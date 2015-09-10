@@ -338,3 +338,14 @@ END_OF_ERR_MSG
     emit_debug_output && return 1
   fi
 }
+
+@test "testing @test line with tabs" {
+  run bats "$FIXTURE_ROOT/tabs.bats"
+  [ $status -eq 0 ]
+  [ "${lines[1]}" = 'ok 1 tabs1' ]
+  [ "${lines[2]}" = 'ok 2 tabs2' ]
+  [ "${lines[3]}" = 'ok 3 tabs3' ]
+  [ "${lines[4]}" = 'ok 4 tabs4' ]
+  [ "${lines[5]}" = 'ok 5 tabs5' ]
+  [ "${lines[6]}" = 'ok 6 tabs6' ]
+}
