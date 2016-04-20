@@ -52,6 +52,9 @@ status=0
 offset=0
 for filename in "$@"; do
   index=0
+  if test -n "$junit"; then
+    echo suite bats.$(basename "$filename"| sed -e 's/\.bats//')
+  fi
   {
     IFS= read -r # 1..n
     while IFS= read -r line; do
