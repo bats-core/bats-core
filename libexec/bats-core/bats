@@ -163,7 +163,7 @@ fi
 
 set -o pipefail execfail
 if [[ -n "$junit" ]]; then
-  exec "$command" -x "${flags[@]}" "${filenames[@]}" | bats-format-junit
+  exec "$command" -j "${flags[@]}" "${filenames[@]}" | bats-format-junit
 elif [[ -n "$pretty" ]]; then
   exec "$command" -x "${flags[@]}" "${filenames[@]}" | bats-format-tap-stream
 else
