@@ -343,9 +343,8 @@ END_OF_ERR_MSG
   run bats "$FIXTURE_ROOT/duplicate-tests.bats"
   [ $status -eq 1 ]
 
-  # Note the trailing space is an artifact of: `tr '\n' ' '`
   local expected='bats warning: duplicate test name(s) in '
-  expected+="$FIXTURE_ROOT/duplicate-tests.bats: test_gizmo_test "
+  expected+="$FIXTURE_ROOT/duplicate-tests.bats: test_gizmo_test"
 
   printf 'expected: "%s"\n' "$expected" >&2
   printf 'actual:   "%s"\n' "${lines[0]}" >&2
