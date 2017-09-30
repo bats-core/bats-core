@@ -284,6 +284,14 @@ fixtures bats
   [ "${lines[1]}" = "ok 1 loop_func" ]
 }
 
+@test "duplicate tests cause a warning on stderr" {
+  run bats "$FIXTURE_ROOT/duplicate-tests.bats"
+  [ $status -eq 1 ]
+  case "${lines[0]}" in
+    "bats warning: duplicate test name(s) in /"*": test_gizmo_test " ) true ;; * ) false ;; esac
+  [ "${#lines[*]}" = "7" ]
+}
+
 @test "expand variables in test name" {
   SUITE='test/suite' run bats "$FIXTURE_ROOT/expand_var_in_test_name.bats"
   [ $status -eq 0 ]
