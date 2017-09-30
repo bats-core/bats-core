@@ -335,7 +335,7 @@ bats_preprocess_source() {
   trap "bats_cleanup_preprocessed_source" err exit
   trap "bats_cleanup_preprocessed_source; exit 1" int
 
-  local test_dupes="$(grep '^bats_test_function\ ' "$BATS_TEST_SOURCE" |
+  local test_dupes="$(grep '^bats_test_function\ ' "$BATS_TEST_SOURCE" | sort |
     uniq -d | cut -d ' ' -f 2 | tr '\n' ' ')"
   test -z "$test_dupes" ||
     echo "bats warning: duplicate test name(s) in $BATS_TEST_FILENAME: $test_dupes" >&2
