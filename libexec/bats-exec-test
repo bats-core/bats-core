@@ -344,8 +344,11 @@ bats_cleanup_preprocessed_source() {
 bats_detect_duplicate_test_case_names() {
   local test_dupes="$(grep '^bats_test_function\ ' "$BATS_TEST_SOURCE" | sort |
     uniq -d | cut -d ' ' -f 2 | tr '\n' ' ')"
-  test -z "$test_dupes" ||
-    echo "bats warning: duplicate test name(s) in $BATS_TEST_FILENAME: $test_dupes" >&2
+
+  if [[ -n "$test_dupes" ]]; then
+    echo "bats warning: duplicate test name(s) in $BATS_TEST_FILENAME:" \
+      "$test_dupes" >&2
+  fi
 }
 
 bats_evaluate_preprocessed_source() {
