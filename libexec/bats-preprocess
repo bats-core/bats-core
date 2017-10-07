@@ -45,7 +45,7 @@ while IFS= read -r line; do
     tests["${#tests[@]}"]="$encoded_name"
     echo "${encoded_name}() { bats_test_begin \"${name}\" ${index}; ${body}"
   elif [[ "$line" =~ \]\][[:space:]]*$ ]]; then
-    printf "%s || false\n" "$line"
+    printf "%s || return 1\n" "$line"
   else
     printf "%s\n" "$line"
   fi
