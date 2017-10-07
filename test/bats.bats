@@ -342,10 +342,10 @@ END_OF_ERR_MSG
 @test "testing @test line with tabs" {
   run bats "$FIXTURE_ROOT/tabs.bats"
   [ $status -eq 0 ]
-  [ "${lines[1]}" = 'ok 1 tabs1' ]
-  [ "${lines[2]}" = 'ok 2 tabs2' ]
-  [ "${lines[3]}" = 'ok 3 tabs3' ]
-  [ "${lines[4]}" = 'ok 4 tabs4' ]
-  [ "${lines[5]}" = 'ok 5 tabs5' ]
-  [ "${lines[6]}" = 'ok 6 tabs6' ]
+  [ "${lines[1]}" = 'ok 1 no tabs' ]
+  [ "${lines[2]}" = 'ok 2 tab at beginning of line' ]
+  [ "${lines[3]}" = 'ok 3 tab before description' ]
+  [ "${lines[4]}" = 'ok 4 tab before opening brace' ]
+  [ "${lines[5]}" = 'ok 5 tabs at beginning of line and before description' ]
+  [ "${lines[6]}" = 'ok 6 tabs at beginning, before description, before brace' ]
 }
