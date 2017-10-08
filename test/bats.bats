@@ -316,7 +316,7 @@ $(< "$FIXTURE_ROOT/unofficial_bash_strict_mode.bash")
 --------
 
 See:
-- https://github.com/sstephenson/bats/issues/171'
+- https://github.com/sstephenson/bats/issues/171
 - http://redsymbol.net/articles/unofficial-bash-strict-mode/
 
 If there is no error output from the test fixture, run the following to
