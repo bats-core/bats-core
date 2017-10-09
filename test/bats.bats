@@ -74,7 +74,7 @@ fixtures bats
 }
 
 @test "tap passing, failing and skipping tests" {
-  run filter_control_sequences bats --tap $FIXTURE_ROOT/passing_failing_and_skipping.bats
+  run filter_control_sequences bats --tap "$FIXTURE_ROOT/passing_failing_and_skipping.bats"
   [ $status -eq 0 ]
   [ "${lines[0]}" = "1..3" ]
   [ "${lines[1]}" = "ok 1 a passing test" ]
