@@ -100,34 +100,38 @@ for arg in "$@"; do
 done
 
 unset count_flag pretty
+count_flag=''
+pretty=''
 [ -t 0 ] && [ -t 1 ] && pretty="1"
-[ -n "$CI" ] && pretty=""
+[ -n "${CI:-}" ] && pretty=""
 
-for option in "${options[@]}"; do
-  case "$option" in
-  "h" | "help" )
-    help
-    exit 0
-    ;;
-  "v" | "version" )
-    version
-    exit 0
-    ;;
-  "c" | "count" )
-    count_flag="-c"
-    ;;
-  "t" | "tap" )
-    pretty=""
-    ;;
-  "p" | "pretty" )
-    pretty="1"
-    ;;
-  * )
-    usage >&2
-    exit 1
-    ;;
-  esac
-done
+if [[ "${#options[@]}" -ne '0' ]]; then
+  for option in "${options[@]}"; do
+    case "$option" in
+    "h" | "help" )
+      help
+      exit 0
+      ;;
+    "v" | "version" )
+      version
+      exit 0
+      ;;
+    "c" | "count" )
+      count_flag="-c"
+      ;;
+    "t" | "tap" )
+      pretty=""
+      ;;
+    "p" | "pretty" )
+      pretty="1"
+      ;;
+    * )
+      usage >&2
+      exit 1
+      ;;
+    esac
+  done
+fi
 
 if [ "${#arguments[@]}" -eq 0 ]; then
   usage >&2

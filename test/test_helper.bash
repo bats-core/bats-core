@@ -18,6 +18,10 @@ if ! command -v tput >/dev/null; then
   export -f tput
 fi
 
+emit_debug_output() {
+  printf '%s\n' 'output:' "$output" >&2
+}
+
 teardown() {
   [ -d "$TMP" ] && rm -f "$TMP"/*
 }

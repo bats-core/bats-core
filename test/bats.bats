@@ -74,7 +74,7 @@ fixtures bats
 }
 
 @test "tap passing, failing and skipping tests" {
-  run filter_control_sequences bats --tap $FIXTURE_ROOT/passing_failing_and_skipping.bats
+  run filter_control_sequences bats --tap "$FIXTURE_ROOT/passing_failing_and_skipping.bats"
   [ $status -eq 0 ]
   [ "${lines[0]}" = "1..3" ]
   [ "${lines[1]}" = "ok 1 a passing test" ]
@@ -85,8 +85,7 @@ fixtures bats
 @test "one failing test" {
   run bats "$FIXTURE_ROOT/failing.bats"
   [ $status -eq 1 ]
-  printf 'lines:\n' >&2
-  printf '%s\n' "${lines[@]}" >&2
+  emit_debug_output
   [ "${lines[0]}" = '1..1' ]
   [ "${lines[1]}" = 'not ok 1 a failing test' ]
   [ "${lines[2]}" = "# (in test file $RELATIVE_FIXTURE_ROOT/failing.bats, line 4)" ]
@@ -106,8 +105,7 @@ fixtures bats
 @test "failing test with significant status" {
   STATUS=2 run bats "$FIXTURE_ROOT/failing.bats"
   [ $status -eq 1 ]
-  printf 'lines:\n' >&2
-  printf '%s\n' "${lines[@]}" >&2
+  emit_debug_output
   [ "${lines[3]}" = "#   \`eval \"( exit \${STATUS:-1} )\"' failed with status 2" ]
 }
 
@@ -175,8 +173,7 @@ fixtures bats
   cd "$TMP"
   run bats "$FIXTURE_ROOT/failing.bats"
   [ $status -eq 1 ]
-  printf 'lines:\n' >&2
-  printf '%s\n' "${lines[@]}" >&2
+  emit_debug_output
   [ "${lines[2]}" = "# (in test file $FIXTURE_ROOT/failing.bats, line 4)" ]
 }
 
@@ -299,4 +296,45 @@ fixtures bats
   [ "${lines[1]}" = "ok 1 single-quoted name" ]
   [ "${lines[2]}" = "ok 2 double-quoted name" ]
   [ "${lines[3]}" = "ok 3 unquoted name" ]
+}
+
+@test 'ensure compatibility with unofficial Bash strict mode' {
+  local expected='ok 1 unofficial Bash strict mode conditions met'
+
+  # Run Bats under `set -u` to catch as many unset variable accesses as
+  # possible.
+  run bash -u "${BATS_TEST_DIRNAME%/*}/libexec/bats" \
+    "$FIXTURE_ROOT/unofficial_bash_strict_mode.bats"
+  if [[ "$status" -ne '0' || "${lines[1]}" != "$expected" ]]; then
+    cat <<END_OF_ERR_MSG
+
+This test failed because the Bats internals are violating one of the
+constraints imposed by:
+
+--------
+$(< "$FIXTURE_ROOT/unofficial_bash_strict_mode.bash")
+--------
+
+See:
+- https://github.com/sstephenson/bats/issues/171
+- http://redsymbol.net/articles/unofficial-bash-strict-mode/
+
+If there is no error output from the test fixture, run the following to
+debug the problem:
+
+  $ bash -u bats $RELATIVE_FIXTURE_ROOT/unofficial_bash_strict_mode.bats
+
+If there's no error output even with this command, make sure you're using the
+latest version of Bash, as versions before 4.1-alpha may not produce any error
+output for unset variable accesses.
+
+If there's no output even when running the latest Bash, the problem may reside
+in the DEBUG trap handler. A particularly sneaky issue is that in Bash before
+4.1-alpha, an expansion of an empty array, e.g. "\${FOO[@]}", is considered
+an unset variable access. The solution is to add a size check before the
+expansion, e.g. [[ "\${#FOO[@]}" -ne '0' ]].
+
+END_OF_ERR_MSG
+    emit_debug_output && return 1
+  fi
 }
