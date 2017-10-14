@@ -339,13 +339,19 @@ END_OF_ERR_MSG
   fi
 }
 
-@test "testing @test line with tabs" {
-  run bats "$FIXTURE_ROOT/tabs.bats"
+@test "parse @test lines with various whitespace combinations" {
+  run bats "$FIXTURE_ROOT/whitespace.bats"
+  emit_debug_output
   [ $status -eq 0 ]
-  [ "${lines[1]}" = 'ok 1 no tabs' ]
+  [ "${lines[1]}" = 'ok 1 no extra whitespace' ]
   [ "${lines[2]}" = 'ok 2 tab at beginning of line' ]
   [ "${lines[3]}" = 'ok 3 tab before description' ]
   [ "${lines[4]}" = 'ok 4 tab before opening brace' ]
   [ "${lines[5]}" = 'ok 5 tabs at beginning of line and before description' ]
   [ "${lines[6]}" = 'ok 6 tabs at beginning, before description, before brace' ]
+  [ "${lines[7]}" = 'ok 7 extra whitespace around single-line test' ]
+  [ "${lines[8]}" = 'ok 8 no extra whitespace around single-line test' ]
+  [ "${lines[9]}" = 'ok 9 parse unquoted name between extra whitespace' ]
+  [ "${lines[10]}" = 'ok 10 {' ]  # unquoted single brace is a valid description
+  [ "${lines[11]}" = 'ok 11 ' ]   # empty name from single quote
 }

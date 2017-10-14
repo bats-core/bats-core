@@ -1,4 +1,4 @@
-@test "no tabs" {
+@test "no extra whitespace" {
   true
 }
 
@@ -21,3 +21,13 @@
 	@test	"tabs at beginning, before description, before brace"	{
 	  true
 	}
+
+	 @test	 "extra whitespace around single-line test"	 {	 :;	 }	 
+
+@test "no extra whitespace around single-line test" {:;}
+
+@test	 parse unquoted name between extra whitespace 	{:;}
+
+@test { {:;}  # unquote single brace is a valid description
+
+@test ' {:;}  # empty name from single quote
