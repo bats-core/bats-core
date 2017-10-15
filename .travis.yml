@@ -1,10 +1,19 @@
 language: bash
+
 os:
 - linux
 - osx
 
+services:
+  - docker
+
 script:
-- bash -c 'time bin/bats --tap test'
+- |
+  bash -c 'time bin/bats --tap test'
+  if [[ "$TRAVIS_OS_NAME" == 'linux' ]]; then
+    docker build --tag bats:latest .
+    docker run -it bats:latest --tap /opt/bats/test
+  fi
 
 notifications:
   email:

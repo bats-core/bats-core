@@ -20,7 +20,7 @@ The rough plan, originally [outlined here](https://github.com/sstephenson/bats/i
 >
 
 Doing it this way accomplishes two things:
-1. Removes the dependency on the original maintainer 
+1. Removes the dependency on the original maintainer
 2. Enables collaboration and contribution flow again
 3. Allows the possibility of merging back to original, or merging from original if or when the need arises
 4. Prevents lock-out by giving administrative access to more than one person, increases transferability
@@ -107,7 +107,7 @@ test cases in the file. The first run counts the number of test cases,
 then iterates over the test cases and executes each one in its own
 process.
 
-For more details about how Bats evaluates test files, see 
+For more details about how Bats evaluates test files, see
 [Bats Evaluation Process](https://github.com/bats-core/bats-core/wiki/Bats-Evaluation-Process)
 on the wiki.
 
@@ -248,6 +248,32 @@ Bats. For example, to install Bats into `/usr/local`,
 Note that you may need to run `install.sh` with `sudo` if you do not
 have permission to write to the installation prefix.
 
+## Running Bats in Docker
+
+Check out a copy of the Bats repository, then build a container image:
+
+    $ git clone https://github.com/bats-core/bats-core.git
+    $ cd bats-core
+    $ docker build --tag bats:latest .
+
+This creates a local Docker image called `bats:latest` based on [Alpine
+Linux](https://github.com/gliderlabs/docker-alpine/blob/master/docs/usage.md).
+To run Bats' internal test suite (which is in the container image at
+`/opt/bats/test`):
+
+    $ docker run -it bats:latest /opt/bats/test
+
+To run a test suite from your local machine, mount in a volume and direct
+Bats to its path inside the container:
+
+    $ docker run -it -v "$(pwd):/code" bats:latest /code/test
+
+This is a minimal image. If more tools are required this can be used as a
+base image in a Dockerfile using `FROM <Docker image>`.
+In the future there may be images based on Debian, and/or with more tools
+installed (`curl` and `openssl`, for example). If you require a specific
+configuration please search and +1 an issue or
+[raise a new issue](https://github.com/bats-core/bats-core/issues).
 
 ## Support
 
