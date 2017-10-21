@@ -34,4 +34,14 @@ cp -R "$BATS_ROOT"/libexec/* "$PREFIX"/libexec
 cp "$BATS_ROOT"/man/bats.1 "$PREFIX"/share/man/man1
 cp "$BATS_ROOT"/man/bats.7 "$PREFIX"/share/man/man7
 
+# fix broken symbolic link file
+if [ ! -L "$PREFIX"/bin/bats ]; then
+    rm -f "$PREFIX"/bin/bats
+    ln -s "$PREFIX"/libexec/bats "$PREFIX"/bin/bats
+fi
+
+# fix file permission
+chmod a+x "$PREFIX"/bin/*
+chmod a+x "$PREFIX"/libexec/*
+
 echo "Installed Bats to $PREFIX/bin/bats"
