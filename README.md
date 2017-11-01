@@ -141,10 +141,41 @@ You may also find it useful to pipe commands together.  To accomplish this with 
 }
 ```
 
-
 The `$status` variable contains the status code of the command, and
 the `$output` variable contains the combined contents of the command's
 standard output and standard error streams.
+
+You may also find it useful to pipe commands together.  To accomplish
+this with the `run` helper, you will need to wrap the pipe in `bash -c` command:
+
+```bash
+@test "invoking foo displays 3 lines of output" {
+  run bash -c "foo | wc -l"
+  [ "$status" -eq 1  ]
+  [ "$output" -eq 3  ]
+}
+```
+
+Keep in mind that the return code of `bash -c` is, by default, the return
+code of only the *last* command.  Thus, if there is a failing command somewhere
+in the pipeline, but the final command exits with a 0 status, this could lead to
+unexpected results.  To capture the status code of any failing command that is
+in a pipe, use the option: `-o pipefail`.  To capture the failing exit codes of
+any other *non-pipeline* commands, use the `-e` option.
+
+```bash
+run bash -e -o pipefail -c "foo | wc -l"
+# Will fail if foo's exit code is non-zero
+```
+
+However, this may be an unwanted result if `foo` is a script or function
+that contains pipes of its own along with its own error handling.
+Alternately, if your script reads from standard input, consider using
+`run` within the pipeline.
+
+```bash
+echo "foo" | run my-script
+```
 
 A third special variable, the `$lines` array, is available for easily
 accessing individual lines of output. For example, if you want to test
