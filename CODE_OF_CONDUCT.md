@@ -67,13 +67,14 @@ members of the project's leadership.
 
 ## Project Maintainers
 
-### Current Maintainers:
+### Current Maintainers
+
 * [Bianca Tamayo][bt-gh]
 * [Mike Bland][mb-gh]
 * [Jason Karns][jk-gh]
 
+### Past Maintainers
 
-### Past Maintainers:
 * Sam Stephenson <<sstephenson@gmail.com>> (Original author)
 
 ## Attribution

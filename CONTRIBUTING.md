@@ -1,4 +1,6 @@
-# Welcome!
+# Contributing Guidelines
+
+## Welcome!
 
 Thank you for considering contributing to the development of this project's 
 development and/or documentation. Just a reminder: if you're new to this project
@@ -9,8 +11,8 @@ on issues:
 - [docs][docslabel]
 - [good first issue][goodfirstissuelabel]
 
-[docslabel]: https://github.com/bats-core/bats-core/labels/docs
-[helpwantedlabel]: https://github.com/bats-core/bats-core/labels/help%20wanted
+[docslabel]:           https://github.com/bats-core/bats-core/labels/docs
+[helpwantedlabel]:     https://github.com/bats-core/bats-core/labels/help%20wanted
 [goodfirstissuelabel]: https://github.com/bats-core/bats-core/labels/good%20first%20issue
 
 To see all labels and their meanings, [check this wiki page][labelswiki].
@@ -21,7 +23,7 @@ drafted with tips from [Wrangling Web Contributions: How to Build
 a CONTRIBUTING.md][moz] and with some inspiration from [the Atom project's
 CONTRIBUTING.md file][atom].
 
-[gsb]: https://github.com/mbland/go-script-bash/blob/master/CONTRIBUTING.md
+[gsb]:  https://github.com/mbland/go-script-bash/blob/master/CONTRIBUTING.md
 [moz]:  https://mozillascience.github.io/working-open-workshop/contributing/
 [atom]: https://github.com/atom/atom/blob/master/CONTRIBUTING.md
 
@@ -29,30 +31,32 @@ CONTRIBUTING.md file][atom].
 
 ## Table of contents
 
-   * [Welcome!](#welcome)
-      * [Table of contents](#table-of-contents)
-      * [Quick links <g-emoji alias="link" fallback-src="https://assets-cdn.github.com/images/icons/emoji/unicode/1f517.png" ios-version="6.0">🔗</g-emoji>](#quick-links-)
-      * [Contributor License Agreement](#contributor-license-agreement)
-      * [Code of conduct](#code-of-conduct)
-      * [Asking questions and reporting issues](#asking-questions-and-reporting-issues)
-      * [Updating documentation](#updating-documentation)
-      * [Workflow](#workflow)
-      * [Testing](#testing)
-      * [Coding conventions](#coding-conventions)
-         * [Formatting](#formatting)
-         * [Naming](#naming)
-         * [Function declarations](#function-declarations)
-         * [Variable and parameter declarations](#variable-and-parameter-declarations)
-         * [Command substitution](#command-substitution)
-         * [Process substitution](#process-substitution)
-         * [Conditionals and loops](#conditionals-and-loops)
-         * [Gotchas](#gotchas)
-      * [Open Source License](#open-source-license)
-      * [Credits](#credits)
+* [Contributing Guidelines](#contributing-guidelines)
+  * [Welcome!](#welcome)
+  * [Table of contents](#table-of-contents)
+  * [Quick links <g-emoji alias="link" fallback-src="https://assets-cdn.github.com/images/icons/emoji/unicode/1f517.png" ios-version="6.0">🔗</g-emoji>](#quick-links-)
+  * [Contributor License Agreement](#contributor-license-agreement)
+  * [Code of conduct](#code-of-conduct)
+  * [Asking questions and reporting issues](#asking-questions-and-reporting-issues)
+  * [Updating documentation](#updating-documentation)
+  * [Environment setup](#environment-setup)
+  * [Workflow](#workflow)
+  * [Testing](#testing)
+  * [Coding conventions](#coding-conventions)
+      * [Formatting](#formatting)
+      * [Naming](#naming)
+      * [Function declarations](#function-declarations)
+      * [Variable and parameter declarations](#variable-and-parameter-declarations)
+      * [Command substitution](#command-substitution)
+      * [Process substitution](#process-substitution)
+      * [Conditionals and loops](#conditionals-and-loops)
+      * [Gotchas](#gotchas)
+  * [Open Source License](#open-source-license)
+  * [Credits](#credits)
 
 ## Quick links &#x1f517;
 
-- [Gitter channel][gitterurl]: These messages sync with the IRC channel
+- [Gitter channel →][gitterurl]: These messages sync with the IRC channel
 - [IRC Channel (#bats on freenode) →][ircurl]: These messages sync with Gitter
 - [README →](README.md)
 - [Code of conduct →](CODE_OF_CONDUCT.md)
@@ -62,14 +66,6 @@ CONTRIBUTING.md file][atom].
 - [Pull requests →][repoprs]
 - [Milestones →][repomilestones]
 - [Projects →][repoprojects]
-
-[repoprojects]: https://github.com/bats-core/bats-core/projects
-[repomilestones]: https://github.com/bats-core/bats-core/milestones
-[repoprs]: https://github.com/bats-core/bats-core/pulls
-[repoissues]: https://github.com/bats-core/bats-core/issues
-[repohome]: https://github.com/bats-core/bats-core
-
-[gitterurl]: https://gitter.im/bats-core/bats-core
 
 ## Contributor License Agreement
 
@@ -102,12 +98,6 @@ Please check the [README](README.md) or existing [issues][repoissues] first.
 If you cannot find an answer to your question, please feel free to hop on our 
 [gitter][gitterurl] [![Gitter](https://badges.gitter.im/bats-core/bats-core.svg)](https://gitter.im/bats-core/bats-core?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge) or [via IRC (#bats on freenode)][ircurl].
 
-
-
-
-[gitterurl]: https://gitter.im/bats-core/bats-core
-[ircurl]: https://kiwiirc.com/client/irc.freenode.net:+6697/#bats
-
 ### Reporting issues
 
 Before reporting an issue, please use the search feature on the [issues
@@ -116,7 +106,7 @@ been filed.
 
 ### Updating or filing a new issue
 
-### Information to include
+#### Information to include
 
 Try to be as specific as possible about your environment and the problem you're
 observing. At a minimum, include:
@@ -151,7 +141,6 @@ than previous stated, different version of bash or bats, different OS, etc.)
 You can read on how to do that here: [Information to include][#information-to-include]
 3. DO remember that you can use the *Subscribe* button on the right side of the
 page to receive notifications of further conversations or a resolution.
-
 
 ## Updating documentation
 
@@ -339,15 +328,28 @@ The following are intended to prevent too-compact code:
   - ftp://ftp.gnu.org/gnu/bash/bash-4.2-patches/bash42-025
   - http://lists.gnu.org/archive/html/help-bash/2012-03/msg00078.html
 
-# Open Source License
+## Open Source License
 
 This software is made available under the [MIT License][osmit].
 For the text of the license, see the [LICENSE](LICENSE.md) file.
 
-[osmit]: https://opensource.org/licenses/MIT
-
 ## Credits
 
-- This guide was heavily written by bats-core member [@mbland](https://github.com/mbland) for [go-script-bash](https://github.com/mbland/go-script-bash), tweaked for [bats-core][repohome]
+- This guide was heavily written by bats-core member [@mbland](https://github.com/mbland) 
+for [go-script-bash](https://github.com/mbland/go-script-bash), tweaked for [bats-core][repohome]
 - Table of Contents created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc)
-- The [official bash logo](https://github.com/odb/official-bash-logo) is copyrighted by the [Free Software Foundation](https://www.fsf.org/), 2016 under the [Free Art License](http://artlibre.org/licence/lal/en/)
+- The [official bash logo](https://github.com/odb/official-bash-logo) is copyrighted
+by the [Free Software Foundation](https://www.fsf.org/), 2016 under the [Free Art License](http://artlibre.org/licence/lal/en/)
+
+
+
+[repoprojects]:   https://github.com/bats-core/bats-core/projects
+[repomilestones]: https://github.com/bats-core/bats-core/milestones
+[repoprs]:        https://github.com/bats-core/bats-core/pulls
+[repoissues]:     https://github.com/bats-core/bats-core/issues
+[repohome]:       https://github.com/bats-core/bats-core
+
+[osmit]:          https://opensource.org/licenses/MIT
+
+[gitterurl]:      https://gitter.im/bats-core/bats-core
+[ircurl]:         https://kiwiirc.com/client/irc.freenode.net:+6697/#bats
