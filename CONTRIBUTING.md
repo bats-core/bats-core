@@ -15,7 +15,8 @@ on issues:
 
 To see all labels and their meanings, [check this wiki page][labelswiki].
 
-This guide borrows **heavily** from [@mbland's go-script-bash][gsb] (with some sections directly quoted), which in turn was
+This guide borrows **heavily** from [@mbland's go-script-bash][gsb] (with some 
+sections directly quoted), which in turn was
 drafted with tips from [Wrangling Web Contributions: How to Build
 a CONTRIBUTING.md][moz] and with some inspiration from [the Atom project's
 CONTRIBUTING.md file][atom].
@@ -28,16 +29,26 @@ CONTRIBUTING.md file][atom].
 
 ## Table of contents
 
-- [Quick links](#quick-links)
-- [Contributor License Agreement](#contributor-license-agreement)
-- [Code of conduct](#code-of-conduct)
-- [Reporting issues](#reporting-issues)
-- [Updating documentation](#updating-documentation)
-- [Environment setup](#environment-setup)
-- [Workflow](#workflow)
-- [Testing](#testing)
-- [Coding conventions](#coding-conventions)
-- [Open Source License](#open-source-license)
+   * [Welcome!](#welcome)
+      * [Table of contents](#table-of-contents)
+      * [Quick links <g-emoji alias="link" fallback-src="https://assets-cdn.github.com/images/icons/emoji/unicode/1f517.png" ios-version="6.0">🔗</g-emoji>](#quick-links-)
+      * [Contributor License Agreement](#contributor-license-agreement)
+      * [Code of conduct](#code-of-conduct)
+      * [Asking questions and reporting issues](#asking-questions-and-reporting-issues)
+      * [Updating documentation](#updating-documentation)
+      * [Workflow](#workflow)
+      * [Testing](#testing)
+      * [Coding conventions](#coding-conventions)
+         * [Formatting](#formatting)
+         * [Naming](#naming)
+         * [Function declarations](#function-declarations)
+         * [Variable and parameter declarations](#variable-and-parameter-declarations)
+         * [Command substitution](#command-substitution)
+         * [Process substitution](#process-substitution)
+         * [Conditionals and loops](#conditionals-and-loops)
+         * [Gotchas](#gotchas)
+      * [Open Source License](#open-source-license)
+      * [Credits](#credits)
 
 ## Quick links &#x1f517;
 
@@ -88,7 +99,8 @@ specifics, see the [CODE_OF_CONDUCT](CODE_OF_CONDUCT.md) file.
 
 Please check the [README](README.md) or existing [issues][repoissues] first.
 
-If you cannot find an answer to your question, please feel free to hop on our [gitter][gitterurl] [![Gitter](https://badges.gitter.im/bats-core/bats-core.svg)](https://gitter.im/bats-core/bats-core?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge) or [via IRC (#bats on freenode)][ircurl].
+If you cannot find an answer to your question, please feel free to hop on our 
+[gitter][gitterurl] [![Gitter](https://badges.gitter.im/bats-core/bats-core.svg)](https://gitter.im/bats-core/bats-core?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge) or [via IRC (#bats on freenode)][ircurl].
 
 
 
@@ -112,7 +124,8 @@ observing. At a minimum, include:
 #### Installation issues
 
 1. State the version of bash you're using `bash --version`
-2. If you're installing through homebrew, run `brew doctor`, and attach the output of `brew info bats-core`
+2. If you're installing through homebrew, run `brew doctor`, and attach the 
+output of `brew info bats-core`
 
 #### Bugs/usage issues
 
@@ -132,7 +145,10 @@ Also consider using:
 ### On existing issues
 
 1. DO NOT add a +1 comment: Use the reactions provided instead
-2. DO add information if you're facing a similiar issue as someone else, but within a different context (e.g. different steps needed to reproduce the issue than previous stated, different version of bash or bats, different OS, etc.) You can read on how to do that here: [Information to include][#information-to-include]
+2. DO add information if you're facing a similiar issue as someone else, but 
+within a different context (e.g. different steps needed to reproduce the issue 
+than previous stated, different version of bash or bats, different OS, etc.) 
+You can read on how to do that here: [Information to include][#information-to-include]
 3. DO remember that you can use the *Subscribe* button on the right side of the
 page to receive notifications of further conversations or a resolution.
 
@@ -141,7 +157,8 @@ page to receive notifications of further conversations or a resolution.
 
 We love documentation and people who love documentation!
 
-If you love writing clear, accessible docs, please don't be shy about pull requests. Remember: docs are just as important as code.
+If you love writing clear, accessible docs, please don't be shy about pull 
+requests. Remember: docs are just as important as code.
 
 Also: _no typo is too small to fix!_ Really. Of course, batches of fixes are
 preferred, but even one nit is one nit too many.
@@ -156,8 +173,8 @@ README][env-setup].
 ## Workflow
 
 The basic workflow for submitting changes resembles that of the [GitHub Git
-Flow][github-flow] (a.k.a. GitHub Flow), except that you will be working with your own fork of the
-repository and issuing pull requests to the original.
+Flow][github-flow] (a.k.a. GitHub Flow), except that you will be working with 
+your own fork of the repository and issuing pull requests to the original.
 
 [github-flow]: https://guides.github.com/introduction/flow/
 
@@ -322,9 +339,15 @@ The following are intended to prevent too-compact code:
   - ftp://ftp.gnu.org/gnu/bash/bash-4.2-patches/bash42-025
   - http://lists.gnu.org/archive/html/help-bash/2012-03/msg00078.html
 
-## Open Source License
+# Open Source License
 
 This software is made available under the [MIT License][osmit].
 For the text of the license, see the [LICENSE](LICENSE.md) file.
 
 [osmit]: https://opensource.org/licenses/MIT
+
+## Credits
+
+- This guide was heavily written by bats-core member [@mbland](https://github.com/mbland) for [go-script-bash](https://github.com/mbland/go-script-bash), tweaked for [bats-core][repohome]
+- Table of Contents created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc)
+- The [official bash logo](https://github.com/odb/official-bash-logo) is copyrighted by the [Free Software Foundation](https://www.fsf.org/), 2016 under the [Free Art License](http://artlibre.org/licence/lal/en/)
