@@ -12,6 +12,8 @@ if [[ "$header" =~ $header_pattern ]]; then
   index=0
   failures=0
   skipped=0
+  todone=0
+  todo=0
   name=""
   count_column_width=$(( ${#count} * 2 + 2 ))
 else
@@ -51,6 +53,22 @@ skip() {
   advance
 }
 
+todo() {
+  local reason="$1"
+  [ -z "$reason" ] || reason=": $reason"
+  go_to_column 0
+  printf " - %s (todo%s)" "$name" "$reason"
+  advance
+}
+
+todone() {
+  local reason="$1"
+  [ -z "$reason" ] || reason=": $reason"
+  go_to_column 0
+  printf " ✓ %s (done%s)" "$name" "$reason"
+  advance
+}
+
 fail() {
   go_to_column 0
   set_color 1 bold
@@ -77,6 +95,14 @@ summary() {
 
   if [ "$skipped" -gt 0 ]; then
     printf ", %d skipped" "$skipped"
+  fi
+  
+  if [ "$todo" -gt 0 ]; then
+    printf ", %d todo" "$todo"
+  fi
+  
+  if [ "$todone" -gt 0 ]; then
+    printf ", %d done" "$todone"
   fi
 
   printf "\n"
@@ -153,16 +179,26 @@ while IFS= read -r line; do
     ;;
   "ok "* )
     skip_expr="ok $index (.*) # skip ?(([^)]*))?"
+    done_expr="ok $index (.*) # done ?(([^)]*))?"
     if [[ "$line" =~ $skip_expr ]]; then
       let skipped+=1
       buffer skip "${BASH_REMATCH[2]}"
+    elif [[ "$line" =~ $done_expr ]]; then
+      let todone+=1
+      buffer todone "${BASH_REMATCH[2]}"
     else
       buffer pass
     fi
     ;;
   "not ok "* )
-    let failures+=1
-    buffer fail
+    todo_expr="not ok $index (.*) # todo ?(([^)]*))?"
+    if [[ "$line" =~ $todo_expr ]]; then  
+      let todo+=1
+      buffer todo "${BASH_REMATCH[2]}"
+    else
+      let failures+=1
+      buffer fail
+    fi  
     ;;
   "# "* )
     buffer log "${line:2}"
