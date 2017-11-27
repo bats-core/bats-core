@@ -3,8 +3,6 @@ set -e
 set -E
 set -T
 
-BATS_EXPECTED=""
-BATS_RECEIVED=""
 BATS_COUNT_ONLY=""
 if [ "$1" = "-c" ]; then
   BATS_COUNT_ONLY=1
@@ -187,8 +185,9 @@ bats_print_failed_command() {
     echo -n "failed with status $status"
   fi
 
-  if [ -n ${BATS_EXPECTED} ];then
+  if [ "${BATS_EXPECTED}" ];then
     echo -e ", received: ${BATS_RECEIVED}, expected: ${BATS_EXPECTED}"
+    unset BATS_EXPECTED
   else
     echo
   fi
