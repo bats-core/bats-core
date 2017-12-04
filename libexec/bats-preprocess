@@ -44,6 +44,18 @@ while IFS= read -r line; do
     encode_name "$name" 'encoded_name'
     tests["${#tests[@]}"]="$encoded_name"
     echo "${encoded_name}() { bats_test_begin \"${name}\" ${index}; ${body}"
+  elif [[ "$line" =~ $BATS_INCLUDE_PATTERN ]]; then
+    file_to_include="${BASH_REMATCH[1]}"
+    file_to_include=$(eval "echo \"${BASH_REMATCH[1]}\"")
+    if [ -f "$file_to_include" ]; then
+      cat $file_to_include
+    elif [ -d "$file_to_include" ]; then
+      echo "bats: cannot include a directory: $file_to_include" >&3
+      exit 1
+    else
+      echo "bats: file to include does not exist: $file_to_include" >&3
+      exit 1
+    fi
   else
     printf "%s\n" "$line"
   fi
