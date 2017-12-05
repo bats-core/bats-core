@@ -335,7 +335,7 @@ bats_preprocess_source() {
 
   found="true"
   while [[ "$found" == "true" ]]; do
-    if [[ "$output" =~ $BATS_TEST_PATTERN|$BATS_INCLUDE_PATTERN ]]; then
+    if [[ "$output" =~ $BATS_TEST_PATTERN_WITH_NL|$BATS_INCLUDE_PATTERN_WITH_NL ]]; then
       found="true"
       output=$(bats-preprocess <<< "$output" )
     else
