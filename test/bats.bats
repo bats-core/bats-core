@@ -355,3 +355,31 @@ END_OF_ERR_MSG
   [ "${lines[10]}" = 'ok 10 {' ]  # unquoted single brace is a valid description
   [ "${lines[11]}" = 'ok 11 ' ]   # empty name from single quote
 }
+
+@test "installer only fixes file permissions of installed files" {
+  # populate installation directory
+  mkdir -p "${BATS_TMPDIR}"/{bin,libexec,other}
+  # create some files that don't have the execution permission set
+  touch "${BATS_TMPDIR}/bin/existing-file-without-x-flag"
+  touch "${BATS_TMPDIR}/libexec/existing-file-without-x-flag"
+  touch "${BATS_TMPDIR}/other/existing-file-without-x-flag"
+  # install bats to populated directory
+  ./install.sh "${BATS_TMPDIR}"
+  # make sure the execution permissions have been set for the installed files
+  [ $(read_permissions "${BATS_TMPDIR}/bin/bats") = "lrwxrwxrwx" ]
+  [ $(read_permissions "${BATS_TMPDIR}/libexec/bats") = "-rwxrwxr-x" ]
+  # make sure the existing files have not been touched
+  [ $(read_permissions "${BATS_TMPDIR}/bin/existing-file-without-x-flag") = "-rw-rw-r--" ]
+  [ $(read_permissions "${BATS_TMPDIR}/libexec/existing-file-without-x-flag") = "-rw-rw-r--" ]
+  [ $(read_permissions "${BATS_TMPDIR}/other/existing-file-without-x-flag") = "-rw-rw-r--" ]
+}
+
+# returns human readable permissions for file $1
+# Example:
+#   read_permissions "/bin/bash"
+#   Returns:
+#     "-rwxr-xr-x"
+read_permissions() {
+  file=$1
+  stat -c '%A' "${file}"
+}
