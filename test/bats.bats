@@ -355,3 +355,40 @@ END_OF_ERR_MSG
   [ "${lines[10]}" = 'ok 10 {' ]  # unquoted single brace is a valid description
   [ "${lines[11]}" = 'ok 11 ' ]   # empty name from single quote
 }
+
+@test "installer only fixes file permissions of installed files" {
+  local install_dir="${BATS_TMPDIR}/bats"
+  
+  local find_cmd="find"
+  if [ -f /bin/find ]; then
+    # Tests run in AppVeyor need to use /bin/find, otherwise windows find is used
+    find_cmd="/bin/find"
+  fi
+
+  # populate installation directory
+  mkdir -p "${install_dir}"/{bin,libexec,other}
+  
+  # create some files that don't have the execution permission set
+  touch "${install_dir}/bin/existing-file-without-x-flag"
+  touch "${install_dir}/libexec/existing-file-without-x-flag"
+  touch "${install_dir}/other/existing-file-without-x-flag"
+
+  # install bats to populated directory
+  ./install.sh "${install_dir}"
+  
+  # find all executable files
+  readarray executable_files < <($find_cmd "${install_dir}" -perm /u+x,o+x,a+x)
+  
+  # make sure the execution permissions have been set for the installed files
+  [[ "${executable_files[@]}" == *"${install_dir}/bin/bats"* ]]
+  [[ "${executable_files[@]}" == *"${install_dir}/libexec/bats"* ]]
+
+  # find all files that are not executable
+  readarray not_executable_files < <($find_cmd "${install_dir}" ! -perm /u+x,o+x,a+x)
+
+  # make sure the existing files have not been touched
+  [[ "${not_executable_files[@]}" == *"${install_dir}/bin/existing-file-without-x-flag"* ]]
+  [[ "${not_executable_files[@]}" == *"${install_dir}/libexec/existing-file-without-x-flag"* ]]
+  [[ "${not_executable_files[@]}" == *"${install_dir}/other/existing-file-without-x-flag"* ]]
+}
+
