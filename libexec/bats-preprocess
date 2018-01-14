@@ -7,8 +7,8 @@ encode_name() {
   local hex_code
 
   if [[ ! "$name" =~ [^[:alnum:]\ _-] ]]; then
-    name="${name//_/-5f}"
-    name="${name//-/-2d}"
+    name="${name//_/5f}"
+    name="${name//-/2d}"
     name="${name// /_}"
     result+="$name"
   else
@@ -22,7 +22,7 @@ encode_name() {
       elif [[ "$char" =~ [[:alnum:]] ]]; then
         result+="$char"
       else
-        printf -v 'hex_code' -- "-%02x" \'"$char"
+        printf -v 'hex_code' -- "%02x" \'"$char"
         result+="$hex_code"
       fi
     done
