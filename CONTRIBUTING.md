@@ -113,21 +113,23 @@ observing. At a minimum, include:
 
 #### Installation issues
 
-1. State the version of bash you're using `bash --version`
-2. If you're installing through homebrew, run `brew doctor`, and attach the 
+1. State the version of Bash you're using `bash --version`
+1. State your operating system and its version
+1. If you're installing through homebrew, run `brew doctor`, and attach the 
 output of `brew info bats-core`
 
 #### Bugs/usage issues
 
-- State the version of bash you're using `bash --version`
-- Command line steps or code snippets that reproduce the issue
-- Any apparently relevant information from the [Bash changelog][bash-changes]
+1. State the version of Bash you're using `bash --version`
+1. State your operating system and its version
+1. Command line steps or code snippets that reproduce the issue
+1. Any apparently relevant information from the [Bash changelog][bash-changes]
 
 [bash-changes]: https://tiswww.case.edu/php/chet/bash/CHANGES
 
 Also consider using:
 
-- bash's `time` builtin to collect running times
+- Bash's `time` builtin to collect running times
 - a regression test to add to the suite
 - memory usage as reported by a tool such as
   [memusg](https://gist.github.com/netj/526585)
@@ -135,11 +137,11 @@ Also consider using:
 ### On existing issues
 
 1. DO NOT add a +1 comment: Use the reactions provided instead
-2. DO add information if you're facing a similiar issue as someone else, but 
+1. DO add information if you're facing a similar issue to someone else, but 
 within a different context (e.g. different steps needed to reproduce the issue 
-than previous stated, different version of bash or bats, different OS, etc.) 
+than previous stated, different version of Bash or BATS, different OS, etc.) 
 You can read on how to do that here: [Information to include][#information-to-include]
-3. DO remember that you can use the *Subscribe* button on the right side of the
+1. DO remember that you can use the *Subscribe* button on the right side of the
 page to receive notifications of further conversations or a resolution.
 
 ## Updating documentation
@@ -168,14 +170,14 @@ your own fork of the repository and issuing pull requests to the original.
 [github-flow]: https://guides.github.com/introduction/flow/
 
 1. Fork the repo on GitHub (look for the "Fork" button)
-2. Clone your forked repo to your local machine
-3. Create your feature branch (`git checkout -b my-new-feature`)
-4. Develop _and [test](#testing)_ your changes as necessary.
-4. Commit your changes (`git commit -am 'Add some feature'`)
-5. Push to the branch (`git push origin my-new-feature`)
-6. Create a new [GitHub pull request][gh-pr] for your feature branch based
+1. Clone your forked repo to your local machine
+1. Create your feature branch (`git checkout -b my-new-feature`)
+1. Develop _and [test](#testing)_ your changes as necessary.
+1. Commit your changes (`git commit -am 'Add some feature'`)
+1. Push to the branch (`git push origin my-new-feature`)
+1. Create a new [GitHub pull request][gh-pr] for your feature branch based
    against the original repository's `master` branch
-7. If your request is accepted, you can [delete your feature branch][rm-branch]
+1. If your request is accepted, you can [delete your feature branch][rm-branch]
    and pull the updated `master` branch from the original repository into your
    fork. You may even [delete your fork][rm-fork] if you don't anticipate making
    further changes.
@@ -335,8 +337,8 @@ For the text of the license, see the [LICENSE](LICENSE.md) file.
 
 ## Credits
 
-- This guide was heavily written by bats-core member [@mbland](https://github.com/mbland) 
-for [go-script-bash](https://github.com/mbland/go-script-bash), tweaked for [bats-core][repohome]
+- This guide was heavily written by BATS-core member [@mbland](https://github.com/mbland) 
+for [go-script-bash](https://github.com/mbland/go-script-bash), tweaked for [BATS-core][repohome]
 - Table of Contents created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc)
 - The [official bash logo](https://github.com/odb/official-bash-logo) is copyrighted
 by the [Free Software Foundation](https://www.fsf.org/), 2016 under the [Free Art License](http://artlibre.org/licence/lal/en/)
