@@ -355,3 +355,8 @@ END_OF_ERR_MSG
   [ "${lines[10]}" = 'ok 10 {' ]  # unquoted single brace is a valid description
   [ "${lines[11]}" = 'ok 11 ' ]   # empty name from single quote
 }
+
+@test "test inter-test communication with BATS_BUCKET" {
+  run bats "$FIXTURE_ROOT/bats_bucket.bats"
+  [ "$status" -eq 0 ]
+}
