@@ -333,7 +333,7 @@ BATS_TMPNAME="$BATS_TMPDIR/bats.$$"
 BATS_PARENT_TMPNAME="$BATS_TMPDIR/bats.$PPID"
 BATS_OUT="${BATS_TMPNAME}.out"
 
-if [ "${BATS_BUCKET_DECLARATION[@]-}" = '' ]; then
+if [ "${BATS_BUCKET_DECLARATION[*]-}" = '' ]; then
   declare -x BATS_BUCKET_DECLARATION='declare -x BATS_BUCKET=""'
 fi
 eval "$BATS_BUCKET_DECLARATION"
