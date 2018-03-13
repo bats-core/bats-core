@@ -148,6 +148,9 @@ for filename in "${arguments[@]}"; do
       filenames["${#filenames[@]}"]="$suite_filename"
     done
     shopt -u nullglob
+  elif [ ! -f "$filename" ]; then
+    echo "bats: $filename does not exist" >&2
+    exit 1
   else
     filenames["${#filenames[@]}"]="$filename"
   fi
