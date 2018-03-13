@@ -356,7 +356,7 @@ END_OF_ERR_MSG
   [ "${lines[11]}" = 'ok 11 ' ]   # empty name from single quote
 }
 
-@test "test inter-test communication with BATS_BUCKET" {
-  run bats "$FIXTURE_ROOT/bats_bucket.bats"
+@test "test inter-test communication" {
+  run bats "$FIXTURE_ROOT/bats_bucket"
   [ "$status" -eq 0 ]
 }

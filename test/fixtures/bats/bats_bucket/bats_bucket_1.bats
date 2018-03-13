@@ -3,9 +3,9 @@
 
   BATS_BUCKET='value'
 
-  [ "${lines[0]}" == 'declare -x BATS_BUCKET=""' ]
+  [ "${lines[0]}" = 'declare -x BATS_BUCKET=""' ]
 }
 
 @test "value is passed between tests" {
-  [ "$BATS_BUCKET" == 'value' ]
+  [ "$BATS_BUCKET" = 'value' ]
 }

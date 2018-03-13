@@ -15,6 +15,12 @@ if [ "$1" = "-x" ]; then
   shift
 fi
 
+BATS_IN_SUITE=""
+if [ "$1" = "-s" ]; then
+  BATS_IN_SUITE="$1"
+  shift
+fi
+
 BATS_TEST_FILENAME="$1"
 if [ -z "$BATS_TEST_FILENAME" ]; then
   echo "usage: bats-exec <filename>" >&2
@@ -297,6 +303,11 @@ bats_perform_tests() {
     BATS_BUCKET_DECLARATION="${test_result##*$'\n'}"
     let test_number+=1
   done
+
+  if [ -n "$BATS_IN_SUITE" ]; then
+    declare -p BATS_BUCKET_DECLARATION
+  fi
+
   exit "$status"
 }
 

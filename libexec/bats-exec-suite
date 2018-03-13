@@ -47,12 +47,15 @@ for filename in "$@"; do
         echo "${line/ $index / $(($offset + $index)) }"
         [ "${line:0:6}" != "not ok" ] || status=1
         ;;
+      "declare"*)
+        eval "$line"
+        ;;
       * )
         echo "$line"
         ;;
       esac
     done
-  } < <( bats-exec-test $extended_syntax_flag "$filename" )
+  } < <( bats-exec-test $extended_syntax_flag -s "$filename" )
   offset=$(($offset + $index))
 done
 
