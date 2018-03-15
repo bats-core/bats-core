@@ -14,6 +14,7 @@ abort() {
   printf 'Error: %s\n' "$1" >&2
   usage >&2
   exit 1
+  echo "Usage: bats [-c] [-l <logfile>] [-p | -t] <test> [<test> ...]"
 }
 
 help() {
@@ -28,6 +29,7 @@ help() {
 
   -c, --count      Count the number of test cases without running any tests
   -h, --help       Display this help message
+  -l  --log      Set path to log file used by all tests with logit calls
   -p, --pretty     Show results in pretty format (default for terminals)
   -r, --recursive  Include tests in subdirectories
   -t, --tap        Show results in TAP format
@@ -77,8 +79,12 @@ for arg in "$@"; do
     arguments[${#arguments[*]}]="$arg"
   fi
 done
+<<<<<<< HEAD
 
 unset count_flag pretty recursive
+=======
+unset count_flag pretty logfile
+>>>>>>> Want basic logging support for logging output and other side-effects
 count_flag=''
 pretty=''
 recursive=''
@@ -96,6 +102,17 @@ if [[ "${#options[@]}" -ne 0 ]]; then
     "v" | "version" )
       version
       exit 0
+      ;;
+    "l" | "log" )
+      # If -l | --log option was passed, the argument following it
+      # is assumed to be name of logfile, i.e. relative or absolute
+      # path.
+      logfile=${arguments[0]}
+      if ! touch "${logfile}" >/dev/null 2>&1 ; then
+        unset logfile
+        echo "error: unable to read log file, path is invalid" >&2
+      fi
+      arguments=(${arguments[@]:1}) # Shift arguments by one
       ;;
     "c" | "count" )
       count_flag="-c"
@@ -119,6 +136,8 @@ fi
 if [[ "${#arguments[@]}" -eq 0 ]]; then
   abort 'Must specify at least one <test>'
 fi
+
+if [[ -n "${logfile}" ]]; then export BATS_LOGFILE_PATH="${logfile}"; fi
 
 filenames=()
 for filename in "${arguments[@]}"; do

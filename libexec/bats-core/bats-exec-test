@@ -56,6 +56,24 @@ run() {
   set "-$origFlags"
 }
 
+uuid4_first_eight() {
+  # Generate only the first 8 characters of what would normally
+  # be a set of 8, 4, 4, and 12 hexadecimal numbers.
+  LC_ALL=C tr -dc a-f0-9 < /dev/urandom  |
+    dd bs=8 count=1 2> /dev/null
+}
+
+logit() {
+  [ -z "${BATS_LOGFILE_PATH}" ] && return
+  ts=`date +%Y-%m-%dT%H:%M:%S%z`
+  tag=`uuid4_first_eight` # uniquely identifies each logging event
+  echo "${ts} ${BATS_TEST_NUMBER}_${BATS_TEST_DESCRIPTION} ${tag} begin" \
+    >> "${BATS_LOGFILE_PATH}"
+  echo "$@" >> "${BATS_LOGFILE_PATH}"
+  echo "${ts} ${BATS_TEST_NUMBER}_${BATS_TEST_DESCRIPTION} ${tag} end" \
+    >> "${BATS_LOGFILE_PATH}"
+}
+
 setup() {
   return 0
 }
