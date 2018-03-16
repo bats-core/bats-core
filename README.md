@@ -346,7 +346,7 @@ on the wiki.
 
 ---
 
-© 2017 Bianca Tamayo (bats-core organization)
+© 2017 bats-core organization
 
 © 2014 Sam Stephenson
 
