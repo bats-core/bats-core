@@ -329,6 +329,8 @@ The following are intended to prevent too-compact code:
   - https://lists.gnu.org/archive/html/bug-bash/2012-06/msg00068.html
   - ftp://ftp.gnu.org/gnu/bash/bash-4.2-patches/bash42-025
   - http://lists.gnu.org/archive/html/help-bash/2012-03/msg00078.html
+- [ShellCheck](https://www.shellcheck.net/) can help to identify many of these issues
+
 
 ## Open Source License
 
