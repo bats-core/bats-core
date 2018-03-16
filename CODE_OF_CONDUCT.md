@@ -72,6 +72,7 @@ members of the project's leadership.
 * [Bianca Tamayo][bt-gh]
 * [Mike Bland][mb-gh]
 * [Jason Karns][jk-gh]
+* [Andrew Martin][am-gh]
 
 ### Past Maintainers
 
@@ -85,5 +86,7 @@ available at [http://contributor-covenant.org/version/1/4][version]
 [bt-gh]: https://github.com/btamayo
 [mb-gh]: https://github.com/mbland
 [jk-gh]: https://github.com/jasonkarns
+[am-gh]: https://github.com/sublimino
+
 [homepage]: http://contributor-covenant.org
 [version]: http://contributor-covenant.org/version/1/4/
