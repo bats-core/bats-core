@@ -49,6 +49,8 @@ while IFS= read -r line; do
   fi
 done
 
+if [ "${#tests[@]}" -gt 0 ]; then
 for test_name in "${tests[@]}"; do
   echo "bats_test_function ${test_name}"
 done
+fi
