@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -e
+set -euo pipefail
 
 # Just stream the TAP output (sans extended syntax) if tput is missing
 command -v tput >/dev/null || exec grep -v "^begin "
@@ -115,7 +116,7 @@ set_color() {
   local color="$1"
   local weight='22'
 
-  if [[ "$2" == 'bold' ]]; then
+  if [[ "$#" -gt 1 && "$2" == 'bold' ]]; then
     weight='1'
   fi
   printf "\x1B[%d;%dm" $(( 30 + $color )) "$weight"

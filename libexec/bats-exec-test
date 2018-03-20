@@ -2,6 +2,7 @@
 set -e
 set -E
 set -T
+set -euo pipefail
 
 BATS_COUNT_ONLY=""
 if [ "$1" = "-c" ]; then
