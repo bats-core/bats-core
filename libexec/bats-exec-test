@@ -58,8 +58,6 @@ run() {
   set +T
   output="$("$@" 2>&1)"
   status="$?"
-echo >>q
-  echo "$output">>q
   oldIFS=$IFS
   IFS=$'\n' lines=($output)
   [ -z "$e" ] || set -e
@@ -361,7 +359,7 @@ if [ "$#" -eq 0 ]; then
   else
     if [ "${#BATS_TEST_NAMES[@]}" -gt 0 ]; then
       bats_perform_tests "${BATS_TEST_NAMES[@]}"
-    else 
+    else
       bats_perform_tests
     fi
   fi
