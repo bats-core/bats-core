@@ -275,6 +275,24 @@ installed (`curl` and `openssl`, for example). If you require a specific
 configuration please search and +1 an issue or
 [raise a new issue](https://github.com/bats-core/bats-core/issues).
 
+## Using Bats
+
+Bats comes with two manual pages. After installation you can view them with `man 1 bats` (usage manual) and `man 7 bats` (writing test files manual). Also, you can view the available command line options that Bats supports by calling Bats with the `-h` or `--help` options. These are the options that Bats currently supports:
+
+```
+Bats 0.4.0
+Usage: bats [-c] [-p | -t] <test> [<test> ...]
+
+  <test> is the path to a Bats test file, or the path to a directory
+  containing Bats test files.
+
+  -c, --count    Count the number of test cases without running any tests
+  -h, --help     Display this help message
+  -p, --pretty   Show results in pretty format (default for terminals)
+  -t, --tap      Show results in TAP format
+  -v, --version  Display the version number
+```
+
 ## Support
 
 The Bats source code repository is [hosted on
