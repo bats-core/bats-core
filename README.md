@@ -290,7 +290,17 @@ To learn how to set up your editor for Bats syntax highlighting, see
 on the wiki.
 
 
-## Version history
+## Version 
+
+*0.5.0* (April xx, 2018)
+
+* Added support for Docker.
+* Added support for test scripts that have the [unofficial strict mode](redsymbol.net/articles/unofficial-bash-strict-mode/) enabled.
+* Added support for tabs in test names.
+* Improved stability on Windows and macOS platforms.
+* Fixed an installation bug where if Bats was uploaded from Windows to a server installation would fail ([commit](7afdf57bd3cbd216f6dd98b2112f2cf4fa521870))
+* Fixed TAP compliance for skipped tests
+
 
 *0.4.0* (August 13, 2014)
 
