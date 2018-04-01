@@ -234,6 +234,28 @@ in the test file.
 store temporary files.
 
 
+## Installation
+
+## Supported Bash versions
+
+The following is a list of Bash versions that are currently supported by Bats. This list is composed of platforms that Bats has been tested on and is known to work on without issues.
+  
+- Bash versions:
+  - Everything from 3.2.57(1) and higher
+- Operating systems:
+  - Arch Linux
+  - Alpine Linux
+  - FreeBSD 10.x and 11.x
+  - version 3.2.57(1)-release on macOS
+  - Windows Subsystem for Linux
+- Continuous Integration:
+  - default bash in standard Travis images
+- Other:
+  - Latest version for the following platforms:
+  - Git for Windows Bash (MSYS2 based)
+  - Cygwin
+  - MSYS2
+  
 ## Installing Bats from source
 
 Check out a copy of the Bats repository. Then, either add the Bats
