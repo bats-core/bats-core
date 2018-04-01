@@ -345,7 +345,6 @@ bats_detect_duplicate_test_case_names() {
   local test_names=()
   local test_dupes=()
   local line
-  local name
 
   while read -r line; do
     if [[ ! "$line" =~ ^bats_test_function\  ]]; then
@@ -354,12 +353,10 @@ bats_detect_duplicate_test_case_names() {
     line="${line%$'\r'}"
     line="${line#* }"
 
-    for name in "${test_names[@]}"; do
-      if [[ "$line" == "$name" ]]; then
-        test_dupes+=("$line")
-        continue 2
-      fi
-    done
+    if [[ " ${test_names[*]} " == *" $line "* ]]; then
+      test_dupes+=("$line")
+      continue
+    fi
     test_names+=("$line")
   done <"$BATS_TEST_SOURCE"
 
