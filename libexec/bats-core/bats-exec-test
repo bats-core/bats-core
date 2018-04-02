@@ -65,7 +65,15 @@ uuid4_first_eight() {
 
 logit() {
   [ -z "${BATS_LOGFILE_PATH}" ] && return
-  ts=`date +%Y-%m-%dT%H:%M:%S%z`
+  if [ `uname -s` == "BrickStorOS" ]; then
+    if [ -x /usr/gnu/bin/date ]; then
+      ts=`/usr/gnu/bin/date --rfc-3339=ns`
+    else
+      ts=`date +%Y-%m-%dT%H:%M:%S%z`
+    fi
+  else
+    ts=`date --rfc-3339=ns`
+  fi
   tag=`uuid4_first_eight` # uniquely identifies each logging event
   echo "${ts} ${BATS_TEST_NUMBER}_${BATS_TEST_DESCRIPTION} ${tag} begin" \
     >> "${BATS_LOGFILE_PATH}"
