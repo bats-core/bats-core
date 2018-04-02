@@ -329,6 +329,8 @@ on the wiki.
 
 ## Version history
 
+Bats is [SemVer compliant](https://semver.org/).
+
 *0.4.0* (August 13, 2014)
 
 * Improved the display of failing test cases. Bats now shows the
