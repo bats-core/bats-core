@@ -55,7 +55,7 @@ run() {
   set +e
   set +E
   set +T
-  output="$("$@" 2>&1)"
+  output="$(set -e; "$@" 2>&1)"
   status="$?"
   oldIFS=$IFS
   IFS=$'\n' lines=($output)
