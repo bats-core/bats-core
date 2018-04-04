@@ -355,3 +355,26 @@ END_OF_ERR_MSG
   [ "${lines[10]}" = 'ok 10 {' ]  # unquoted single brace is a valid description
   [ "${lines[11]}" = 'ok 11 ' ]   # empty name from single quote
 }
+
+@test "execute exported function without breaking failing test output" {
+  skip "passes on Bash 4.4 only"
+  exported_function() { return 0; }
+  export -f exported_function
+  run bats "$FIXTURE_ROOT/exported_function.bats"
+  [ $status -eq 1 ]
+  [ "${lines[0]}" = "1..1" ] &&
+  [ "${lines[1]}" = "not ok 1 failing test" ] &&
+  [ "${lines[2]}" = "# (in test file test/fixtures/bats/exported_function.bats, line 8)" ] &&
+  [ "${lines[3]}" = "#   \`false' failed" ] &&
+  [ "${lines[4]}" = "# a='exported_function'" ] || {
+    echo
+    echo "Output was:"
+    echo "${lines[0]}"
+    echo "${lines[1]}"
+    echo "${lines[2]}"
+    echo "${lines[3]}"
+    echo "${lines[4]}"
+    echo
+    false
+  } >&2
+}
