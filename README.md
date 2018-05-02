@@ -214,11 +214,14 @@ you print in code outside of `@test`, `setup` or `teardown` functions
 must be redirected to `stderr` (`>&2`). Otherwise, the output may
 cause Bats to fail by polluting the TAP stream on `stdout`.
 
-### File descriptor 3
+### File descriptor 3 (read this if Bats hangs)
 
 Bats makes a separation between output from the code under test and output that forms the TAP stream (which is produced by Bats internals). This is done in order to produce TAP-compliant output. In the [Printing to the terminal](#printing-to-the-terminal) section, there are details on how to use file descriptor 3 to print custom text properly. 
 
-A side effect of using file descriptor 3 is that, under some circumstances, it can cause Bats to block and execution to seem dead without reason. This can happen if a child process is spawned in the background from a test. In this case, the child process will inherit file descriptor 3. Bats, as the parent process, will wait for the file descriptor to be closed by the child process before continuing execution. If the child process takes a lot of time to complete (eg if the child process is a `sleep 100` command or a background service that will run indefinitely), Bats will be similarly blocked for the same amount of time. To prevent this from happening, you need to close the file descriptor when calling the child process, eg `command_name 3>- &`.
+A side effect of using file descriptor 3 is that, under some circumstances, it can cause Bats to block and execution to seem dead without reason. This can happen if a child process is spawned in the background from a test. In this case, the child process will inherit file descriptor 3. Bats, as the parent process, will wait for the file descriptor to be closed by the child process before continuing execution. If the child process takes a lot of time to complete (eg if the child process is a `sleep 100` command or a background service that will run indefinitely), Bats will be similarly blocked for the same amount of time. 
+
+**To prevent this from happening, close FD 3 explicitly when running any command that may
+launch long-running child processes**, e.g. `command_name 3>- &`.
 
 ### Printing to the terminal
 
