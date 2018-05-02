@@ -224,7 +224,7 @@ A side-effect of using file descriptor 3 is that, under some circumstances, it c
 
 Bats produces output compliant with [version 12 of the TAP protocol](https://testanything.org). The produced TAP stream is by default piped to a pretty formatter for human consumption, but if Bats is called with the `-t` flag, then the TAP stream is directly printed to the console. 
 
-The above have implications if you try to print custom text to the terminal. As mentioned in [File descriptor 3](#file-descriptor-3), bats provides a special file descriptor, `&3`, that you should use to print your custom text. Here are some detailed guidelines to refer to:
+This has implications if you try to print custom text to the terminal. As mentioned in [File descriptor 3](#file-descriptor-3), bats provides a special file descriptor, `&3`, that you should use to print your custom text. Here are some detailed guidelines to refer to:
 
 - Printing **from within a test function**:
   - To have text printed from within a test function, you need to redirect the output to file descriptor 3, eg `echo 'text' >&3`. This output will become part of the TAP stream. You are encouraged to prepend text printed this way with a hash (eg `echo '# text' >&3`) in order to produce 100% TAP compliant output. Otherwise, depending on the 3rd-party tools you use to analyze the TAP stream, you can encounter unexpected behavior or errors. 
