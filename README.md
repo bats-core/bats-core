@@ -227,8 +227,8 @@ Bats produces output compliant with [version 12 of the TAP protocol](https://tes
 This has implications if you try to print custom text to the terminal. As mentioned in [File descriptor 3](#file-descriptor-3), bats provides a special file descriptor, `&3`, that you should use to print your custom text. Here are some detailed guidelines to refer to:
 
 - Printing **from within a test function**:
-  - To have text printed from within a test function, you need to redirect the output to file descriptor 3, eg `echo 'text' >&3`. This output will become part of the TAP stream. You are encouraged to prepend text printed this way with a hash (eg `echo '# text' >&3`) in order to produce 100% TAP compliant output. Otherwise, depending on the 3rd-party tools you use to analyze the TAP stream, you can encounter unexpected behavior or errors. 
-  - The pretty formatter that Bats uses by default to process the TAP stream, will filter out and not print text output to file descriptor 3. 
+  - To have text printed from within a test function you need to redirect the output to file descriptor 3, eg `echo 'text' >&3`. This output will become part of the TAP stream. You are encouraged to prepend text printed this way with a hash (eg `echo '# text' >&3`) in order to produce 100% TAP compliant output. Otherwise, depending on the 3rd-party tools you use to analyze the TAP stream, you can encounter unexpected behavior or errors. 
+  - The pretty formatter that Bats uses by default to process the TAP stream will filter out and not print text output to file descriptor 3. 
   - Text that is output directly to stdout or stderr (file descriptor 1 or 2), ie `echo 'text'` is considered part of the test function output and is printed only on test failures for diagnostic purposes, regardless of the formatter used (TAP or pretty).
 - Printing **from within the `setup` or `teardown` functions**: The same hold true as for printing with test functions.
 - Printing **outside test or `setup`/`teardown` functions**:
