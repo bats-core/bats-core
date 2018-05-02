@@ -222,7 +222,7 @@ A side-effect of using file descriptor 3 is that, under some circumstances, it c
 
 ### Printing to the terminal
 
-Bats produces output compliant with [version 12 of the TAP protocol](https://testanything.org). The produced TAP stream is by default piped to a pretty formatter for human consumption, but if BATS is called with the `-t` flag, then the TAP stream is directly printed to the console. 
+Bats produces output compliant with [version 12 of the TAP protocol](https://testanything.org). The produced TAP stream is by default piped to a pretty formatter for human consumption, but if Bats is called with the `-t` flag, then the TAP stream is directly printed to the console. 
 
 The above have implications if you try to print custom text to the terminal. As mentioned in [File descriptor 3](#file-descriptor-3), bats provides a special file descriptor, `&3`, that you should use to print your custom text. Here are some detailed guidelines to refer to:
 
