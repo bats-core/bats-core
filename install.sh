@@ -19,12 +19,24 @@ abs_dirname() {
   cd "$cwd"
 }
 
-PREFIX="$1"
-if [ -z "$1" ]; then
-  { echo "usage: $0 <prefix>"
-    echo "  e.g. $0 /usr/local"
-  } >&2
+help() {
+  echo "usage: $0 <installation_dir>"
+  echo "  e.g. $0 /usr/local"
+}
+
+if [[ "$#" -ne 1 ]]; then
+  echo "one argument expected, got $#" >&2
+  help >&2
   exit 1
+elif [[ "$1" == '-h' || "$1" == '--help' ]]; then
+  help
+  exit
+elif [[ "$1" =~ ^- ]]; then
+  echo "bad option: $1" >&2
+  help >&2
+  exit 1
+else
+  PREFIX="$1"
 fi
 
 BATS_ROOT="$(abs_dirname "$0")"
