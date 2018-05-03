@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/bats-core/bats-core.svg?branch=master)](https://travis-ci.org/bats-core/bats-core)
 
-### Table of contents
+## Table of contents
 - [Background](#background)
   - [What is this repo?](#what-is-this-repo)
   - [Why was it created?](#why-was-it-created)
