@@ -3,18 +3,6 @@ set -e
 set -E
 set -T
 
-BATS_COUNT_ONLY=""
-if [ "$1" = "-c" ]; then
-  BATS_COUNT_ONLY=1
-  shift
-fi
-
-BATS_EXTENDED_SYNTAX=""
-if [ "$1" = "-x" ]; then
-  BATS_EXTENDED_SYNTAX="$1"
-  shift
-fi
-
 BATS_TEST_FILENAME="$1"
 if [ -z "$BATS_TEST_FILENAME" ]; then
   echo "usage: bats-exec <filename>" >&2
@@ -82,7 +70,7 @@ skip() {
 
 bats_test_begin() {
   BATS_TEST_DESCRIPTION="$1"
-  if [ -n "$BATS_EXTENDED_SYNTAX" ]; then
+  if [[ "$BATS_PRETTY_FORMAT" == 'true' ]]; then
     echo "begin $BATS_TEST_NUMBER $BATS_TEST_DESCRIPTION" >&3
   fi
   setup
@@ -290,7 +278,7 @@ bats_perform_tests() {
   test_number=1
   status=0
   for test_name in "$@"; do
-    "$0" $BATS_EXTENDED_SYNTAX "$BATS_TEST_FILENAME" "$test_name" "$test_number" || status=1
+    "$0" "$BATS_TEST_FILENAME" "$test_name" "$test_number" || status=1
     let test_number+=1
   done
   exit "$status"
@@ -353,7 +341,7 @@ if [ "$#" -eq 0 ]; then
   bats_preprocess_source
   bats_evaluate_preprocessed_source
 
-  if [ -n "$BATS_COUNT_ONLY" ]; then
+  if [[ "$BATS_COUNT_ONLY" == 'true' ]]; then
     echo "${#BATS_TEST_NAMES[@]}"
   else
     bats_perform_tests "${BATS_TEST_NAMES[@]}"

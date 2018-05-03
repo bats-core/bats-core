@@ -79,61 +79,50 @@ export BATS_PREFIX
 export BATS_CWD
 export BATS_TEST_PATTERN="^[[:blank:]]*@test[[:blank:]]+(.*[^[:blank:]])[[:blank:]]+\{(.*)\$"
 export PATH="$BATS_LIBEXEC:$PATH"
+export BATS_COUNT_ONLY=false
+export BATS_PRETTY_FORMAT=false
 
-options=()
-arguments=()
-for arg in "$@"; do
-  if [ "${arg:0:1}" = "-" ]; then
-    if [ "${arg:1:1}" = "-" ]; then
-      options[${#options[*]}]="${arg:2}"
-    else
-      index=1
-      while option="${arg:$index:1}"; do
-        [ -n "$option" ] || break
-        options[${#options[*]}]="$option"
-        let index+=1
-      done
-    fi
-  else
-    arguments[${#arguments[*]}]="$arg"
-  fi
-done
+if [[ -t 0 && -t 1 ]]; then
+  BATS_PRETTY_FORMAT=true
+fi
+if [[ -n "${CI:-}" ]]; then
+  BATS_PRETTY_FORMAT=false
+fi
 
-unset count_flag pretty
-count_flag=''
-pretty=''
-[ -t 0 ] && [ -t 1 ] && pretty="1"
-[ -n "${CI:-}" ] && pretty=""
+declare -a arguments=()
 
-if [[ "${#options[@]}" -ne '0' ]]; then
-  for option in "${options[@]}"; do
-    case "$option" in
-    "h" | "help" )
+while [[ "$#" -gt 0 ]]; do
+  case "$1" in
+    -h | --help )
       help
       exit 0
       ;;
-    "v" | "version" )
+    -v | --version )
       version
       exit 0
       ;;
-    "c" | "count" )
-      count_flag="-c"
+    -c | --count )
+      BATS_COUNT_ONLY=true
       ;;
-    "t" | "tap" )
-      pretty=""
+    -t | --tap )
+      BATS_PRETTY_FORMAT=false
       ;;
-    "p" | "pretty" )
-      pretty="1"
+    -p | --pretty )
+      BATS_PRETTY_FORMAT=true
       ;;
-    * )
+    -* )
+      echo "bad argument: $option" >&2
       usage >&2
       exit 1
       ;;
-    esac
-  done
-fi
+    *)
+      arguments+=( "$1" )
+  esac
+  shift
+done
 
 if [ "${#arguments[@]}" -eq 0 ]; then
+  echo 'no tests specified' >&2
   usage >&2
   exit 1
 fi
@@ -152,6 +141,7 @@ for filename in "${arguments[@]}"; do
     filenames["${#filenames[@]}"]="$filename"
   fi
 done
+unset arguments
 
 if [ "${#filenames[@]}" -eq 1 ]; then
   command="bats-exec-test"
@@ -160,10 +150,9 @@ else
 fi
 
 set -o pipefail execfail
-if [ -z "$pretty" ]; then
-  exec "$command" $count_flag "${filenames[@]}"
+if [[ "$BATS_PRETTY_FORMAT" == false ]]; then
+  exec "$command" "${filenames[@]}"
 else
-  extended_syntax_flag="-x"
   formatter="bats-format-tap-stream"
-  exec "$command" $count_flag $extended_syntax_flag "${filenames[@]}" | "$formatter"
+  exec "$command" "${filenames[@]}" | "$formatter"
 fi
