@@ -7,7 +7,7 @@
   - [What is this repo?](#what-is-this-repo)
   - [Why was it created?](#why-was-it-created)
   - [What's the plan and why?](#whats-the-plan-and-why)
-  - [Misc](#misc)
+  - [Contact us](#contact-us)
 - [What is Bats?](#what-is-bats)
 - [Running tests with Bats](#running-tests-with-bats)
   - [Test suites](#test-suites)
