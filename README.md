@@ -47,7 +47,7 @@ Doing it this way accomplishes two things:
 3. Allows the possibility of merging back to original, or merging from original if or when the need arises
 4. Prevents lock-out by giving administrative access to more than one person, increases transferability
 
-### Misc
+### Contact us
 - We are `#bats` on freenode
 
 ## What is Bats?
