@@ -1,14 +1,15 @@
 #!/usr/bin/env bash
 set -e
+set -euo pipefail
 
 count_only_flag=""
-if [ "$1" = "-c" ]; then
+if [ "${1-}" = "-c" ]; then
   count_only_flag=1
   shift
 fi
 
 extended_syntax_flag=""
-if [ "$1" = "-x" ]; then
+if [ "${1-}" = "-x" ]; then
   extended_syntax_flag="-x"
   shift
 fi

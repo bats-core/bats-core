@@ -2,6 +2,7 @@
 set -e
 set -E
 set -T
+set -euo pipefail
 
 BATS_COUNT_ONLY=""
 if [ "$1" = "-c" ]; then
@@ -319,7 +320,7 @@ bats_perform_test() {
   fi
 }
 
-if [ -z "$TMPDIR" ]; then
+if [[ "${TMPDIR-}" == '' ]]; then
   BATS_TMPDIR="/tmp"
 else
   BATS_TMPDIR="${TMPDIR%/}"
@@ -353,7 +354,7 @@ bats_cleanup_preprocessed_source() {
 }
 
 bats_evaluate_preprocessed_source() {
-  if [ -z "$BATS_TEST_SOURCE" ]; then
+  if [ "${BATS_TEST_SOURCE-}" = '' ]; then
     BATS_TEST_SOURCE="${BATS_PARENT_TMPNAME}.src"
   fi
   source "$BATS_TEST_SOURCE"
@@ -368,7 +369,11 @@ if [ "$#" -eq 0 ]; then
   if [ -n "$BATS_COUNT_ONLY" ]; then
     echo "${#BATS_TEST_NAMES[@]}"
   else
-    bats_perform_tests "${BATS_TEST_NAMES[@]}"
+    if [ "${#BATS_TEST_NAMES[@]}" -gt 0 ]; then
+      bats_perform_tests "${BATS_TEST_NAMES[@]}"
+    else
+      bats_perform_tests
+    fi
   fi
 else
   bats_evaluate_preprocessed_source
