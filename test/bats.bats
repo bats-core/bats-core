@@ -355,3 +355,19 @@ END_OF_ERR_MSG
   [ "${lines[10]}" = 'ok 10 {' ]  # unquoted single brace is a valid description
   [ "${lines[11]}" = 'ok 11 ' ]   # empty name from single quote
 }
+
+@test "sourcing a nonexistent file in setup produces error output" {
+  run bats "$FIXTURE_ROOT/source_nonexistent_file.bats"
+  [ $status -eq 1 ]
+  [ "${lines[1]}" = 'not ok 1 sourcing nonexistent file fails in setup' ]
+  [ "${lines[2]}" = "# (from function \`setup' in test file $RELATIVE_FIXTURE_ROOT/source_nonexistent_file.bats, line 2)" ]
+  [ "${lines[3]}" = "#   \`source \"nonexistent file\"' failed" ]
+}
+
+@test "referencing unset parameter in setup produces error output" {
+  run bats "$FIXTURE_ROOT/reference_unset_parameter.bats"
+  [ $status -eq 1 ]
+  [ "${lines[1]}" = 'not ok 1 referencing unset parameter fails in setup' ]
+  [ "${lines[2]}" = "# (from function \`setup' in test file $RELATIVE_FIXTURE_ROOT/reference_unset_parameter.bats, line 3)" ]
+  [ "${lines[3]}" = "#   \`echo \"\$unset_parameter\"' failed" ]
+}

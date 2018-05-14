@@ -95,6 +95,7 @@ bats_test_function() {
 
 BATS_CURRENT_STACK_TRACE=()
 BATS_PREVIOUS_STACK_TRACE=()
+BATS_ERROR_STACK_TRACE=()
 
 bats_capture_stack_trace() {
   if [[ "${#BATS_CURRENT_STACK_TRACE[@]}" -ne '0' ]]; then
@@ -271,6 +272,11 @@ bats_exit_trap() {
   fi
 
   if [ -z "$BATS_TEST_COMPLETED" ] || [ -z "$BATS_TEARDOWN_COMPLETED" ]; then
+    if [[ "${#BATS_ERROR_STACK_TRACE[@]}" -eq 0 ]]; then
+      # Some Bash command failures trigger the EXIT trap, but not ERR.
+      BATS_ERROR_STACK_TRACE=( "${BATS_CURRENT_STACK_TRACE[@]}" )
+      BATS_ERROR_STATUS=1
+    fi
     echo "not ok $BATS_TEST_NUMBER $BATS_TEST_DESCRIPTION" >&3
     bats_print_stack_trace "${BATS_ERROR_STACK_TRACE[@]}" >&3
     bats_print_failed_command "${BATS_ERROR_STACK_TRACE[${#BATS_ERROR_STACK_TRACE[@]}-1]}" "$BATS_ERROR_STATUS" >&3
