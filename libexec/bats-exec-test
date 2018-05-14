@@ -230,17 +230,24 @@ bats_debug_trap() {
 }
 
 # For some versions of Bash, the `ERR` trap may not always fire for every
-# command failure, but the `EXIT` trap will. For this reason we call it at the
-# very beginning of `bats_teardown_trap` (the `DEBUG` trap for the call will
-# move `BATS_CURRENT_STACK_TRACE` to `BATS_PREVIOUS_STACK_TRACE`) and check the
-# value of `$?` before taking other actions.
+# command failure, but the `EXIT` trap will. Also, some command failures may not
+# set `$?` properly. See #72 and #81 for details.
+#
+# For this reason, we call `bats_error_trap` at the very beginning of
+# `bats_teardown_trap` (the `DEBUG` trap for the call will move
+# `BATS_CURRENT_STACK_TRACE` to `BATS_PREVIOUS_STACK_TRACE`) and check the value
+# of `$BATS_TEST_COMPLETED` before taking other actions. We also adjust the exit
+# status value if needed.
 #
 # See `bats_exit_trap` for an additional EXIT error handling case when `$?`
-# isn't set properly.
+# isn't set properly during `teardown()` errors.
 bats_error_trap() {
   local status="$?"
-  if [[ "$status" -ne '0' ]]; then
-    BATS_ERROR_STATUS="$status"
+  if [[ -z "$BATS_TEST_COMPLETED" ]]; then
+    if [[ "$status" -eq 0 ]]; then
+      status=1
+    fi
+    BATS_ERROR_STATUS="${status:-1}"
     BATS_ERROR_STACK_TRACE=( "${BATS_PREVIOUS_STACK_TRACE[@]}" )
     trap - debug
   fi
@@ -277,8 +284,13 @@ bats_exit_trap() {
     if [[ "${#BATS_ERROR_STACK_TRACE[@]}" -eq 0 ]]; then
       # For some versions of bash, `$?` may not be set properly for some error
       # conditions before triggering the EXIT trap directly (see #72 and #81).
-      # Thanks to the `BATS_TEST_COMPLETED` and `BATS_TEARDOWN_COMPLETED`
-      # signals, this will pinpoint such errors.
+      # Thanks to the `BATS_TEARDOWN_COMPLETED` signal, this will pinpoint such
+      # errors if they happen during `teardown()` when `bats_perform_test` calls
+      # `bats_teardown_trap` directly after the test itself passes.
+      #
+      # If instead the test fails, and the `teardown()` error happens while
+      # `bats_teardown_trap` runs as the EXIT trap, the test will fail with no
+      # output, since there's no way to reach the `bats_exit_trap` call.
       BATS_ERROR_STACK_TRACE=( "${BATS_PREVIOUS_STACK_TRACE[@]}" )
       BATS_ERROR_STATUS=1
     fi
