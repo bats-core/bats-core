@@ -85,7 +85,6 @@ fixtures bats
 @test "one failing test" {
   run bats "$FIXTURE_ROOT/failing.bats"
   [ $status -eq 1 ]
-  emit_debug_output
   [ "${lines[0]}" = '1..1' ]
   [ "${lines[1]}" = 'not ok 1 a failing test' ]
   [ "${lines[2]}" = "# (in test file $RELATIVE_FIXTURE_ROOT/failing.bats, line 4)" ]
@@ -105,7 +104,6 @@ fixtures bats
 @test "failing test with significant status" {
   STATUS=2 run bats "$FIXTURE_ROOT/failing.bats"
   [ $status -eq 1 ]
-  emit_debug_output
   [ "${lines[3]}" = "#   \`eval \"( exit \${STATUS:-1} )\"' failed with status 2" ]
 }
 
@@ -173,7 +171,6 @@ fixtures bats
   cd "$TMP"
   run bats "$FIXTURE_ROOT/failing.bats"
   [ $status -eq 1 ]
-  emit_debug_output
   [ "${lines[2]}" = "# (in test file $FIXTURE_ROOT/failing.bats, line 4)" ]
 }
 
@@ -341,7 +338,6 @@ END_OF_ERR_MSG
 
 @test "parse @test lines with various whitespace combinations" {
   run bats "$FIXTURE_ROOT/whitespace.bats"
-  emit_debug_output
   [ $status -eq 0 ]
   [ "${lines[1]}" = 'ok 1 no extra whitespace' ]
   [ "${lines[2]}" = 'ok 2 tab at beginning of line' ]
@@ -357,17 +353,49 @@ END_OF_ERR_MSG
 }
 
 @test "sourcing a nonexistent file in setup produces error output" {
-  run bats "$FIXTURE_ROOT/source_nonexistent_file.bats"
+  run bats "$FIXTURE_ROOT/source_nonexistent_file_in_setup.bats"
   [ $status -eq 1 ]
   [ "${lines[1]}" = 'not ok 1 sourcing nonexistent file fails in setup' ]
-  [ "${lines[2]}" = "# (from function \`setup' in test file $RELATIVE_FIXTURE_ROOT/source_nonexistent_file.bats, line 2)" ]
+  [ "${lines[2]}" = "# (from function \`setup' in test file $RELATIVE_FIXTURE_ROOT/source_nonexistent_file_in_setup.bats, line 2)" ]
   [ "${lines[3]}" = "#   \`source \"nonexistent file\"' failed" ]
 }
 
 @test "referencing unset parameter in setup produces error output" {
-  run bats "$FIXTURE_ROOT/reference_unset_parameter.bats"
+  run bats "$FIXTURE_ROOT/reference_unset_parameter_in_setup.bats"
   [ $status -eq 1 ]
   [ "${lines[1]}" = 'not ok 1 referencing unset parameter fails in setup' ]
-  [ "${lines[2]}" = "# (from function \`setup' in test file $RELATIVE_FIXTURE_ROOT/reference_unset_parameter.bats, line 3)" ]
+  [ "${lines[2]}" = "# (from function \`setup' in test file $RELATIVE_FIXTURE_ROOT/reference_unset_parameter_in_setup.bats, line 3)" ]
+  [ "${lines[3]}" = "#   \`echo \"\$unset_parameter\"' failed" ]
+}
+
+@test "sourcing a nonexistent file in test produces error output" {
+  run bats "$FIXTURE_ROOT/source_nonexistent_file.bats"
+  [ $status -eq 1 ]
+  [ "${lines[1]}" = 'not ok 1 sourcing nonexistent file fails' ]
+  [ "${lines[2]}" = "# (in test file $RELATIVE_FIXTURE_ROOT/source_nonexistent_file.bats, line 2)" ]
+  [ "${lines[3]}" = "#   \`source \"nonexistent file\"' failed" ]
+}
+
+@test "referencing unset parameter in test produces error output" {
+  run bats "$FIXTURE_ROOT/reference_unset_parameter.bats"
+  [ $status -eq 1 ]
+  [ "${lines[1]}" = 'not ok 1 referencing unset parameter fails' ]
+  [ "${lines[2]}" = "# (in test file $RELATIVE_FIXTURE_ROOT/reference_unset_parameter.bats, line 3)" ]
+  [ "${lines[3]}" = "#   \`echo \"\$unset_parameter\"' failed" ]
+}
+
+@test "sourcing a nonexistent file in teardown produces error output" {
+  run bats "$FIXTURE_ROOT/source_nonexistent_file_in_teardown.bats"
+  [ $status -eq 1 ]
+  [ "${lines[1]}" = 'not ok 1 sourcing nonexistent file fails in teardown' ]
+  [ "${lines[2]}" = "# (from function \`teardown' in test file $RELATIVE_FIXTURE_ROOT/source_nonexistent_file_in_teardown.bats, line 2)" ]
+  [ "${lines[3]}" = "#   \`source \"nonexistent file\"' failed" ]
+}
+
+@test "referencing unset parameter in teardown produces error output" {
+  run bats "$FIXTURE_ROOT/reference_unset_parameter_in_teardown.bats"
+  [ $status -eq 1 ]
+  [ "${lines[1]}" = 'not ok 1 referencing unset parameter fails in teardown' ]
+  [ "${lines[2]}" = "# (from function \`teardown' in test file $RELATIVE_FIXTURE_ROOT/reference_unset_parameter_in_teardown.bats, line 3)" ]
   [ "${lines[3]}" = "#   \`echo \"\$unset_parameter\"' failed" ]
 }

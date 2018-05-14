@@ -1,7 +1,3 @@
-setup() {
+@test "sourcing nonexistent file fails" {
   source "nonexistent file"
-}
-
-@test "sourcing nonexistent file fails in setup" {
-  :
 }
