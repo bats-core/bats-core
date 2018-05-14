@@ -244,10 +244,10 @@ bats_debug_trap() {
 bats_error_trap() {
   local status="$?"
   if [[ -z "$BATS_TEST_COMPLETED" ]]; then
-    if [[ "$status" -eq 0 ]]; then
-      status=1
+    BATS_ERROR_STATUS="$status"
+    if [[ "$BATS_ERROR_STATUS" -eq 0 ]]; then
+      BATS_ERROR_STATUS=1
     fi
-    BATS_ERROR_STATUS="${status:-1}"
     BATS_ERROR_STACK_TRACE=( "${BATS_PREVIOUS_STACK_TRACE[@]}" )
     trap - debug
   fi
