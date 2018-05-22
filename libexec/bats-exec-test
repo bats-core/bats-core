@@ -95,6 +95,7 @@ bats_test_function() {
 
 BATS_CURRENT_STACK_TRACE=()
 BATS_PREVIOUS_STACK_TRACE=()
+BATS_ERROR_STACK_TRACE=()
 
 bats_capture_stack_trace() {
   if [[ "${#BATS_CURRENT_STACK_TRACE[@]}" -ne '0' ]]; then
@@ -228,15 +229,25 @@ bats_debug_trap() {
   fi
 }
 
-# When running under Bash 3.2.57(1)-release on macOS, the `ERR` trap may not
-# always fire, but the `EXIT` trap will. For this reason we call it at the very
-# beginning of `bats_teardown_trap` (the `DEBUG` trap for the call will move
+# For some versions of Bash, the `ERR` trap may not always fire for every
+# command failure, but the `EXIT` trap will. Also, some command failures may not
+# set `$?` properly. See #72 and #81 for details.
+#
+# For this reason, we call `bats_error_trap` at the very beginning of
+# `bats_teardown_trap` (the `DEBUG` trap for the call will move
 # `BATS_CURRENT_STACK_TRACE` to `BATS_PREVIOUS_STACK_TRACE`) and check the value
-# of `$?` before taking other actions.
+# of `$BATS_TEST_COMPLETED` before taking other actions. We also adjust the exit
+# status value if needed.
+#
+# See `bats_exit_trap` for an additional EXIT error handling case when `$?`
+# isn't set properly during `teardown()` errors.
 bats_error_trap() {
   local status="$?"
-  if [[ "$status" -ne '0' ]]; then
+  if [[ -z "$BATS_TEST_COMPLETED" ]]; then
     BATS_ERROR_STATUS="$status"
+    if [[ "$BATS_ERROR_STATUS" -eq 0 ]]; then
+      BATS_ERROR_STATUS=1
+    fi
     BATS_ERROR_STACK_TRACE=( "${BATS_PREVIOUS_STACK_TRACE[@]}" )
     trap - debug
   fi
@@ -244,7 +255,6 @@ bats_error_trap() {
 
 bats_teardown_trap() {
   bats_error_trap
-  trap "bats_exit_trap" exit
   local status=0
   teardown >>"$BATS_OUT" 2>&1 || status="$?"
 
@@ -271,6 +281,19 @@ bats_exit_trap() {
   fi
 
   if [ -z "$BATS_TEST_COMPLETED" ] || [ -z "$BATS_TEARDOWN_COMPLETED" ]; then
+    if [[ "${#BATS_ERROR_STACK_TRACE[@]}" -eq 0 ]]; then
+      # For some versions of bash, `$?` may not be set properly for some error
+      # conditions before triggering the EXIT trap directly (see #72 and #81).
+      # Thanks to the `BATS_TEARDOWN_COMPLETED` signal, this will pinpoint such
+      # errors if they happen during `teardown()` when `bats_perform_test` calls
+      # `bats_teardown_trap` directly after the test itself passes.
+      #
+      # If instead the test fails, and the `teardown()` error happens while
+      # `bats_teardown_trap` runs as the EXIT trap, the test will fail with no
+      # output, since there's no way to reach the `bats_exit_trap` call.
+      BATS_ERROR_STACK_TRACE=( "${BATS_PREVIOUS_STACK_TRACE[@]}" )
+      BATS_ERROR_STATUS=1
+    fi
     echo "not ok $BATS_TEST_NUMBER $BATS_TEST_DESCRIPTION" >&3
     bats_print_stack_trace "${BATS_ERROR_STACK_TRACE[@]}" >&3
     bats_print_failed_command "${BATS_ERROR_STACK_TRACE[${#BATS_ERROR_STACK_TRACE[@]}-1]}" "$BATS_ERROR_STATUS" >&3
@@ -312,6 +335,8 @@ bats_perform_test() {
     trap "bats_teardown_trap" exit
     "$BATS_TEST_NAME" >>"$BATS_OUT" 2>&1
     BATS_TEST_COMPLETED=1
+    trap "bats_exit_trap" exit
+    bats_teardown_trap
 
   else
     echo "bats: unknown test name \`$BATS_TEST_NAME'" >&2
