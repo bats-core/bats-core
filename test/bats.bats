@@ -399,3 +399,15 @@ END_OF_ERR_MSG
   [ "${lines[2]}" = "# (from function \`teardown' in test file $RELATIVE_FIXTURE_ROOT/reference_unset_parameter_in_teardown.bats, line 3)" ]
   [ "${lines[3]}" = "#   \`echo \"\$unset_parameter\"' failed" ]
 }
+
+@test "execute exported function without breaking failing test output" {
+  exported_function() { return 0; }
+  export -f exported_function
+  run bats "$FIXTURE_ROOT/exported_function.bats"
+  [ $status -eq 1 ]
+  [ "${lines[0]}" = "1..1" ]
+  [ "${lines[1]}" = "not ok 1 failing test" ]
+  [ "${lines[2]}" = "# (in test file test/fixtures/bats/exported_function.bats, line 7)" ]
+  [ "${lines[3]}" = "#   \`false' failed" ]
+  [ "${lines[4]}" = "# a='exported_function'" ]
+}
