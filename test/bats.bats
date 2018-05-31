@@ -407,7 +407,12 @@ END_OF_ERR_MSG
   [ $status -eq 1 ]
   [ "${lines[0]}" = "1..1" ]
   [ "${lines[1]}" = "not ok 1 failing test" ]
-  [ "${lines[2]}" = "# (in test file test/fixtures/bats/exported_function.bats, line 7)" ]
+  local expected='# \(in test file .*test/fixtures/bats/exported_function\.bats, line 7\)'
+  if [[ ! "${lines[2]}" =~ $expected ]]; then
+    printf 'Expected stack trace to match /%s/\n' "$expected" >&2
+    emit_debug_output
+    false
+  fi
   [ "${lines[3]}" = "#   \`false' failed" ]
   [ "${lines[4]}" = "# a='exported_function'" ]
 }
