@@ -43,7 +43,7 @@ abs_dirname() {
   local cwd="$PWD"
   local path="$1"
 
-  while [ -n "$path" ]; do
+  while [[ -n "$path" ]]; do
     cd "${path%/*}"
     local name="${path##*/}"
     path="$(resolve_link "$name")"
@@ -81,13 +81,13 @@ export PATH="$BATS_LIBEXEC:$PATH"
 options=()
 arguments=()
 for arg in "$@"; do
-  if [ "${arg:0:1}" = "-" ]; then
-    if [ "${arg:1:1}" = "-" ]; then
+  if [[ "${arg:0:1}" = "-" ]]; then
+    if [[ "${arg:1:1}" = "-" ]]; then
       options[${#options[*]}]="${arg:2}"
     else
       index=1
       while option="${arg:$index:1}"; do
-        [ -n "$option" ] || break
+        [[ -n "$option" ]] || break
         options[${#options[*]}]="$option"
         let index+=1
       done
@@ -100,8 +100,8 @@ done
 unset count_flag pretty
 count_flag=''
 pretty=''
-[ -t 0 ] && [ -t 1 ] && pretty=1
-[ -n "${CI:-}" ] && pretty=""
+[[ -t 0 && -t 1 ]] && pretty=1
+[[ -n "${CI:-}" ]] && pretty=""
 
 if [[ "${#options[@]}" -ne 0 ]]; then
   for option in "${options[@]}"; do
@@ -131,7 +131,7 @@ if [[ "${#options[@]}" -ne 0 ]]; then
   done
 fi
 
-if [ "${#arguments[@]}" -eq 0 ]; then
+if [[ "${#arguments[@]}" -eq 0 ]]; then
   usage >&2
   exit 1
 fi
@@ -140,7 +140,7 @@ filenames=()
 for filename in "${arguments[@]}"; do
   expand_path "$filename" 'filename'
 
-  if [ -d "$filename" ]; then
+  if [[ -d "$filename" ]]; then
     shopt -s nullglob
     for suite_filename in "$filename"/*.bats; do
       filenames["${#filenames[@]}"]="$suite_filename"
@@ -151,14 +151,14 @@ for filename in "${arguments[@]}"; do
   fi
 done
 
-if [ "${#filenames[@]}" -eq 1 ]; then
+if [[ "${#filenames[@]}" -eq 1 ]]; then
   command="bats-exec-test"
 else
   command="bats-exec-suite"
 fi
 
 set -o pipefail execfail
-if [ -z "$pretty" ]; then
+if [[ -z "$pretty" ]]; then
   exec "$command" $count_flag "${filenames[@]}"
 else
   extended_syntax_flag="-x"

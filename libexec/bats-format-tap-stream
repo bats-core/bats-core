@@ -45,7 +45,7 @@ pass() {
 
 skip() {
   local reason="$1"
-  [ -z "$reason" ] || reason=": $reason"
+  [[ -z "$reason" ]] || reason=": $reason"
   go_to_column 0
   printf " - %s (skipped%s)" "$name" "$reason"
   advance
@@ -75,7 +75,7 @@ summary() {
     printf 's'
   fi
 
-  if [ "$skipped" -gt 0 ]; then
+  if [[ "$skipped" -gt 0 ]]; then
     printf ", %d skipped" "$skipped"
   fi
 
@@ -89,7 +89,7 @@ printf_with_truncation() {
 
   printf -v 'string' -- "$@"
 
-  if [ "${#string}" -gt "$width" ]; then
+  if [[ "${#string}" -gt "$width" ]]; then
     printf "%s..." "${string:0:$(( $width - 4 ))}"
   else
     printf "%s" "$string"

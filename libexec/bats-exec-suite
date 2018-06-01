@@ -2,13 +2,13 @@
 set -e
 
 count_only_flag=""
-if [ "$1" = "-c" ]; then
+if [[ "$1" = "-c" ]]; then
   count_only_flag=1
   shift
 fi
 
 extended_syntax_flag=""
-if [ "$1" = "-x" ]; then
+if [[ "$1" = "-x" ]]; then
   extended_syntax_flag="-x"
   shift
 fi
@@ -24,7 +24,7 @@ for filename in "$@"; do
   done <"$filename"
 done
 
-if [ -n "$count_only_flag" ]; then
+if [[ -n "$count_only_flag" ]]; then
   echo "$count"
   exit
 fi
@@ -43,9 +43,9 @@ for filename in "$@"; do
         echo "${line/ $index / $(($offset + $index)) }"
         ;;
       "ok "* | "not ok "* )
-        [ -n "$extended_syntax_flag" ] || let index+=1
+        [[ -n "$extended_syntax_flag" ]] || let index+=1
         echo "${line/ $index / $(($offset + $index)) }"
-        [ "${line:0:6}" != "not ok" ] || status=1
+        [[ "${line:0:6}" != "not ok" ]] || status=1
         ;;
       * )
         echo "$line"
