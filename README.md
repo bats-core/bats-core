@@ -1,17 +1,39 @@
-## BATS-core: Bash Automated Testing System (2017)
+# Bats-core: Bash Automated Testing System (2018)
 
 [![Join the chat at https://gitter.im/bats-core/bats-core](https://badges.gitter.im/bats-core/bats-core.svg)](https://gitter.im/bats-core/bats-core?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 [![Build Status](https://travis-ci.org/bats-core/bats-core.svg?branch=master)](https://travis-ci.org/bats-core/bats-core)
 
-### Background:
+## Table of contents
+- [Background](#background)
+  - [What is this repo?](#what-is-this-repo)
+  - [Why was it created?](#why-was-it-created)
+  - [What's the plan and why?](#whats-the-plan-and-why)
+  - [Contact us](#contact-us)
+- [What is Bats?](#what-is-bats)
+- [Running tests with Bats](#running-tests-with-bats)
+  - [Test suites](#test-suites)
+- [Writing tests](#writing-tests)
+  - [`run`: Test other commands](#run-test-other-commands)
+  - [`load`: Share common code](#load-share-common-code)
+  - [`skip`: Easily skip tests](#skip-easily-skip-tests)
+  - [`setup` and `teardown`: Pre- and post-test hooks](#setup-and-teardown-pre--and-post-test-hooks)
+  - [Code outside of test cases](#code-outside-of-test-cases)
+  - [Special variables](#special-variables)
+- [Installing Bats from source](#installing-bats-from-source)
+- [Running Bats in Docker](#running-bats-in-docker)
+- [Support](#support)
+- [Version history](#version-history)
+  
+
+## Background:
 ### What is this repo?
-**Tuesday, September 19, 2017:** This is a mirrored fork of [bats](https://github.com/sstephenson/bats), at [0360811](https://github.com/sstephenson/bats/commit/03608115df2071fff4eaaff1605768c275e5f81f). It was created via `git clone --bare` and `git push --mirror`.
+**Tuesday, September 19, 2017:** This is a mirrored fork of [Bats](https://github.com/sstephenson/bats), at [0360811](https://github.com/sstephenson/bats/commit/03608115df2071fff4eaaff1605768c275e5f81f). It was created via `git clone --bare` and `git push --mirror`.
 
-#### Why was it created?
-The original bats repository needed new maintainers, and has not been actively maintained since 2013. While there were volunteers for maintainers, attempts to organize issues, and outstanding PRs, the lack of write-access to the repo hindered progress severely.
+### Why was it created?
+The original Bats repository needed new maintainers, and has not been actively maintained since 2013. While there were volunteers for maintainers, attempts to organize issues, and outstanding PRs, the lack of write-access to the repo hindered progress severely.
 
-## What's the plan and why?
+### What's the plan and why?
 The rough plan, originally [outlined here](https://github.com/sstephenson/bats/issues/150#issuecomment-323845404) is to create a new, mirrored mainline (this repo!). An excerpt:
 
 > **1. Roadmap 1.0:**
@@ -27,11 +49,10 @@ Doing it this way accomplishes two things:
 3. Allows the possibility of merging back to original, or merging from original if or when the need arises
 4. Prevents lock-out by giving administrative access to more than one person, increases transferability
 
-## Misc
+### Contact us
 - We are `#bats` on freenode
 
----
-# Bats: Bash Automated Testing System
+## What is Bats?
 
 Bats is a [TAP](http://testanything.org)-compliant testing framework
 for Bash. It provides a simple way to verify that the UNIX programs
@@ -64,7 +85,7 @@ command in the test case exits with a `0` status code (success), the
 test passes. In this way, each line is an assertion of truth.
 
 
-## Running tests
+## Running tests with Bats
 
 To run your tests, invoke the `bats` interpreter with a path to a test
 file. The file's test cases are run sequentially and in isolation. If
