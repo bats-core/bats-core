@@ -1,5 +1,7 @@
 ## BATS-core: Bash Automated Testing System (2017)
 
+[![Join the chat at https://gitter.im/bats-core/bats-core](https://badges.gitter.im/bats-core/bats-core.svg)](https://gitter.im/bats-core/bats-core?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 [![Build Status](https://travis-ci.org/bats-core/bats-core.svg?branch=master)](https://travis-ci.org/bats-core/bats-core)
 
 ### Background:
