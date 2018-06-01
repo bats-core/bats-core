@@ -158,7 +158,7 @@ fixtures bats
   [ $status -eq 1 ]
   [ "${lines[1]}" =  'not ok 1 truth' ]
   [ "${lines[2]}" =  "# (in test file $RELATIVE_FIXTURE_ROOT/failing_teardown.bats, line 6)" ]
-  [ "${lines[3]}" = $'#   `[ "$PASS" = "1" ]\' failed' ]
+  [ "${lines[3]}" = $'#   `[ "$PASS" = 1 ]\' failed' ]
 }
 
 @test "teardown failure with significant status" {
@@ -206,11 +206,11 @@ fixtures bats
 @test "-c prints the number of tests" {
   run bats -c "$FIXTURE_ROOT/empty.bats"
   [ $status -eq 0 ]
-  [ "$output" = "0" ]
+  [ "$output" = 0 ]
 
   run bats -c "$FIXTURE_ROOT/output.bats"
   [ $status -eq 0 ]
-  [ "$output" = "4" ]
+  [ "$output" = 4 ]
 }
 
 @test "dash-e is not mangled on beginning of line" {
@@ -303,7 +303,7 @@ fixtures bats
   # possible.
   run bash -u "${BATS_TEST_DIRNAME%/*}/libexec/bats" \
     "$FIXTURE_ROOT/unofficial_bash_strict_mode.bats"
-  if [[ "$status" -ne '0' || "${lines[1]}" != "$expected" ]]; then
+  if [[ "$status" -ne 0 || "${lines[1]}" != "$expected" ]]; then
     cat <<END_OF_ERR_MSG
 
 This test failed because the Bats internals are violating one of the
@@ -330,7 +330,7 @@ If there's no output even when running the latest Bash, the problem may reside
 in the DEBUG trap handler. A particularly sneaky issue is that in Bash before
 4.1-alpha, an expansion of an empty array, e.g. "\${FOO[@]}", is considered
 an unset variable access. The solution is to add a size check before the
-expansion, e.g. [[ "\${#FOO[@]}" -ne '0' ]].
+expansion, e.g. [[ "\${#FOO[@]}" -ne 0 ]].
 
 END_OF_ERR_MSG
     emit_debug_output && return 1

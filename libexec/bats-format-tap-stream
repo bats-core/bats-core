@@ -66,12 +66,12 @@ log() {
 
 summary() {
   printf "\n%d test" "$count"
-  if [[ "$count" -ne '1' ]]; then
+  if [[ "$count" -ne 1 ]]; then
     printf 's'
   fi
 
   printf ", %d failure" "$failures"
-  if [[ "$failures" -ne '1' ]]; then
+  if [[ "$failures" -ne 1 ]]; then
     printf 's'
   fi
 
@@ -113,10 +113,10 @@ advance() {
 
 set_color() {
   local color="$1"
-  local weight='22'
+  local weight=22
 
   if [[ "$2" == 'bold' ]]; then
-    weight='1'
+    weight=1
   fi
   printf "\x1B[%d;%dm" $(( 30 + $color )) "$weight"
 }

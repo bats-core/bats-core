@@ -75,7 +75,7 @@ teardown() {
 
 BATS_TEST_SKIPPED=''
 skip() {
-  BATS_TEST_SKIPPED=${1:-1}
+  BATS_TEST_SKIPPED="${1:-1}"
   BATS_TEST_COMPLETED=1
   exit 0
 }
@@ -98,7 +98,7 @@ BATS_PREVIOUS_STACK_TRACE=()
 BATS_ERROR_STACK_TRACE=()
 
 bats_capture_stack_trace() {
-  if [[ "${#BATS_CURRENT_STACK_TRACE[@]}" -ne '0' ]]; then
+  if [[ "${#BATS_CURRENT_STACK_TRACE[@]}" -ne 0 ]]; then
     BATS_PREVIOUS_STACK_TRACE=("${BATS_CURRENT_STACK_TRACE[@]}")
   fi
   BATS_CURRENT_STACK_TRACE=()
@@ -200,7 +200,7 @@ bats_frame_filename() {
 
 bats_extract_line() {
   local __bats_extract_line_line
-  local __bats_extract_line_index='0'
+  local __bats_extract_line_index=0
 
   while IFS= read -r __bats_extract_line_line; do
     if [[ "$((++__bats_extract_line_index))" -eq "$2" ]]; then
@@ -275,7 +275,7 @@ bats_exit_trap() {
 
   if [ -n "$BATS_TEST_SKIPPED" ]; then
     skipped=" # skip"
-    if [ "1" != "$BATS_TEST_SKIPPED" ]; then
+    if [ "$BATS_TEST_SKIPPED" != '1' ]; then
       skipped+=" $BATS_TEST_SKIPPED"
     fi
   fi
@@ -325,7 +325,7 @@ bats_perform_test() {
     BATS_TEST_NUMBER="$2"
     if [ -z "$BATS_TEST_NUMBER" ]; then
       echo "1..1"
-      BATS_TEST_NUMBER="1"
+      BATS_TEST_NUMBER=1
     fi
 
     BATS_TEST_COMPLETED=""

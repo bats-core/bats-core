@@ -102,10 +102,10 @@ done
 unset count_flag pretty
 count_flag=''
 pretty=''
-[ -t 0 ] && [ -t 1 ] && pretty="1"
+[ -t 0 ] && [ -t 1 ] && pretty=1
 [ -n "${CI:-}" ] && pretty=""
 
-if [[ "${#options[@]}" -ne '0' ]]; then
+if [[ "${#options[@]}" -ne 0 ]]; then
   for option in "${options[@]}"; do
     case "$option" in
     "h" | "help" )
@@ -123,7 +123,7 @@ if [[ "${#options[@]}" -ne '0' ]]; then
       pretty=""
       ;;
     "p" | "pretty" )
-      pretty="1"
+      pretty=1
       ;;
     * )
       usage >&2
