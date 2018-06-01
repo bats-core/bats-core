@@ -12,5 +12,4 @@ build: off
 test_script:
   - where bash
   - bash --version
-  - bash -c 'mkdir /tmp'
   - bash -c 'time bin/bats test'
