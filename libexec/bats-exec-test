@@ -260,6 +260,7 @@ bats_teardown_trap() {
 }
 
 bats_exit_trap() {
+  local line
   local status
   local skipped=''
   trap - err exit
@@ -288,7 +289,9 @@ bats_exit_trap() {
     echo "not ok $BATS_TEST_NUMBER $BATS_TEST_DESCRIPTION" >&3
     bats_print_stack_trace "${BATS_ERROR_STACK_TRACE[@]}" >&3
     bats_print_failed_command "${BATS_ERROR_STACK_TRACE[${#BATS_ERROR_STACK_TRACE[@]}-1]}" "$BATS_ERROR_STATUS" >&3
-    sed -e "s/^/# /" < "$BATS_OUT" >&3
+    while read -r line; do
+      printf '# %s\n' "$line"
+    done <"$BATS_OUT" >&3
     status=1
   else
     echo "ok ${BATS_TEST_NUMBER} ${BATS_TEST_DESCRIPTION}${skipped}" >&3
