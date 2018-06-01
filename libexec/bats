@@ -26,19 +26,17 @@ help() {
   echo
 }
 
-BATS_READLINK=
+export BATS_READLINK='true'
+if command -v 'greadlink' >/dev/null; then
+  BATS_READLINK='greadlink'
+elif command -v 'readlink' >/dev/null; then
+  BATS_READLINK='readlink'
+fi
 
 resolve_link() {
-  if [[ -z "$BATS_READLINK" ]]; then
-    if command -v 'greadlink' >/dev/null; then
-      BATS_READLINK='greadlink'
-    elif command -v 'readlink' >/dev/null; then
-      BATS_READLINK='readlink'
-    else
-      BATS_READLINK='true'
-    fi
+  if ! "$BATS_READLINK" "$1"; then
+    return 0
   fi
-  "$BATS_READLINK" "$1" || return 0
 }
 
 abs_dirname() {
