@@ -122,7 +122,7 @@ fixtures bats
 }
 
 @test "setup is run once before each test" {
-  rm -f "$TMP/setup.log"
+  make_tmpdir
   run bats "$FIXTURE_ROOT/setup.bats"
   [ $status -eq 0 ]
   run cat "$TMP/setup.log"
@@ -130,7 +130,7 @@ fixtures bats
 }
 
 @test "teardown is run once after each test, even if it fails" {
-  rm -f "$TMP/teardown.log"
+  make_tmpdir
   run bats "$FIXTURE_ROOT/teardown.bats"
   [ $status -eq 1 ]
   run cat "$TMP/teardown.log"
@@ -168,6 +168,7 @@ fixtures bats
 }
 
 @test "failing test file outside of BATS_CWD" {
+  make_tmpdir
   cd "$TMP"
   run bats "$FIXTURE_ROOT/failing.bats"
   [ $status -eq 1 ]

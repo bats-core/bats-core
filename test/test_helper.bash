@@ -3,8 +3,9 @@ fixtures() {
   bats_trim_filename "$FIXTURE_ROOT" 'RELATIVE_FIXTURE_ROOT'
 }
 
-setup() {
-  export TMP="$BATS_TEST_DIRNAME/tmp"
+make_tmpdir() {
+  export TMP="$BATS_TMPDIR/tmp"
+  mkdir -p "$TMP"
 }
 
 filter_control_sequences() {
@@ -23,5 +24,7 @@ emit_debug_output() {
 }
 
 teardown() {
-  [ -d "$TMP" ] && rm -f "$TMP"/*
+  if [[ -n "$TMP" ]]; then
+    rm -rf "$TMP"
+  fi
 }
