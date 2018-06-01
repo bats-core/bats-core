@@ -216,6 +216,31 @@ you print in code outside of `@test`, `setup` or `teardown` functions
 must be redirected to `stderr` (`>&2`). Otherwise, the output may
 cause Bats to fail by polluting the TAP stream on `stdout`.
 
+### File descriptor 3 (read this if Bats hangs)
+
+Bats makes a separation between output from the code under test and output that forms the TAP stream (which is produced by Bats internals). This is done in order to produce TAP-compliant output. In the [Printing to the terminal](#printing-to-the-terminal) section, there are details on how to use file descriptor 3 to print custom text properly. 
+
+A side effect of using file descriptor 3 is that, under some circumstances, it can cause Bats to block and execution to seem dead without reason. This can happen if a child process is spawned in the background from a test. In this case, the child process will inherit file descriptor 3. Bats, as the parent process, will wait for the file descriptor to be closed by the child process before continuing execution. If the child process takes a lot of time to complete (eg if the child process is a `sleep 100` command or a background service that will run indefinitely), Bats will be similarly blocked for the same amount of time. 
+
+**To prevent this from happening, close FD 3 explicitly when running any command that may
+launch long-running child processes**, e.g. `command_name 3>- &`.
+
+### Printing to the terminal
+
+Bats produces output compliant with [version 12 of the TAP protocol](https://testanything.org). The produced TAP stream is by default piped to a pretty formatter for human consumption, but if Bats is called with the `-t` flag, then the TAP stream is directly printed to the console. 
+
+This has implications if you try to print custom text to the terminal. As mentioned in [File descriptor 3](#file-descriptor-3), bats provides a special file descriptor, `&3`, that you should use to print your custom text. Here are some detailed guidelines to refer to:
+
+- Printing **from within a test function**:
+  - To have text printed from within a test function you need to redirect the output to file descriptor 3, eg `echo 'text' >&3`. This output will become part of the TAP stream. You are encouraged to prepend text printed this way with a hash (eg `echo '# text' >&3`) in order to produce 100% TAP compliant output. Otherwise, depending on the 3rd-party tools you use to analyze the TAP stream, you can encounter unexpected behavior or errors. 
+  - The pretty formatter that Bats uses by default to process the TAP stream will filter out and not print text output to file descriptor 3. 
+  - Text that is output directly to stdout or stderr (file descriptor 1 or 2), ie `echo 'text'` is considered part of the test function output and is printed only on test failures for diagnostic purposes, regardless of the formatter used (TAP or pretty).
+- Printing **from within the `setup` or `teardown` functions**: The same hold true as for printing with test functions.
+- Printing **outside test or `setup`/`teardown` functions**:
+  - Regardless of where text is redirected to (stdout, stderr or file descriptor 3) text is immediately visible in the terminal.
+  - Text printed in such a way, will disable pretty formatting. Also, it will make output non-compliant with the TAP spec. The reason for this is that each test file is evaluated n+1 times (as metioned [earlier](https://github.com/bats-core/bats-core#writing-tests)). The first run will cause such output to be produced before the [_plan line_](https://testanything.org/tap-specification.html#the-plan) is printed, contrary to the spec that requires the _plan line_ to be either the first or the last line of the output.
+  - Due to internal pipes/redirects, output to stderr is always printed first.
+  
 ### Special variables
 
 There are several global variables you can use to introspect on Bats
