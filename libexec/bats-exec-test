@@ -342,9 +342,10 @@ bats_perform_test() {
 }
 
 if [[ -z "$TMPDIR" ]]; then
-  TMPDIR="${TEMP:-/tmp}"
+  BATS_TMPDIR="/tmp"
+else
+  BATS_TMPDIR="${TMPDIR%/}"
 fi
-BATS_TMPDIR="${TMPDIR%/}"
 
 BATS_TMPNAME="$BATS_TMPDIR/bats.$$"
 BATS_PARENT_TMPNAME="$BATS_TMPDIR/bats.$PPID"
