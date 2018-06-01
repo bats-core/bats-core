@@ -43,9 +43,13 @@ for filename in "$@"; do
         echo "${line/ $index / $(($offset + $index)) }"
         ;;
       "ok "* | "not ok "* )
-        [[ -n "$extended_syntax_flag" ]] || let index+=1
+        if [[ -z "$extended_syntax_flag" ]]; then
+          let index+=1
+        fi
         echo "${line/ $index / $(($offset + $index)) }"
-        [[ "${line:0:6}" != "not ok" ]] || status=1
+        if [[ "${line:0:6}" == "not ok" ]]; then
+          status=1
+        fi
         ;;
       * )
         echo "$line"

@@ -2,7 +2,9 @@
 set -e
 
 # Just stream the TAP output (sans extended syntax) if tput is missing
-command -v tput >/dev/null || exec grep -v "^begin "
+if ! command -v tput >/dev/null; then
+  exec grep -v "^begin "
+fi
 
 header_pattern='[0-9]+\.\.[0-9]+'
 IFS= read -r header
@@ -45,7 +47,9 @@ pass() {
 
 skip() {
   local reason="$1"
-  [[ -z "$reason" ]] || reason=": $reason"
+  if [[ -n "$reason" ]]; then
+    reason=": $reason"
+  fi
   go_to_column 0
   printf " - %s (skipped%s)" "$name" "$reason"
   advance

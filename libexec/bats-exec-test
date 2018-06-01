@@ -313,7 +313,10 @@ bats_perform_tests() {
   test_number=1
   status=0
   for test_name in "$@"; do
-    "$0" $BATS_EXTENDED_SYNTAX "$BATS_TEST_FILENAME" "$test_name" "$test_number" || status=1
+    if ! "$0" $BATS_EXTENDED_SYNTAX "$BATS_TEST_FILENAME" "$test_name" \
+      "$test_number"; then
+      status=1
+    fi
     let test_number+=1
   done
   exit "$status"

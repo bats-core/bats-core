@@ -87,7 +87,9 @@ for arg in "$@"; do
     else
       index=1
       while option="${arg:$index:1}"; do
-        [[ -n "$option" ]] || break
+        if [[ -z "$option" ]]; then
+          break
+        fi
         options[${#options[*]}]="$option"
         let index+=1
       done
@@ -100,8 +102,9 @@ done
 unset count_flag pretty
 count_flag=''
 pretty=''
-[[ -t 0 && -t 1 ]] && pretty=1
-[[ -n "${CI:-}" ]] && pretty=""
+if [[ -z "${CI:-}" && -t 0 && -t 1 ]]; then
+  pretty=1
+fi
 
 if [[ "${#options[@]}" -ne 0 ]]; then
   for option in "${options[@]}"; do
@@ -163,5 +166,6 @@ if [[ -z "$pretty" ]]; then
 else
   extended_syntax_flag="-x"
   formatter="bats-format-tap-stream"
-  exec "$command" $count_flag $extended_syntax_flag "${filenames[@]}" | "$formatter"
+  exec "$command" $count_flag $extended_syntax_flag "${filenames[@]}" |
+    "$formatter"
 fi
