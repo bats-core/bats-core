@@ -66,11 +66,11 @@ run() {
 }
 
 setup() {
-  true
+  return 0
 }
 
 teardown() {
-  true
+  return 0
 }
 
 BATS_TEST_SKIPPED=''
