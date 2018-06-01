@@ -65,6 +65,14 @@ run() {
   IFS=$oldIFS
 }
 
+assert_equal() {
+  if [ ! "$1" = "$2" ];then
+    BATS_EXPECTED="$2"
+    BATS_RECEIVED="$1"
+  fi
+  [ "$1" = "$2" ]
+}
+
 setup() {
   true
 }
@@ -173,9 +181,16 @@ bats_print_failed_command() {
   printf '%s' "#   \`${failed_command}' "
 
   if [ $status -eq 1 ]; then
-    echo "failed"
+    echo -n "failed"
   else
-    echo "failed with status $status"
+    echo -n "failed with status $status"
+  fi
+
+  if [ "${BATS_EXPECTED}" ];then
+    echo -e ", received: ${BATS_RECEIVED}, expected: ${BATS_EXPECTED}"
+    unset BATS_EXPECTED
+  else
+    echo
   fi
 }
 
