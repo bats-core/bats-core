@@ -19,6 +19,42 @@ abs_dirname() {
   cd "$cwd"
 }
 
+# performs chmod a+x for all files in $target/$folder 
+# that exist in $src/$folder
+# 
+# Example:
+#     fix_folder_file_permissions $src $target $folder
+#
+fix_folder_file_permissions() {
+  src=$1
+  target=$2
+  folder=$3
+  # scan $src directory for the filenames to fix in $target
+  directory="${src}/${folder}"
+  for f in "${directory}"/*; do
+    # get basename of file (strip the path)
+    filename="${f##*/}"
+    # change the execution bit for the file in $target
+    chmod a+x "${target}/${folder}/$filename"
+  done
+}
+
+# executes fix_folder_file_permissions for the folders
+# bin and libexec.
+#
+# Example: 
+#     fix_installed_file_permissions "${BATS_ROOT}" "${PREFIX}"
+# 
+fix_installed_file_permissions() {
+  src=$1
+  target=$2
+  # we only need to adapt execution bits for bin and libexec
+  folders=(bin libexec)
+  for folder in ${folders[@]}; do
+    fix_folder_file_permissions "${src}" "${target}" "${folder}"
+  done
+}
+
 PREFIX="$1"
 if [ -z "$1" ]; then
   { echo "usage: $0 <prefix>"
@@ -41,8 +77,6 @@ if [ ! -L "$PREFIX"/bin/bats ]; then
     ln -s "$dir"/libexec/bats "$dir"/bin/bats
 fi
 
-# fix file permission
-chmod a+x "$PREFIX"/bin/*
-chmod a+x "$PREFIX"/libexec/*
+fix_installed_file_permissions "${BATS_ROOT}" "${PREFIX}"
 
 echo "Installed Bats to $PREFIX/bin/bats"
