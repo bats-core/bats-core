@@ -292,14 +292,23 @@ on the wiki.
 
 ## Version 
 
-*0.5.0* (April xx, 2018)
+*0.5.0* (June xx, 2018)
+
+`0.5.0` generally preserves compatibility with `0.4.0`, but with some Bash compatibility improvements and a massive performance boost. In other words:
+- all existing tests should remain compatible
+- tests that might've failed or exhibited unexpected behavior on earlier versions of Bash should now also pass or behave as expected
+
+Changes:
 
 * Added support for Docker.
-* Added support for test scripts that have the [unofficial strict mode](redsymbol.net/articles/unofficial-bash-strict-mode/) enabled.
-* Added support for tabs in test names.
+* Added support for test scripts that have the [unofficial strict mode](http://redsymbol.net/articles/unofficial-bash-strict-mode/) enabled.
 * Improved stability on Windows and macOS platforms.
-* Fixed an installation bug where if Bats was uploaded from Windows to a server installation would fail ([commit](7afdf57bd3cbd216f6dd98b2112f2cf4fa521870))
+* Massive performance improvements, especially on Windows (#8)
+* Workarounds for inconsistent behavior between Bash versions (#82)
+* Workaround for preserving stack info after calling an exported function under Bash < 4.4 (#87)
 * Fixed TAP compliance for skipped tests
+* Added support for tabs in test names.
+* Fixed an installation bug where if Bats was uploaded from Windows to a server installation would fail ([commit](https://github.com/bats-core/bats-core/commit/7afdf57bd3cbd216f6dd98b2112f2cf4fa521870))
 
 
 *0.4.0* (August 13, 2014)
