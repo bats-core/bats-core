@@ -107,11 +107,15 @@ bats_capture_stack_trace() {
   local setup_pattern=" setup $BATS_TEST_SOURCE"
   local teardown_pattern=" teardown $BATS_TEST_SOURCE"
 
+  local source_file
   local frame
   local i
 
   for ((i=2; i != ${#FUNCNAME[@]}; ++i)); do
-    frame="${BASH_LINENO[$((i-1))]} ${FUNCNAME[$i]} ${BASH_SOURCE[$i]}"
+    # Use BATS_TEST_SOURCE if necessary to work around Bash < 4.4 bug whereby
+    # calling an exported function erases the test file's BASH_SOURCE entry.
+    source_file="${BASH_SOURCE[$i]:-$BATS_TEST_SOURCE}"
+    frame="${BASH_LINENO[$((i-1))]} ${FUNCNAME[$i]} $source_file"
     BATS_CURRENT_STACK_TRACE["${#BATS_CURRENT_STACK_TRACE[@]}"]="$frame"
     if [[ "$frame" = *"$test_pattern"     || \
           "$frame" = *"$setup_pattern"    || \
