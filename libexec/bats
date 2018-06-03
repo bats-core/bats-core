@@ -26,26 +26,24 @@ help() {
   echo
 }
 
-BATS_READLINK=
+export BATS_READLINK='true'
+if command -v 'greadlink' >/dev/null; then
+  BATS_READLINK='greadlink'
+elif command -v 'readlink' >/dev/null; then
+  BATS_READLINK='readlink'
+fi
 
 resolve_link() {
-  if [[ -z "$BATS_READLINK" ]]; then
-    if command -v 'greadlink' >/dev/null; then
-      BATS_READLINK='greadlink'
-    elif command -v 'readlink' >/dev/null; then
-      BATS_READLINK='readlink'
-    else
-      BATS_READLINK='true'
-    fi
+  if ! "$BATS_READLINK" "$1"; then
+    return 0
   fi
-  "$BATS_READLINK" "$1" || return 0
 }
 
 abs_dirname() {
   local cwd="$PWD"
   local path="$1"
 
-  while [ -n "$path" ]; do
+  while [[ -n "$path" ]]; do
     cd "${path%/*}"
     local name="${path##*/}"
     path="$(resolve_link "$name")"
@@ -83,13 +81,15 @@ export PATH="$BATS_LIBEXEC:$PATH"
 options=()
 arguments=()
 for arg in "$@"; do
-  if [ "${arg:0:1}" = "-" ]; then
-    if [ "${arg:1:1}" = "-" ]; then
+  if [[ "${arg:0:1}" = "-" ]]; then
+    if [[ "${arg:1:1}" = "-" ]]; then
       options[${#options[*]}]="${arg:2}"
     else
       index=1
       while option="${arg:$index:1}"; do
-        [ -n "$option" ] || break
+        if [[ -z "$option" ]]; then
+          break
+        fi
         options[${#options[*]}]="$option"
         let index+=1
       done
@@ -102,10 +102,11 @@ done
 unset count_flag pretty
 count_flag=''
 pretty=''
-[ -t 0 ] && [ -t 1 ] && pretty="1"
-[ -n "${CI:-}" ] && pretty=""
+if [[ -z "${CI:-}" && -t 0 && -t 1 ]]; then
+  pretty=1
+fi
 
-if [[ "${#options[@]}" -ne '0' ]]; then
+if [[ "${#options[@]}" -ne 0 ]]; then
   for option in "${options[@]}"; do
     case "$option" in
     "h" | "help" )
@@ -123,7 +124,7 @@ if [[ "${#options[@]}" -ne '0' ]]; then
       pretty=""
       ;;
     "p" | "pretty" )
-      pretty="1"
+      pretty=1
       ;;
     * )
       usage >&2
@@ -133,7 +134,7 @@ if [[ "${#options[@]}" -ne '0' ]]; then
   done
 fi
 
-if [ "${#arguments[@]}" -eq 0 ]; then
+if [[ "${#arguments[@]}" -eq 0 ]]; then
   usage >&2
   exit 1
 fi
@@ -142,7 +143,7 @@ filenames=()
 for filename in "${arguments[@]}"; do
   expand_path "$filename" 'filename'
 
-  if [ -d "$filename" ]; then
+  if [[ -d "$filename" ]]; then
     shopt -s nullglob
     for suite_filename in "$filename"/*.bats; do
       filenames["${#filenames[@]}"]="$suite_filename"
@@ -153,17 +154,18 @@ for filename in "${arguments[@]}"; do
   fi
 done
 
-if [ "${#filenames[@]}" -eq 1 ]; then
+if [[ "${#filenames[@]}" -eq 1 ]]; then
   command="bats-exec-test"
 else
   command="bats-exec-suite"
 fi
 
 set -o pipefail execfail
-if [ -z "$pretty" ]; then
+if [[ -z "$pretty" ]]; then
   exec "$command" $count_flag "${filenames[@]}"
 else
   extended_syntax_flag="-x"
   formatter="bats-format-tap-stream"
-  exec "$command" $count_flag $extended_syntax_flag "${filenames[@]}" | "$formatter"
+  exec "$command" $count_flag $extended_syntax_flag "${filenames[@]}" |
+    "$formatter"
 fi
