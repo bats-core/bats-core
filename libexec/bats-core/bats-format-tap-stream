@@ -54,7 +54,9 @@ skip() {
 
 todo() {
   local reason="$1"
-  [ -z "$reason" ] || reason=": $reason"
+  if [[ -n "$reason" ]]; then
+    reason=": $reason"
+  fi
   go_to_column 0
   printf " - %s (todo%s)" "$name" "$reason"
   advance
@@ -62,7 +64,9 @@ todo() {
 
 todone() {
   local reason="$1"
-  [ -z "$reason" ] || reason=": $reason"
+  if [[ -n "$reason" ]]; then
+      reason=": $reason"
+  fi
   go_to_column 0
   printf " ✓ %s (done%s)" "$name" "$reason"
   advance
