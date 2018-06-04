@@ -1,4 +1,4 @@
-LOG="$TMP/setup.log"
+LOG="$BATS_TEST_SUITE_TMPDIR/setup.log"
 
 setup() {
   echo "$BATS_TEST_NAME" >> "$LOG"

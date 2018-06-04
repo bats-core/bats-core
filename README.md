@@ -1,15 +1,44 @@
-## BATS-core: Bash Automated Testing System (2017)
+# Bats-core: Bash Automated Testing System (2018)
+
+[![Join the chat at https://gitter.im/bats-core/bats-core](https://badges.gitter.im/bats-core/bats-core.svg)](https://gitter.im/bats-core/bats-core?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 [![Build Status](https://travis-ci.org/bats-core/bats-core.svg?branch=master)](https://travis-ci.org/bats-core/bats-core)
 
-### Background:
+## Table of contents
+- [Background](#background)
+  - [What is this repo?](#what-is-this-repo)
+  - [Why was it created?](#why-was-it-created)
+  - [What's the plan and why?](#whats-the-plan-and-why)
+  - [Contact us](#contact-us)
+- [What is Bats?](#what-is-bats)
+- [Running tests with Bats](#running-tests-with-bats)
+  - [Test suites](#test-suites)
+- [Writing tests](#writing-tests)
+  - [`run`: Test other commands](#run-test-other-commands)
+  - [`load`: Share common code](#load-share-common-code)
+  - [`skip`: Easily skip tests](#skip-easily-skip-tests)
+  - [`setup` and `teardown`: Pre- and post-test hooks](#setup-and-teardown-pre--and-post-test-hooks)
+  - [Code outside of test cases](#code-outside-of-test-cases)
+  - [File descriptor 3](#file-descriptor-3-read-this-if-bats-hangs)
+  - [Printing to the terminal](#printing-to-the-terminal)
+  - [Special variables](#special-variables)
+- [Installation](#installation)
+  - [Supported Bash versions](#supported-bash-versions)
+- [Installing Bats from source](#installing-bats-from-source)
+- [Running Bats in Docker](#running-bats-in-docker)
+- [Using Bats](#using-bats)
+- [Support](#support)
+- [Version history](#version-history)
+  
+
+## Background:
 ### What is this repo?
-**Tuesday, September 19, 2017:** This is a mirrored fork of [bats](https://github.com/sstephenson/bats), at [0360811](https://github.com/sstephenson/bats/commit/03608115df2071fff4eaaff1605768c275e5f81f). It was created via `git clone --bare` and `git push --mirror`.
+**Tuesday, September 19, 2017:** This is a mirrored fork of [Bats](https://github.com/sstephenson/bats), at [0360811](https://github.com/sstephenson/bats/commit/03608115df2071fff4eaaff1605768c275e5f81f). It was created via `git clone --bare` and `git push --mirror`.
 
-#### Why was it created?
-The original bats repository needed new maintainers, and has not been actively maintained since 2013. While there were volunteers for maintainers, attempts to organize issues, and outstanding PRs, the lack of write-access to the repo hindered progress severely.
+### Why was it created?
+The original Bats repository needed new maintainers, and has not been actively maintained since 2013. While there were volunteers for maintainers, attempts to organize issues, and outstanding PRs, the lack of write-access to the repo hindered progress severely.
 
-## What's the plan and why?
+### What's the plan and why?
 The rough plan, originally [outlined here](https://github.com/sstephenson/bats/issues/150#issuecomment-323845404) is to create a new, mirrored mainline (this repo!). An excerpt:
 
 > **1. Roadmap 1.0:**
@@ -25,11 +54,10 @@ Doing it this way accomplishes two things:
 3. Allows the possibility of merging back to original, or merging from original if or when the need arises
 4. Prevents lock-out by giving administrative access to more than one person, increases transferability
 
-## Misc
+### Contact us
 - We are `#bats` on freenode
 
----
-# Bats: Bash Automated Testing System
+## What is Bats?
 
 Bats is a [TAP](http://testanything.org)-compliant testing framework
 for Bash. It provides a simple way to verify that the UNIX programs
@@ -62,7 +90,7 @@ command in the test case exits with a `0` status code (success), the
 test passes. In this way, each line is an assertion of truth.
 
 
-## Running tests
+## Running tests with Bats
 
 To run your tests, invoke the `bats` interpreter with a path to a test
 file. The file's test cases are run sequentially and in isolation. If
@@ -214,6 +242,31 @@ you print in code outside of `@test`, `setup` or `teardown` functions
 must be redirected to `stderr` (`>&2`). Otherwise, the output may
 cause Bats to fail by polluting the TAP stream on `stdout`.
 
+### File descriptor 3 (read this if Bats hangs)
+
+Bats makes a separation between output from the code under test and output that forms the TAP stream (which is produced by Bats internals). This is done in order to produce TAP-compliant output. In the [Printing to the terminal](#printing-to-the-terminal) section, there are details on how to use file descriptor 3 to print custom text properly. 
+
+A side effect of using file descriptor 3 is that, under some circumstances, it can cause Bats to block and execution to seem dead without reason. This can happen if a child process is spawned in the background from a test. In this case, the child process will inherit file descriptor 3. Bats, as the parent process, will wait for the file descriptor to be closed by the child process before continuing execution. If the child process takes a lot of time to complete (eg if the child process is a `sleep 100` command or a background service that will run indefinitely), Bats will be similarly blocked for the same amount of time. 
+
+**To prevent this from happening, close FD 3 explicitly when running any command that may
+launch long-running child processes**, e.g. `command_name 3>- &`.
+
+### Printing to the terminal
+
+Bats produces output compliant with [version 12 of the TAP protocol](https://testanything.org). The produced TAP stream is by default piped to a pretty formatter for human consumption, but if Bats is called with the `-t` flag, then the TAP stream is directly printed to the console. 
+
+This has implications if you try to print custom text to the terminal. As mentioned in [File descriptor 3](#file-descriptor-3), bats provides a special file descriptor, `&3`, that you should use to print your custom text. Here are some detailed guidelines to refer to:
+
+- Printing **from within a test function**:
+  - To have text printed from within a test function you need to redirect the output to file descriptor 3, eg `echo 'text' >&3`. This output will become part of the TAP stream. You are encouraged to prepend text printed this way with a hash (eg `echo '# text' >&3`) in order to produce 100% TAP compliant output. Otherwise, depending on the 3rd-party tools you use to analyze the TAP stream, you can encounter unexpected behavior or errors. 
+  - The pretty formatter that Bats uses by default to process the TAP stream will filter out and not print text output to file descriptor 3. 
+  - Text that is output directly to stdout or stderr (file descriptor 1 or 2), ie `echo 'text'` is considered part of the test function output and is printed only on test failures for diagnostic purposes, regardless of the formatter used (TAP or pretty).
+- Printing **from within the `setup` or `teardown` functions**: The same hold true as for printing with test functions.
+- Printing **outside test or `setup`/`teardown` functions**:
+  - Regardless of where text is redirected to (stdout, stderr or file descriptor 3) text is immediately visible in the terminal.
+  - Text printed in such a way, will disable pretty formatting. Also, it will make output non-compliant with the TAP spec. The reason for this is that each test file is evaluated n+1 times (as metioned [earlier](https://github.com/bats-core/bats-core#writing-tests)). The first run will cause such output to be produced before the [_plan line_](https://testanything.org/tap-specification.html#the-plan) is printed, contrary to the spec that requires the _plan line_ to be either the first or the last line of the output.
+  - Due to internal pipes/redirects, output to stderr is always printed first.
+  
 ### Special variables
 
 There are several global variables you can use to introspect on Bats
@@ -234,6 +287,25 @@ in the test file.
 store temporary files.
 
 
+## Installation
+
+## Supported Bash versions
+
+The following is a list of Bash versions that are currently supported by Bats. This list is composed of platforms that Bats has been tested on and is known to work on without issues.
+  
+- Bash versions:
+  - Everything from `3.2.57(1)` and higher
+- Operating systems:
+  - Arch Linux
+  - Alpine Linux
+  - FreeBSD `10.x` and `11.x`
+  - macOS
+  - Windows Subsystem for Linux
+- Latest version for the following platforms:
+  - Git for Windows Bash (MSYS2 based)
+  - Cygwin
+  - MSYS2
+  
 ## Installing Bats from source
 
 Check out a copy of the Bats repository. Then, either add the Bats
@@ -275,6 +347,24 @@ installed (`curl` and `openssl`, for example). If you require a specific
 configuration please search and +1 an issue or
 [raise a new issue](https://github.com/bats-core/bats-core/issues).
 
+## Using Bats
+
+Bats comes with two manual pages. After installation you can view them with `man 1 bats` (usage manual) and `man 7 bats` (writing test files manual). Also, you can view the available command line options that Bats supports by calling Bats with the `-h` or `--help` options. These are the options that Bats currently supports:
+
+```
+Bats 0.4.0
+Usage: bats [-c] [-p | -t] <test> [<test> ...]
+
+  <test> is the path to a Bats test file, or the path to a directory
+  containing Bats test files.
+
+  -c, --count    Count the number of test cases without running any tests
+  -h, --help     Display this help message
+  -p, --pretty   Show results in pretty format (default for terminals)
+  -t, --tap      Show results in TAP format
+  -v, --version  Display the version number
+```
+
 ## Support
 
 The Bats source code repository is [hosted on
@@ -291,6 +381,8 @@ on the wiki.
 
 
 ## Version history
+
+Bats is [SemVer compliant](https://semver.org/).
 
 *0.4.0* (August 13, 2014)
 
@@ -346,7 +438,7 @@ on the wiki.
 
 ---
 
-© 2017 Bianca Tamayo (bats-core organization)
+© 2018 bats-core organization
 
 © 2014 Sam Stephenson
 

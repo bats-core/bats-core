@@ -3,5 +3,5 @@ teardown() {
 }
 
 @test "truth" {
-  [ "$PASS" = "1" ]
+  [ "$PASS" = 1 ]
 }
