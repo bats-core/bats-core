@@ -100,11 +100,11 @@ summary() {
     buffer ', %d skipped' "$skipped"
   fi
   
-  if [ "$todo" -gt 0 ]; then
+  if [[ "$todo" -gt 0 ]]; then
     printf ", %d todo" "$todo"
   fi
   
-  if [ "$done_" -gt 0 ]; then
+  if [[ "$done_" -gt 0 ]]; then
     printf ", %d done" "$done_"
   fi
 
