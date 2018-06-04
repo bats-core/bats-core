@@ -290,7 +290,7 @@ To learn how to set up your editor for Bats syntax highlighting, see
 on the wiki.
 
 
-## Version 
+## Version history
 
 *0.5.0* (June xx, 2018)
 
