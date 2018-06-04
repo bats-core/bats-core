@@ -82,7 +82,7 @@ skip() {
 
 BATS_TEST_TODOED=''
 todo() {
-  BATS_TEST_TODOED=${1:-1}
+  BATS_TEST_TODOED="${1:-1}"
 }
 
 bats_test_begin() {
@@ -277,10 +277,10 @@ bats_exit_trap() {
     fi
   fi
 
-  if [ -n "$BATS_TEST_TODOED" ]; then
+  if [[ -n "$BATS_TEST_TODOED" ]]; then
     todoed=" # todo"
     todone=" # done"
-    if [ "1" != "$BATS_TEST_TODOED" ]; then
+    if [[ "1" != "$BATS_TEST_TODOED" ]]; then
       todoed+=" $BATS_TEST_TODOED"
       todone+=" $BATS_TEST_TODOED"
     fi
