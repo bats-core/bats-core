@@ -308,7 +308,7 @@ Changes:
 * Workaround for preserving stack info after calling an exported function under Bash < 4.4 (#87)
 * Fixed TAP compliance for skipped tests
 * Added support for tabs in test names.
-* Fixed an installation bug where if Bats was uploaded from Windows to a server installation would fail ([commit](https://github.com/bats-core/bats-core/commit/7afdf57bd3cbd216f6dd98b2112f2cf4fa521870))
+* Fixed an installation bug where if Bats was uploaded from Windows to a server installation would fail (#88)
 
 
 *0.4.0* (August 13, 2014)
