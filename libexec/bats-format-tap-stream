@@ -12,7 +12,7 @@ if [[ "$header" =~ $header_pattern ]]; then
   index=0
   failures=0
   skipped=0
-  todone=0
+  done_=0
   todo=0
   name=""
   count_column_width=$(( ${#count} * 2 + 2 ))
@@ -63,7 +63,7 @@ todo() {
   advance
 }
 
-todone() {
+done_() {
   local reason="$1"
   if [[ -n "$reason" ]]; then
       reason=": $reason"
@@ -105,8 +105,8 @@ summary() {
     printf ", %d todo" "$todo"
   fi
   
-  if [ "$todone" -gt 0 ]; then
-    printf ", %d done" "$todone"
+  if [ "$done_" -gt 0 ]; then
+    printf ", %d done" "$done_"
   fi
 
   printf "\n"
@@ -188,8 +188,8 @@ while IFS= read -r line; do
       let skipped+=1
       buffer skip "${BASH_REMATCH[2]}"
     elif [[ "$line" =~ $done_expr ]]; then
-      let todone+=1
-      buffer todone "${BASH_REMATCH[2]}"
+      let done_+=1
+      buffer done_ "${BASH_REMATCH[2]}"
     else
       buffer pass
     fi

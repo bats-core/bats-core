@@ -80,9 +80,9 @@ skip() {
   exit 0
 }
 
-BATS_TEST_TODOED=''
+BATS_TEST_TODO=''
 todo() {
-  BATS_TEST_TODOED="${1:-1}"
+  BATS_TEST_TODO="${1:-1}"
 }
 
 bats_test_begin() {
@@ -266,8 +266,8 @@ bats_teardown_trap() {
 bats_exit_trap() {
   local status
   local skipped=''
-  local todoed=''
-  local todone=''
+  local todo=''
+  local done_=''
   trap - err exit
 
   if [ -n "$BATS_TEST_SKIPPED" ]; then
@@ -277,23 +277,23 @@ bats_exit_trap() {
     fi
   fi
 
-  if [[ -n "$BATS_TEST_TODOED" ]]; then
-    todoed=" # todo"
-    todone=" # done"
-    if [[ "1" != "$BATS_TEST_TODOED" ]]; then
-      todoed+=" $BATS_TEST_TODOED"
-      todone+=" $BATS_TEST_TODOED"
+  if [[ -n "$BATS_TEST_TODO" ]]; then
+    todo=" # todo"
+    done_=" # done"
+    if [[ "1" != "$BATS_TEST_TODO" ]]; then
+      todo+=" $BATS_TEST_TODO"
+      done_+=" $BATS_TEST_TODO"
     fi
   fi
 
   if [ -z "$BATS_TEST_COMPLETED" ] || [ -z "$BATS_TEARDOWN_COMPLETED" ]; then
-    echo "not ok ${BATS_TEST_NUMBER} ${BATS_TEST_DESCRIPTION}${todoed}" >&3
+    echo "not ok ${BATS_TEST_NUMBER} ${BATS_TEST_DESCRIPTION}${todo}" >&3
     bats_print_stack_trace "${BATS_ERROR_STACK_TRACE[@]}" >&3
     bats_print_failed_command "${BATS_ERROR_STACK_TRACE[${#BATS_ERROR_STACK_TRACE[@]}-1]}" "$BATS_ERROR_STATUS" >&3
     sed -e "s/^/# /" < "$BATS_OUT" >&3
     status=1
   else
-    echo "ok ${BATS_TEST_NUMBER} ${BATS_TEST_DESCRIPTION}${skipped}${todone}" >&3
+    echo "ok ${BATS_TEST_NUMBER} ${BATS_TEST_DESCRIPTION}${skipped}${done_}" >&3
     status=0
   fi
 
