@@ -353,6 +353,21 @@ END_OF_ERR_MSG
   [ "${lines[11]}" = 'ok 11 ' ]   # empty name from single quote
 }
 
+@test "duplicate tests cause a warning on stderr" {
+  run bats "$FIXTURE_ROOT/duplicate-tests.bats"
+  [ $status -eq 1 ]
+
+  local expected='bats warning: duplicate test name(s) in '
+  expected+="$FIXTURE_ROOT/duplicate-tests.bats: test_gizmo_test"
+
+  printf 'expected: "%s"\n' "$expected" >&2
+  printf 'actual:   "%s"\n' "${lines[0]}" >&2
+  [ "${lines[0]}" = "$expected" ]
+
+  printf 'num lines: %d\n' "${#lines[*]}" >&2
+  [ "${#lines[*]}" = "7" ]
+}
+
 @test "sourcing a nonexistent file in setup produces error output" {
   run bats "$FIXTURE_ROOT/source_nonexistent_file_in_setup.bats"
   [ $status -eq 1 ]
