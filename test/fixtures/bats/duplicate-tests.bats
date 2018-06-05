@@ -1,10 +1,9 @@
-
-@test "gizmo test" "this does fail, as expected" {
+# This does not fail as expected
+@test "gizmo test" {
   false
 }
 
-# This does not fail as expected
-@test "gizmo test" {
+@test "gizmo test" "this does fail, as expected" {
   false
 }
 

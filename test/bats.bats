@@ -284,14 +284,6 @@ fixtures bats
   [ "${lines[1]}" = "ok 1 loop_func" ]
 }
 
-@test "duplicate tests cause a warning on stderr" {
-  run bats "$FIXTURE_ROOT/duplicate-tests.bats"
-  [ $status -eq 1 ]
-  case "${lines[0]}" in
-    "bats warning: duplicate test name(s) in /"*": test_gizmo_test " ) true ;; * ) false ;; esac
-  [ "${#lines[*]}" = "7" ]
-}
-
 @test "expand variables in test name" {
   SUITE='test/suite' run bats "$FIXTURE_ROOT/expand_var_in_test_name.bats"
   [ $status -eq 0 ]
@@ -362,4 +354,19 @@ END_OF_ERR_MSG
   [ "${lines[9]}" = 'ok 9 parse unquoted name between extra whitespace' ]
   [ "${lines[10]}" = 'ok 10 {' ]  # unquoted single brace is a valid description
   [ "${lines[11]}" = 'ok 11 ' ]   # empty name from single quote
+}
+
+@test "duplicate tests cause a warning on stderr" {
+  run bats "$FIXTURE_ROOT/duplicate-tests.bats"
+  [ $status -eq 1 ]
+
+  local expected='bats warning: duplicate test name(s) in '
+  expected+="$FIXTURE_ROOT/duplicate-tests.bats: test_gizmo_test"
+
+  printf 'expected: "%s"\n' "$expected" >&2
+  printf 'actual:   "%s"\n' "${lines[0]}" >&2
+  [ "${lines[0]}" = "$expected" ]
+
+  printf 'num lines: %d\n' "${#lines[*]}" >&2
+  [ "${#lines[*]}" = "7" ]
 }

@@ -335,14 +335,36 @@ bats_preprocess_source() {
   trap "bats_cleanup_preprocessed_source" err exit
   trap "bats_cleanup_preprocessed_source; exit 1" int
 
-  local test_dupes="$(grep '^bats_test_function\ ' "$BATS_TEST_SOURCE" |
-    uniq -d | cut -d ' ' -f 2 | tr '\n' ' ')"
-  test -z "$test_dupes" ||
-    echo "bats warning: duplicate test name(s) in $BATS_TEST_FILENAME: $test_dupes" >&2
+  bats_detect_duplicate_test_case_names
 }
 
 bats_cleanup_preprocessed_source() {
   rm -f "$BATS_TEST_SOURCE"
+}
+
+bats_detect_duplicate_test_case_names() {
+  local test_names=()
+  local test_dupes=()
+  local line
+
+  while read -r line; do
+    if [[ ! "$line" =~ ^bats_test_function\  ]]; then
+      continue
+    fi
+    line="${line%$'\r'}"
+    line="${line#* }"
+
+    if [[ " ${test_names[*]} " == *" $line "* ]]; then
+      test_dupes+=("$line")
+      continue
+    fi
+    test_names+=("$line")
+  done <"$BATS_TEST_SOURCE"
+
+  if [[ "${#test_dupes[@]}" -ne '0' ]]; then
+    printf 'bats warning: duplicate test name(s) in %s: %s\n' \
+      "$BATS_TEST_FILENAME" "${test_dupes[*]}" >&2
+  fi
 }
 
 bats_evaluate_preprocessed_source() {
