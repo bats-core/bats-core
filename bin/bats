@@ -1,1 +1,3 @@
-../libexec/bats
+#! /usr/bin/env bash
+
+exec "${0%/*}/../libexec/bats" "$@"
