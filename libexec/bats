@@ -26,57 +26,23 @@ help() {
   echo
 }
 
-export BATS_READLINK='true'
-if command -v 'greadlink' >/dev/null; then
-  BATS_READLINK='greadlink'
-elif command -v 'readlink' >/dev/null; then
-  BATS_READLINK='readlink'
-fi
-
-resolve_link() {
-  if ! "$BATS_READLINK" "$1"; then
-    return 0
-  fi
-}
-
-abs_dirname() {
-  local cwd="$PWD"
-  local path="$1"
-
-  while [[ -n "$path" ]]; do
-    cd "${path%/*}"
-    local name="${path##*/}"
-    path="$(resolve_link "$name")"
-  done
-
-  printf -v "$2" -- '%s' "$PWD"
-  cd "$cwd"
-}
-
 expand_path() {
   local path="${1%/}"
   local dirname="${path%/*}"
 
   if [[ "$dirname" == "$path" ]]; then
     dirname="$PWD"
-  elif cd "$dirname" 2>/dev/null; then
+  else
+    cd "$dirname"
     dirname="$PWD"
     cd "$OLDPWD"
-  else
-    printf '%s' "$path"
-    return
   fi
   printf -v "$2" '%s/%s' "$dirname" "${path##*/}"
 }
 
-abs_dirname "$0" 'BATS_LIBEXEC'
-abs_dirname "$BATS_LIBEXEC" 'BATS_PREFIX'
-abs_dirname '.' 'BATS_CWD'
-
-export BATS_PREFIX
-export BATS_CWD
+export BATS_CWD="${PWD%/*}"
 export BATS_TEST_PATTERN="^[[:blank:]]*@test[[:blank:]]+(.*[^[:blank:]])[[:blank:]]+\{(.*)\$"
-export PATH="$BATS_LIBEXEC:$PATH"
+export PATH="$BATS_ROOT/libexec:$PATH"
 
 options=()
 arguments=()
