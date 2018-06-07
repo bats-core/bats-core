@@ -29,7 +29,7 @@
 - [Using Bats](#using-bats)
 - [Support](#support)
 - [Version history](#version-history)
-  
+
 
 ## Background:
 ### What is this repo?
@@ -244,29 +244,29 @@ cause Bats to fail by polluting the TAP stream on `stdout`.
 
 ### File descriptor 3 (read this if Bats hangs)
 
-Bats makes a separation between output from the code under test and output that forms the TAP stream (which is produced by Bats internals). This is done in order to produce TAP-compliant output. In the [Printing to the terminal](#printing-to-the-terminal) section, there are details on how to use file descriptor 3 to print custom text properly. 
+Bats makes a separation between output from the code under test and output that forms the TAP stream (which is produced by Bats internals). This is done in order to produce TAP-compliant output. In the [Printing to the terminal](#printing-to-the-terminal) section, there are details on how to use file descriptor 3 to print custom text properly.
 
-A side effect of using file descriptor 3 is that, under some circumstances, it can cause Bats to block and execution to seem dead without reason. This can happen if a child process is spawned in the background from a test. In this case, the child process will inherit file descriptor 3. Bats, as the parent process, will wait for the file descriptor to be closed by the child process before continuing execution. If the child process takes a lot of time to complete (eg if the child process is a `sleep 100` command or a background service that will run indefinitely), Bats will be similarly blocked for the same amount of time. 
+A side effect of using file descriptor 3 is that, under some circumstances, it can cause Bats to block and execution to seem dead without reason. This can happen if a child process is spawned in the background from a test. In this case, the child process will inherit file descriptor 3. Bats, as the parent process, will wait for the file descriptor to be closed by the child process before continuing execution. If the child process takes a lot of time to complete (eg if the child process is a `sleep 100` command or a background service that will run indefinitely), Bats will be similarly blocked for the same amount of time.
 
 **To prevent this from happening, close FD 3 explicitly when running any command that may
 launch long-running child processes**, e.g. `command_name 3>- &`.
 
 ### Printing to the terminal
 
-Bats produces output compliant with [version 12 of the TAP protocol](https://testanything.org). The produced TAP stream is by default piped to a pretty formatter for human consumption, but if Bats is called with the `-t` flag, then the TAP stream is directly printed to the console. 
+Bats produces output compliant with [version 12 of the TAP protocol](https://testanything.org). The produced TAP stream is by default piped to a pretty formatter for human consumption, but if Bats is called with the `-t` flag, then the TAP stream is directly printed to the console.
 
 This has implications if you try to print custom text to the terminal. As mentioned in [File descriptor 3](#file-descriptor-3), bats provides a special file descriptor, `&3`, that you should use to print your custom text. Here are some detailed guidelines to refer to:
 
 - Printing **from within a test function**:
-  - To have text printed from within a test function you need to redirect the output to file descriptor 3, eg `echo 'text' >&3`. This output will become part of the TAP stream. You are encouraged to prepend text printed this way with a hash (eg `echo '# text' >&3`) in order to produce 100% TAP compliant output. Otherwise, depending on the 3rd-party tools you use to analyze the TAP stream, you can encounter unexpected behavior or errors. 
-  - The pretty formatter that Bats uses by default to process the TAP stream will filter out and not print text output to file descriptor 3. 
+  - To have text printed from within a test function you need to redirect the output to file descriptor 3, eg `echo 'text' >&3`. This output will become part of the TAP stream. You are encouraged to prepend text printed this way with a hash (eg `echo '# text' >&3`) in order to produce 100% TAP compliant output. Otherwise, depending on the 3rd-party tools you use to analyze the TAP stream, you can encounter unexpected behavior or errors.
+  - The pretty formatter that Bats uses by default to process the TAP stream will filter out and not print text output to file descriptor 3.
   - Text that is output directly to stdout or stderr (file descriptor 1 or 2), ie `echo 'text'` is considered part of the test function output and is printed only on test failures for diagnostic purposes, regardless of the formatter used (TAP or pretty).
 - Printing **from within the `setup` or `teardown` functions**: The same hold true as for printing with test functions.
 - Printing **outside test or `setup`/`teardown` functions**:
   - Regardless of where text is redirected to (stdout, stderr or file descriptor 3) text is immediately visible in the terminal.
   - Text printed in such a way, will disable pretty formatting. Also, it will make output non-compliant with the TAP spec. The reason for this is that each test file is evaluated n+1 times (as metioned [earlier](https://github.com/bats-core/bats-core#writing-tests)). The first run will cause such output to be produced before the [_plan line_](https://testanything.org/tap-specification.html#the-plan) is printed, contrary to the spec that requires the _plan line_ to be either the first or the last line of the output.
   - Due to internal pipes/redirects, output to stderr is always printed first.
-  
+
 ### Special variables
 
 There are several global variables you can use to introspect on Bats
@@ -292,7 +292,7 @@ store temporary files.
 ## Supported Bash versions
 
 The following is a list of Bash versions that are currently supported by Bats. This list is composed of platforms that Bats has been tested on and is known to work on without issues.
-  
+
 - Bash versions:
   - Everything from `3.2.57(1)` and higher
 - Operating systems:
@@ -305,7 +305,7 @@ The following is a list of Bash versions that are currently supported by Bats. T
   - Git for Windows Bash (MSYS2 based)
   - Cygwin
   - MSYS2
-  
+
 ## Installing Bats from source
 
 Check out a copy of the Bats repository. Then, either add the Bats
@@ -383,6 +383,25 @@ on the wiki.
 ## Version history
 
 Bats is [SemVer compliant](https://semver.org/).
+
+*1.0.0* (June 08, 2018)
+
+`1.0.0` generally preserves compatibility with `0.4.0`, but with some Bash compatibility improvements and a massive performance boost. In other words:
+- all existing tests should remain compatible
+- tests that might've failed or exhibited unexpected behavior on earlier versions of Bash should now also pass or behave as expected
+
+Changes:
+
+* Added support for Docker.
+* Added support for test scripts that have the [unofficial strict mode](http://redsymbol.net/articles/unofficial-bash-strict-mode/) enabled.
+* Improved stability on Windows and macOS platforms.
+* Massive performance improvements, especially on Windows (#8)
+* Workarounds for inconsistent behavior between Bash versions (#82)
+* Workaround for preserving stack info after calling an exported function under Bash < 4.4 (#87)
+* Fixed TAP compliance for skipped tests
+* Added support for tabs in test names.
+* Fixed an installation bug where if Bats was uploaded from Windows to a server installation would fail (#88)
+* `bin/bats` and `install.sh` now work reliably on Windows (#91)
 
 *0.4.0* (August 13, 2014)
 
