@@ -384,9 +384,9 @@ on the wiki.
 
 Bats is [SemVer compliant](https://semver.org/).
 
-*0.5.0* (June xx, 2018)
+*1.0.0* (June 08, 2018)
 
-`0.5.0` generally preserves compatibility with `0.4.0`, but with some Bash compatibility improvements and a massive performance boost. In other words:
+`1.0.0` generally preserves compatibility with `0.4.0`, but with some Bash compatibility improvements and a massive performance boost. In other words:
 - all existing tests should remain compatible
 - tests that might've failed or exhibited unexpected behavior on earlier versions of Bash should now also pass or behave as expected
 
@@ -401,6 +401,7 @@ Changes:
 * Fixed TAP compliance for skipped tests
 * Added support for tabs in test names.
 * Fixed an installation bug where if Bats was uploaded from Windows to a server installation would fail (#88)
+* `bin/bats` and `install.sh` now work reliably on Windows (#91)
 
 *0.4.0* (August 13, 2014)
 
