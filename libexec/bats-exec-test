@@ -211,11 +211,7 @@ bats_strip_string() {
 }
 
 bats_trim_filename() {
-  if [[ "$1" =~ ^${BATS_CWD}/ ]]; then
-    printf -v "$2" '%s' "${1#$BATS_CWD/}"
-  else
-    printf -v "$2" '%s' "$1"
-  fi
+  printf -v "$2" '%s' "${1#$BATS_CWD/}"
 }
 
 bats_debug_trap() {

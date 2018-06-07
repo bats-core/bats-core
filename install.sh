@@ -1,23 +1,6 @@
 #!/usr/bin/env bash
+
 set -e
-
-resolve_link() {
-  $(type -p greadlink readlink | head -n1) "$1"
-}
-
-abs_dirname() {
-  local cwd="$(pwd)"
-  local path="$1"
-
-  while [ -n "$path" ]; do
-    cd "${path%/*}"
-    local name="${path##*/}"
-    path="$(resolve_link "$name" || true)"
-  done
-
-  pwd
-  cd "$cwd"
-}
 
 PREFIX="$1"
 if [ -z "$1" ]; then
@@ -27,15 +10,48 @@ if [ -z "$1" ]; then
   exit 1
 fi
 
-BATS_ROOT="$(abs_dirname "$0")"
-mkdir -p "$PREFIX"/{bin,libexec,share/man/man{1,7}}
-cp -R "$BATS_ROOT"/bin/* "$PREFIX"/bin
-cp -R "$BATS_ROOT"/libexec/* "$PREFIX"/libexec
-cp "$BATS_ROOT"/man/bats.1 "$PREFIX"/share/man/man1
-cp "$BATS_ROOT"/man/bats.7 "$PREFIX"/share/man/man7
+export BATS_READLINK='true'
+if command -v 'greadlink' >/dev/null; then
+  BATS_READLINK='greadlink'
+elif command -v 'readlink' >/dev/null; then
+  BATS_READLINK='readlink'
+fi
 
-# fix file permission
-chmod a+x "$PREFIX"/bin/*
-chmod a+x "$PREFIX"/libexec/*
+bats_resolve_link() {
+  if ! "$BATS_READLINK" "$1"; then
+    return 0
+  fi
+}
+
+bats_absolute_path() {
+  local cwd="$PWD"
+  local path="$1"
+
+  while [[ -n "$path" ]]; do
+    cd "${path%/*}"
+    local name="${path##*/}"
+    path="$(bats_resolve_link "$name")"
+  done
+
+  printf -v "$2" -- '%s' "$PWD"
+  cd "$cwd"
+}
+
+bats_install_scripts() {
+  local scripts_dir
+  local scripts=()
+
+  for scripts_dir in "$@"; do
+    scripts=("$BATS_ROOT/$scripts_dir"/*)
+    cp "${scripts[@]}" "$PREFIX/$scripts_dir"
+    chmod a+x "${scripts[@]/#$BATS_ROOT[/]/$PREFIX/}"
+  done
+}
+
+mkdir -p "$PREFIX"/{bin,libexec,share/man/man{1,7}}
+bats_absolute_path "$0" 'BATS_ROOT'
+bats_install_scripts 'bin' 'libexec'
+cp "$BATS_ROOT/man/bats.1" "$PREFIX/share/man/man1"
+cp "$BATS_ROOT/man/bats.7" "$PREFIX/share/man/man7"
 
 echo "Installed Bats to $PREFIX/bin/bats"
