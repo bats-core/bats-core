@@ -69,7 +69,7 @@ CONTRIBUTING.md file][atom].
 
 [README]: https://github.com/bats-core/bats-core/blob/master/README.md
 [CODE_OF_CONDUCT]: https://github.com/bats-core/bats-core/blob/master/docs/CODE_OF_CONDUCT.md
-[LICENSE]: https://github.com/bats-core/bats-core/blob/master/docs/LICENSE.md
+[LICENSE]: https://github.com/bats-core/bats-core/blob/master/LICENSE.md
 
 ## Contributor License Agreement
 
