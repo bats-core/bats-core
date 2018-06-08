@@ -301,7 +301,7 @@ fixtures bats
 
   # Run Bats under `set -u` to catch as many unset variable accesses as
   # possible.
-  run bash -u "${BATS_TEST_DIRNAME%/*}/libexec/bats" \
+  run bash -u "${BATS_TEST_DIRNAME%/*}/bin/bats" \
     "$FIXTURE_ROOT/unofficial_bash_strict_mode.bats"
   if [[ "$status" -ne 0 || "${lines[1]}" != "$expected" ]]; then
     cat <<END_OF_ERR_MSG
