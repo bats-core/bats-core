@@ -88,5 +88,5 @@ available at [http://contributor-covenant.org/version/1/4][version]
 [jk-gh]: https://github.com/jasonkarns
 [am-gh]: https://github.com/sublimino
 
-[homepage]: http://contributor-covenant.org
-[version]: http://contributor-covenant.org/version/1/4/
+[homepage]: https://contributor-covenant.org
+[version]: https://contributor-covenant.org/version/1/4/
