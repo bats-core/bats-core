@@ -1,0 +1,51 @@
+# Docker Usage Guide
+
+- [Docker Usage Guide](#docker-usage-guide)
+  * [Basic Usage](#basic-usage)
+  * [Docker Gotchas](#docker-gotchas)
+  * [Extending from the base image](#extending-from-the-base-image)
+  
+## Basic Usage
+
+To build and run `bats`' own tests:
+```bash
+$ git clone https://github.com/bats-core/bats-core.git
+Cloning into 'bats-core'...
+remote: Counting objects: 1222, done.
+remote: Compressing objects: 100% (53/53), done.
+remote: Total 1222 (delta 34), reused 55 (delta 21), pack-reused 1146
+Receiving objects: 100% (1222/1222), 327.28 KiB | 1.70 MiB/s, done.
+Resolving deltas: 100% (661/661), done.
+
+$ cd bats-core/
+$ docker build --tag bats:latest .
+...
+$ docker run -it bats:latest --tap /opt/bats/test
+```
+
+To mount your tests into the container, first built the image as above. Then:
+```bash
+$ docker run -v $(pwd)/test:/test bats /test
+```
+This has run the `test/` directory from the bats-core repository inside the bats Docker container.
+
+## Docker Gotchas
+
+Relying on functionality provided by your environment (ssh keys or agent, installed binaries, fixtures outside the mounted test directory) will fail when running inside Docker. 
+
+
+## Extending from the base image
+
+Docker operates on a principle of isolation, and bundles all dependencies required into the Docker image. These can be mounted in at runtime (for test files, configuration, etc). For binary dependencies it may be better to extend the base Docker image with further tools and files.
+
+```dockerfile
+FROM bats
+
+RUN \ 
+  apk \
+  --no-cache \
+  --update \
+  add \
+  openssh 
+
+```
