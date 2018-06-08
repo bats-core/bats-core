@@ -12,7 +12,16 @@ script:
 - |
   if [[ "$TRAVIS_OS_NAME" == 'linux' ]]; then
     docker build --tag bats:latest .
-    docker run -it bats:latest --tap /opt/bats/test
+
+    docker run -it \
+      bats:latest \
+        --tap \
+        /opt/bats/test
+
+    docker run -it \
+      -v $(pwd)/test:/test \
+      bats:latest \
+        /test
   fi
 
 notifications:
