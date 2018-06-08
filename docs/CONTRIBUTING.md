@@ -58,14 +58,18 @@ CONTRIBUTING.md file][atom].
 
 - [Gitter channel →][gitterurl]: These messages sync with the IRC channel
 - [IRC Channel (#bats on freenode) →][ircurl]: These messages sync with Gitter
-- [README →](README.md)
-- [Code of conduct →](CODE_OF_CONDUCT.md)
-- [License information →](LICENSE.md)
+- [README →][README]
+- [Code of conduct →][CODE_OF_CONDUCT]
+- [License information →][LICENSE]
 - [Original repository →][repohome]
 - [Issues →][repoissues]
 - [Pull requests →][repoprs]
 - [Milestones →][repomilestones]
 - [Projects →][repoprojects]
+
+[README]: https://github.com/bats-core/bats-core/blob/master/README.md
+[CODE_OF_CONDUCT]: https://github.com/bats-core/bats-core/blob/master/docs/CODE_OF_CONDUCT.md
+[LICENSE]: https://github.com/bats-core/bats-core/blob/master/LICENSE.md
 
 ## Contributor License Agreement
 
@@ -87,13 +91,13 @@ See also: ["Does my project need an additional contributor agreement? Probably
 ## Code of conduct
 
 Harrassment or rudeness of any kind will not be tolerated, period. For
-specifics, see the [CODE_OF_CONDUCT](CODE_OF_CONDUCT.md) file.
+specifics, see the [CODE_OF_CONDUCT][] file.
 
 ## Asking questions and reporting issues
 
 ### Asking questions
 
-Please check the [README](README.md) or existing [issues][repoissues] first.
+Please check the [README][] or existing [issues][repoissues] first.
 
 If you cannot find an answer to your question, please feel free to hop on our 
 [gitter][gitterurl] [![Gitter](https://badges.gitter.im/bats-core/bats-core.svg)](https://gitter.im/bats-core/bats-core?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge) or [via IRC (#bats on freenode)][ircurl].
@@ -159,7 +163,7 @@ preferred, but even one nit is one nit too many.
 Make sure you have Bash installed per the [Environment setup in the
 README][env-setup].
 
-[env-setup]: README.md#environment-setup
+[env-setup]: https://github.com/bats-core/bats-core/blob/master/README.md#environment-setup
 
 ## Workflow
 
@@ -335,7 +339,7 @@ The following are intended to prevent too-compact code:
 ## Open Source License
 
 This software is made available under the [MIT License][osmit].
-For the text of the license, see the [LICENSE](LICENSE.md) file.
+For the text of the license, see the [LICENSE][] file.
 
 ## Credits
 
