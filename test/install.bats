@@ -3,14 +3,17 @@
 load test_helper
 
 INSTALL_DIR=
+BATS_ROOT=
 
 setup() {
   make_bats_test_suite_tmpdir
   INSTALL_DIR="$BATS_TEST_SUITE_TMPDIR/bats-core"
+  BATS_ROOT="${BATS_TEST_DIRNAME%/*}"
 }
 
 @test "install.sh creates a valid installation" {
   run "$BATS_ROOT/install.sh" "$INSTALL_DIR"
+  emit_debug_output
   [ "$status" -eq 0 ]
   [ "$output" == "Installed Bats to $INSTALL_DIR/bin/bats" ]
   [ -x "$INSTALL_DIR/bin/bats" ]
