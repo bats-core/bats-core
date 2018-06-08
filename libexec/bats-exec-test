@@ -383,7 +383,7 @@ bats_detect_duplicate_test_case_names() {
     test_names+=("$line")
   done <"$BATS_TEST_SOURCE"
 
-  if [[ "${#test_dupes[@]}" -ne '0' ]]; then
+  if [[ "${#test_dupes[@]}" -ne 0 ]]; then
     printf 'bats warning: duplicate test name(s) in %s: %s\n' \
       "$BATS_TEST_FILENAME" "${test_dupes[*]}" >&2
   fi
