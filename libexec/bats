@@ -29,6 +29,7 @@ help() {
 expand_path() {
   local path="${1%/}"
   local dirname="${path%/*}"
+  local result="$2"
 
   if [[ "$dirname" == "$path" ]]; then
     dirname="$PWD"
@@ -37,7 +38,7 @@ expand_path() {
     dirname="$PWD"
     cd "$OLDPWD"
   fi
-  printf -v "$2" '%s/%s' "$dirname" "${path##*/}"
+  printf -v "$result" '%s/%s' "$dirname" "${path##*/}"
 }
 
 export BATS_CWD="${PWD%/*}"

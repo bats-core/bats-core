@@ -18,14 +18,14 @@ bats_resolve_link() {
 bats_absolute_path() {
   local cwd="$PWD"
   local path="$1"
+  local result="$2"
 
   while [[ -n "$path" ]]; do
     cd "${path%/*}"
-    local name="${path##*/}"
-    path="$(bats_resolve_link "$name")"
+    path="$(bats_resolve_link "${path##*/}")"
   done
 
-  printf -v "$2" -- '%s' "$PWD"
+  printf -v "$result" -- '%s' "$PWD"
   cd "$cwd"
 }
 
