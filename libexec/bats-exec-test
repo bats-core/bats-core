@@ -184,7 +184,7 @@ bats_print_failed_command() {
     echo "#   Store them into a variable first to see the failing value"
   else
     echo ":"
-    ( eval echo "$failed_command" 2>&1 || true ) \
+    ( eval echo \"$failed_command\" 2>&1 || true ) \
       | sed "s/^/#   \`/; s/\$/'/"
   fi
 }
