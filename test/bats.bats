@@ -82,6 +82,13 @@ fixtures bats
   [ "${lines[3]}" = "not ok 3 a failing test" ]
 }
 
+@test "BATS_CWD is correctly set to PWD as validated by bats_trim_filename" {
+  local trimmed
+  bats_trim_filename "$PWD/foo/bar" 'trimmed'
+  printf 'ACTUAL: %s\n' "$trimmed" >&2
+  [ "$trimmed" = 'foo/bar' ]
+}
+
 @test "one failing test" {
   run bats "$FIXTURE_ROOT/failing.bats"
   [ $status -eq 1 ]
