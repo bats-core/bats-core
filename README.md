@@ -143,7 +143,7 @@ with the `-h` or `--help` options. These are the options that Bats currently
 supports:
 
 ```
-Bats 1.0.0
+Bats 1.0.1
 Usage: bats [-c] [-p | -t] <test> [<test> ...]
 
   <test> is the path to a Bats test file, or the path to a directory
@@ -399,7 +399,16 @@ on the wiki.
 
 Bats is [SemVer compliant](https://semver.org/).
 
-*1.0.0* (June 08, 2018)
+*1.0.1* (June 9, 2018)
+
+* Fixed a `BATS_CWD` bug introduced in #91 whereby it was set to the parent of
+  `PWD`, when it should've been set to `PWD` itself (#98). This caused file
+  names in stack traces to contain the basename of `PWD` as a prefix, when the
+  names should've been purely relative to `PWD`.
+* Ensure the last line of test output prints when it doesn't end with a newline
+  (#99). This was a quasi-bug introduced by replacing `sed` with `while` in #88.
+
+*1.0.0* (June 8, 2018)
 
 `1.0.0` generally preserves compatibility with `0.4.0`, but with some Bash
 compatibility improvements and a massive performance boost. In other words:

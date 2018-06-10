@@ -1,6 +1,6 @@
 {
   "name": "bats",
-  "version": "v1.0.0",
+  "version": "v1.0.1",
   "description": "Bash Automated Testing System",
   "homepage": "https://github.com/bats-core/bats-core#readme",
   "repository": "github:bats-core/bats-core",
