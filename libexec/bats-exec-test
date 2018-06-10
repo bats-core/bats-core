@@ -292,6 +292,9 @@ bats_exit_trap() {
     while IFS= read -r line; do
       printf '# %s\n' "$line"
     done <"$BATS_OUT" >&3
+    if [[ -n "$line" ]]; then
+      printf '# %s\n' "$line"
+    fi
     status=1
   else
     echo "ok ${BATS_TEST_NUMBER} ${BATS_TEST_DESCRIPTION}${skipped}" >&3
