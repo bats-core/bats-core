@@ -41,7 +41,7 @@ expand_path() {
   printf -v "$result" '%s/%s' "$dirname" "${path##*/}"
 }
 
-export BATS_CWD="${PWD%/*}"
+export BATS_CWD="$PWD"
 export BATS_TEST_PATTERN="^[[:blank:]]*@test[[:blank:]]+(.*[^[:blank:]])[[:blank:]]+\{(.*)\$"
 export PATH="$BATS_ROOT/libexec:$PATH"
 
