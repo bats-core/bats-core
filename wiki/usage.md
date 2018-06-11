@@ -23,14 +23,14 @@ $ docker build --tag bats:latest .
 $ docker run -it bats:latest --tap /opt/bats/test
 ```
 
-To mount your tests into the container, first built the image as above. Then, for example with `bats`:
+To mount your tests into the container, first build the image as above. Then, for example with `bats`:
 ```bash
 $ docker run -it -v $(pwd):/opt/bats bats:latest /opt/bats/test
 ```
-This has run the `test/` directory from the bats-core repository inside the bats Docker container.
+This runs the `test/` directory from the bats-core repository inside the bats Docker container.
 
+For test suites that are intended to run in isolation from the project (i.e. tests do not depend on project files outside of the test directory), you can mount the test directory by iteself and execute the tests like so:
 
-Or for test files without any dependencies:
 ```bash
 $ docker run -v $(pwd)/test:/test bats /test
 ```
