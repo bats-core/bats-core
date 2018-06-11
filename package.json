@@ -1,8 +1,40 @@
 {
   "name": "bats",
-  "version": "v1.0.1",
+  "version": "0.4.0",
   "description": "Bash Automated Testing System",
   "homepage": "https://github.com/bats-core/bats-core#readme",
-  "repository": "github:bats-core/bats-core",
-  "bin": "./bin/bats"
+  "license": "MIT",
+  "author": "Sam Stephenson <sstephenson@gmail.com> (http://sstephenson.us/)",
+  "contributors": [
+    "Andrew Martin (https://control-plane.io/)",
+    "Bianca Tamayo <hi@biancatamayo.me> (https://biancatamayo.me/)",
+    "Jason Karns <jason.karns@gmail.com> (http://jasonkarns.com/)",
+    "Mike Bland <mbland@acm.org> (https://mike-bland.com/)"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bats-core/bats-core.git"
+  },
+  "bugs": {
+    "url": "https://github.com/bats-core/bats-core/issues"
+  },
+  "files": [
+    "bin", "libexec", "man"
+  ],
+  "directories": {
+    "bin": "bin",
+    "doc": "docs",
+    "man": "man",
+    "test": "test"
+  },
+  "scripts": {
+    "test": "bin/bats test"
+  },
+  "keywords": [
+    "bats",
+    "bash",
+    "shell",
+    "test",
+    "unit"
+  ]
 }
