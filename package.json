@@ -5,12 +5,6 @@
   "homepage": "https://github.com/bats-core/bats-core#readme",
   "license": "MIT",
   "author": "Sam Stephenson <sstephenson@gmail.com> (http://sstephenson.us/)",
-  "contributors": [
-    "Andrew Martin (https://control-plane.io/)",
-    "Bianca Tamayo <hi@biancatamayo.me> (https://biancatamayo.me/)",
-    "Jason Karns <jason.karns@gmail.com> (http://jasonkarns.com/)",
-    "Mike Bland <mbland@acm.org> (https://mike-bland.com/)"
-  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/bats-core/bats-core.git"
@@ -19,7 +13,9 @@
     "url": "https://github.com/bats-core/bats-core/issues"
   },
   "files": [
-    "bin", "libexec", "man"
+    "bin",
+    "libexec",
+    "man"
   ],
   "directories": {
     "bin": "bin",
