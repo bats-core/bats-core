@@ -144,7 +144,7 @@ with the `-h` or `--help` options. These are the options that Bats currently
 supports:
 
 ```
-Bats 1.0.1
+Bats x.y.z
 Usage: bats [-c] [-p | -t] <test> [<test> ...]
 
   <test> is the path to a Bats test file, or the path to a directory
