@@ -242,7 +242,7 @@ fixtures bats
 @test "skipped test with parens (pretty formatter)" {
   run bats --pretty "$FIXTURE_ROOT/skipped_with_parens.bats"
   [ $status -eq 0 ]
-  [[ "${lines[0]}" =~ "- a skipped test with parentheses in the reason (skipped: a reason (with parentheses))" ]]
+  [[ "${lines[@]}" =~ "- a skipped test with parentheses in the reason (skipped: "+"a reason (with parentheses))" ]]
 }
 
 @test "extended syntax" {
