@@ -244,6 +244,16 @@ fixtures bats
   [ "${lines[2]}" = "ok 2 a skipped test with a reason # skip a reason" ]
 }
 
+@test "skipped test with parens (pretty formatter)" {
+  run bats --pretty "$FIXTURE_ROOT/skipped_with_parens.bats"
+  [ $status -eq 0 ]
+
+  # Some systems (Alpine, for example) seem to emit an extra whitespace into
+  # entries in the 'lines' array when a carriage return is present from the
+  # pretty formatter.  This is why a '+' is used after the 'skipped' note.
+  [[ "${lines[@]}" =~ "- a skipped test with parentheses in the reason (skipped: "+"a reason (with parentheses))" ]]
+}
+
 @test "extended syntax" {
   run bats-exec-test -x "$FIXTURE_ROOT/failing_and_passing.bats"
   [ $status -eq 1 ]
