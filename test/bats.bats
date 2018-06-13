@@ -239,6 +239,12 @@ fixtures bats
   [ "${lines[2]}" = "ok 2 a skipped test with a reason # skip a reason" ]
 }
 
+@test "skipped test with parens (pretty formatter)" {
+  run bats --pretty "$FIXTURE_ROOT/skipped_with_parens.bats"
+  [ $status -eq 0 ]
+  [[ "${lines[0]}" =~ "- a skipped test with parentheses in the reason (skipped: a reason (with parentheses))" ]]
+}
+
 @test "extended syntax" {
   run bats-exec-test -x "$FIXTURE_ROOT/failing_and_passing.bats"
   [ $status -eq 1 ]
