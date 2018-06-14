@@ -49,7 +49,7 @@ commit [0360811][].  It was created via `git clone --bare` and `git push
 
 - [Installation](#installation)
   - [Supported Bash versions](#supported-bash-versions)
-  - [macOS](#macos)
+  - [Homebrew](#homebrew)
   - [npm](#npm)
   - [Installing Bats from source](#installing-bats-from-source)
   - [Running Bats in Docker](#running-bats-in-docker)
@@ -96,9 +96,10 @@ work on without issues.
   - MSYS2
   - Cygwin
 
-### macOS
+### Homebrew
 
-Install [Homebrew](https://brew.sh/) if you haven't already, then run:
+On macOS, you can install [Homebrew](https://brew.sh/) if you haven't already,
+then run:
 
 ```bash
 $ brew install bats-core
@@ -112,8 +113,8 @@ You can install the [Bats npm package](https://www.npmjs.com/package/bats) via:
 # To install globally:
 $ npm install -g bats
 
-# To install into your project and save it as a "devDependency" in your
-# package.json:
+# To install into your project and save it as one of the "devDependencies" in
+# your package.json:
 $ npm install --save-dev bats
 ```
 
