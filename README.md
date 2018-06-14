@@ -93,6 +93,12 @@ work on without issues.
   - MSYS2
   - Cygwin
 
+### On macOS
+
+```bash
+$ brew install bats-core
+```
+
 ### Installing Bats from source
 
 Check out a copy of the Bats repository. Then, either add the Bats `bin`
