@@ -6,7 +6,7 @@
 [![Continuous integration status for Linux and macOS](https://img.shields.io/travis/bats-core/bats-core/master.svg?label=travis%20build)](https://travis-ci.org/bats-core/bats-core)
 [![Continuous integration status for Windows](https://img.shields.io/appveyor/ci/bats-core/bats-core/master.svg?label=appveyor%20build)](https://ci.appveyor.com/project/bats-core/bats-core)
 
-[![Join the chat at https://gitter.im/bats-core/bats-core](https://badges.gitter.im/bats-core/bats-core.svg)](https://gitter.im/bats-core/bats-core?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Join the chat in bats-core/bats-core on gitter](https://badges.gitter.im/bats-core/bats-core.svg)][gitter]
 
 Bats is a [TAP][]-compliant testing framework for Bash.  It provides a simple
 way to verify that the UNIX programs you write behave as expected.
@@ -46,8 +46,11 @@ commit [0360811][].  It was created via `git clone --bare` and `git push
 [0360811]: https://github.com/sstephenson/bats/commit/03608115df2071fff4eaaff1605768c275e5f81f
 
 ## Table of contents
+
 - [Installation](#installation)
   - [Supported Bash versions](#supported-bash-versions)
+  - [Homebrew](#homebrew)
+  - [npm](#npm)
   - [Installing Bats from source](#installing-bats-from-source)
   - [Running Bats in Docker](#running-bats-in-docker)
 - [Usage](#usage)
@@ -70,7 +73,7 @@ commit [0360811][].  It was created via `git clone --bare` and `git push
 
 ## Installation
 
-## Supported Bash versions
+### Supported Bash versions
 
 The following is a list of Bash versions that are currently supported by Bats.
 This list is composed of platforms that Bats has been tested on and is known to
@@ -93,10 +96,26 @@ work on without issues.
   - MSYS2
   - Cygwin
 
-### On macOS
+### Homebrew
+
+On macOS, you can install [Homebrew](https://brew.sh/) if you haven't already,
+then run:
 
 ```bash
 $ brew install bats-core
+```
+
+### npm
+
+You can install the [Bats npm package](https://www.npmjs.com/package/bats) via:
+
+```
+# To install globally:
+$ npm install -g bats
+
+# To install into your project and save it as one of the "devDependencies" in
+# your package.json:
+$ npm install --save-dev bats
 ```
 
 ### Installing Bats from source
@@ -538,3 +557,5 @@ Doing it this way accomplishes a number of things:
 © 2014 Sam Stephenson
 
 Bats is released under an MIT-style license; see `LICENSE.md` for details.
+
+[gitter]: https://gitter.im/bats-core/bats-core?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
