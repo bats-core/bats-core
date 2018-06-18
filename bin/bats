@@ -32,4 +32,4 @@ bats_absolute_path() {
 export BATS_ROOT
 bats_absolute_path "$0" 'BATS_ROOT'
 BATS_ROOT="${BATS_ROOT%/*}"
-exec "$BATS_ROOT/libexec/bats" "$@"
+exec "$BATS_ROOT/libexec/bats-core/bats" "$@"

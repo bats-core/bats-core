@@ -10,9 +10,9 @@ if [ -z "$1" ]; then
   } >&2
   exit 1
 fi
-mkdir -p "$PREFIX"/{bin,libexec,share/man/man{1,7}}
+mkdir -p "$PREFIX"/{bin,libexec/bats-core,share/man/man{1,7}}
 
-for scripts_dir in 'bin' 'libexec'; do
+for scripts_dir in 'bin' 'libexec/bats-core'; do
   scripts=("$BATS_ROOT/$scripts_dir"/*)
   cp "${scripts[@]}" "$PREFIX/$scripts_dir"
   chmod a+x "${scripts[@]/#$BATS_ROOT[/]/$PREFIX/}"
