@@ -1,11 +1,12 @@
 # Bats-core: Bash Automated Testing System (2018)
 
 [![Latest release](https://img.shields.io/github/release/bats-core/bats-core.svg)](https://github.com/bats-core/bats-core/releases/latest)
+[![npm package](https://img.shields.io/npm/v/bats.svg)](https://www.npmjs.com/package/bats)
 [![License](https://img.shields.io/github/license/bats-core/bats-core.svg)](https://github.com/bats-core/bats-core/blob/master/LICENSE.md)
-[![Continuous integration status for Linux and macOS](https://img.shields.io/travis/bats-core/bats-core/master.svg)](https://travis-ci.org/bats-core/bats-core)
-[![Continuous integration status for Windows](https://img.shields.io/appveyor/ci/bats-core/bats-core/master.svg)](https://ci.appveyor.com/project/bats-core/bats-core)
+[![Continuous integration status for Linux and macOS](https://img.shields.io/travis/bats-core/bats-core/master.svg?label=travis%20build)](https://travis-ci.org/bats-core/bats-core)
+[![Continuous integration status for Windows](https://img.shields.io/appveyor/ci/bats-core/bats-core/master.svg?label=appveyor%20build)](https://ci.appveyor.com/project/bats-core/bats-core)
 
-[![Join the chat at https://gitter.im/bats-core/bats-core](https://badges.gitter.im/bats-core/bats-core.svg)](https://gitter.im/bats-core/bats-core?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Join the chat in bats-core/bats-core on gitter](https://badges.gitter.im/bats-core/bats-core.svg)][gitter]
 
 Bats is a [TAP][]-compliant testing framework for Bash.  It provides a simple
 way to verify that the UNIX programs you write behave as expected.
@@ -45,8 +46,11 @@ commit [0360811][].  It was created via `git clone --bare` and `git push
 [0360811]: https://github.com/sstephenson/bats/commit/03608115df2071fff4eaaff1605768c275e5f81f
 
 ## Table of contents
+
 - [Installation](#installation)
   - [Supported Bash versions](#supported-bash-versions)
+  - [Homebrew](#homebrew)
+  - [npm](#npm)
   - [Installing Bats from source](#installing-bats-from-source)
   - [Running Bats in Docker](#running-bats-in-docker)
 - [Usage](#usage)
@@ -69,7 +73,7 @@ commit [0360811][].  It was created via `git clone --bare` and `git push
 
 ## Installation
 
-## Supported Bash versions
+### Supported Bash versions
 
 The following is a list of Bash versions that are currently supported by Bats.
 This list is composed of platforms that Bats has been tested on and is known to
@@ -91,6 +95,28 @@ work on without issues.
   - Windows Subsystem for Linux
   - MSYS2
   - Cygwin
+
+### Homebrew
+
+On macOS, you can install [Homebrew](https://brew.sh/) if you haven't already,
+then run:
+
+```bash
+$ brew install bats-core
+```
+
+### npm
+
+You can install the [Bats npm package](https://www.npmjs.com/package/bats) via:
+
+```
+# To install globally:
+$ npm install -g bats
+
+# To install into your project and save it as one of the "devDependencies" in
+# your package.json:
+$ npm install --save-dev bats
+```
 
 ### Installing Bats from source
 
@@ -143,7 +169,7 @@ with the `-h` or `--help` options. These are the options that Bats currently
 supports:
 
 ```
-Bats 1.0.0
+Bats x.y.z
 Usage: bats [-c] [-p | -t] <test> [<test> ...]
 
   <test> is the path to a Bats test file, or the path to a directory
@@ -399,7 +425,28 @@ on the wiki.
 
 Bats is [SemVer compliant](https://semver.org/).
 
-*1.0.0* (June 08, 2018)
+*1.0.2* (June 18, 2018)
+
+* Fixed sstephenson/bats#240, whereby `skip` messages containing parentheses
+  were truncated (#48)
+* Doc improvements:
+  * Docker usage (#94)
+  * Better README badges (#101)
+  * Better installation instructions (#102, #104)
+* Packaging/installation improvements:
+  * package.json update (#100)
+  * Moved `libexec/` files to `libexec/bats-core/`, improved `install.sh` (#105)
+
+*1.0.1* (June 9, 2018)
+
+* Fixed a `BATS_CWD` bug introduced in #91 whereby it was set to the parent of
+  `PWD`, when it should've been set to `PWD` itself (#98). This caused file
+  names in stack traces to contain the basename of `PWD` as a prefix, when the
+  names should've been purely relative to `PWD`.
+* Ensure the last line of test output prints when it doesn't end with a newline
+  (#99). This was a quasi-bug introduced by replacing `sed` with `while` in #88.
+
+*1.0.0* (June 8, 2018)
 
 `1.0.0` generally preserves compatibility with `0.4.0`, but with some Bash
 compatibility improvements and a massive performance boost. In other words:
@@ -522,3 +569,5 @@ Doing it this way accomplishes a number of things:
 © 2014 Sam Stephenson
 
 Bats is released under an MIT-style license; see `LICENSE.md` for details.
+
+[gitter]: https://gitter.im/bats-core/bats-core?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge

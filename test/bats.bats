@@ -82,6 +82,13 @@ fixtures bats
   [ "${lines[3]}" = "not ok 3 a failing test" ]
 }
 
+@test "BATS_CWD is correctly set to PWD as validated by bats_trim_filename" {
+  local trimmed
+  bats_trim_filename "$PWD/foo/bar" 'trimmed'
+  printf 'ACTUAL: %s\n' "$trimmed" >&2
+  [ "$trimmed" = 'foo/bar' ]
+}
+
 @test "one failing test" {
   run bats "$FIXTURE_ROOT/failing.bats"
   [ $status -eq 1 ]
@@ -235,6 +242,16 @@ fixtures bats
   [ $status -eq 0 ]
   [ "${lines[1]}" = "ok 1 a skipped test # skip" ]
   [ "${lines[2]}" = "ok 2 a skipped test with a reason # skip a reason" ]
+}
+
+@test "skipped test with parens (pretty formatter)" {
+  run bats --pretty "$FIXTURE_ROOT/skipped_with_parens.bats"
+  [ $status -eq 0 ]
+
+  # Some systems (Alpine, for example) seem to emit an extra whitespace into
+  # entries in the 'lines' array when a carriage return is present from the
+  # pretty formatter.  This is why a '+' is used after the 'skipped' note.
+  [[ "${lines[@]}" =~ "- a skipped test with parentheses in the reason (skipped: "+"a reason (with parentheses))" ]]
 }
 
 @test "extended syntax" {
@@ -426,4 +443,18 @@ END_OF_ERR_MSG
   [ "${lines[2]}" = "# (in test file $RELATIVE_FIXTURE_ROOT/exported_function.bats, line 7)" ]
   [ "${lines[3]}" = "#   \`false' failed" ]
   [ "${lines[4]}" = "# a='exported_function'" ]
+}
+
+@test "output printed even when no final newline" {
+  run bats "$FIXTURE_ROOT/no-final-newline.bats"
+  printf 'num lines: %d\n' "${#lines[@]}" >&2
+  printf 'LINE: %s\n' "${lines[@]}" >&2
+  [ "$status" -eq 1 ]
+  [ "${#lines[@]}" -eq 7 ]
+  [ "${lines[1]}" = 'not ok 1 no final newline' ]
+  [ "${lines[2]}" = "# (in test file $RELATIVE_FIXTURE_ROOT/no-final-newline.bats, line 2)" ]
+  [ "${lines[3]}" = "#   \`printf 'foo\nbar\nbaz' >&2 && return 1' failed" ]
+  [ "${lines[4]}" = '# foo' ]
+  [ "${lines[5]}" = '# bar' ]
+  [ "${lines[6]}" = '# baz' ]
 }
