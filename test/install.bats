@@ -17,11 +17,11 @@ setup() {
   [ "$status" -eq 0 ]
   [ "$output" == "Installed Bats to $INSTALL_DIR/bin/bats" ]
   [ -x "$INSTALL_DIR/bin/bats" ]
-  [ -x "$INSTALL_DIR/libexec/bats" ]
-  [ -x "$INSTALL_DIR/libexec/bats-exec-suite" ]
-  [ -x "$INSTALL_DIR/libexec/bats-exec-test" ]
-  [ -x "$INSTALL_DIR/libexec/bats-format-tap-stream" ]
-  [ -x "$INSTALL_DIR/libexec/bats-preprocess" ]
+  [ -x "$INSTALL_DIR/libexec/bats-core/bats" ]
+  [ -x "$INSTALL_DIR/libexec/bats-core/bats-exec-suite" ]
+  [ -x "$INSTALL_DIR/libexec/bats-core/bats-exec-test" ]
+  [ -x "$INSTALL_DIR/libexec/bats-core/bats-format-tap-stream" ]
+  [ -x "$INSTALL_DIR/libexec/bats-core/bats-preprocess" ]
   [ -f "$INSTALL_DIR/share/man/man1/bats.1" ]
   [ -f "$INSTALL_DIR/share/man/man7/bats.7" ]
 
@@ -31,12 +31,12 @@ setup() {
 }
 
 @test "install.sh only updates permissions for Bats files" {
-  mkdir -p "$INSTALL_DIR"/{bin,libexec}
+  mkdir -p "$INSTALL_DIR"/{bin,libexec/bats-core}
 
   local dummy_bin="$INSTALL_DIR/bin/dummy"
   printf 'dummy' >"$dummy_bin"
 
-  local dummy_libexec="$INSTALL_DIR/libexec/dummy"
+  local dummy_libexec="$INSTALL_DIR/libexec/bats-core/dummy"
   printf 'dummy' >"$dummy_libexec"
 
   run "$BATS_ROOT/install.sh" "$INSTALL_DIR"
