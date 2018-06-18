@@ -425,6 +425,18 @@ on the wiki.
 
 Bats is [SemVer compliant](https://semver.org/).
 
+*1.0.2* (June 18, 2018)
+
+* Fixed sstephenson/bats#240, whereby `skip` messages containing parentheses
+  were truncated (#48)
+* Doc improvements:
+  * Docker usage (#94)
+  * Better README badges (#101)
+  * Better installation instructions (#102, #104)
+* Packaging/installation improvements:
+  * package.json update (#100)
+  * Moved `libexec/` files to `libexec/bats-core/`, improved `install.sh` (#105)
+
 *1.0.1* (June 9, 2018)
 
 * Fixed a `BATS_CWD` bug introduced in #91 whereby it was set to the parent of

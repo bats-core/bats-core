@@ -1,4 +1,4 @@
-version: 'v1.0.1.{build}'
+version: 'v1.0.2.{build}'
 
 build: off
 
