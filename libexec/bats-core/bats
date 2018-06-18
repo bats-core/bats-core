@@ -43,7 +43,7 @@ expand_path() {
 
 export BATS_CWD="$PWD"
 export BATS_TEST_PATTERN="^[[:blank:]]*@test[[:blank:]]+(.*[^[:blank:]])[[:blank:]]+\{(.*)\$"
-export PATH="$BATS_ROOT/libexec:$PATH"
+export PATH="$BATS_ROOT/libexec/bats-core:$PATH"
 
 options=()
 arguments=()
