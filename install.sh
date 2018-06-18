@@ -4,21 +4,18 @@ set -e
 
 BATS_ROOT="${0%/*}"
 PREFIX="$1"
-if [ -z "$1" ]; then
-  { echo "usage: $0 <prefix>"
-    echo "  e.g. $0 /usr/local"
-  } >&2
+
+if [[ -z "$PREFIX" ]]; then
+  printf '%s\n' \
+    "usage: $0 <prefix>" \
+    "  e.g. $0 /usr/local" >&2
   exit 1
 fi
-mkdir -p "$PREFIX"/{bin,libexec/bats-core,share/man/man{1,7}}
 
-for scripts_dir in 'bin' 'libexec/bats-core'; do
-  scripts=("$BATS_ROOT/$scripts_dir"/*)
-  cp "${scripts[@]}" "$PREFIX/$scripts_dir"
-  chmod a+x "${scripts[@]/#$BATS_ROOT[/]/$PREFIX/}"
-done
-
-cp "$BATS_ROOT/man/bats.1" "$PREFIX/share/man/man1"
-cp "$BATS_ROOT/man/bats.7" "$PREFIX/share/man/man7"
+install -d -m 755 "$PREFIX"/{bin,libexec/bats-core,share/man/man{1,7}}
+install -m 755 "$BATS_ROOT/bin"/* "$PREFIX/bin"
+install -m 755 "$BATS_ROOT/libexec/bats-core"/* "$PREFIX/libexec/bats-core"
+install -m 644 "$BATS_ROOT/man/bats.1" "$PREFIX/share/man/man1"
+install -m 644 "$BATS_ROOT/man/bats.7" "$PREFIX/share/man/man7"
 
 echo "Installed Bats to $PREFIX/bin/bats"
