@@ -52,6 +52,8 @@ OPTIONS
     Display help message
   * `-p`, `--pretty`:
     Show results in pretty format (default for terminals)
+  * `-r`, `--recursive`:
+    Include tests in subdirectories
   * `-t`, `--tap`:
     Show results in TAP format
   * `-v`, `--version`:
