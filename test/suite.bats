@@ -76,3 +76,10 @@ fixtures suite
   echo "$output"
   [ "${lines[0]}" = "1..2" ]
 }
+
+@test "recursive with screwy test filenames" {
+  run bats -r "${FIXTURE_ROOT}/recursive_screwy"
+  [ "$status" -eq 0 ]
+  echo "$output"
+  [ "${lines[0]}" = "1..2" ]
+}
