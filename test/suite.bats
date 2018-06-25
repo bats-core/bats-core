@@ -66,13 +66,15 @@ fixtures suite
 @test "recursive support (short option)" {
   run bats -r "${FIXTURE_ROOT}/recursive"
   [ $status -eq 0 ]
-  echo "$output"
   [ "${lines[0]}" = "1..2" ]
+  [ "${lines[1]}" = "ok 1 another passing test" ]
+  [ "${lines[2]}" = "ok 2 a passing test" ]
 }
 
 @test "recursive support (long option)" {
   run bats --recursive "${FIXTURE_ROOT}/recursive"
   [ $status -eq 0 ]
-  echo "$output"
   [ "${lines[0]}" = "1..2" ]
+  [ "${lines[1]}" = "ok 1 another passing test" ]
+  [ "${lines[2]}" = "ok 2 a passing test" ]
 }
