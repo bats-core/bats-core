@@ -170,16 +170,17 @@ supports:
 
 ```
 Bats x.y.z
-Usage: bats [-c] [-p | -t] <test> [<test> ...]
+Usage: bats [-c] [-r] [-p | -t] <test> [<test> ...]
 
   <test> is the path to a Bats test file, or the path to a directory
   containing Bats test files.
 
-  -c, --count    Count the number of test cases without running any tests
-  -h, --help     Display this help message
-  -p, --pretty   Show results in pretty format (default for terminals)
-  -t, --tap      Show results in TAP format
-  -v, --version  Display the version number
+  -c, --count      Count the number of test cases without running any tests
+  -h, --help       Display this help message
+  -p, --pretty     Show results in pretty format (default for terminals)
+  -r, --recursive  Include tests in subdirectories
+  -t, --tap        Show results in TAP format
+  -v, --version    Display the version number
 ```
 
 To run your tests, invoke the `bats` interpreter with one or more paths to test

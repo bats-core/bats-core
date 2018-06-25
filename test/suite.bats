@@ -62,3 +62,15 @@ fixtures suite
   [ "${lines[5]}" = "begin 3 quasi-truth" ]
   [ "${lines[6]}" = "not ok 3 quasi-truth" ]
 }
+
+@test "recursive support (short option)" {
+  run bats -r "${FIXTURE_ROOT}/recursive"
+  [ $status -eq 0 ]
+  [ "${lines[0]}" = "1..2" ]
+}
+
+@test "recursive support (long option)" {
+  run bats --recursive "${FIXTURE_ROOT}/recursive"
+  [ $status -eq 0 ]
+  [ "${lines[0]}" = "1..2" ]
+}

@@ -7,7 +7,7 @@ version() {
 
 usage() {
   version
-  echo "Usage: bats [-c] [-p | -t] <test> [<test> ...]"
+  echo "Usage: bats [-c] [-r] [-p | -t] <test> [<test> ...]"
 }
 
 help() {
@@ -16,11 +16,12 @@ help() {
   echo "  <test> is the path to a Bats test file, or the path to a directory"
   echo "  containing Bats test files."
   echo
-  echo "  -c, --count    Count the number of test cases without running any tests"
-  echo "  -h, --help     Display this help message"
-  echo "  -p, --pretty   Show results in pretty format (default for terminals)"
-  echo "  -t, --tap      Show results in TAP format"
-  echo "  -v, --version  Display the version number"
+  echo "  -c, --count      Count the number of test cases without running any tests"
+  echo "  -h, --help       Display this help message"
+  echo "  -p, --pretty     Show results in pretty format (default for terminals)"
+  echo "  -r, --recursive  Include tests in subdirectories"
+  echo "  -t, --tap        Show results in TAP format"
+  echo "  -v, --version    Display the version number"
   echo
   echo "  For more information, see https://github.com/bats-core/bats-core"
   echo
@@ -66,9 +67,10 @@ for arg in "$@"; do
   fi
 done
 
-unset count_flag pretty
+unset count_flag pretty recursive
 count_flag=''
 pretty=''
+recursive=''
 if [[ -z "${CI:-}" && -t 0 && -t 1 ]]; then
   pretty=1
 fi
@@ -86,6 +88,9 @@ if [[ "${#options[@]}" -ne 0 ]]; then
       ;;
     "c" | "count" )
       count_flag="-c"
+      ;;
+    "r" | "recursive" )
+      recursive=1
       ;;
     "t" | "tap" )
       pretty=""
@@ -112,9 +117,18 @@ for filename in "${arguments[@]}"; do
 
   if [[ -d "$filename" ]]; then
     shopt -s nullglob
-    for suite_filename in "$filename"/*.bats; do
-      filenames["${#filenames[@]}"]="$suite_filename"
-    done
+    if [[ "$recursive" -eq 1 ]]; then
+      OIFS="${IFS}"
+      while IFS= read -r -d $'\0' file; do
+        filenames["${#filenames[@]}"]="$file"
+      done < <(find "$filename" -type f -name "*.bats" -print0 | sort -z)
+      IFS="${OIFS}"
+      unset -v OIFS
+    else
+      for suite_filename in "$filename"/*.bats; do
+        filenames["${#filenames[@]}"]="$suite_filename"
+      done
+    fi
     shopt -u nullglob
   else
     filenames["${#filenames[@]}"]="$filename"
@@ -129,10 +143,10 @@ fi
 
 set -o pipefail execfail
 if [[ -z "$pretty" ]]; then
-  exec "$command" $count_flag "${filenames[@]}"
+  exec "$command" $count_flag $recursive_flag "${filenames[@]}"
 else
   extended_syntax_flag="-x"
   formatter="bats-format-tap-stream"
-  exec "$command" $count_flag $extended_syntax_flag "${filenames[@]}" |
+  exec "$command" $count_flag $recursive_flag $extended_syntax_flag "${filenames[@]}" |
     "$formatter"
 fi
