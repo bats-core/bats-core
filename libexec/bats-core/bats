@@ -118,12 +118,9 @@ for filename in "${arguments[@]}"; do
   if [[ -d "$filename" ]]; then
     shopt -s nullglob
     if [[ "$recursive" -eq 1 ]]; then
-      OIFS="${IFS}"
       while IFS= read -r -d $'\0' file; do
         filenames["${#filenames[@]}"]="$file"
       done < <(find "$filename" -type f -name "*.bats" -print0 | sort -z)
-      IFS="${OIFS}"
-      unset -v OIFS
     else
       for suite_filename in "$filename"/*.bats; do
         filenames["${#filenames[@]}"]="$suite_filename"
