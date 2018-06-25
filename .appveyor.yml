@@ -13,4 +13,4 @@ test_script:
   - where bash
   - bash --version
   - bash -c 'export'
-  - bash -c 'time bin/bats test'
+  - bash -c 'PATH="/usr/bin:${PATH}" time bin/bats test'
