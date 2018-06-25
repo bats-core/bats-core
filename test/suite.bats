@@ -66,11 +66,13 @@ fixtures suite
 @test "recursive support (short option)" {
   run bats -r "${FIXTURE_ROOT}/recursive"
   [ $status -eq 0 ]
+  echo "$output"
   [ "${lines[0]}" = "1..2" ]
 }
 
 @test "recursive support (long option)" {
   run bats --recursive "${FIXTURE_ROOT}/recursive"
   [ $status -eq 0 ]
+  echo "$output"
   [ "${lines[0]}" = "1..2" ]
 }

@@ -143,10 +143,10 @@ fi
 
 set -o pipefail execfail
 if [[ -z "$pretty" ]]; then
-  exec "$command" $count_flag $recursive_flag "${filenames[@]}"
+  exec "$command" $count_flag "${filenames[@]}"
 else
   extended_syntax_flag="-x"
   formatter="bats-format-tap-stream"
-  exec "$command" $count_flag $recursive_flag $extended_syntax_flag "${filenames[@]}" |
+  exec "$command" $count_flag $extended_syntax_flag "${filenames[@]}" |
     "$formatter"
 fi
