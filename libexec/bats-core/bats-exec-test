@@ -235,7 +235,7 @@ bats_debug_trap() {
 bats_error_trap() {
   local status="$?"
   if [[ -z "$BATS_TEST_COMPLETED" ]]; then
-    BATS_ERROR_STATUS="$status"
+    BATS_ERROR_STATUS="${BATS_ERROR_STATUS:-$status}"
     if [[ "$BATS_ERROR_STATUS" -eq 0 ]]; then
       BATS_ERROR_STATUS=1
     fi
@@ -330,6 +330,7 @@ bats_perform_test() {
 
     BATS_TEST_COMPLETED=""
     BATS_TEARDOWN_COMPLETED=""
+    BATS_ERROR_STATUS=""
     trap "bats_debug_trap \"\$BASH_SOURCE\"" debug
     trap "bats_error_trap" err
     trap "bats_teardown_trap" exit
