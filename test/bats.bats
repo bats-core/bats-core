@@ -111,7 +111,6 @@ fixtures bats
 @test "failing test with significant status" {
   STATUS=2 run bats "$FIXTURE_ROOT/failing.bats"
   [ $status -eq 1 ]
-  echo "$output"
   [ "${lines[3]}" = "#   \`eval \"( exit \${STATUS:-1} )\"' failed with status 2" ]
 }
 
