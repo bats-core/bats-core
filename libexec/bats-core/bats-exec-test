@@ -245,9 +245,7 @@ bats_error_trap() {
 }
 
 bats_teardown_trap() {
-  if [ "${BATS_ERROR_STATUS:-?}" = "?" ]; then
-    bats_error_trap
-  fi
+  bats_error_trap
   local status=0
   teardown >>"$BATS_OUT" 2>&1 || status="$?"
 
