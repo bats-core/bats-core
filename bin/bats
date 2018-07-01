@@ -21,6 +21,9 @@ bats_resolve_absolute_root_dir() {
   local result="$2"
   local target_dir
   local target_name
+  local original_shell_options="$-"
+
+  set -P
 
   while true; do
     target_dir="${path%/*}"
@@ -30,19 +33,12 @@ bats_resolve_absolute_root_dir() {
       cd "$target_dir"
     fi
 
-    # Resolve the parent directory, e.g. /bin => /usr/bin on CentOS (#113).
-    while [[ -L "$PWD" ]]; do
-      target_dir="$(bats_resolve_link "$PWD")"
-      if [[ "${target_dir:0:1}" != '/' ]]; then
-        target_dir="$PWD/../$target_dir"
-      fi
-      cd "$target_dir"
-    done
-
     if [[ -L "$target_name" ]]; then
       path="$(bats_resolve_link "$target_name")"
     else
       printf -v "$result" -- '%s' "${PWD%/*}"
+      set +P
+      set "-$original_shell_options"
       cd "$cwd"
       return
     fi
