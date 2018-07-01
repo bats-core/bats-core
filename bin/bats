@@ -21,8 +21,8 @@ bats_resolve_absolute_root_dir() {
   local cwd="$PWD"
   local path="$1"
   local result="$2"
-  local target_dir="${path%/*}"
-  local target_name="${path##*/}"
+  local target_dir
+  local target_name
   local limit="$BATS_MAX_SYMLINKS"
 
   while [[ "$limit" -ne -1 ]]; do
@@ -42,7 +42,9 @@ bats_resolve_absolute_root_dir() {
       cd "$target_dir"
     done
 
-    if [[ ! -L "$target_name" ]]; then
+    if [[ "$limit" -eq -1 ]]; then
+      break
+    elif [[ ! -L "$target_name" ]]; then
       printf -v "$result" -- '%s' "${PWD%/*}"
       cd "$cwd"
       return
