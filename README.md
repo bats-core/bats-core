@@ -53,6 +53,7 @@ commit [0360811][].  It was created via `git clone --bare` and `git push
   - [npm](#npm)
   - [Installing Bats from source](#installing-bats-from-source)
   - [Running Bats in Docker](#running-bats-in-docker)
+    - [Building a Docker image](#building-a-docker-image)
 - [Usage](#usage)
 - [Writing tests](#writing-tests)
   - [`run`: Test other commands](#run-test-other-commands)
@@ -60,7 +61,7 @@ commit [0360811][].  It was created via `git clone --bare` and `git push
   - [`skip`: Easily skip tests](#skip-easily-skip-tests)
   - [`setup` and `teardown`: Pre- and post-test hooks](#setup-and-teardown-pre--and-post-test-hooks)
   - [Code outside of test cases](#code-outside-of-test-cases)
-  - [File descriptor 3](#file-descriptor-3-read-this-if-bats-hangs)
+  - [File descriptor 3 (read this if Bats hangs)](#file-descriptor-3-read-this-if-bats-hangs)
   - [Printing to the terminal](#printing-to-the-terminal)
   - [Special variables](#special-variables)
 - [Support](#support)
@@ -134,31 +135,40 @@ permission to write to the installation prefix.
 
 ### Running Bats in Docker
 
+There is an official image on the Docker Hub:
+
+    $ docker run -it bats/bats:latest --version
+
+#### Building a Docker image
+
 Check out a copy of the Bats repository, then build a container image:
 
     $ git clone https://github.com/bats-core/bats-core.git
     $ cd bats-core
-    $ docker build --tag bats:latest .
+    $ docker build --tag bats/bats:latest .
 
-This creates a local Docker image called `bats:latest` based on [Alpine
-Linux][]. To run Bats' internal test suite (which is in the container image at
+This creates a local Docker image called `bats/bats:latest` based on [Alpine
+Linux](https://github.com/gliderlabs/docker-alpine/blob/master/docs/usage.md) 
+(to push to private registries, tag it with another organisation, e.g. 
+`my-org/bats:latest`).
+
+To run Bats' internal test suite (which is in the container image at
 `/opt/bats/test`):
 
-[Alpine Linux]: https://github.com/gliderlabs/docker-alpine/blob/master/docs/usage.md
-
-    $ docker run -it bats:latest /opt/bats/test
+    $ docker run -it bats/bats:latest /opt/bats/test
 
 To run a test suite from your local machine, mount in a volume and direct Bats
 to its path inside the container:
 
-    $ docker run -it -v "$(pwd):/code" bats:latest /code/test
+    $ docker run -it -v "$(pwd):/code" bats/bats:latest /code/test
 
-This is a minimal image. If more tools are required this can be used as a base
-image in a Dockerfile using `FROM <Docker image>`.  In the future there may be
-images based on Debian, and/or with more tools installed (`curl` and `openssl`,
+This is a minimal Docker image. If more tools are required this can be used as a 
+base image in a Dockerfile using `FROM <Docker image>`.  In the future there may 
+be images based on Debian, and/or with more tools installed (`curl` and `openssl`,
 for example). If you require a specific configuration please search and +1 an
 issue or [raise a new issue](https://github.com/bats-core/bats-core/issues).
 
+Further usage examples are in [the wiki](https://github.com/bats-core/bats-core/wiki/Docker-Usage-Examples).
 
 ## Usage
 
