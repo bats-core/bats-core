@@ -23,6 +23,7 @@ bats_resolve_absolute_root_dir() {
   local target_name
   local original_shell_options="$-"
 
+  # Resolve the parent directory, e.g. /bin => /usr/bin on CentOS (#113).
   set -P
 
   while true; do
