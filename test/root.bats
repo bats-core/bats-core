@@ -63,7 +63,6 @@ setup() {
     "$BATS_TEST_SUITE_TMPDIR/usr/bin"
 
   BATS_MAX_SYMLINKS=1 run "$BATS_TEST_SUITE_TMPDIR/bin/bats" -v
-  emit_debug_output
   [ "$status" -eq 1 ]
 
   local expected="$BATS_TEST_SUITE_TMPDIR/bin/bats failed to resolve "
