@@ -9,8 +9,6 @@ elif command -v 'readlink' >/dev/null; then
   BATS_READLINK='readlink'
 fi
 
-BATS_MAX_SYMLINKS="${BATS_MAX_SYMLINKS:-16}"
-
 bats_resolve_link() {
   if ! "$BATS_READLINK" "$1"; then
     return 0
@@ -23,9 +21,8 @@ bats_resolve_absolute_root_dir() {
   local result="$2"
   local target_dir
   local target_name
-  local limit="$BATS_MAX_SYMLINKS"
 
-  while [[ "$limit" -ne -1 ]]; do
+  while true; do
     target_dir="${path%/*}"
     target_name="${path##*/}"
 
@@ -34,7 +31,7 @@ bats_resolve_absolute_root_dir() {
     fi
 
     # Resolve the parent directory, e.g. /bin => /usr/bin on CentOS (#113).
-    while [[ -L "$PWD" && "$((--limit))" -ne -1 ]]; do
+    while [[ -L "$PWD" ]]; do
       target_dir="$(bats_resolve_link "$PWD")"
       if [[ "${target_dir:0:1}" != '/' ]]; then
         target_dir="$PWD/../$target_dir"
@@ -42,20 +39,14 @@ bats_resolve_absolute_root_dir() {
       cd "$target_dir"
     done
 
-    if [[ "$limit" -eq -1 ]]; then
-      break
-    elif [[ ! -L "$target_name" ]]; then
+    if [[ -L "$target_name" ]]; then
+      path="$(bats_resolve_link "$target_name")"
+    else
       printf -v "$result" -- '%s' "${PWD%/*}"
       cd "$cwd"
       return
-    elif [[ "$((--limit))" -ne -1 ]]; then
-      path="$(bats_resolve_link "$target_name")"
     fi
   done
-
-  printf '%s failed to resolve after following %d symlink(s)\n' \
-    "$0" "$BATS_MAX_SYMLINKS" >&2
-  return 1
 }
 
 export BATS_ROOT

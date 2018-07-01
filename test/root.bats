@@ -38,38 +38,6 @@ setup() {
   [ "${output%% *}" == 'Bats' ]
 }
 
-@test "short-circuit symlink resolution via BATS_MAX_SYMLINKS" {
-  BATS_MAX_SYMLINKS=1 run "$BATS_TEST_SUITE_TMPDIR/bin/bats" -v
-  [ "$status" -eq 1 ]
-
-  local expected="$BATS_TEST_SUITE_TMPDIR/bin/bats failed to resolve "
-  expected+="after following 1 symlink(s)"
-  [ "$output" == "$expected" ]
-}
-
-@test "find BATS_ROOT without symlinks" {
-  BATS_MAX_SYMLINKS=0 run "$BATS_TEST_SUITE_TMPDIR/opt/bats-core/bin/bats" -v
-  [ "$status" -eq 0 ]
-  [ "${output%% *}" == 'Bats' ]
-}
-
-# The resolution scheme here is:
-#
-# - /bin => /usr/bin
-# - /usr/bin => /opt/bats-core/bin
-@test "parent directories exhaust BATS_MAX_SYMLINKS" {
-  rm -rf "$BATS_TEST_SUITE_TMPDIR/usr/bin"
-  ln -s "$BATS_TEST_SUITE_TMPDIR/opt/bats-core/bin" \
-    "$BATS_TEST_SUITE_TMPDIR/usr/bin"
-
-  BATS_MAX_SYMLINKS=1 run "$BATS_TEST_SUITE_TMPDIR/bin/bats" -v
-  [ "$status" -eq 1 ]
-
-  local expected="$BATS_TEST_SUITE_TMPDIR/bin/bats failed to resolve "
-  expected+="after following 1 symlink(s)"
-  [ "$output" == "$expected" ]
-}
-
 # The resolution scheme here is:
 #
 # - /bin => /usr/bin (relative directory)
@@ -93,7 +61,7 @@ setup() {
   ln -s bats opt/bats-core/bin/baz
 
   cd - >/dev/null
-  BATS_MAX_SYMLINKS=8 run "$BATS_TEST_SUITE_TMPDIR/bin/foo" -v
+  run "$BATS_TEST_SUITE_TMPDIR/bin/foo" -v
   [ "$status" -eq 0 ]
   [ "${output%% *}" == 'Bats' ]
 }
