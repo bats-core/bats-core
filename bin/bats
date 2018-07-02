@@ -38,8 +38,7 @@ bats_resolve_absolute_root_dir() {
       path="$(bats_resolve_link "$target_name")"
     else
       printf -v "$result" -- '%s' "${PWD%/*}"
-      set +P
-      set "-$original_shell_options"
+      set +P "-$original_shell_options"
       cd "$cwd"
       return
     fi
