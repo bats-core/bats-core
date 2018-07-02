@@ -17,8 +17,8 @@ script:
       docker build --build-arg bashver=${bashver} --tag bats/bats:bash-${bashver} .
       docker run -it bats/bats:bash-${bashver} --tap /opt/bats/test || RC=1
     done
+    [ ${RC} -eq 0 ]
   fi
-  [ ${RC} -eq 0 ]
 
 notifications:
   email:
