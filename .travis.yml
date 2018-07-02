@@ -19,11 +19,12 @@ services:
   - docker
 
 script:
-- bash -c 'time bin/bats --tap test'
 - |
   if [[ "$TRAVIS_OS_NAME" == 'linux' ]]; then
     docker build --build-arg bashver=${BASHVER} --tag bats/bats:bash-${BASHVER} .
-    docker run -it bats/bats:bash-${BASHVER} --tap /opt/bats/test
+    time docker run -it bats/bats:bash-${BASHVER} --tap /opt/bats/test
+  else
+    bash -c 'time bin/bats --tap test'
   fi
 
 notifications:
