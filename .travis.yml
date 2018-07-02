@@ -13,8 +13,8 @@ script:
   if [[ "$TRAVIS_OS_NAME" == 'linux' ]]; then
     for bashver in 3.2 4.0 4.1 4.2 4.3 4.4
     do
-      docker build --build-arg bashver=${bashver} --tag bats:bash${bashver} .
-      docker run -it bats:bash${bashver} --tap /opt/bats/test
+      docker build --build-arg bashver=${bashver} --tag bats/bats:bash-${bashver} .
+      docker run -it bats/bats:bash-${bashver} --tap /opt/bats/test
     done
   fi
 
