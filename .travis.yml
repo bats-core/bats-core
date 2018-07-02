@@ -2,7 +2,18 @@ language: bash
 
 os:
 - linux
-- osx
+
+env:
+  - BASHVER=3.2
+  - BASHVER=4.0
+  - BASHVER=4.1
+  - BASHVER=4.2
+  - BASHVER=4.3
+  - BASHVER=4.4
+
+matrix:
+  include:
+    - os: osx
 
 services:
   - docker
@@ -11,13 +22,8 @@ script:
 - bash -c 'time bin/bats --tap test'
 - |
   if [[ "$TRAVIS_OS_NAME" == 'linux' ]]; then
-    RC=0
-    for bashver in 3.2 4.0 4.1 4.2 4.3 4.4
-    do
-      docker build --build-arg bashver=${bashver} --tag bats/bats:bash-${bashver} .
-      docker run -it bats/bats:bash-${bashver} --tap /opt/bats/test || RC=1
-    done
-    [ ${RC} -eq 0 ]
+    docker build --build-arg bashver=${BASHVER} --tag bats/bats:bash-${BASHVER} .
+    docker run -it bats/bats:bash-${BASHVER} --tap /opt/bats/test
   fi
 
 notifications:
