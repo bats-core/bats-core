@@ -1,8 +1,9 @@
-FROM alpine:3.6
+ARG bashver
 
-RUN apk --no-cache add bash \
-    && ln -s /opt/bats/bin/bats /usr/sbin/bats
+FROM bash:$bashver
+
+RUN ln -s /opt/bats/bin/bats /usr/sbin/bats
 
 COPY . /opt/bats/
 
-ENTRYPOINT ["bats"]
+ENTRYPOINT ["bash", "/usr/sbin/bats"]
