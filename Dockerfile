@@ -1,6 +1,6 @@
-ARG bashver
+ARG bashver=latest
 
-FROM bash:$bashver
+FROM bash:${bashver}
 
 RUN ln -s /opt/bats/bin/bats /usr/sbin/bats
 
