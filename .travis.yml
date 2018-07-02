@@ -11,12 +11,14 @@ script:
 - bash -c 'time bin/bats --tap test'
 - |
   if [[ "$TRAVIS_OS_NAME" == 'linux' ]]; then
+    RC=0
     for bashver in 3.2 4.0 4.1 4.2 4.3 4.4
     do
       docker build --build-arg bashver=${bashver} --tag bats/bats:bash-${bashver} .
-      docker run -it bats/bats:bash-${bashver} --tap /opt/bats/test
+      docker run -it bats/bats:bash-${bashver} --tap /opt/bats/test || RC=1
     done
   fi
+  [ ${RC} -eq 0 ]
 
 notifications:
   email:
