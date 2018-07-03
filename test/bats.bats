@@ -3,10 +3,19 @@
 load test_helper
 fixtures bats
 
-@test "no arguments prints usage instructions" {
+@test "no arguments prints message and usage instructions" {
   run bats
   [ $status -eq 1 ]
-  [ $(expr "${lines[1]}" : "Usage:") -ne 0 ]
+  [ "${lines[0]}" == 'Error: Must specify at least one <test>' ]
+  [ "${lines[2]%% *}" == 'Usage:' ]
+}
+
+@test "invalid option prints message and usage instructions" {
+  run bats --invalid-option
+  [ $status -eq 1 ]
+  emit_debug_output
+  [ "${lines[0]}" == "Error: Bad command line option '-invalid-option'" ]
+  [ "${lines[2]%% *}" == 'Usage:' ]
 }
 
 @test "-v and --version print version number" {

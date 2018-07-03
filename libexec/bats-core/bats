@@ -7,7 +7,13 @@ version() {
 
 usage() {
   version
-  echo "Usage: bats [-c] [-r] [-p | -t] <test> [<test> ...]"
+  printf "Usage: bats [-c] [-r] [-p | -t] <test> [<test> ...]\n"
+}
+
+abort() {
+  printf 'Error: %s\n' "$1" >&2
+  usage >&2
+  exit 1
 }
 
 help() {
@@ -99,16 +105,14 @@ if [[ "${#options[@]}" -ne 0 ]]; then
       pretty=1
       ;;
     * )
-      usage >&2
-      exit 1
+      abort "Bad command line option '-$option'"
       ;;
     esac
   done
 fi
 
 if [[ "${#arguments[@]}" -eq 0 ]]; then
-  usage >&2
-  exit 1
+  abort 'Must specify at least one <test>'
 fi
 
 filenames=()
