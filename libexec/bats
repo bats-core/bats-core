@@ -6,10 +6,14 @@ version() {
 }
 
 usage() {
-  local errmsg="$1"
   version
-  [ -n "$errmsg" ] && echo "Error: $errmsg"
-  echo "Usage: bats [-c] [-p | -t] <test> [<test> ...]"
+  printf "Usage: bats [-c] [-p | -t] <test> [<test> ...]\n"
+}
+
+abort() {
+  printf 'Error: %s\n' "$1" >&2
+  usage >&2
+  exit 1
 }
 
 help() {
@@ -128,15 +132,14 @@ if [[ "${#options[@]}" -ne '0' ]]; then
       pretty="1"
       ;;
     * )
-      usage "Bad command line option '-$option'" >&2
-      exit 1
+      abort "Bad command line option '-$option'"
       ;;
     esac
   done
 fi
 
 if [ "${#arguments[@]}" -eq 0 ]; then
-  usage "Must specify at least one <test>" >&2
+  abort 'Must specify at least one <test>'
   exit 1
 fi
 
