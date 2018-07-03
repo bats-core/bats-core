@@ -1,1 +1,35 @@
-../libexec/bats
+#!/usr/bin/env bash
+
+set -e
+
+export BATS_READLINK='true'
+if command -v 'greadlink' >/dev/null; then
+  BATS_READLINK='greadlink'
+elif command -v 'readlink' >/dev/null; then
+  BATS_READLINK='readlink'
+fi
+
+bats_resolve_link() {
+  if ! "$BATS_READLINK" "$1"; then
+    return 0
+  fi
+}
+
+bats_absolute_path() {
+  local cwd="$PWD"
+  local path="$1"
+  local result="$2"
+
+  while [[ -n "$path" ]]; do
+    cd "${path%/*}"
+    path="$(bats_resolve_link "${path##*/}")"
+  done
+
+  printf -v "$result" -- '%s' "$PWD"
+  cd "$cwd"
+}
+
+export BATS_ROOT
+bats_absolute_path "$0" 'BATS_ROOT'
+BATS_ROOT="${BATS_ROOT%/*}"
+exec "$BATS_ROOT/libexec/bats-core/bats" "$@"

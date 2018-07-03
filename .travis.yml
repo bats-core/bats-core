@@ -2,17 +2,31 @@ language: bash
 
 os:
 - linux
-- osx
+
+env:
+  - BASHVER=
+  - BASHVER=3.2
+  - BASHVER=4.0
+  - BASHVER=4.1
+  - BASHVER=4.2
+  - BASHVER=4.3
+  - BASHVER=4.4
+
+matrix:
+  include:
+    - os: osx
 
 services:
   - docker
 
 script:
 - |
-  bash -c 'time bin/bats --tap test'
-  if [[ "$TRAVIS_OS_NAME" == 'linux' ]]; then
-    docker build --tag bats:latest .
-    docker run -it bats:latest --tap /opt/bats/test
+  if [[ "$TRAVIS_OS_NAME" == 'linux' && -n "$BASHVER" ]]; then
+    docker build --build-arg bashver=${BASHVER} --tag bats/bats:bash-${BASHVER} .
+    docker run -it bash:${BASHVER} --version
+    time docker run -it bats/bats:bash-${BASHVER} --tap /opt/bats/test
+  else
+    time bin/bats --tap test
   fi
 
 notifications:

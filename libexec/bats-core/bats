@@ -1,0 +1,153 @@
+#!/usr/bin/env bash
+set -e
+
+version() {
+  echo "Bats 1.0.2"
+}
+
+usage() {
+  version
+  printf "Usage: bats [-c] [-r] [-p | -t] <test> [<test> ...]\n"
+}
+
+abort() {
+  printf 'Error: %s\n' "$1" >&2
+  usage >&2
+  exit 1
+}
+
+help() {
+  usage
+  echo
+  echo "  <test> is the path to a Bats test file, or the path to a directory"
+  echo "  containing Bats test files."
+  echo
+  echo "  -c, --count      Count the number of test cases without running any tests"
+  echo "  -h, --help       Display this help message"
+  echo "  -p, --pretty     Show results in pretty format (default for terminals)"
+  echo "  -r, --recursive  Include tests in subdirectories"
+  echo "  -t, --tap        Show results in TAP format"
+  echo "  -v, --version    Display the version number"
+  echo
+  echo "  For more information, see https://github.com/bats-core/bats-core"
+  echo
+}
+
+expand_path() {
+  local path="${1%/}"
+  local dirname="${path%/*}"
+  local result="$2"
+
+  if [[ "$dirname" == "$path" ]]; then
+    dirname="$PWD"
+  else
+    cd "$dirname"
+    dirname="$PWD"
+    cd "$OLDPWD"
+  fi
+  printf -v "$result" '%s/%s' "$dirname" "${path##*/}"
+}
+
+export BATS_CWD="$PWD"
+export BATS_TEST_PATTERN="^[[:blank:]]*@test[[:blank:]]+(.*[^[:blank:]])[[:blank:]]+\{(.*)\$"
+export PATH="$BATS_ROOT/libexec/bats-core:$PATH"
+
+options=()
+arguments=()
+for arg in "$@"; do
+  if [[ "${arg:0:1}" = "-" ]]; then
+    if [[ "${arg:1:1}" = "-" ]]; then
+      options[${#options[*]}]="${arg:2}"
+    else
+      index=1
+      while option="${arg:$index:1}"; do
+        if [[ -z "$option" ]]; then
+          break
+        fi
+        options[${#options[*]}]="$option"
+        let index+=1
+      done
+    fi
+  else
+    arguments[${#arguments[*]}]="$arg"
+  fi
+done
+
+unset count_flag pretty recursive
+count_flag=''
+pretty=''
+recursive=''
+if [[ -z "${CI:-}" && -t 0 && -t 1 ]]; then
+  pretty=1
+fi
+
+if [[ "${#options[@]}" -ne 0 ]]; then
+  for option in "${options[@]}"; do
+    case "$option" in
+    "h" | "help" )
+      help
+      exit 0
+      ;;
+    "v" | "version" )
+      version
+      exit 0
+      ;;
+    "c" | "count" )
+      count_flag="-c"
+      ;;
+    "r" | "recursive" )
+      recursive=1
+      ;;
+    "t" | "tap" )
+      pretty=""
+      ;;
+    "p" | "pretty" )
+      pretty=1
+      ;;
+    * )
+      abort "Bad command line option '-$option'"
+      ;;
+    esac
+  done
+fi
+
+if [[ "${#arguments[@]}" -eq 0 ]]; then
+  abort 'Must specify at least one <test>'
+fi
+
+filenames=()
+for filename in "${arguments[@]}"; do
+  expand_path "$filename" 'filename'
+
+  if [[ -d "$filename" ]]; then
+    shopt -s nullglob
+    if [[ "$recursive" -eq 1 ]]; then
+      while IFS= read -r -d $'\0' file; do
+        filenames["${#filenames[@]}"]="$file"
+      done < <(find "$filename" -type f -name "*.bats" -print0 | sort -z)
+    else
+      for suite_filename in "$filename"/*.bats; do
+        filenames["${#filenames[@]}"]="$suite_filename"
+      done
+    fi
+    shopt -u nullglob
+  else
+    filenames["${#filenames[@]}"]="$filename"
+  fi
+done
+
+if [[ "${#filenames[@]}" -eq 1 ]]; then
+  command="bats-exec-test"
+else
+  command="bats-exec-suite"
+fi
+
+set -o pipefail execfail
+if [[ -z "$pretty" ]]; then
+  exec "$command" $count_flag "${filenames[@]}"
+else
+  extended_syntax_flag="-x"
+  formatter="bats-format-tap-stream"
+  exec "$command" $count_flag $extended_syntax_flag "${filenames[@]}" |
+    "$formatter"
+fi

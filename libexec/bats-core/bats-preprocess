@@ -17,7 +17,7 @@ encode_name() {
 
     for ((i=0; i<length; i++)); do
       char="${name:$i:1}"
-      if [ "$char" = " " ]; then
+      if [[ "$char" = " " ]]; then
         result+="_"
       elif [[ "$char" =~ [[:alnum:]] ]]; then
         result+="$char"

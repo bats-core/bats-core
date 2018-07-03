@@ -2,7 +2,9 @@
 set -e
 
 # Just stream the TAP output (sans extended syntax) if tput is missing
-command -v tput >/dev/null || exec grep -v "^begin "
+if ! command -v tput >/dev/null; then
+  exec grep -v "^begin "
+fi
 
 header_pattern='[0-9]+\.\.[0-9]+'
 IFS= read -r header
@@ -45,7 +47,9 @@ pass() {
 
 skip() {
   local reason="$1"
-  [ -z "$reason" ] || reason=": $reason"
+  if [[ -n "$reason" ]]; then
+    reason=": $reason"
+  fi
   go_to_column 0
   printf " - %s (skipped%s)" "$name" "$reason"
   advance
@@ -66,16 +70,16 @@ log() {
 
 summary() {
   printf "\n%d test" "$count"
-  if [[ "$count" -ne '1' ]]; then
+  if [[ "$count" -ne 1 ]]; then
     printf 's'
   fi
 
   printf ", %d failure" "$failures"
-  if [[ "$failures" -ne '1' ]]; then
+  if [[ "$failures" -ne 1 ]]; then
     printf 's'
   fi
 
-  if [ "$skipped" -gt 0 ]; then
+  if [[ "$skipped" -gt 0 ]]; then
     printf ", %d skipped" "$skipped"
   fi
 
@@ -89,7 +93,7 @@ printf_with_truncation() {
 
   printf -v 'string' -- "$@"
 
-  if [ "${#string}" -gt "$width" ]; then
+  if [[ "${#string}" -gt "$width" ]]; then
     printf "%s..." "${string:0:$(( $width - 4 ))}"
   else
     printf "%s" "$string"
@@ -113,10 +117,10 @@ advance() {
 
 set_color() {
   local color="$1"
-  local weight='22'
+  local weight=22
 
   if [[ "$2" == 'bold' ]]; then
-    weight='1'
+    weight=1
   fi
   printf "\x1B[%d;%dm" $(( 30 + $color )) "$weight"
 }
@@ -152,7 +156,7 @@ while IFS= read -r line; do
     flush
     ;;
   "ok "* )
-    skip_expr="ok $index (.*) # skip ?(([^)]*))?"
+    skip_expr="ok $index (.*) # skip ?(([[:print:]]*))?"
     if [[ "$line" =~ $skip_expr ]]; then
       let skipped+=1
       buffer skip "${BASH_REMATCH[2]}"

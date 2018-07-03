@@ -91,10 +91,16 @@ fixtures bats
   [ "${lines[3]}" = "not ok 3 a failing test" ]
 }
 
+@test "BATS_CWD is correctly set to PWD as validated by bats_trim_filename" {
+  local trimmed
+  bats_trim_filename "$PWD/foo/bar" 'trimmed'
+  printf 'ACTUAL: %s\n' "$trimmed" >&2
+  [ "$trimmed" = 'foo/bar' ]
+}
+
 @test "one failing test" {
   run bats "$FIXTURE_ROOT/failing.bats"
   [ $status -eq 1 ]
-  emit_debug_output
   [ "${lines[0]}" = '1..1' ]
   [ "${lines[1]}" = 'not ok 1 a failing test' ]
   [ "${lines[2]}" = "# (in test file $RELATIVE_FIXTURE_ROOT/failing.bats, line 4)" ]
@@ -114,7 +120,6 @@ fixtures bats
 @test "failing test with significant status" {
   STATUS=2 run bats "$FIXTURE_ROOT/failing.bats"
   [ $status -eq 1 ]
-  emit_debug_output
   [ "${lines[3]}" = "#   \`eval \"( exit \${STATUS:-1} )\"' failed with status 2" ]
 }
 
@@ -133,18 +138,18 @@ fixtures bats
 }
 
 @test "setup is run once before each test" {
-  rm -f "$TMP/setup.log"
+  make_bats_test_suite_tmpdir
   run bats "$FIXTURE_ROOT/setup.bats"
   [ $status -eq 0 ]
-  run cat "$TMP/setup.log"
+  run cat "$BATS_TEST_SUITE_TMPDIR/setup.log"
   [ ${#lines[@]} -eq 3 ]
 }
 
 @test "teardown is run once after each test, even if it fails" {
-  rm -f "$TMP/teardown.log"
+  make_bats_test_suite_tmpdir
   run bats "$FIXTURE_ROOT/teardown.bats"
   [ $status -eq 1 ]
-  run cat "$TMP/teardown.log"
+  run cat "$BATS_TEST_SUITE_TMPDIR/teardown.log"
   [ ${#lines[@]} -eq 3 ]
 }
 
@@ -169,7 +174,7 @@ fixtures bats
   [ $status -eq 1 ]
   [ "${lines[1]}" =  'not ok 1 truth' ]
   [ "${lines[2]}" =  "# (in test file $RELATIVE_FIXTURE_ROOT/failing_teardown.bats, line 6)" ]
-  [ "${lines[3]}" = $'#   `[ "$PASS" = "1" ]\' failed' ]
+  [ "${lines[3]}" = $'#   `[ "$PASS" = 1 ]\' failed' ]
 }
 
 @test "teardown failure with significant status" {
@@ -179,10 +184,10 @@ fixtures bats
 }
 
 @test "failing test file outside of BATS_CWD" {
-  cd "$TMP"
+  make_bats_test_suite_tmpdir
+  cd "$BATS_TEST_SUITE_TMPDIR"
   run bats "$FIXTURE_ROOT/failing.bats"
   [ $status -eq 1 ]
-  emit_debug_output
   [ "${lines[2]}" = "# (in test file $FIXTURE_ROOT/failing.bats, line 4)" ]
 }
 
@@ -217,11 +222,11 @@ fixtures bats
 @test "-c prints the number of tests" {
   run bats -c "$FIXTURE_ROOT/empty.bats"
   [ $status -eq 0 ]
-  [ "$output" = "0" ]
+  [ "$output" = 0 ]
 
   run bats -c "$FIXTURE_ROOT/output.bats"
   [ $status -eq 0 ]
-  [ "$output" = "4" ]
+  [ "$output" = 4 ]
 }
 
 @test "dash-e is not mangled on beginning of line" {
@@ -246,6 +251,16 @@ fixtures bats
   [ $status -eq 0 ]
   [ "${lines[1]}" = "ok 1 a skipped test # skip" ]
   [ "${lines[2]}" = "ok 2 a skipped test with a reason # skip a reason" ]
+}
+
+@test "skipped test with parens (pretty formatter)" {
+  run bats --pretty "$FIXTURE_ROOT/skipped_with_parens.bats"
+  [ $status -eq 0 ]
+
+  # Some systems (Alpine, for example) seem to emit an extra whitespace into
+  # entries in the 'lines' array when a carriage return is present from the
+  # pretty formatter.  This is why a '+' is used after the 'skipped' note.
+  [[ "${lines[@]}" =~ "- a skipped test with parentheses in the reason (skipped: "+"a reason (with parentheses))" ]]
 }
 
 @test "extended syntax" {
@@ -312,9 +327,9 @@ fixtures bats
 
   # Run Bats under `set -u` to catch as many unset variable accesses as
   # possible.
-  run bash -u "${BATS_TEST_DIRNAME%/*}/libexec/bats" \
+  run bash -u "${BATS_TEST_DIRNAME%/*}/bin/bats" \
     "$FIXTURE_ROOT/unofficial_bash_strict_mode.bats"
-  if [[ "$status" -ne '0' || "${lines[1]}" != "$expected" ]]; then
+  if [[ "$status" -ne 0 || "${lines[1]}" != "$expected" ]]; then
     cat <<END_OF_ERR_MSG
 
 This test failed because the Bats internals are violating one of the
@@ -341,7 +356,7 @@ If there's no output even when running the latest Bash, the problem may reside
 in the DEBUG trap handler. A particularly sneaky issue is that in Bash before
 4.1-alpha, an expansion of an empty array, e.g. "\${FOO[@]}", is considered
 an unset variable access. The solution is to add a size check before the
-expansion, e.g. [[ "\${#FOO[@]}" -ne '0' ]].
+expansion, e.g. [[ "\${#FOO[@]}" -ne 0 ]].
 
 END_OF_ERR_MSG
     emit_debug_output && return 1
@@ -350,7 +365,6 @@ END_OF_ERR_MSG
 
 @test "parse @test lines with various whitespace combinations" {
   run bats "$FIXTURE_ROOT/whitespace.bats"
-  emit_debug_output
   [ $status -eq 0 ]
   [ "${lines[1]}" = 'ok 1 no extra whitespace' ]
   [ "${lines[2]}" = 'ok 2 tab at beginning of line' ]
@@ -363,4 +377,93 @@ END_OF_ERR_MSG
   [ "${lines[9]}" = 'ok 9 parse unquoted name between extra whitespace' ]
   [ "${lines[10]}" = 'ok 10 {' ]  # unquoted single brace is a valid description
   [ "${lines[11]}" = 'ok 11 ' ]   # empty name from single quote
+}
+
+@test "duplicate tests cause a warning on stderr" {
+  run bats "$FIXTURE_ROOT/duplicate-tests.bats"
+  [ $status -eq 1 ]
+
+  local expected='bats warning: duplicate test name(s) in '
+  expected+="$FIXTURE_ROOT/duplicate-tests.bats: test_gizmo_test"
+
+  printf 'expected: "%s"\n' "$expected" >&2
+  printf 'actual:   "%s"\n' "${lines[0]}" >&2
+  [ "${lines[0]}" = "$expected" ]
+
+  printf 'num lines: %d\n' "${#lines[*]}" >&2
+  [ "${#lines[*]}" = "7" ]
+}
+
+@test "sourcing a nonexistent file in setup produces error output" {
+  run bats "$FIXTURE_ROOT/source_nonexistent_file_in_setup.bats"
+  [ $status -eq 1 ]
+  [ "${lines[1]}" = 'not ok 1 sourcing nonexistent file fails in setup' ]
+  [ "${lines[2]}" = "# (from function \`setup' in test file $RELATIVE_FIXTURE_ROOT/source_nonexistent_file_in_setup.bats, line 2)" ]
+  [ "${lines[3]}" = "#   \`source \"nonexistent file\"' failed" ]
+}
+
+@test "referencing unset parameter in setup produces error output" {
+  run bats "$FIXTURE_ROOT/reference_unset_parameter_in_setup.bats"
+  [ $status -eq 1 ]
+  [ "${lines[1]}" = 'not ok 1 referencing unset parameter fails in setup' ]
+  [ "${lines[2]}" = "# (from function \`setup' in test file $RELATIVE_FIXTURE_ROOT/reference_unset_parameter_in_setup.bats, line 3)" ]
+  [ "${lines[3]}" = "#   \`echo \"\$unset_parameter\"' failed" ]
+}
+
+@test "sourcing a nonexistent file in test produces error output" {
+  run bats "$FIXTURE_ROOT/source_nonexistent_file.bats"
+  [ $status -eq 1 ]
+  [ "${lines[1]}" = 'not ok 1 sourcing nonexistent file fails' ]
+  [ "${lines[2]}" = "# (in test file $RELATIVE_FIXTURE_ROOT/source_nonexistent_file.bats, line 2)" ]
+  [ "${lines[3]}" = "#   \`source \"nonexistent file\"' failed" ]
+}
+
+@test "referencing unset parameter in test produces error output" {
+  run bats "$FIXTURE_ROOT/reference_unset_parameter.bats"
+  [ $status -eq 1 ]
+  [ "${lines[1]}" = 'not ok 1 referencing unset parameter fails' ]
+  [ "${lines[2]}" = "# (in test file $RELATIVE_FIXTURE_ROOT/reference_unset_parameter.bats, line 3)" ]
+  [ "${lines[3]}" = "#   \`echo \"\$unset_parameter\"' failed" ]
+}
+
+@test "sourcing a nonexistent file in teardown produces error output" {
+  run bats "$FIXTURE_ROOT/source_nonexistent_file_in_teardown.bats"
+  [ $status -eq 1 ]
+  [ "${lines[1]}" = 'not ok 1 sourcing nonexistent file fails in teardown' ]
+  [ "${lines[2]}" = "# (from function \`teardown' in test file $RELATIVE_FIXTURE_ROOT/source_nonexistent_file_in_teardown.bats, line 2)" ]
+  [ "${lines[3]}" = "#   \`source \"nonexistent file\"' failed" ]
+}
+
+@test "referencing unset parameter in teardown produces error output" {
+  run bats "$FIXTURE_ROOT/reference_unset_parameter_in_teardown.bats"
+  [ $status -eq 1 ]
+  [ "${lines[1]}" = 'not ok 1 referencing unset parameter fails in teardown' ]
+  [ "${lines[2]}" = "# (from function \`teardown' in test file $RELATIVE_FIXTURE_ROOT/reference_unset_parameter_in_teardown.bats, line 3)" ]
+  [ "${lines[3]}" = "#   \`echo \"\$unset_parameter\"' failed" ]
+}
+
+@test "execute exported function without breaking failing test output" {
+  exported_function() { return 0; }
+  export -f exported_function
+  run bats "$FIXTURE_ROOT/exported_function.bats"
+  [ $status -eq 1 ]
+  [ "${lines[0]}" = "1..1" ]
+  [ "${lines[1]}" = "not ok 1 failing test" ]
+  [ "${lines[2]}" = "# (in test file $RELATIVE_FIXTURE_ROOT/exported_function.bats, line 7)" ]
+  [ "${lines[3]}" = "#   \`false' failed" ]
+  [ "${lines[4]}" = "# a='exported_function'" ]
+}
+
+@test "output printed even when no final newline" {
+  run bats "$FIXTURE_ROOT/no-final-newline.bats"
+  printf 'num lines: %d\n' "${#lines[@]}" >&2
+  printf 'LINE: %s\n' "${lines[@]}" >&2
+  [ "$status" -eq 1 ]
+  [ "${#lines[@]}" -eq 7 ]
+  [ "${lines[1]}" = 'not ok 1 no final newline' ]
+  [ "${lines[2]}" = "# (in test file $RELATIVE_FIXTURE_ROOT/no-final-newline.bats, line 2)" ]
+  [ "${lines[3]}" = "#   \`printf 'foo\nbar\nbaz' >&2 && return 1' failed" ]
+  [ "${lines[4]}" = '# foo' ]
+  [ "${lines[5]}" = '# bar' ]
+  [ "${lines[6]}" = '# baz' ]
 }
