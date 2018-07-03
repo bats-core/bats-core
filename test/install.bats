@@ -54,8 +54,8 @@ setup() {
   # Simulate a symlink to bin/bats (without using a symlink, for Windows sake)
   # by creating a wrapper script that executes bin/bats via a relative path.
   #
-  # The real test is in the .travis.yml script using the Dockerfile, which uses
-  # a real symbolic link.
+  # root.bats contains tests that use real symlinks on platforms that support
+  # them, as does the .travis.yml script that exercises the Dockerfile.
   local bats_symlink="$INSTALL_DIR/bin/bats-link"
   printf '%s\n' '#! /usr/bin/env bash' \
     "cd '$INSTALL_DIR/bin'" \

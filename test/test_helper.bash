@@ -4,7 +4,7 @@ fixtures() {
 }
 
 make_bats_test_suite_tmpdir() {
-  export BATS_TEST_SUITE_TMPDIR="$BATS_TMPDIR/tmp"
+  export BATS_TEST_SUITE_TMPDIR="$BATS_TMPDIR/bats-test-tmp"
   mkdir -p "$BATS_TEST_SUITE_TMPDIR"
 }
 

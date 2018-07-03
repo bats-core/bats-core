@@ -15,21 +15,36 @@ bats_resolve_link() {
   fi
 }
 
-bats_absolute_path() {
+bats_resolve_absolute_root_dir() {
   local cwd="$PWD"
   local path="$1"
   local result="$2"
+  local target_dir
+  local target_name
+  local original_shell_options="$-"
 
-  while [[ -n "$path" ]]; do
-    cd "${path%/*}"
-    path="$(bats_resolve_link "${path##*/}")"
+  # Resolve the parent directory, e.g. /bin => /usr/bin on CentOS (#113).
+  set -P
+
+  while true; do
+    target_dir="${path%/*}"
+    target_name="${path##*/}"
+
+    if [[ "$target_dir" != "$path" ]]; then
+      cd "$target_dir"
+    fi
+
+    if [[ -L "$target_name" ]]; then
+      path="$(bats_resolve_link "$target_name")"
+    else
+      printf -v "$result" -- '%s' "${PWD%/*}"
+      set +P "-$original_shell_options"
+      cd "$cwd"
+      return
+    fi
   done
-
-  printf -v "$result" -- '%s' "$PWD"
-  cd "$cwd"
 }
 
 export BATS_ROOT
-bats_absolute_path "$0" 'BATS_ROOT'
-BATS_ROOT="${BATS_ROOT%/*}"
+bats_resolve_absolute_root_dir "$0" 'BATS_ROOT'
 exec "$BATS_ROOT/libexec/bats-core/bats" "$@"
