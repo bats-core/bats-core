@@ -180,7 +180,7 @@ supports:
 
 ```
 Bats x.y.z
-Usage: bats [-c] [-r] [-p | -t] <test> [<test> ...]
+Usage: bats [-c] [-r] [-p | -t] [--global-helper=script_name] <test> [<test> ...]
 
   <test> is the path to a Bats test file, or the path to a directory
   containing Bats test files.
@@ -191,6 +191,8 @@ Usage: bats [-c] [-r] [-p | -t] <test> [<test> ...]
   -r, --recursive  Include tests in subdirectories
   -t, --tap        Show results in TAP format
   -v, --version    Display the version number
+  --global-helper  Load a global test helper script before each test file
+                   is processed
 ```
 
 To run your tests, invoke the `bats` interpreter with one or more paths to test
@@ -283,6 +285,18 @@ load test_helper
 
 will source the script `test/test_helper.bash` in your test file. This can be
 useful for sharing functions to set up your environment or load fixtures.
+
+If you have a lot of test files that will share the same test helper script,
+you can tell bats to load the helper script prior to each supplied test by
+using the `--global-helper` command line argument.
+
+You can also make use of this functionality by exporting
+`BATS_GLOBAL_HELPER_SCRIPT` with the desired value.
+
+Note: --global-helper takes arguments the same way `load` would, so if you
+run `bats test/suite/subtests`, and your global helper is
+`test/suite/subtests/test\_helper.bash`, you'd use
+`--global-helper=test_helper`.  You can also use absolute paths, if desired.
 
 ### `skip`: Easily skip tests
 
@@ -407,6 +421,8 @@ some detailed guidelines to refer to:
 
 There are several global variables you can use to introspect on Bats tests:
 
+* `$BATS_GLOBAL_HELPER_SCRIPT` is the test helper script that will get loaded
+  prior to processing each test file.
 * `$BATS_TEST_FILENAME` is the fully expanded path to the Bats test file.
 * `$BATS_TEST_DIRNAME` is the directory in which the Bats test file is located.
 * `$BATS_TEST_NAMES` is an array of function names for each test case.

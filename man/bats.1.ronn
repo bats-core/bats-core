@@ -58,6 +58,8 @@ OPTIONS
     Show results in TAP format
   * `-v`, `--version`:
     Display the version number
+  * `--global-helper`:
+    Load a global test helper script before each test file is processed
 
 
 OUTPUT
