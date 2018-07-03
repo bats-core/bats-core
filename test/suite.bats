@@ -78,3 +78,12 @@ fixtures suite
   [ "${lines[1]}" = "ok 1 another passing test" ]
   [ "${lines[2]}" = "ok 2 a passing test" ]
 }
+
+@test "global helper script" {
+  run bats --global-helper=gh_test_helper "${FIXTURE_ROOT}/global-helper"
+  [ $status -eq 0 ]
+  [ "${lines[0]}" = "1..3" ]
+  [ "${lines[1]}" = "ok 1 test one" ]
+  [ "${lines[2]}" = "ok 2 test two" ]
+  [ "${lines[3]}" = "ok 3 test three" ]
+}

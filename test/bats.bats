@@ -36,6 +36,12 @@ fixtures bats
   [ $(expr "$output" : ".*does not exist") -ne 0 ]
 }
 
+@test "missing script for --global-helper prints error and usage instructions" {
+  run bats --global-helper=
+  [ $status -eq 1 ]
+  [ $(expr "$output" : ".*You must supply a script with --global-helper.*") -ne 0 ]
+}
+
 @test "empty test file runs zero tests" {
   run bats "$FIXTURE_ROOT/empty.bats"
   [ $status -eq 0 ]
