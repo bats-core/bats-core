@@ -7,7 +7,7 @@ version() {
 
 usage() {
   version
-  printf "Usage: bats [-c] [-r] [-p | -t] <test> [<test> ...]\n"
+  printf "Usage: bats [-c] [-r] [-p | -t] [--global-helper=script_name] <test> [<test> ...]\n"
 }
 
 abort() {
@@ -28,6 +28,8 @@ help() {
   echo "  -r, --recursive  Include tests in subdirectories"
   echo "  -t, --tap        Show results in TAP format"
   echo "  -v, --version    Display the version number"
+  echo "  --global-helper  Load a global test helper script before each test file"
+  echo "                   is processed"
   echo
   echo "  For more information, see https://github.com/bats-core/bats-core"
   echo
@@ -57,7 +59,17 @@ arguments=()
 for arg in "$@"; do
   if [[ "${arg:0:1}" = "-" ]]; then
     if [[ "${arg:1:1}" = "-" ]]; then
-      options[${#options[*]}]="${arg:2}"
+      if [ "$(expr "${arg:2}" : "global-helper=.*$")" -ne 0 ]; then
+        BATS_GLOBAL_HELPER_SCRIPT="${arg##*=}"
+
+        if [ -z "${BATS_GLOBAL_HELPER_SCRIPT}" ]; then
+          abort "You must supply a script with --global-helper"
+        else
+          export BATS_GLOBAL_HELPER_SCRIPT
+        fi
+      else
+        options[${#options[*]}]="${arg:2}"
+      fi
     else
       index=1
       while option="${arg:$index:1}"; do

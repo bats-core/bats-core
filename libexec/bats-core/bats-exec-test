@@ -400,6 +400,12 @@ bats_evaluate_preprocessed_source() {
   source "$BATS_TEST_SOURCE"
 }
 
+bats_load_global_helper() {
+  if [[ -n "${BATS_GLOBAL_HELPER_SCRIPT:-}" ]]; then
+    load "${BATS_GLOBAL_HELPER_SCRIPT}"
+  fi
+}
+
 exec 3<&1
 
 if [[ "$#" -eq 0 ]]; then
@@ -413,5 +419,6 @@ if [[ "$#" -eq 0 ]]; then
   fi
 else
   bats_evaluate_preprocessed_source
+  bats_load_global_helper
   bats_perform_test "$@"
 fi
