@@ -39,7 +39,9 @@ fixtures bats
 @test "missing script for --global-helper prints error and usage instructions" {
   run bats --global-helper=
   [ $status -eq 1 ]
-  [ $(expr "$output" : ".*You must supply a script with --global-helper.*") -ne 0 ]
+  emit_debug_output
+  [ "${lines[0]}" = "Error: You must supply a script with --global-helper" ]
+  [ "${lines[2]%% *}" == 'Usage:' ]
 }
 
 @test "empty test file runs zero tests" {

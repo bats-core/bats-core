@@ -1,3 +1,3 @@
 @test "test one" {
-  [ "$(tail -1 /tmp/ghtestfile)" == "GH Test: test one" ]
+  [ "$(< ${BATS_TEST_SUITE_TMPDIR}/ghtestfile)" == "GH Test: test one" ]
 }

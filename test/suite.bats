@@ -80,6 +80,7 @@ fixtures suite
 }
 
 @test "global helper script" {
+  make_bats_test_suite_tmpdir
   run bats --global-helper=gh_test_helper "${FIXTURE_ROOT}/global-helper"
   [ $status -eq 0 ]
   [ "${lines[0]}" = "1..3" ]

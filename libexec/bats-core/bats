@@ -52,6 +52,7 @@ expand_path() {
 
 export BATS_CWD="$PWD"
 export BATS_TEST_PATTERN="^[[:blank:]]*@test[[:blank:]]+(.*[^[:blank:]])[[:blank:]]+\{(.*)\$"
+export BATS_GLOBAL_HELPER_SCRIPT=""
 export PATH="$BATS_ROOT/libexec/bats-core:$PATH"
 
 options=()
@@ -59,13 +60,11 @@ arguments=()
 for arg in "$@"; do
   if [[ "${arg:0:1}" = "-" ]]; then
     if [[ "${arg:1:1}" = "-" ]]; then
-      if [ "$(expr "${arg:2}" : "global-helper=.*$")" -ne 0 ]; then
+      if [[ "${arg:2}" =~ ^global-helper=.*$ ]]; then
         BATS_GLOBAL_HELPER_SCRIPT="${arg##*=}"
 
-        if [ -z "${BATS_GLOBAL_HELPER_SCRIPT}" ]; then
+        if [[ -z "${BATS_GLOBAL_HELPER_SCRIPT}" ]]; then
           abort "You must supply a script with --global-helper"
-        else
-          export BATS_GLOBAL_HELPER_SCRIPT
         fi
       else
         options[${#options[*]}]="${arg:2}"
