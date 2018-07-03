@@ -15,10 +15,10 @@ fi
 
 BATS_TEST_FILENAME="$1"
 if [[ -z "$BATS_TEST_FILENAME" ]]; then
-  echo "usage: bats-exec-test <filename>" >&2
+  printf 'usage: bats-exec-test <filename>\n' >&2
   exit 1
 elif [[ ! -f "$BATS_TEST_FILENAME" ]]; then
-  echo "bats: $BATS_TEST_FILENAME does not exist" >&2
+  printf 'bats: %s does not exist\n' "$BATS_TEST_FILENAME" >&2
   exit 1
 else
   shift
@@ -38,7 +38,7 @@ load() {
   fi
 
   if [[ ! -f "$filename" ]]; then
-    echo "bats: $filename does not exist" >&2
+    printf 'bats: %s does not exist\n' "$filename" >&2
     exit 1
   fi
 
@@ -74,7 +74,7 @@ skip() {
 bats_test_begin() {
   BATS_TEST_DESCRIPTION="$1"
   if [[ -n "$BATS_EXTENDED_SYNTAX" ]]; then
-    echo "begin $BATS_TEST_NUMBER $BATS_TEST_DESCRIPTION" >&3
+    printf 'begin %d %s\n' "$BATS_TEST_NUMBER" "$BATS_TEST_DESCRIPTION" >&3
   fi
   setup
 }
@@ -132,21 +132,21 @@ bats_print_stack_trace() {
     bats_frame_lineno "$frame" 'lineno'
 
     if [[ $index -eq 1 ]]; then
-      echo -n "# ("
+      printf '# ('
     else
-      echo -n "#  "
+      printf '#  '
     fi
 
     local fn
     bats_frame_function "$frame" 'fn'
     if [[ "$fn" != "$BATS_TEST_NAME" ]]; then
-      echo -n "from function \`$fn' "
+      printf "from function \`%s' " "$fn"
     fi
 
     if [[ $index -eq $count ]]; then
-      echo "in test file $filename, line $lineno)"
+      printf 'in test file %s, line %d)\n' "$filename" "$lineno"
     else
-      echo "in file $filename, line $lineno,"
+      printf 'in file %s, line %d,\n' "$filename" "$lineno"
     fi
 
     let index+=1
@@ -168,9 +168,9 @@ bats_print_failed_command() {
   printf '%s' "#   \`${failed_command}' "
 
   if [[ $status -eq 1 ]]; then
-    echo "failed"
+    printf 'failed\n'
   else
-    echo "failed with status $status"
+    printf 'failed with status %d\n' "$status"
   fi
 }
 
@@ -286,9 +286,12 @@ bats_exit_trap() {
       BATS_ERROR_STACK_TRACE=( "${BATS_PREVIOUS_STACK_TRACE[@]}" )
       BATS_ERROR_STATUS=1
     fi
-    echo "not ok $BATS_TEST_NUMBER $BATS_TEST_DESCRIPTION" >&3
+    printf 'not ok %d %s\n' "$BATS_TEST_NUMBER" "$BATS_TEST_DESCRIPTION" >&3
     bats_print_stack_trace "${BATS_ERROR_STACK_TRACE[@]}" >&3
-    bats_print_failed_command "${BATS_ERROR_STACK_TRACE[${#BATS_ERROR_STACK_TRACE[@]}-1]}" "$BATS_ERROR_STATUS" >&3
+    bats_print_failed_command \
+      "${BATS_ERROR_STACK_TRACE[${#BATS_ERROR_STACK_TRACE[@]}-1]}" \
+      "$BATS_ERROR_STATUS" >&3
+
     while IFS= read -r line; do
       printf '# %s\n' "$line"
     done <"$BATS_OUT" >&3
@@ -297,7 +300,8 @@ bats_exit_trap() {
     fi
     status=1
   else
-    echo "ok ${BATS_TEST_NUMBER} ${BATS_TEST_DESCRIPTION}${skipped}" >&3
+    printf 'ok %d %s%s\n' "$BATS_TEST_NUMBER" "$BATS_TEST_DESCRIPTION" \
+      "$skipped" >&3
     status=0
   fi
 
@@ -306,7 +310,7 @@ bats_exit_trap() {
 }
 
 bats_perform_tests() {
-  echo "1..$#"
+  printf '1..%d\n' "$#"
   test_number=1
   status=0
   for test_name in "$@"; do
@@ -324,7 +328,7 @@ bats_perform_test() {
   if declare -F "$BATS_TEST_NAME" >/dev/null; then
     BATS_TEST_NUMBER="$2"
     if [[ -z "$BATS_TEST_NUMBER" ]]; then
-      echo "1..1"
+      printf '1..1\n'
       BATS_TEST_NUMBER=1
     fi
 
@@ -340,7 +344,7 @@ bats_perform_test() {
     bats_teardown_trap
 
   else
-    echo "bats: unknown test name \`$BATS_TEST_NAME'" >&2
+    printf "bats: unknown test name \`%s'\n" "$BATS_TEST_NAME" >&2
     exit 1
   fi
 }
@@ -407,7 +411,7 @@ if [[ "$#" -eq 0 ]]; then
   bats_evaluate_preprocessed_source
 
   if [[ -n "$BATS_COUNT_ONLY" ]]; then
-    echo "${#BATS_TEST_NAMES[@]}"
+    printf '%d\n' "${#BATS_TEST_NAMES[@]}"
   else
     bats_perform_tests "${BATS_TEST_NAMES[@]}"
   fi

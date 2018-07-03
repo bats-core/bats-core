@@ -2,12 +2,12 @@
 set -e
 
 version() {
-  echo "Bats 1.0.2"
+  printf 'Bats 1.0.2\n'
 }
 
 usage() {
   version
-  printf "Usage: bats [-c] [-r] [-p | -t] <test> [<test> ...]\n"
+  printf 'Usage: bats [-c] [-r] [-p | -t] <test> [<test> ...]\n'
 }
 
 abort() {
@@ -17,20 +17,25 @@ abort() {
 }
 
 help() {
+  local line
   usage
-  echo
-  echo "  <test> is the path to a Bats test file, or the path to a directory"
-  echo "  containing Bats test files."
-  echo
-  echo "  -c, --count      Count the number of test cases without running any tests"
-  echo "  -h, --help       Display this help message"
-  echo "  -p, --pretty     Show results in pretty format (default for terminals)"
-  echo "  -r, --recursive  Include tests in subdirectories"
-  echo "  -t, --tap        Show results in TAP format"
-  echo "  -v, --version    Display the version number"
-  echo
-  echo "  For more information, see https://github.com/bats-core/bats-core"
-  echo
+  while read -r line; do
+    printf '%s\n' "$line"
+  done <<END_OF_HELP_TEXT
+
+  <test> is the path to a Bats test file, or the path to a directory
+  containing Bats test files.
+
+  -c, --count      Count the number of test cases without running any tests
+  -h, --help       Display this help message
+  -p, --pretty     Show results in pretty format (default for terminals)
+  -r, --recursive  Include tests in subdirectories
+  -t, --tap        Show results in TAP format
+  -v, --version    Display the version number
+
+  For more information, see https://github.com/bats-core/bats-core
+
+END_OF_HELP_TEXT
 }
 
 expand_path() {
