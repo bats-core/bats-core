@@ -111,7 +111,7 @@ clear_to_end_of_line() {
 
 advance() {
   clear_to_end_of_line
-  echo
+  printf '\n'
   clear_color
 }
 
