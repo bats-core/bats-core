@@ -24,7 +24,7 @@ with the message `Bats <VERSION>`, where `<VERSION>` is the new version number.
 Create a new signed, annotated tag with:
 
 ```bash
-$ git tag -a -s <VERSION>`
+$ git tag -a -s <VERSION>
 ```
 
 Include the `docs/CHANGELOG.md` notes corresponding to the new version as the
@@ -43,18 +43,13 @@ Added:
 
 ## Create a GitHub release
 
-Push the new version commit and tag to GitHub via the following (yes, it must be
-two separate commands):
+Push the new version commit and tag to GitHub via the following:
 
 ```bash
-# Push the version commit to `master`:
-$ git push
-
-# Push the version tag:
-$ git push --tags
+$ git push --follow-tags
 ```
 
-Then visit https://github.com/bats-core/bats-core/releases, then:
+Then visit https://github.com/bats-core/bats-core/releases, and:
 
 * Click **Draft a new release**.
 * Select the new version tag.
@@ -62,6 +57,14 @@ Then visit https://github.com/bats-core/bats-core/releases, then:
 * Paste the same notes from the version tag annotation as the description,
   except change the first line to read: `Released: YYYY-MM-DD`.
 * Click **Publish release**.
+
+For more on `git push --follow-tags`, see:
+
+* [git push --follow-tags in the online manual][ft-man]
+* [Stack Overflow: How to push a tag to a remote repository using Git?][ft-so]
+
+[ft-man]: https://git-scm.com/docs/git-push#git-push---follow-tags
+[ft-so]: https://stackoverflow.com/a/26438076
 
 ## NPM
 
@@ -104,6 +107,9 @@ SHA512(v1.1.0.zip)=accd83cfec0025a2be40982b3f9a314c2bbf72f5c85daffa9e9419611904a
 
 After cloning alpinelinux/aports, I used the above information to create:
 https://github.com/alpinelinux/aports/pull/4696
+
+**Note:** Currently users must enable the `edge` branch of the `community` repo
+by adding/uncommenting the corresponding entry in `/etc/apk/repositories`.
 
 ## Announce
 
