@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# Usage: script/release [<newversion> | major | minor | patch | premajor | preminor | prepatch | prerelease | from-git]
+#
+# - Triggers a version bump to the provided explicit version,
+#   or to the derived new version given the "bump level".
+#   Leverages npm-version to the bumping and git-commit/tag.
+#   Requires git to be configured for GPG signing.
+
+set -euo pipefail
+IFS=$'\n\t'
+
+BUMP=${1:-patch}
+
+npm version --sign-git-tag --message 'Bats %s' "$BUMP"
