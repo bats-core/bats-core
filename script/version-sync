@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+# Usage: script/version-sync [version]
+#
+# - Updates version references throughout the repo.
+#   This script is intended to be invoked via the `version` npm script hook;
+#   which expects the environment variable `npm_package_version`,
+#   to which all other version references will be updated.
+#   This script can also be invoked directly with the new version
+#   provided as the first argument.
+#   The optional version argument takes precedence over `npm_package_version`.
+#   Lastly, if not given an argument and `npm_package_version` is unset,
+#   then version will be taken from package.json.
+
+set -euo pipefail
+IFS=$'\n\t'
+
+version_from_npm() {
+  echo "${npm_package_version:-$(node -p 'require("./package").version')}"
+}
+export NEW_VERSION=${1:-$(version_from_npm)}
+
+perl -pi -e 's/^(version:\s+v).*$/$1$ENV{NEW_VERSION}+appveyor.{build}/' -- .appveyor.yml
+perl -pi -e 's/^(Version:\s+).*$/$1$ENV{NEW_VERSION}/' -- contrib/rpm/bats.spec
+perl -pi -e 's/^(\s*bats_version=).*$/$1$ENV{NEW_VERSION}/' -- libexec/bats-core/bats
+
+git add -- .appveyor.yml contrib/rpm/bats.spec libexec/bats-core/bats

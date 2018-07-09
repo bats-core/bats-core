@@ -19,7 +19,8 @@
     "test": "test"
   },
   "scripts": {
-    "test": "bin/bats test"
+    "test": "bin/bats test",
+    "version": "script/version-sync"
   },
   "keywords": [
     "bats",
