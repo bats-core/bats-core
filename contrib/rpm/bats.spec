@@ -3,7 +3,7 @@
 %global repo            bats-core
 
 Name:           bats
-Version:        1.0.2
+Version:        1.1.0
 Release:        1%{?dist}
 Summary:        Bash Automated Testing System
 
@@ -41,6 +41,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man7/%{name}.7.gz
 
 %changelog
+* Tue Jul 08 2018 mbland <mbland@acm.org> - 1.1.0-1
+- Increase version to match upstream release
+
 * Mon Jun 18 2018 pixdrift <support@pixeldrift.net> - 1.0.2-1
 - Increase version to match upstream release
 - Relocate libraries to bats-core subdirectory

@@ -436,6 +436,26 @@ on the wiki.
 
 Bats is [SemVer compliant](https://semver.org/).
 
+*1.1.0* (July 8, 2018)
+
+This is the first release with new features relative to the original Bats 0.4.0.
+
+Added:
+* The `-r, --recursive` flag to scan directory arguments recursively for
+  `*.bats` files (#109)
+* The `contrib/rpm/bats.spec` file to build RPMs (#111)
+
+Changed:
+* Travis exercises latest versions of Bash from 3.2 through 4.4 (#116, #117)
+* Error output highlights invalid command line options (#45, #46, #118)
+* Replaced `echo` with `printf` (#120)
+
+Fixed:
+* Fixed `BATS_ERROR_STATUS` getting lost when `bats_error_trap` fired multiple
+  times under Bash 4.2.x (#110)
+* Updated `bin/bats` symlink resolution, handling the case on CentOS where
+  `/bin` is a symlink to `/usr/bin` (#113, #115)
+
 *1.0.2* (June 18, 2018)
 
 * Fixed sstephenson/bats#240, whereby `skip` messages containing parentheses
