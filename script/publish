@@ -5,8 +5,9 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-RELNOTES="$(git rev-parse --git-dir)/RELNOTES"
 DRYRUN=
+TAG="$(git describe --tags --exact-match)"
+RELNOTES="$(git rev-parse --git-dir)/RELNOTES"
 
 abort() {
   printf 'Aborting: %s\n' "$1" >&2
@@ -19,6 +20,10 @@ assert_release_notes() {
 
 github_push() {
   git push --follow-tags ${DRYRUN:+--dry-run}
+}
+
+github_release() {
+  hub release create --browse --file=- "$TAG" <"$RELNOTES" || true
 }
 
 npm_publish() {
@@ -38,4 +43,5 @@ done
 assert_release_notes
 
 github_push
+github_release
 npm_publish
