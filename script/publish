@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+# Usage: script/publish
+#
+
+set -euo pipefail
+IFS=$'\n\t'
+
+RELNOTES="$(git rev-parse --git-dir)/RELNOTES"
+DRYRUN=
+
+abort() {
+  printf 'Aborting: %s\n' "$1" >&2
+  exit 1
+}
+
+assert_release_notes() {
+  test -s "$RELNOTES"
+}
+
+github_push() {
+  git push --follow-tags ${DRYRUN:+--dry-run}
+}
+
+npm_publish() {
+  local publish=${DRYRUN:+pack}
+  npm ${publish:-publish}
+}
+
+while getopts ':n' opt; do
+  case $opt in
+  # f) force=--force ;;
+  n) DRYRUN=true; set -x ;;
+  :) abort "Option -$OPTARG requires an argument." ;;
+  \?) abort "Invalid option: -$OPTARG" ;;
+  esac
+done
+
+assert_release_notes
+
+github_push
+npm_publish
