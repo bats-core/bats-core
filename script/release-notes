@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+# Usage: script/release-notes
+#
+# - fetches latest tags
+# - switches to master branch
+# - ensures there are unreleased features
+# - creates .git/RELNOTES file from git history
+# - opens .git/RELNOTES in $EDITOR (default: vim)
+# - exits with vim's exit status (and non-empty RELNOTES file)
+
+set -euo pipefail
+IFS=$'\n\t'
+
+abort() {
+  printf 'Aborting: %s\n' "$1" >&2
+  exit 1
+}
+
+assert_features_since() {
+  local previous_tag=$1
+
+  if git diff --quiet "${previous_tag}..HEAD" -- install.sh bin contrib libexec; then
+    abort "No features to release since '${previous_tag}'"
+  fi
+}
+
+changes_since() {
+  local previous_tag=$1
+  git log --first-parent --format='%w(0,0,2)* %B%n' --reverse "${previous_tag}..HEAD^" --  install.sh bin contrib libexec
+}
+
+
+git fetch --quiet --tags
+
+git checkout --quiet master
+
+# This only finds tags reachable from HEAD
+PREV_TAG="$(git describe --tags --match 'v*' --abbrev=0)"
+RELNOTES="$(git rev-parse --git-dir)/RELNOTES"
+
+assert_features_since "$PREV_TAG"
+
+changes_since "$PREV_TAG" > "$RELNOTES"
+
+${EDITOR:-vim} "$RELNOTES"
+
+test -s "$RELNOTES"
