@@ -10,5 +10,10 @@ set -euo pipefail
 IFS=$'\n\t'
 
 BUMP=${1:-patch}
+RELNOTES="$(git rev-parse --git-dir)/RELNOTES"
 
-npm version --sign-git-tag --message 'Bats %s' "$BUMP"
+./script/release-notes
+
+printf -v MESSAGE 'Bats %%s\n\n%s' "$(sed -E 's/^#+[ \t]*//' "$RELNOTES")"
+
+npm version --sign-git-tag --message "$MESSAGE" "$BUMP"
