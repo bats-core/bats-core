@@ -23,7 +23,10 @@ github_push() {
 }
 
 github_release() {
-  hub release create --browse --file=- "$TAG" <"$RELNOTES" || true
+  local message
+  printf -v message 'Bats %s\n\n%s' "${TAG#v}" "$(<"$RELNOTES")"
+
+  hub release create --browse --message="$message" "$TAG"
 }
 
 npm_publish() {
