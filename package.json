@@ -20,7 +20,7 @@
   },
   "scripts": {
     "test": "bin/bats test",
-    "version": "script/version-sync"
+    "version": "script/version-sync && script/version-changelog"
   },
   "keywords": [
     "bats",
