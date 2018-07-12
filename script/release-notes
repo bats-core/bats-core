@@ -44,4 +44,6 @@ changes_since "$PREV_TAG" > "$RELNOTES"
 
 ${EDITOR:-vim} "$RELNOTES"
 
+sed -i '' 's/[ \t]*$//' "$RELNOTES"
+
 test -s "$RELNOTES"
