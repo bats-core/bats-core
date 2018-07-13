@@ -32,6 +32,9 @@ npm_publish() {
   npm ${publish:-publish}
 }
 
+homebrew_pr() {
+  "$(npm bin)"/brew-publish bats-core "$TAG" -g bats-core/bats-core ${DRYRUN:+-n}
+}
 
 while getopts ':dn' opt; do
   case $opt in
@@ -52,3 +55,4 @@ assert_release_notes
 github_push
 github_release
 npm_publish
+homebrew_pr
