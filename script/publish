@@ -36,6 +36,10 @@ homebrew_pr() {
   "$(npm bin)"/brew-publish bats-core "$TAG" -g bats-core/bats-core ${DRYRUN:+-n}
 }
 
+cleanup_relnotes() {
+  rm "$RELNOTES"
+}
+
 while getopts ':dn' opt; do
   case $opt in
   d) set -x ;;
@@ -46,7 +50,6 @@ while getopts ':dn' opt; do
   esac
 done
 
-# set after opt parsing so set-x is more helpful
 TAG="$(git describe --tags --exact-match)"
 RELNOTES="$(git rev-parse --git-dir)/RELNOTES"
 
@@ -56,3 +59,5 @@ github_push
 github_release
 npm_publish
 homebrew_pr
+
+cleanup_relnotes

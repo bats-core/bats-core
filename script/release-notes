@@ -40,7 +40,7 @@ RELNOTES="$(git rev-parse --git-dir)/RELNOTES"
 
 assert_features_since "$PREV_TAG"
 
-changes_since "$PREV_TAG" > "$RELNOTES"
+changes_since "$PREV_TAG" >> "$RELNOTES"
 
 ${EDITOR:-vim} "$RELNOTES"
 
