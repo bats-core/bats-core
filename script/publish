@@ -6,8 +6,6 @@ set -euo pipefail
 IFS=$'\n\t'
 
 DRYRUN=
-TAG="$(git describe --tags --exact-match)"
-RELNOTES="$(git rev-parse --git-dir)/RELNOTES"
 
 abort() {
   printf 'Aborting: %s\n' "$1" >&2
@@ -34,14 +32,20 @@ npm_publish() {
   npm ${publish:-publish}
 }
 
-while getopts ':n' opt; do
+
+while getopts ':dn' opt; do
   case $opt in
+  d) set -x ;;
   # f) force=--force ;;
-  n) DRYRUN=true; set -x ;;
+  n) DRYRUN=true ;;
   :) abort "Option -$OPTARG requires an argument." ;;
   \?) abort "Invalid option: -$OPTARG" ;;
   esac
 done
+
+# set after opt parsing so set-x is more helpful
+TAG="$(git describe --tags --exact-match)"
+RELNOTES="$(git rev-parse --git-dir)/RELNOTES"
 
 assert_release_notes
 
