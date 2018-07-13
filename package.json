@@ -22,6 +22,9 @@
     "test": "bin/bats test",
     "version": "script/version-sync && script/version-changelog"
   },
+  "devDependencies": {
+    "brew-publish": "^2.2.0"
+  },
   "keywords": [
     "bats",
     "bash",
