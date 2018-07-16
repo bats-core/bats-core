@@ -14,7 +14,7 @@ fixtures bats
   run bats --invalid-option
   [ $status -eq 1 ]
   emit_debug_output
-  [ "${lines[0]}" == "Error: Bad command line option '-invalid-option'" ]
+  [ "${lines[0]}" == "Error: Bad command line option '--invalid-option'" ]
   [ "${lines[2]%% *}" == 'Usage:' ]
 }
 

@@ -57,63 +57,66 @@ export BATS_CWD="$PWD"
 export BATS_TEST_PATTERN="^[[:blank:]]*@test[[:blank:]]+(.*[^[:blank:]])[[:blank:]]+\{(.*)\$"
 export PATH="$BATS_ROOT/libexec/bats-core:$PATH"
 
-options=()
 arguments=()
+
+# Unpack single-character options bundled together, e.g. -cr, -pr.
 for arg in "$@"; do
-  if [[ "${arg:0:1}" == '-' ]]; then
-    if [[ "${arg:1:1}" == '-' ]]; then
-      options+=("${arg:2}")
-    else
-      index=1
-      while option="${arg:$((index++)):1}"; do
-        if [[ -z "$option" ]]; then
-          break
-        fi
-        options+=("$option")
-      done
-    fi
+  if [[ "$arg" =~ ^-[^-]. ]]; then
+    index=1
+    while option="${arg:$((index++)):1}"; do
+      if [[ -z "$option" ]]; then
+        break
+      fi
+      arguments+=("-$option")
+    done
   else
     arguments+=("$arg")
   fi
+  shift
 done
 
+set -- "${arguments[@]}"
+arguments=()
+
 unset count_flag pretty recursive
-count_flag=''
-pretty=''
-recursive=''
+count_flag=
+pretty=
+recursive=
 if [[ -z "${CI:-}" && -t 0 && -t 1 ]]; then
   pretty=1
 fi
 
-if [[ "${#options[@]}" -ne 0 ]]; then
-  for option in "${options[@]}"; do
-    case "$option" in
-    "h" | "help" )
-      help
-      exit 0
-      ;;
-    "v" | "version" )
-      version
-      exit 0
-      ;;
-    "c" | "count" )
-      count_flag="-c"
-      ;;
-    "r" | "recursive" )
-      recursive=1
-      ;;
-    "t" | "tap" )
-      pretty=""
-      ;;
-    "p" | "pretty" )
-      pretty=1
-      ;;
-    * )
-      abort "Bad command line option '-$option'"
-      ;;
-    esac
-  done
-fi
+while [[ "$#" -ne 0 ]]; do
+  case "$1" in
+  -h|--help)
+    help
+    exit 0
+    ;;
+  -v|--version)
+    version
+    exit 0
+    ;;
+  -c|--count)
+    count_flag='-c'
+    ;;
+  -r|--recursive)
+    recursive=1
+    ;;
+  -t|--tap)
+    pretty=
+    ;;
+  -p|--pretty)
+    pretty=1
+    ;;
+  -*)
+    abort "Bad command line option '$1'"
+    ;;
+  *)
+    arguments+=("$1")
+    ;;
+  esac
+  shift
+done
 
 if [[ "${#arguments[@]}" -eq 0 ]]; then
   abort 'Must specify at least one <test>'
