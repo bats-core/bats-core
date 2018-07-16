@@ -60,21 +60,20 @@ export PATH="$BATS_ROOT/libexec/bats-core:$PATH"
 options=()
 arguments=()
 for arg in "$@"; do
-  if [[ "${arg:0:1}" = "-" ]]; then
-    if [[ "${arg:1:1}" = "-" ]]; then
-      options[${#options[*]}]="${arg:2}"
+  if [[ "${arg:0:1}" == '-' ]]; then
+    if [[ "${arg:1:1}" == '-' ]]; then
+      options+=("${arg:2}")
     else
       index=1
-      while option="${arg:$index:1}"; do
+      while option="${arg:$((index++)):1}"; do
         if [[ -z "$option" ]]; then
           break
         fi
-        options[${#options[*]}]="$option"
-        let index+=1
+        options+=("$option")
       done
     fi
   else
-    arguments[${#arguments[*]}]="$arg"
+    arguments+=("$arg")
   fi
 done
 
