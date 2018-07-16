@@ -7,7 +7,8 @@ version() {
 
 usage() {
   version
-  printf 'Usage: bats [-c] [-r] [-p | -t] <test> [<test> ...]\n'
+  printf '%s\n' \
+    'Usage: bats [-h] [-c] [-f <regex>] [-r] [-p | -t] <test> [<test> ...]'
 }
 
 abort() {
@@ -19,7 +20,7 @@ abort() {
 help() {
   local line
   usage
-  while read -r line; do
+  while IFS= read -r line; do
     printf '%s\n' "$line"
   done <<END_OF_HELP_TEXT
 
@@ -27,6 +28,7 @@ help() {
   containing Bats test files.
 
   -c, --count      Count the number of test cases without running any tests
+  -f, --filter     Filter test cases by names matching the regular expression
   -h, --help       Display this help message
   -p, --pretty     Show results in pretty format (default for terminals)
   -r, --recursive  Include tests in subdirectories
@@ -55,6 +57,7 @@ expand_path() {
 
 export BATS_CWD="$PWD"
 export BATS_TEST_PATTERN="^[[:blank:]]*@test[[:blank:]]+(.*[^[:blank:]])[[:blank:]]+\{(.*)\$"
+export BATS_TEST_FILTER=
 export PATH="$BATS_ROOT/libexec/bats-core:$PATH"
 
 arguments=()
@@ -98,6 +101,10 @@ while [[ "$#" -ne 0 ]]; do
     ;;
   -c|--count)
     count_flag='-c'
+    ;;
+  -f|--filter)
+    shift
+    BATS_TEST_FILTER="$1"
     ;;
   -r|--recursive)
     recursive=1

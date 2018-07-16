@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-encode_name() {
+bats_encode_test_name() {
   local name="$1"
   local result="test_"
   local hex_code
@@ -41,10 +41,13 @@ while IFS= read -r line; do
     name="${BASH_REMATCH[1]#[\'\"]}"
     name="${name%[\'\"]}"
     body="${BASH_REMATCH[2]}"
-    encode_name "$name" 'encoded_name'
-    tests["${#tests[@]}"]="$encoded_name"
+    bats_encode_test_name "$name" 'encoded_name'
     printf '%s() { bats_test_begin "%s" %d; %s\n' "$encoded_name" "$name" \
       "$index" "$body"
+
+    if [[ -z "$BATS_TEST_FILTER" || "$name" =~ $BATS_TEST_FILTER ]]; then
+      tests["${#tests[@]}"]="$encoded_name"
+    fi
   else
     printf "%s\n" "$line"
   fi

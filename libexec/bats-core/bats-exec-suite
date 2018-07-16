@@ -19,7 +19,11 @@ count=0
 for filename in "$@"; do
   while IFS= read -r line; do
     if [[ "$line" =~ $BATS_TEST_PATTERN ]]; then
-      let count+=1
+      test_name="${BASH_REMATCH[1]#[\'\"]}"
+      test_name="${test_name%[\'\"]}"
+      if [[ -z "$BATS_TEST_FILTER" || "$test_name" =~ $BATS_TEST_FILTER ]]; then
+        let count+=1
+      fi
     fi
   done <"$filename"
 done
