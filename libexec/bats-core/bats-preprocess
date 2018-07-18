@@ -46,7 +46,7 @@ while IFS= read -r line; do
       "$index" "$body"
 
     if [[ -z "$BATS_TEST_FILTER" || "$name" =~ $BATS_TEST_FILTER ]]; then
-      tests["${#tests[@]}"]="$encoded_name"
+      tests+=("$encoded_name")
     fi
   else
     printf "%s\n" "$line"
