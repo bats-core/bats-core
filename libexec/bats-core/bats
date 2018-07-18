@@ -7,7 +7,7 @@ version() {
 
 usage() {
   version
-  printf 'Usage: bats [-c] [-r] [-p | -t] <test> [<test> ...]\n'
+  printf 'Usage: bats [-c] [-r] [-p | -t] [-d] <test> [<test> ...]\n'
 }
 
 abort() {
@@ -31,6 +31,7 @@ help() {
   -p, --pretty     Show results in pretty format (default for terminals)
   -r, --recursive  Include tests in subdirectories
   -t, --tap        Show results in TAP format
+  -d, --duration   Track duration of each test in YAML when using TAP format
   -v, --version    Display the version number
 
   For more information, see https://github.com/bats-core/bats-core
@@ -109,6 +110,9 @@ if [[ "${#options[@]}" -ne 0 ]]; then
     "p" | "pretty" )
       pretty=1
       ;;
+    "d" | "duration" )
+      duration_flag="-d"
+      ;;
     * )
       abort "Bad command line option '-$option'"
       ;;
@@ -149,7 +153,7 @@ fi
 
 set -o pipefail execfail
 if [[ -z "$pretty" ]]; then
-  exec "$command" $count_flag "${filenames[@]}"
+  exec "$command" $count_flag $duration_flag "${filenames[@]}"
 else
   extended_syntax_flag="-x"
   formatter="bats-format-tap-stream"

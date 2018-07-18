@@ -180,7 +180,7 @@ supports:
 
 ```
 Bats x.y.z
-Usage: bats [-c] [-r] [-p | -t] <test> [<test> ...]
+Usage: bats [-c] [-r] [-p | -t] [-d] <test> [<test> ...]
 
   <test> is the path to a Bats test file, or the path to a directory
   containing Bats test files.
@@ -190,6 +190,7 @@ Usage: bats [-c] [-r] [-p | -t] <test> [<test> ...]
   -p, --pretty     Show results in pretty format (default for terminals)
   -r, --recursive  Include tests in subdirectories
   -t, --tap        Show results in TAP format
+  -d, --duration   Track duration of each test in YAML when using TAP format
   -v, --version    Display the version number
 ```
 

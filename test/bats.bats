@@ -467,3 +467,23 @@ END_OF_ERR_MSG
   [ "${lines[5]}" = '# bar' ]
   [ "${lines[6]}" = '# baz' ]
 }
+
+@test "tests with durations" {
+  run bats -td $FIXTURE_ROOT/passing_failing_and_skipping.bats
+  [ "$status" -eq 1 ]
+  
+  [ "${lines[0]}"       =  'TAP version 13' ]
+  [ "${lines[2]}"       =  'ok 1 a passing test' ]
+  [ "${lines[3]}"       =  '  ---' ]
+  [ "${lines[4]:0:15}"  =  '  duration_ms: ' ]
+  [ "${lines[5]}"       =  '  ...' ]
+  [ "${lines[6]}"       =  'ok 2 a skipping test # skip' ]
+  [ "${lines[7]}"       =  '  ---' ]
+  [ "${lines[8]:0:15}"  =  '  duration_ms: ' ]
+  [ "${lines[9]}"       =  '  ...' ]
+  [ "${lines[10]}"      =  'not ok 3 a failing test' ]
+  [ "${lines[11]:0:15}" =  '# (in test file' ]
+  [ "${lines[13]}"      =  '  ---' ]
+  [ "${lines[14]:0:15}" =  '  duration_ms: ' ]
+  [ "${lines[15]}"      =  '  ...' ]
+}
