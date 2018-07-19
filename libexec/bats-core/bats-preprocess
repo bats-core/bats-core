@@ -33,6 +33,7 @@ encode_name() {
 
 tests=()
 index=0
+run_test=1
 
 while IFS= read -r line; do
   line="${line//$'\r'}"
@@ -40,9 +41,18 @@ while IFS= read -r line; do
   if [[ "$line" =~ $BATS_TEST_PATTERN ]]; then
     name="${BASH_REMATCH[1]#[\'\"]}"
     name="${name%[\'\"]}"
+    if [[ -n "$BATS_RUN_PATTERN" ]]; then
+      if [[ "${name//\"/}" =~ $BATS_RUN_PATTERN ]]; then
+        run_test=1
+      else
+        run_test=0
+      fi
+    fi
     body="${BASH_REMATCH[2]}"
     encode_name "$name" 'encoded_name'
-    tests["${#tests[@]}"]="$encoded_name"
+    if [[ "$run_test" -eq 1 ]]; then
+      tests["${#tests[@]}"]="$encoded_name"
+    fi
     printf '%s() { bats_test_begin "%s" %d; %s\n' "$encoded_name" "$name" \
       "$index" "$body"
   else

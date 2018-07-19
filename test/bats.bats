@@ -467,3 +467,11 @@ END_OF_ERR_MSG
   [ "${lines[5]}" = '# bar' ]
   [ "${lines[6]}" = '# baz' ]
 }
+
+@test "BATS_RUN_PATTERN matches tests to run against a pattern" {
+  BATS_RUN_PATTERN='a passing test' run bats -t "$FIXTURE_ROOT/passing_failing_and_skipping.bats"
+  [ "$status" -eq 0 ]
+  [ "${lines[0]}" = '1..1' ]
+  [ "${lines[1]}" = 'ok 1 a passing test' ]
+  [ "${#lines[@]}" -eq 2 ]
+}

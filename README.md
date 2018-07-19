@@ -417,6 +417,8 @@ There are several global variables you can use to introspect on Bats tests:
   test file.
 * `$BATS_TMPDIR` is the location to a directory that may be used to store
   temporary files.
+* `$BATS_RUN_PATTERN` is a regular expression describing which tests to run
+  from the test file.
 
 ## Support
 
