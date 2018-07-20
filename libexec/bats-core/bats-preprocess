@@ -32,18 +32,15 @@ bats_encode_test_name() {
 }
 
 tests=()
-index=0
 
 while IFS= read -r line; do
   line="${line//$'\r'}"
-  let index+=1
   if [[ "$line" =~ $BATS_TEST_PATTERN ]]; then
     name="${BASH_REMATCH[1]#[\'\"]}"
     name="${name%[\'\"]}"
     body="${BASH_REMATCH[2]}"
     bats_encode_test_name "$name" 'encoded_name'
-    printf '%s() { bats_test_begin "%s" %d; %s\n' "$encoded_name" "$name" \
-      "$index" "$body"
+    printf '%s() { bats_test_begin "%s"; %s\n' "$encoded_name" "$name" "$body"
 
     if [[ -z "$BATS_TEST_FILTER" || "$name" =~ $BATS_TEST_FILTER ]]; then
       tests+=("$encoded_name")
