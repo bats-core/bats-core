@@ -137,16 +137,16 @@ for filename in "${arguments[@]}"; do
     shopt -s nullglob
     if [[ "$recursive" -eq 1 ]]; then
       while IFS= read -r -d $'\0' file; do
-        filenames["${#filenames[@]}"]="$file"
+        filenames+=("$file")
       done < <(find "$filename" -type f -name "*.bats" -print0 | sort -z)
     else
       for suite_filename in "$filename"/*.bats; do
-        filenames["${#filenames[@]}"]="$suite_filename"
+        filenames+=("$suite_filename")
       done
     fi
     shopt -u nullglob
   else
-    filenames["${#filenames[@]}"]="$filename"
+    filenames+=("$filename")
   fi
 done
 

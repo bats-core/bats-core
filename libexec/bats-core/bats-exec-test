@@ -123,7 +123,7 @@ bats_capture_stack_trace() {
     # calling an exported function erases the test file's BASH_SOURCE entry.
     source_file="${BASH_SOURCE[$i]:-$BATS_TEST_SOURCE}"
     frame="${BASH_LINENO[$((i-1))]} ${FUNCNAME[$i]} $source_file"
-    BATS_CURRENT_STACK_TRACE["${#BATS_CURRENT_STACK_TRACE[@]}"]="$frame"
+    BATS_CURRENT_STACK_TRACE+=("$frame")
     if [[ "$frame" = *"$test_pattern"     || \
           "$frame" = *"$setup_pattern"    || \
           "$frame" = *"$teardown_pattern" ]]; then
