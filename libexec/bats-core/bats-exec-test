@@ -165,7 +165,7 @@ bats_print_stack_trace() {
       printf 'in file %s, line %d,\n' "$filename" "$lineno"
     fi
 
-    let index+=1
+    ((++index))
   done
 }
 
@@ -336,7 +336,7 @@ bats_perform_tests() {
       "$test_number"; then
       status=1
     fi
-    let test_number+=1
+    ((++test_number))
   done
   exit "$status"
 }

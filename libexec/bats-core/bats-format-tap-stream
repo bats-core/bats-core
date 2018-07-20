@@ -150,7 +150,7 @@ trap finish EXIT
 while IFS= read -r line; do
   case "$line" in
   "begin "* )
-    let index+=1
+    ((++index))
     name="${line#* $index }"
     buffer begin
     flush
@@ -158,14 +158,14 @@ while IFS= read -r line; do
   "ok "* )
     skip_expr="ok $index (.*) # skip ?(([[:print:]]*))?"
     if [[ "$line" =~ $skip_expr ]]; then
-      let skipped+=1
+      ((++skipped))
       buffer skip "${BASH_REMATCH[2]}"
     else
       buffer pass
     fi
     ;;
   "not ok "* )
-    let failures+=1
+    ((++failures))
     buffer fail
     ;;
   "# "* )
