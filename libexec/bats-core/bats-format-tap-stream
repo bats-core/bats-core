@@ -1,11 +1,6 @@
 #!/usr/bin/env bash
 set -e
 
-# Just stream the TAP output (sans extended syntax) if tput is missing
-if ! command -v tput >/dev/null; then
-  exec grep -v '^begin '
-fi
-
 header_pattern='[0-9]+\.\.[0-9]+'
 IFS= read -r header
 

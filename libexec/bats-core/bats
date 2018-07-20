@@ -84,7 +84,7 @@ unset flags pretty recursive
 flags=()
 pretty=
 recursive=
-if [[ -z "${CI:-}" && -t 0 && -t 1 ]]; then
+if [[ -z "${CI:-}" && -t 0 && -t 1 ]] && command -v tput >/dev/null; then
   pretty=1
 fi
 
