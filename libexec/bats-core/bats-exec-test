@@ -1,17 +1,28 @@
 #!/usr/bin/env bash
 set -eET
 
-BATS_COUNT_ONLY=""
-if [[ "$1" = "-c" ]]; then
-  BATS_COUNT_ONLY=1
-  shift
-fi
+BATS_COUNT_ONLY=''
+BATS_TEST_FILTER=''
+BATS_EXTENDED_SYNTAX=''
 
-BATS_EXTENDED_SYNTAX=""
-if [[ "$1" = "-x" ]]; then
-  BATS_EXTENDED_SYNTAX="$1"
+while [[ "$#" -ne 0 ]]; do
+  case "$1" in
+  -c)
+    BATS_COUNT_ONLY=1
+    ;;
+  -f)
+    BATS_TEST_FILTER="$2"
+    shift
+    ;;
+  -x)
+    BATS_EXTENDED_SYNTAX='-x'
+    ;;
+  *)
+    break
+    ;;
+  esac
   shift
-fi
+done
 
 BATS_TEST_FILENAME="$1"
 if [[ -z "$BATS_TEST_FILENAME" ]]; then

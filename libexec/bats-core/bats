@@ -80,8 +80,8 @@ done
 set -- "${arguments[@]}"
 arguments=()
 
-unset count_flag pretty recursive
-count_flag=
+unset flags pretty recursive
+flags=()
 pretty=
 recursive=
 if [[ -z "${CI:-}" && -t 0 && -t 1 ]]; then
@@ -100,11 +100,11 @@ while [[ "$#" -ne 0 ]]; do
     exit 0
     ;;
   -c|--count)
-    count_flag='-c'
+    flags+=('-c')
     ;;
   -f|--filter)
     shift
-    BATS_TEST_FILTER="$1"
+    flags+=('-f' "$1")
     ;;
   -r|--recursive)
     recursive=1
@@ -158,10 +158,7 @@ fi
 
 set -o pipefail execfail
 if [[ -z "$pretty" ]]; then
-  exec "$command" $count_flag "${filenames[@]}"
+  exec "$command" "${flags[@]}" "${filenames[@]}"
 else
-  extended_syntax_flag="-x"
-  formatter="bats-format-tap-stream"
-  exec "$command" $count_flag $extended_syntax_flag "${filenames[@]}" |
-    "$formatter"
+  exec "$command" -x "${flags[@]}" "${filenames[@]}" | bats-format-tap-stream
 fi

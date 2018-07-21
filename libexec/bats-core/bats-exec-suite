@@ -1,17 +1,31 @@
 #!/usr/bin/env bash
 set -e
 
-count_only_flag=""
-if [[ "$1" = "-c" ]]; then
-  count_only_flag=1
-  shift
-fi
+count_only_flag=''
+extended_syntax_flag=''
+filter=''
+flags=()
 
-extended_syntax_flag=""
-if [[ "$1" = "-x" ]]; then
-  extended_syntax_flag="-x"
+while [[ "$#" -ne 0 ]]; do
+  case "$1" in
+  -c)
+    count_only_flag=1
+    ;;
+  -f)
+    filter="$2"
+    flags+=('-f' "$filter")
+    shift
+    ;;
+  -x)
+    extended_syntax_flag='-x'
+    flags+=('-x')
+    ;;
+  *)
+    break
+    ;;
+  esac
   shift
-fi
+done
 
 trap "kill 0; exit 1" int
 
@@ -21,7 +35,7 @@ for filename in "$@"; do
     if [[ "$line" =~ $BATS_TEST_PATTERN ]]; then
       test_name="${BASH_REMATCH[1]#[\'\"]}"
       test_name="${test_name%[\'\"]}"
-      if [[ -z "$BATS_TEST_FILTER" || "$test_name" =~ $BATS_TEST_FILTER ]]; then
+      if [[ -z "$filter" || "$test_name" =~ $filter ]]; then
         let count+=1
       fi
     fi
@@ -60,7 +74,7 @@ for filename in "$@"; do
         ;;
       esac
     done
-  } < <( bats-exec-test $extended_syntax_flag "$filename" )
+  } < <( bats-exec-test "${flags[@]}" "$filename" )
   offset=$(($offset + $index))
 done
 
