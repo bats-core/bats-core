@@ -5,9 +5,9 @@ BATS_COUNT_ONLY=''
 BATS_TEST_FILTER=''
 BATS_EXTENDED_SYNTAX=''
 
-# Flags needed when bats_perform_tests re-invokes bats-exec-test in a new
-# process to run bats_perform_test.
-BATS_PERFORM_TEST_FLAGS=()
+# Command and flags used by bats_perform_tests when it re-invokes bats-exec-test
+# in a new process to run bats_perform_test.
+BATS_PERFORM_TEST_CMD=("$0")
 
 while [[ "$#" -ne 0 ]]; do
   case "$1" in
@@ -20,7 +20,7 @@ while [[ "$#" -ne 0 ]]; do
     ;;
   -x)
     BATS_EXTENDED_SYNTAX='-x'
-    BATS_PERFORM_TEST_FLAGS+=('-x')
+    BATS_PERFORM_TEST_CMD+=('-x')
     ;;
   *)
     break
@@ -326,12 +326,14 @@ bats_exit_trap() {
 }
 
 bats_perform_tests() {
+  local test_number=1
+  local status=0
+
   printf '1..%d\n' "$#"
-  test_number=1
-  status=0
+
   for test_name in "$@"; do
-    if ! "$0" "${BATS_PERFORM_TEST_FLAGS[@]}" "$BATS_TEST_FILENAME" \
-      "$test_name" "$test_number"; then
+    if ! "${BATS_PERFORM_TEST_CMD[@]}" "$BATS_TEST_FILENAME" "$test_name" \
+      "$test_number"; then
       status=1
     fi
     let test_number+=1
