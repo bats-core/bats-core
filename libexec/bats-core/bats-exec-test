@@ -47,7 +47,7 @@ load() {
   local name="$1"
   local filename
 
-  if [[ "${name:0:1}" = "/" ]]; then
+  if [[ "${name:0:1}" == '/' ]]; then
     filename="${name}"
   else
     filename="$BATS_TEST_DIRNAME/${name}.bash"
@@ -124,9 +124,9 @@ bats_capture_stack_trace() {
     source_file="${BASH_SOURCE[$i]:-$BATS_TEST_SOURCE}"
     frame="${BASH_LINENO[$((i-1))]} ${FUNCNAME[$i]} $source_file"
     BATS_CURRENT_STACK_TRACE+=("$frame")
-    if [[ "$frame" = *"$test_pattern"     || \
-          "$frame" = *"$setup_pattern"    || \
-          "$frame" = *"$teardown_pattern" ]]; then
+    if [[ "$frame" == *"$test_pattern"     || \
+          "$frame" == *"$setup_pattern"    || \
+          "$frame" == *"$teardown_pattern" ]]; then
       break
     fi
   done
@@ -203,7 +203,7 @@ bats_frame_filename() {
   local __bff_filename="${1#* }"
   __bff_filename="${__bff_filename#* }"
 
-  if [[ "$__bff_filename" = "$BATS_TEST_SOURCE" ]]; then
+  if [[ "$__bff_filename" == "$BATS_TEST_SOURCE" ]]; then
     __bff_filename="$BATS_TEST_FILENAME"
   fi
   printf -v "$2" '%s' "$__bff_filename"

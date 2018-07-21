@@ -17,8 +17,8 @@ bats_encode_test_name() {
 
     for ((i=0; i<length; i++)); do
       char="${name:$i:1}"
-      if [[ "$char" = " " ]]; then
-        result+="_"
+      if [[ "$char" == ' ' ]]; then
+        result+='_'
       elif [[ "$char" =~ [[:alnum:]] ]]; then
         result+="$char"
       else
