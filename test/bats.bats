@@ -13,7 +13,6 @@ fixtures bats
 @test "invalid option prints message and usage instructions" {
   run bats --invalid-option
   [ $status -eq 1 ]
-  emit_debug_output
   [ "${lines[0]}" == "Error: Bad command line option '--invalid-option'" ]
   [ "${lines[1]%% *}" == 'Usage:' ]
 }
