@@ -180,17 +180,21 @@ supports:
 
 ```
 Bats x.y.z
-Usage: bats [-c] [-r] [-p | -t] <test> [<test> ...]
+Usage: bats [-cr] [-f <regex>] [-p | -t] <test>...
+       bats [-h | -v]
 
   <test> is the path to a Bats test file, or the path to a directory
-  containing Bats test files.
+  containing Bats test files (ending with ".bats").
 
   -c, --count      Count the number of test cases without running any tests
+  -f, --filter     Filter test cases by names matching the regular expression
   -h, --help       Display this help message
   -p, --pretty     Show results in pretty format (default for terminals)
   -r, --recursive  Include tests in subdirectories
   -t, --tap        Show results in TAP format
   -v, --version    Display the version number
+
+  For more information, see https://github.com/bats-core/bats-core
 ```
 
 To run your tests, invoke the `bats` interpreter with one or more paths to test
@@ -480,9 +484,9 @@ Doing it this way accomplishes a number of things:
 
 ## Copyright
 
-© 2018 bats-core organization
+© 2017-2018 bats-core organization
 
-© 2014 Sam Stephenson
+© 2011-2016 Sam Stephenson
 
 Bats is released under an MIT-style license; see `LICENSE.md` for details.
 

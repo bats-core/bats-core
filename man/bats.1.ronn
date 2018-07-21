@@ -5,10 +5,11 @@ bats(1) -- Bash Automated Testing System
 SYNOPSIS
 --------
 
-bats [-c] [-p | -t] <test> [<test> ...]
+bats [-cr] [-f <regex>] [-p | -t] <test>...<br/>
+bats [-h | -v]
 
-<test> is the path to a Bats test file, or the path to a directory
-containing Bats test files.
+<test> is the path to a Bats test file, or the path to a directory containing
+Bats test files (ending with ".bats").
 
 
 DESCRIPTION
@@ -48,6 +49,8 @@ OPTIONS
 
   * `-c`, `--count`:
     Count the number of test cases without running any tests
+  * `-f`, `--filter`:
+    Filter test cases by names matching the regular expression
   * `-h`, `--help`:
     Display help message
   * `-p`, `--pretty`:
@@ -103,8 +106,8 @@ Bats wiki: _https://github.com/bats\-core/bats\-core/wiki/_
 COPYRIGHT
 ---------
 
-(c) 2017 Bianca Tamayo (bats-core organization)
-(c) 2014 Sam Stephenson
+(c) 2017-2018 bats-core organization<br/>
+(c) 2011-2016 Sam Stephenson
 
 Bats is released under the terms of an MIT-style license.
 
