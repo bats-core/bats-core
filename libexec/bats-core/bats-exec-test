@@ -5,6 +5,10 @@ BATS_COUNT_ONLY=''
 BATS_TEST_FILTER=''
 BATS_EXTENDED_SYNTAX=''
 
+# Flags needed when bats_perform_tests re-invokes bats-exec-test in a new
+# process to run bats_perform_test.
+BATS_PERFORM_TEST_FLAGS=()
+
 while [[ "$#" -ne 0 ]]; do
   case "$1" in
   -c)
@@ -16,6 +20,7 @@ while [[ "$#" -ne 0 ]]; do
     ;;
   -x)
     BATS_EXTENDED_SYNTAX='-x'
+    BATS_PERFORM_TEST_FLAGS+=('-x')
     ;;
   *)
     break
@@ -325,8 +330,8 @@ bats_perform_tests() {
   test_number=1
   status=0
   for test_name in "$@"; do
-    if ! "$0" $BATS_EXTENDED_SYNTAX "$BATS_TEST_FILENAME" "$test_name" \
-      "$test_number"; then
+    if ! "$0" "${BATS_PERFORM_TEST_FLAGS[@]}" "$BATS_TEST_FILENAME" \
+      "$test_name" "$test_number"; then
       status=1
     fi
     let test_number+=1
@@ -417,6 +422,10 @@ bats_evaluate_preprocessed_source() {
 
 exec 3<&1
 
+# When bats-exec-test is invoked by bats or bats-exec-suite, bats_perform_tests
+# reinvokes bats-exec-suite to run a single test case via bats_perform_test in a
+# new process. This is necessary so that `set -e` and all the traps set by
+# `bats_perform_test` don't interfere with the parent bats-exec-test process.
 if [[ "$#" -eq 0 ]]; then
   bats_preprocess_source
   bats_evaluate_preprocessed_source
