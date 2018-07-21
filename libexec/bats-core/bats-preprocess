@@ -3,7 +3,7 @@ set -e
 
 bats_encode_test_name() {
   local name="$1"
-  local result="test_"
+  local result='test_'
   local hex_code
 
   if [[ ! "$name" =~ [^[:alnum:]\ _-] ]]; then
@@ -22,7 +22,7 @@ bats_encode_test_name() {
       elif [[ "$char" =~ [[:alnum:]] ]]; then
         result+="$char"
       else
-        printf -v 'hex_code' -- "-%02x" \'"$char"
+        printf -v 'hex_code' -- '-%02x' \'"$char"
         result+="$hex_code"
       fi
     done
@@ -46,7 +46,7 @@ while IFS= read -r line; do
       tests+=("$encoded_name")
     fi
   else
-    printf "%s\n" "$line"
+    printf '%s\n' "$line"
   fi
 done
 
