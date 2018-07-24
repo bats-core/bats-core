@@ -284,6 +284,13 @@ load test_helper
 will source the script `test/test_helper.bash` in your test file. This can be
 useful for sharing functions to set up your environment or load fixtures.
 
+If you want to source a file using an absolute file path then the file extension
+must be included. For example
+
+```bash
+load /test_helpers/test_helper.bash
+```
+
 ### `skip`: Easily skip tests
 
 Tests can be skipped by using the `skip` command at the point in a test you wish
