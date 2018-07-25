@@ -195,8 +195,8 @@ Usage: bats [-c] [-r] [-p | -t] <test> [<test> ...]
 
 To run your tests, invoke the `bats` interpreter with one or more paths to test
 files ending with the `.bats` extension, or paths to directories containing test
-files. (`bats` will not only discover `.bats` files at the top level of each
-directory; it will not recurse.)
+files. (`bats` will only execute `.bats` files at the top level of each
+directory; it will not recurse unless you specify the -r flag)
 
 Test cases from each file are run sequentially and in isolation. If all the test
 cases pass, `bats` exits with a `0` status code. If there are any failures,
