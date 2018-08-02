@@ -10,6 +10,14 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 
 ## [Unreleased]
 
+### Added
+* docs/CHANGELOG.md and docs/releasing.md (#122)
+* The `-f, --filter` flag to run only the tests matching a regular expression
+  (#126)
+
+### Changed
+* AppVeyor builds are now semver-compliant (#123)
+
 ## [1.1.0] - 2018-07-08
 
 This is the first release with new features relative to the original Bats 0.4.0.

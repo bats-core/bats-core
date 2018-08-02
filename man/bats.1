@@ -1,16 +1,19 @@
 .\" generated with Ronn/v0.7.3
 .\" http://github.com/rtomayko/ronn/tree/0.7.3
 .
-.TH "BATS" "1" "August 2014" "" ""
+.TH "BATS" "1" "July 2018" "" ""
 .
 .SH "NAME"
 \fBbats\fR \- Bash Automated Testing System
 .
 .SH "SYNOPSIS"
-bats [\-c] [\-p | \-t] \fItest\fR [\fItest\fR \.\.\.]
+bats [\-cr] [\-f \fIregex\fR] [\-p | \-t] \fItest\fR\.\.\.
+.
+.br
+bats [\-h | \-v]
 .
 .P
-\fItest\fR is the path to a Bats test file, or the path to a directory containing Bats test files\.
+\fItest\fR is the path to a Bats test file, or the path to a directory containing Bats test files (ending with "\.bats")\.
 .
 .SH "DESCRIPTION"
 Bats is a TAP\-compliant testing framework for Bash\. It provides a simple way to verify that the UNIX programs you write behave as expected\.
@@ -35,6 +38,10 @@ You can invoke the \fBbats\fR interpreter with multiple test file arguments, or 
 .TP
 \fB\-c\fR, \fB\-\-count\fR
 Count the number of test cases without running any tests
+.
+.TP
+\fB\-f\fR, \fB\-\-filter\fR
+Filter test cases by names matching the regular expression
 .
 .TP
 \fB\-h\fR, \fB\-\-help\fR
@@ -99,9 +106,10 @@ Bats wiki: \fIhttps://github\.com/bats\-core/bats\-core/wiki/\fR
 \fBbash\fR(1), \fBbats\fR(7)
 .
 .SH "COPYRIGHT"
-
-(c) 2017 Bianca Tamayo (bats-core organization)
-(c) 2014 Sam Stephenson
+(c) 2017\-2018 bats\-core organization
+.
+.br
+(c) 2011\-2016 Sam Stephenson
 .
 .P
 Bats is released under the terms of an MIT\-style license\.

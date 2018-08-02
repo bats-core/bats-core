@@ -1,17 +1,33 @@
 #!/usr/bin/env bash
 set -eET
 
-BATS_COUNT_ONLY=""
-if [[ "$1" = "-c" ]]; then
-  BATS_COUNT_ONLY=1
-  shift
-fi
+BATS_COUNT_ONLY=''
+BATS_TEST_FILTER=''
+BATS_EXTENDED_SYNTAX=''
 
-BATS_EXTENDED_SYNTAX=""
-if [[ "$1" = "-x" ]]; then
-  BATS_EXTENDED_SYNTAX="$1"
+# Command and flags used by bats_perform_tests when it re-invokes bats-exec-test
+# in a new process to run bats_perform_test.
+BATS_PERFORM_TEST_CMD=("$0")
+
+while [[ "$#" -ne 0 ]]; do
+  case "$1" in
+  -c)
+    BATS_COUNT_ONLY=1
+    ;;
+  -f)
+    BATS_TEST_FILTER="$2"
+    shift
+    ;;
+  -x)
+    BATS_EXTENDED_SYNTAX='-x'
+    BATS_PERFORM_TEST_CMD+=('-x')
+    ;;
+  *)
+    break
+    ;;
+  esac
   shift
-fi
+done
 
 BATS_TEST_FILENAME="$1"
 if [[ -z "$BATS_TEST_FILENAME" ]]; then
@@ -310,11 +326,13 @@ bats_exit_trap() {
 }
 
 bats_perform_tests() {
+  local test_number=1
+  local status=0
+
   printf '1..%d\n' "$#"
-  test_number=1
-  status=0
+
   for test_name in "$@"; do
-    if ! "$0" $BATS_EXTENDED_SYNTAX "$BATS_TEST_FILENAME" "$test_name" \
+    if ! "${BATS_PERFORM_TEST_CMD[@]}" "$BATS_TEST_FILENAME" "$test_name" \
       "$test_number"; then
       status=1
     fi
@@ -406,6 +424,10 @@ bats_evaluate_preprocessed_source() {
 
 exec 3<&1
 
+# When bats-exec-test is invoked by bats or bats-exec-suite, bats_perform_tests
+# reinvokes bats-exec-suite to run a single test case via bats_perform_test in a
+# new process. This is necessary so that `set -e` and all the traps set by
+# `bats_perform_test` don't interfere with the parent bats-exec-test process.
 if [[ "$#" -eq 0 ]]; then
   bats_preprocess_source
   bats_evaluate_preprocessed_source

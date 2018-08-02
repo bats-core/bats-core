@@ -1,13 +1,10 @@
 #!/usr/bin/env bash
 set -e
 
-version() {
-  printf 'Bats 1.1.0\n'
-}
+export BATS_VERSION='1.1.0'
 
-usage() {
-  version
-  printf 'Usage: bats [-c] [-r] [-p | -t] <test> [<test> ...]\n'
+version() {
+  printf 'Bats %s\n' "$BATS_VERSION"
 }
 
 abort() {
@@ -16,17 +13,21 @@ abort() {
   exit 1
 }
 
-help() {
+usage() {
+  local cmd="${0##*/}"
   local line
-  usage
-  while read -r line; do
+
+  while IFS= read -r line; do
     printf '%s\n' "$line"
   done <<END_OF_HELP_TEXT
+Usage: $cmd [-cr] [-f <regex>] [-p | -t] <test>...
+       $cmd [-h | -v]
 
   <test> is the path to a Bats test file, or the path to a directory
-  containing Bats test files.
+  containing Bats test files (ending with ".bats").
 
   -c, --count      Count the number of test cases without running any tests
+  -f, --filter     Filter test cases by names matching the regular expression
   -h, --help       Display this help message
   -p, --pretty     Show results in pretty format (default for terminals)
   -r, --recursive  Include tests in subdirectories
@@ -55,66 +56,74 @@ expand_path() {
 
 export BATS_CWD="$PWD"
 export BATS_TEST_PATTERN="^[[:blank:]]*@test[[:blank:]]+(.*[^[:blank:]])[[:blank:]]+\{(.*)\$"
+export BATS_TEST_FILTER=
 export PATH="$BATS_ROOT/libexec/bats-core:$PATH"
 
-options=()
 arguments=()
+
+# Unpack single-character options bundled together, e.g. -cr, -pr.
 for arg in "$@"; do
-  if [[ "${arg:0:1}" = "-" ]]; then
-    if [[ "${arg:1:1}" = "-" ]]; then
-      options[${#options[*]}]="${arg:2}"
-    else
-      index=1
-      while option="${arg:$index:1}"; do
-        if [[ -z "$option" ]]; then
-          break
-        fi
-        options[${#options[*]}]="$option"
-        let index+=1
-      done
-    fi
+  if [[ "$arg" =~ ^-[^-]. ]]; then
+    index=1
+    while option="${arg:$((index++)):1}"; do
+      if [[ -z "$option" ]]; then
+        break
+      fi
+      arguments+=("-$option")
+    done
   else
-    arguments[${#arguments[*]}]="$arg"
+    arguments+=("$arg")
   fi
+  shift
 done
 
-unset count_flag pretty recursive
-count_flag=''
-pretty=''
-recursive=''
+set -- "${arguments[@]}"
+arguments=()
+
+unset flags pretty recursive
+flags=()
+pretty=
+recursive=
 if [[ -z "${CI:-}" && -t 0 && -t 1 ]]; then
   pretty=1
 fi
 
-if [[ "${#options[@]}" -ne 0 ]]; then
-  for option in "${options[@]}"; do
-    case "$option" in
-    "h" | "help" )
-      help
-      exit 0
-      ;;
-    "v" | "version" )
-      version
-      exit 0
-      ;;
-    "c" | "count" )
-      count_flag="-c"
-      ;;
-    "r" | "recursive" )
-      recursive=1
-      ;;
-    "t" | "tap" )
-      pretty=""
-      ;;
-    "p" | "pretty" )
-      pretty=1
-      ;;
-    * )
-      abort "Bad command line option '-$option'"
-      ;;
-    esac
-  done
-fi
+while [[ "$#" -ne 0 ]]; do
+  case "$1" in
+  -h|--help)
+    version
+    usage
+    exit 0
+    ;;
+  -v|--version)
+    version
+    exit 0
+    ;;
+  -c|--count)
+    flags+=('-c')
+    ;;
+  -f|--filter)
+    shift
+    flags+=('-f' "$1")
+    ;;
+  -r|--recursive)
+    recursive=1
+    ;;
+  -t|--tap)
+    pretty=
+    ;;
+  -p|--pretty)
+    pretty=1
+    ;;
+  -*)
+    abort "Bad command line option '$1'"
+    ;;
+  *)
+    arguments+=("$1")
+    ;;
+  esac
+  shift
+done
 
 if [[ "${#arguments[@]}" -eq 0 ]]; then
   abort 'Must specify at least one <test>'
@@ -149,10 +158,7 @@ fi
 
 set -o pipefail execfail
 if [[ -z "$pretty" ]]; then
-  exec "$command" $count_flag "${filenames[@]}"
+  exec "$command" "${flags[@]}" "${filenames[@]}"
 else
-  extended_syntax_flag="-x"
-  formatter="bats-format-tap-stream"
-  exec "$command" $count_flag $extended_syntax_flag "${filenames[@]}" |
-    "$formatter"
+  exec "$command" -x "${flags[@]}" "${filenames[@]}" | bats-format-tap-stream
 fi

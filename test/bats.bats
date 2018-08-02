@@ -7,15 +7,14 @@ fixtures bats
   run bats
   [ $status -eq 1 ]
   [ "${lines[0]}" == 'Error: Must specify at least one <test>' ]
-  [ "${lines[2]%% *}" == 'Usage:' ]
+  [ "${lines[1]%% *}" == 'Usage:' ]
 }
 
 @test "invalid option prints message and usage instructions" {
   run bats --invalid-option
   [ $status -eq 1 ]
-  emit_debug_output
-  [ "${lines[0]}" == "Error: Bad command line option '-invalid-option'" ]
-  [ "${lines[2]%% *}" == 'Usage:' ]
+  [ "${lines[0]}" == "Error: Bad command line option '--invalid-option'" ]
+  [ "${lines[1]%% *}" == 'Usage:' ]
 }
 
 @test "-v and --version print version number" {
