@@ -2,18 +2,12 @@
 
 set -e
 
-export BATS_READLINK='true'
+BATS_READLINK='true'
 if command -v 'greadlink' >/dev/null; then
   BATS_READLINK='greadlink'
 elif command -v 'readlink' >/dev/null; then
   BATS_READLINK='readlink'
 fi
-
-bats_resolve_link() {
-  if ! "$BATS_READLINK" "$1"; then
-    return 0
-  fi
-}
 
 bats_resolve_absolute_root_dir() {
   local cwd="$PWD"
@@ -35,7 +29,7 @@ bats_resolve_absolute_root_dir() {
     fi
 
     if [[ -L "$target_name" ]]; then
-      path="$(bats_resolve_link "$target_name")"
+      path="$("$BATS_READLINK" "$target_name")"
     else
       printf -v "$result" -- '%s' "${PWD%/*}"
       set +P "-$original_shell_options"

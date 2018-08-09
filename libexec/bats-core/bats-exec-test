@@ -47,7 +47,7 @@ load() {
   local name="$1"
   local filename
 
-  if [[ "${name:0:1}" = "/" ]]; then
+  if [[ "${name:0:1}" == '/' ]]; then
     filename="${name}"
   else
     filename="$BATS_TEST_DIRNAME/${name}.bash"
@@ -123,10 +123,10 @@ bats_capture_stack_trace() {
     # calling an exported function erases the test file's BASH_SOURCE entry.
     source_file="${BASH_SOURCE[$i]:-$BATS_TEST_SOURCE}"
     frame="${BASH_LINENO[$((i-1))]} ${FUNCNAME[$i]} $source_file"
-    BATS_CURRENT_STACK_TRACE["${#BATS_CURRENT_STACK_TRACE[@]}"]="$frame"
-    if [[ "$frame" = *"$test_pattern"     || \
-          "$frame" = *"$setup_pattern"    || \
-          "$frame" = *"$teardown_pattern" ]]; then
+    BATS_CURRENT_STACK_TRACE+=("$frame")
+    if [[ "$frame" == *"$test_pattern"     || \
+          "$frame" == *"$setup_pattern"    || \
+          "$frame" == *"$teardown_pattern" ]]; then
       break
     fi
   done
@@ -165,7 +165,7 @@ bats_print_stack_trace() {
       printf 'in file %s, line %d,\n' "$filename" "$lineno"
     fi
 
-    let index+=1
+    ((++index))
   done
 }
 
@@ -203,7 +203,7 @@ bats_frame_filename() {
   local __bff_filename="${1#* }"
   __bff_filename="${__bff_filename#* }"
 
-  if [[ "$__bff_filename" = "$BATS_TEST_SOURCE" ]]; then
+  if [[ "$__bff_filename" == "$BATS_TEST_SOURCE" ]]; then
     __bff_filename="$BATS_TEST_FILENAME"
   fi
   printf -v "$2" '%s' "$__bff_filename"
@@ -282,7 +282,7 @@ bats_exit_trap() {
   trap - err exit
 
   if [[ -n "$BATS_TEST_SKIPPED" ]]; then
-    skipped=" # skip"
+    skipped=' # skip'
     if [[ "$BATS_TEST_SKIPPED" != '1' ]]; then
       skipped+=" $BATS_TEST_SKIPPED"
     fi
@@ -336,7 +336,7 @@ bats_perform_tests() {
       "$test_number"; then
       status=1
     fi
-    let test_number+=1
+    ((++test_number))
   done
   exit "$status"
 }
@@ -350,15 +350,15 @@ bats_perform_test() {
       BATS_TEST_NUMBER=1
     fi
 
-    BATS_TEST_COMPLETED=""
-    BATS_TEARDOWN_COMPLETED=""
-    BATS_ERROR_STATUS=""
+    BATS_TEST_COMPLETED=
+    BATS_TEARDOWN_COMPLETED=
+    BATS_ERROR_STATUS=
     trap "bats_debug_trap \"\$BASH_SOURCE\"" debug
-    trap "bats_error_trap" err
-    trap "bats_teardown_trap" exit
+    trap 'bats_error_trap' err
+    trap 'bats_teardown_trap' exit
     "$BATS_TEST_NAME" >>"$BATS_OUT" 2>&1
     BATS_TEST_COMPLETED=1
-    trap "bats_exit_trap" exit
+    trap 'bats_exit_trap' exit
     bats_teardown_trap
 
   else
@@ -368,7 +368,7 @@ bats_perform_test() {
 }
 
 if [[ -z "$TMPDIR" ]]; then
-  BATS_TMPDIR="/tmp"
+  BATS_TMPDIR='/tmp'
 else
   BATS_TMPDIR="${TMPDIR%/}"
 fi
@@ -380,8 +380,8 @@ BATS_OUT="${BATS_TMPNAME}.out"
 bats_preprocess_source() {
   BATS_TEST_SOURCE="${BATS_TMPNAME}.src"
   . bats-preprocess <<< "$(< "$BATS_TEST_FILENAME")"$'\n' > "$BATS_TEST_SOURCE"
-  trap "bats_cleanup_preprocessed_source" err exit
-  trap "bats_cleanup_preprocessed_source; exit 1" int
+  trap 'bats_cleanup_preprocessed_source' err exit
+  trap 'bats_cleanup_preprocessed_source; exit 1' int
 
   bats_detect_duplicate_test_case_names
 }

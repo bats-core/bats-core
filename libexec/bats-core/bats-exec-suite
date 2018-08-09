@@ -27,7 +27,7 @@ while [[ "$#" -ne 0 ]]; do
   shift
 done
 
-trap "kill 0; exit 1" int
+trap 'kill 0; exit 1' int
 
 count=0
 for filename in "$@"; do
@@ -36,7 +36,7 @@ for filename in "$@"; do
       test_name="${BASH_REMATCH[1]#[\'\"]}"
       test_name="${test_name%[\'\"]}"
       if [[ -z "$filter" || "$test_name" =~ $filter ]]; then
-        let count+=1
+        ((++count))
       fi
     fi
   done <"$filename"
@@ -56,16 +56,16 @@ for filename in "$@"; do
     IFS= read -r # 1..n
     while IFS= read -r line; do
       case "$line" in
-      "begin "* )
-        let index+=1
+      'begin '* )
+        ((++index))
         printf '%s\n' "${line/ $index / $(($offset + $index)) }"
         ;;
-      "ok "* | "not ok "* )
+      'ok '* | 'not ok '* )
         if [[ -z "$extended_syntax_flag" ]]; then
-          let index+=1
+          ((++index))
         fi
         printf '%s\n' "${line/ $index / $(($offset + $index)) }"
-        if [[ "${line:0:6}" == "not ok" ]]; then
+        if [[ "${line:0:6}" == 'not ok' ]]; then
           status=1
         fi
         ;;

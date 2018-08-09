@@ -1,11 +1,6 @@
 #!/usr/bin/env bash
 set -e
 
-# Just stream the TAP output (sans extended syntax) if tput is missing
-if ! command -v tput >/dev/null; then
-  exec grep -v "^begin "
-fi
-
 header_pattern='[0-9]+\.\.[0-9]+'
 IFS= read -r header
 
@@ -14,11 +9,11 @@ if [[ "$header" =~ $header_pattern ]]; then
   index=0
   failures=0
   skipped=0
-  name=""
+  name=
   count_column_width=$(( ${#count} * 2 + 2 ))
 else
   # If the first line isn't a TAP plan, print it and pass the rest through
-  printf "%s\n" "$header"
+  printf '%s\n' "$header"
   exec cat
 fi
 
@@ -32,16 +27,16 @@ update_screen_width
 
 begin() {
   go_to_column 0
-  printf_with_truncation $(( $count_column_left - 1 )) "   %s" "$name"
+  buffer_with_truncation $(( $count_column_left - 1 )) '   %s' "$name"
   clear_to_end_of_line
   go_to_column $count_column_left
-  printf "%${#count}s/${count}" "$index"
+  buffer "%${#count}s/${count}" "$index"
   go_to_column 1
 }
 
 pass() {
   go_to_column 0
-  printf " ✓ %s" "$name"
+  buffer ' ✓ %s' "$name"
   advance
 }
 
@@ -51,42 +46,42 @@ skip() {
     reason=": $reason"
   fi
   go_to_column 0
-  printf " - %s (skipped%s)" "$name" "$reason"
+  buffer ' - %s (skipped%s)' "$name" "$reason"
   advance
 }
 
 fail() {
   go_to_column 0
   set_color 1 bold
-  printf " ✗ %s" "$name"
+  buffer ' ✗ %s' "$name"
   advance
 }
 
 log() {
   set_color 1
-  printf "   %s\n" "$1"
+  buffer '   %s\n' "$1"
   clear_color
 }
 
 summary() {
-  printf "\n%d test" "$count"
+  buffer '\n%d test' "$count"
   if [[ "$count" -ne 1 ]]; then
-    printf 's'
+    buffer 's'
   fi
 
-  printf ", %d failure" "$failures"
+  buffer ', %d failure' "$failures"
   if [[ "$failures" -ne 1 ]]; then
-    printf 's'
+    buffer 's'
   fi
 
   if [[ "$skipped" -gt 0 ]]; then
-    printf ", %d skipped" "$skipped"
+    buffer ', %d skipped' "$skipped"
   fi
 
-  printf "\n"
+  buffer '\n'
 }
 
-printf_with_truncation() {
+buffer_with_truncation() {
   local width="$1"
   shift
   local string
@@ -94,24 +89,24 @@ printf_with_truncation() {
   printf -v 'string' -- "$@"
 
   if [[ "${#string}" -gt "$width" ]]; then
-    printf "%s..." "${string:0:$(( $width - 4 ))}"
+    buffer '%s...' "${string:0:$(( $width - 4 ))}"
   else
-    printf "%s" "$string"
+    buffer '%s' "$string"
   fi
 }
 
 go_to_column() {
   local column="$1"
-  printf "\x1B[%dG" $(( $column + 1 ))
+  buffer '\x1B[%dG' $(( $column + 1 ))
 }
 
 clear_to_end_of_line() {
-  printf "\x1B[K"
+  buffer '\x1B[K'
 }
 
 advance() {
   clear_to_end_of_line
-  printf '\n'
+  buffer '\n'
   clear_color
 }
 
@@ -122,56 +117,58 @@ set_color() {
   if [[ "$2" == 'bold' ]]; then
     weight=1
   fi
-  printf "\x1B[%d;%dm" $(( 30 + $color )) "$weight"
+  buffer '\x1B[%d;%dm' "$(( 30 + $color ))" "$weight"
 }
 
 clear_color() {
-  printf "\x1B[0m"
+  buffer '\x1B[0m'
 }
 
-_buffer=""
+_buffer=
 
 buffer() {
-  _buffer="${_buffer}$("$@")"
+  local content
+  printf -v content -- "$@"
+  _buffer+="$content"
 }
 
 flush() {
-  printf "%s" "$_buffer"
-  _buffer=""
+  printf '%s' "$_buffer"
+  _buffer=
 }
 
 finish() {
   flush
-  printf "\n"
+  printf '\n'
 }
 
 trap finish EXIT
 
 while IFS= read -r line; do
   case "$line" in
-  "begin "* )
-    let index+=1
+  'begin '* )
+    ((++index))
     name="${line#* $index }"
-    buffer begin
+    begin
     flush
     ;;
-  "ok "* )
+  'ok '* )
     skip_expr="ok $index (.*) # skip ?(([[:print:]]*))?"
     if [[ "$line" =~ $skip_expr ]]; then
-      let skipped+=1
-      buffer skip "${BASH_REMATCH[2]}"
+      ((++skipped))
+      skip "${BASH_REMATCH[2]}"
     else
-      buffer pass
+      pass
     fi
     ;;
-  "not ok "* )
-    let failures+=1
-    buffer fail
+  'not ok '* )
+    ((++failures))
+    fail
     ;;
-  "# "* )
-    buffer log "${line:2}"
+  '# '* )
+    log "${line:2}"
     ;;
   esac
 done
 
-buffer summary
+summary

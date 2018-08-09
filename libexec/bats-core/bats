@@ -84,7 +84,7 @@ unset flags pretty recursive
 flags=()
 pretty=
 recursive=
-if [[ -z "${CI:-}" && -t 0 && -t 1 ]]; then
+if [[ -z "${CI:-}" && -t 0 && -t 1 ]] && command -v tput >/dev/null; then
   pretty=1
 fi
 
@@ -137,23 +137,23 @@ for filename in "${arguments[@]}"; do
     shopt -s nullglob
     if [[ "$recursive" -eq 1 ]]; then
       while IFS= read -r -d $'\0' file; do
-        filenames["${#filenames[@]}"]="$file"
-      done < <(find "$filename" -type f -name "*.bats" -print0 | sort -z)
+        filenames+=("$file")
+      done < <(find "$filename" -type f -name '*.bats' -print0 | sort -z)
     else
       for suite_filename in "$filename"/*.bats; do
-        filenames["${#filenames[@]}"]="$suite_filename"
+        filenames+=("$suite_filename")
       done
     fi
     shopt -u nullglob
   else
-    filenames["${#filenames[@]}"]="$filename"
+    filenames+=("$filename")
   fi
 done
 
 if [[ "${#filenames[@]}" -eq 1 ]]; then
-  command="bats-exec-test"
+  command='bats-exec-test'
 else
-  command="bats-exec-suite"
+  command='bats-exec-suite'
 fi
 
 set -o pipefail execfail
