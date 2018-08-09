@@ -4,6 +4,7 @@ set -eET
 BATS_COUNT_ONLY=''
 BATS_TEST_FILTER=''
 BATS_EXTENDED_SYNTAX=''
+BATS_TRACE="${BATS_TRACE:-}"
 
 # Command and flags used by bats_perform_tests when it re-invokes bats-exec-test
 # in a new process to run bats_perform_test.
@@ -233,6 +234,13 @@ bats_trim_filename() {
 bats_debug_trap() {
   if [[ "$BASH_SOURCE" != "$1" ]]; then
     bats_capture_stack_trace
+
+    if [[ -n "$BATS_TRACE" && \
+          "$BASH_COMMAND" != '"$BATS_TEST_NAME" >> "$BATS_OUT" 2>&1' &&
+          "${BASH_COMMAND%% *}" != 'bats_test_begin' ]]; then
+      printf '# %s:%d: %s\n' "${BATS_SOURCE#$PWD/}" "$BATS_LINENO" \
+        "$BASH_COMMAND" >&3
+    fi
   fi
 }
 
