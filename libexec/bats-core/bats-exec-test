@@ -232,12 +232,12 @@ bats_trim_filename() {
 }
 
 bats_debug_trap() {
-  if [[ "$BASH_SOURCE" != "$1" ]]; then
+  if [[ "$BASH_SOURCE" != "$1" && \
+        "$BASH_COMMAND" != '"$BATS_TEST_NAME" >> "$BATS_OUT" 2>&1' &&
+        "${BASH_COMMAND%% *}" != 'bats_test_begin' ]]; then
     bats_capture_stack_trace
 
-    if [[ -n "$BATS_TRACE" && \
-          "$BASH_COMMAND" != '"$BATS_TEST_NAME" >> "$BATS_OUT" 2>&1' &&
-          "${BASH_COMMAND%% *}" != 'bats_test_begin' ]]; then
+    if [[ -n "$BATS_TRACE"  ]]; then
       printf '# %s:%d: %s\n' "${BATS_SOURCE#$PWD/}" "$BATS_LINENO" \
         "$BASH_COMMAND" >&3
     fi
