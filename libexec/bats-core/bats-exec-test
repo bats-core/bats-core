@@ -4,7 +4,7 @@ set -eET
 BATS_COUNT_ONLY=''
 BATS_TEST_FILTER=''
 BATS_EXTENDED_SYNTAX=''
-BATS_TRACE="${BATS_TRACE:-}"
+BATS_TRACE=''
 
 # Command and flags used by bats_perform_tests when it re-invokes bats-exec-test
 # in a new process to run bats_perform_test.
@@ -22,6 +22,10 @@ while [[ "$#" -ne 0 ]]; do
   -x)
     BATS_EXTENDED_SYNTAX='-x'
     BATS_PERFORM_TEST_CMD+=('-x')
+    ;;
+  --trace)
+    BATS_TRACE=1
+    BATS_PERFORM_TEST_CMD+=('--trace')
     ;;
   *)
     break
