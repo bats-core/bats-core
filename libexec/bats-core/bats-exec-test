@@ -129,11 +129,11 @@ bats_capture_stack_trace() {
     source_file="${BASH_SOURCE[$i]:-$BATS_TEST_SOURCE}"
     frame="${BASH_LINENO[$((i-1))]} ${FUNCNAME[$i]} $source_file"
     BATS_CURRENT_STACK_TRACE+=("$frame")
-    if [[ "$frame" == *"$test_pattern"     || \
-          "$frame" == *"$setup_pattern"    || \
-          "$frame" == *"$teardown_pattern" ]]; then
+    case "$frame" in
+    *"$test_pattern"|*"$setup_pattern"|*"$teardown_pattern")
       break
-    fi
+      ;;
+    esac
   done
 
   bats_frame_filename "${BATS_CURRENT_STACK_TRACE[0]}" 'BATS_SOURCE'
@@ -236,12 +236,17 @@ bats_trim_filename() {
 }
 
 bats_debug_trap() {
-  if [[ "$BASH_SOURCE" != "$1" && \
-        "$BASH_COMMAND" != '"$BATS_TEST_NAME" >> "$BATS_OUT" 2>&1' &&
-        "${BASH_COMMAND%% *}" != 'bats_test_begin' ]]; then
+  local status="$?"
+
+  if [[ "$BASH_SOURCE" != "$1" ]]; then
+    case "$BASH_COMMAND" in
+    '"$BATS_TEST_NAME" >> "$BATS_OUT"'*|'bats_test_begin '*|"${FUNCNAME[1]} "*)
+      return
+      ;;
+    esac
     bats_capture_stack_trace
 
-    if [[ -n "$BATS_TRACE"  ]]; then
+    if [[ -n "$BATS_TRACE" && "$status" -eq 0 ]]; then
       printf '# %s:%d: %s\n' "${BATS_SOURCE#$PWD/}" "$BATS_LINENO" \
         "$BASH_COMMAND" >&3
     fi
