@@ -130,9 +130,6 @@ bats_capture_stack_trace() {
       break
     fi
   done
-
-  bats_frame_filename "${BATS_CURRENT_STACK_TRACE[0]}" 'BATS_SOURCE'
-  bats_frame_lineno "${BATS_CURRENT_STACK_TRACE[0]}" 'BATS_LINENO'
 }
 
 bats_print_stack_trace() {
