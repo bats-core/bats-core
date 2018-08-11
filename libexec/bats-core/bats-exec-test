@@ -108,6 +108,8 @@ bats_test_function() {
 BATS_CURRENT_STACK_TRACE=()
 BATS_PREVIOUS_STACK_TRACE=()
 BATS_ERROR_STACK_TRACE=()
+BATS_PREVIOUS_FUNCNAME_SIZE=100
+BATS_PREVIOUS_COMMAND=''
 
 bats_capture_stack_trace() {
   if [[ "${#BATS_CURRENT_STACK_TRACE[@]}" -ne 0 ]]; then
@@ -238,19 +240,35 @@ bats_trim_filename() {
 bats_debug_trap() {
   local status="$?"
 
-  if [[ "$BASH_SOURCE" != "$1" ]]; then
+  # Avoid capturing a stack trace for the beginning of a function definition
+  # by comparing the current and previous stack sizes.
+  if [[ "$BASH_SOURCE" != "$1" && \
+        "${#FUNCNAME[@]}" -le "$BATS_PREVIOUS_FUNCNAME_SIZE" ]]; then
     case "$BASH_COMMAND" in
-    '"$BATS_TEST_NAME" >> "$BATS_OUT"'*|'bats_test_begin '*|"${FUNCNAME[1]} "*)
+    '"$BATS_TEST_NAME" >>"$BATS_OUT" 2>&1'|'bats_test_begin '*)
       return
       ;;
     esac
     bats_capture_stack_trace
 
-    if [[ -n "$BATS_TRACE" && "$status" -eq 0 ]]; then
-      printf '# %s:%d: %s\n' "${BATS_SOURCE#$PWD/}" "$BATS_LINENO" \
-        "$BASH_COMMAND" >&3
+    # If `status` is nonzero but the command is the same, then this DEBUG trap
+    # is firing before the ERR trap of a failing command. Since we've printed
+    # the command before it failed, we don't want to print it a second time.
+    if [[ -n "$BATS_TRACE" ]]; then
+      local prev_lineno
+
+      bats_frame_lineno "${BATS_PREVIOUS_STACK_TRACE[0]}" 'prev_lineno'
+
+      if [[ "$status" -eq 0 || \
+            "$BASH_COMMAND" != "$BATS_PREVIOUS_COMMAND" ||
+            "$BATS_LINENO" -gt "$prev_lineno" ]]; then
+        printf '# %s:%d: %s\n' "${BATS_SOURCE#$PWD/}" "$BATS_LINENO" \
+          "$BASH_COMMAND" >&3
+      fi
+      BATS_PREVIOUS_COMMAND="$BASH_COMMAND"
     fi
   fi
+  BATS_PREVIOUS_FUNCNAME_SIZE="${#FUNCNAME[@]}"
 }
 
 # For some versions of Bash, the `ERR` trap may not always fire for every
