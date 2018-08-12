@@ -157,8 +157,7 @@ bats_print_stack_trace() {
 }
 
 bats_print_failed_command() {
-  local frame="$1"
-  local status="$2"
+  local frame="${BATS_STACK_TRACE[${#BATS_STACK_TRACE[@]}-1]}"
   local filename
   local lineno
   local failed_line
@@ -170,10 +169,10 @@ bats_print_failed_command() {
   bats_strip_string "$failed_line" 'failed_command'
   printf '%s' "#   \`${failed_command}' "
 
-  if [[ $status -eq 1 ]]; then
+  if [[ "$BATS_ERROR_STATUS" -eq 1 ]]; then
     printf 'failed\n'
   else
-    printf 'failed with status %d\n' "$status"
+    printf 'failed with status %d\n' "$BATS_ERROR_STATUS"
   fi
 }
 
@@ -292,8 +291,7 @@ bats_exit_trap() {
     fi
     printf 'not ok %d %s\n' "$BATS_TEST_NUMBER" "$BATS_TEST_DESCRIPTION" >&3
     bats_print_stack_trace "${BATS_STACK_TRACE[@]}" >&3
-    bats_print_failed_command "${BATS_STACK_TRACE[${#BATS_STACK_TRACE[@]}-1]}" \
-      "$BATS_ERROR_STATUS" >&3
+    bats_print_failed_command >&3
 
     while IFS= read -r line; do
       printf '# %s\n' "$line"
