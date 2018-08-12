@@ -100,34 +100,32 @@ bats_test_function() {
   BATS_TEST_NAMES+=("$test_name")
 }
 
-BATS_CURRENT_STACK_TRACE=()
+# Avoid a bug in Bash < 4.4-rc2 where "${BATS_CURRENT_STACK_TRACE[@]}" will
+# throw an unbound variable error when empty by initializing it with 'main'.
+BATS_CURRENT_STACK_TRACE=('main')
 BATS_PREVIOUS_STACK_TRACE=()
 BATS_ERROR_STACK_TRACE=()
 
 bats_capture_stack_trace() {
-  if [[ "${#BATS_CURRENT_STACK_TRACE[@]}" -ne 0 ]]; then
-    BATS_PREVIOUS_STACK_TRACE=("${BATS_CURRENT_STACK_TRACE[@]}")
-  fi
+  BATS_PREVIOUS_STACK_TRACE=("${BATS_CURRENT_STACK_TRACE[@]}")
   BATS_CURRENT_STACK_TRACE=()
 
-  local test_pattern=" $BATS_TEST_NAME $BATS_TEST_SOURCE"
-  local setup_pattern=" setup $BATS_TEST_SOURCE"
-  local teardown_pattern=" teardown $BATS_TEST_SOURCE"
-
-  local source_file
-  local frame
+  local test_file
+  local funcname
   local i
 
   for ((i=2; i != ${#FUNCNAME[@]}; ++i)); do
     # Use BATS_TEST_SOURCE if necessary to work around Bash < 4.4 bug whereby
     # calling an exported function erases the test file's BASH_SOURCE entry.
-    source_file="${BASH_SOURCE[$i]:-$BATS_TEST_SOURCE}"
-    frame="${BASH_LINENO[$((i-1))]} ${FUNCNAME[$i]} $source_file"
-    BATS_CURRENT_STACK_TRACE+=("$frame")
-    if [[ "$frame" == *"$test_pattern"     || \
-          "$frame" == *"$setup_pattern"    || \
-          "$frame" == *"$teardown_pattern" ]]; then
-      break
+    test_file="${BASH_SOURCE[$i]:-$BATS_TEST_SOURCE}"
+    funcname="${FUNCNAME[$i]}"
+    BATS_CURRENT_STACK_TRACE+=("${BASH_LINENO[$((i-1))]} $funcname $test_file")
+    if [[ "$test_file" == "$BATS_TEST_SOURCE" ]]; then
+      case "$funcname" in
+      "$BATS_TEST_NAME"|setup|teardown)
+        break
+        ;;
+      esac
     fi
   done
 }
