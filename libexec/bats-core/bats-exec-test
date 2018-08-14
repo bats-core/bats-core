@@ -72,6 +72,10 @@ run() {
   set "-$origFlags"
 }
 
+background() {
+  "$@" 3>&- & disown
+}
+
 setup() {
   return 0
 }
