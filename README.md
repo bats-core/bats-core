@@ -58,6 +58,7 @@ commit [0360811][].  It was created via `git clone --bare` and `git push
 - [Writing tests](#writing-tests)
   - [`run`: Test other commands](#run-test-other-commands)
   - [`load`: Share common code](#load-share-common-code)
+  - [`background`: Run a command asynchronously](#background-run-a-command-asynchronously)
   - [`skip`: Easily skip tests](#skip-easily-skip-tests)
   - [`setup` and `teardown`: Pre- and post-test hooks](#setup-and-teardown-pre--and-post-test-hooks)
   - [Code outside of test cases](#code-outside-of-test-cases)
@@ -274,6 +275,25 @@ without any arguments prints usage information on the first line:
 }
 ```
 
+### `background`: Run a command asynchronously
+
+There is often confusion around Bats's use of file descriptor 3 (See
+[File descriptor 3 (read this if Bats hangs)](#file-descriptor-3-read-this-if-bats-hangs)).
+If you need to handle a process asynchronously, and want to make it clear
+that you're running an asynchronous child process, this makes it a bit clearer
+what is happening in the test for users less familiar with Bash's handling of file
+descriptors.
+
+
+```bash
+@test "Do stuff in the background" {
+  background /path/to/some/process
+  WAITPID=$!
+  # Test stuff happening during the process run here, like lock file creation, etc.
+  wait $WAITPID
+}
+```
+
 ### `load`: Share common code
 
 You may want to share common code across multiple test files. Bats includes a
@@ -366,6 +386,9 @@ amount of time.
 
 **To prevent this from happening, close FD 3 explicitly when running any command
 that may launch long-running child processes**, e.g. `command_name 3>- &`.
+
+**Optionally, you can also use the `background` command (See
+[`background`: Run a command asynchronously](#background-run-a-command-asynchronously)).**
 
 ### Printing to the terminal
 
