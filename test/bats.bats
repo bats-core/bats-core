@@ -501,7 +501,6 @@ END_OF_ERR_MSG
 
 @test "trace a test case calling a recursive function" {
   run bats -x "$FIXTURE_ROOT/trace-recursive.bats"
-  emit_debug_output
 
   [ "$status" -eq 0 ]
   [ "${#lines[@]}" -eq 17 ]
