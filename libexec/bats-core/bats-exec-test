@@ -222,34 +222,30 @@ bats_trim_filename() {
 }
 
 bats_debug_trap() {
-  local status="$?"
-
   if [[ "$BASH_SOURCE" != "$1" ]]; then
     bats_capture_stack_trace
     BATS_LINENO="$BATS_CURRENT_LINENO"
     BATS_CURRENT_LINENO="${BASH_LINENO[0]}"
 
     if [[ -n "$BATS_TRACE" ]]; then
-      bats_emit_trace "$status"
+      bats_emit_trace
     fi
   fi
 }
 
 bats_emit_trace() {
-  local status="$?"
-
   case "$BASH_COMMAND" in
   '"$BATS_TEST_NAME" >> "$BATS_OUT" 2>&1'|'bats_test_begin '*)
     return
     ;;
   esac
 
-  # If `status` is nonzero but the command is the same, then this DEBUG trap
-  # is firing before the ERR trap of a failing command. Since we've printed
+  # If the `BASH_COMMAND` is the same, but `BATS_CURRENT_LINENO` is less than or
+  # equal to `BATS_LINENO` (the previous trap's `BASH_LINENO`), then this DEBUG
+  # trap is firing before the ERR trap of a failing command. Since we've printed
   # the command before it failed, we don't want to print it a second time.
-  if [[ "$status" -eq 0 && \
-        ( "$BASH_COMMAND" != "$BATS_PREVIOUS_COMMAND" || \
-          "$BATS_LINENO" -lt "$BATS_CURRENT_LINENO" ) ]]; then
+  if [[ "$BASH_COMMAND" != "$BATS_PREVIOUS_COMMAND" || \
+        "$BATS_LINENO" -lt "$BATS_CURRENT_LINENO" ]]; then
     local filename="${BASH_SOURCE[2]}"
 
     if [[ "$filename" == "$BATS_TEST_SOURCE" ]]; then
