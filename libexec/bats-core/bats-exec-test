@@ -80,7 +80,6 @@ teardown() {
   return 0
 }
 
-BATS_TEST_SKIPPED=''
 skip() {
   BATS_TEST_SKIPPED="${1:-1}"
   BATS_TEST_COMPLETED=1
@@ -100,39 +99,27 @@ bats_test_function() {
   BATS_TEST_NAMES+=("$test_name")
 }
 
-BATS_CURRENT_STACK_TRACE=()
-BATS_PREVIOUS_STACK_TRACE=()
-BATS_ERROR_STACK_TRACE=()
-
 bats_capture_stack_trace() {
-  if [[ "${#BATS_CURRENT_STACK_TRACE[@]}" -ne 0 ]]; then
-    BATS_PREVIOUS_STACK_TRACE=("${BATS_CURRENT_STACK_TRACE[@]}")
-  fi
-  BATS_CURRENT_STACK_TRACE=()
-
-  local test_pattern=" $BATS_TEST_NAME $BATS_TEST_SOURCE"
-  local setup_pattern=" setup $BATS_TEST_SOURCE"
-  local teardown_pattern=" teardown $BATS_TEST_SOURCE"
-
-  local source_file
-  local frame
+  local test_file
+  local funcname
   local i
+
+  BATS_STACK_TRACE=()
 
   for ((i=2; i != ${#FUNCNAME[@]}; ++i)); do
     # Use BATS_TEST_SOURCE if necessary to work around Bash < 4.4 bug whereby
     # calling an exported function erases the test file's BASH_SOURCE entry.
-    source_file="${BASH_SOURCE[$i]:-$BATS_TEST_SOURCE}"
-    frame="${BASH_LINENO[$((i-1))]} ${FUNCNAME[$i]} $source_file"
-    BATS_CURRENT_STACK_TRACE+=("$frame")
-    if [[ "$frame" == *"$test_pattern"     || \
-          "$frame" == *"$setup_pattern"    || \
-          "$frame" == *"$teardown_pattern" ]]; then
-      break
+    test_file="${BASH_SOURCE[$i]:-$BATS_TEST_SOURCE}"
+    funcname="${FUNCNAME[$i]}"
+    BATS_STACK_TRACE+=("${BASH_LINENO[$((i-1))]} $funcname $test_file")
+    if [[ "$test_file" == "$BATS_TEST_SOURCE" ]]; then
+      case "$funcname" in
+      "$BATS_TEST_NAME"|setup|teardown)
+        break
+        ;;
+      esac
     fi
   done
-
-  bats_frame_filename "${BATS_CURRENT_STACK_TRACE[0]}" 'BATS_SOURCE'
-  bats_frame_lineno "${BATS_CURRENT_STACK_TRACE[0]}" 'BATS_LINENO'
 }
 
 bats_print_stack_trace() {
@@ -170,8 +157,7 @@ bats_print_stack_trace() {
 }
 
 bats_print_failed_command() {
-  local frame="$1"
-  local status="$2"
+  local frame="${BATS_STACK_TRACE[${#BATS_STACK_TRACE[@]}-1]}"
   local filename
   local lineno
   local failed_line
@@ -183,10 +169,10 @@ bats_print_failed_command() {
   bats_strip_string "$failed_line" 'failed_command'
   printf '%s' "#   \`${failed_command}' "
 
-  if [[ $status -eq 1 ]]; then
+  if [[ "$BATS_ERROR_STATUS" -eq 1 ]]; then
     printf 'failed\n'
   else
-    printf 'failed with status %d\n' "$status"
+    printf 'failed with status %d\n' "$BATS_ERROR_STATUS"
   fi
 }
 
@@ -233,6 +219,8 @@ bats_trim_filename() {
 bats_debug_trap() {
   if [[ "$BASH_SOURCE" != "$1" ]]; then
     bats_capture_stack_trace
+    BATS_LINENO="$BATS_CURRENT_LINENO"
+    BATS_CURRENT_LINENO="${BASH_LINENO[0]}"
   fi
 }
 
@@ -242,8 +230,8 @@ bats_debug_trap() {
 #
 # For this reason, we call `bats_error_trap` at the very beginning of
 # `bats_teardown_trap` (the `DEBUG` trap for the call will move
-# `BATS_CURRENT_STACK_TRACE` to `BATS_PREVIOUS_STACK_TRACE`) and check the value
-# of `$BATS_TEST_COMPLETED` before taking other actions. We also adjust the exit
+# `BATS_CURRENT_LINENO` to `BATS_LINENO`) and check the value of
+# `$BATS_TEST_COMPLETED` before taking other actions. We also adjust the exit
 # status value if needed.
 #
 # See `bats_exit_trap` for an additional EXIT error handling case when `$?`
@@ -255,7 +243,7 @@ bats_error_trap() {
     if [[ "$BATS_ERROR_STATUS" -eq 0 ]]; then
       BATS_ERROR_STATUS=1
     fi
-    BATS_ERROR_STACK_TRACE=( "${BATS_PREVIOUS_STACK_TRACE[@]}" )
+    BATS_STACK_TRACE[0]="$BATS_LINENO ${BATS_STACK_TRACE[0]#* }"
     trap - debug
   fi
 }
@@ -269,7 +257,6 @@ bats_teardown_trap() {
     BATS_TEARDOWN_COMPLETED=1
   elif [[ -n "$BATS_TEST_COMPLETED" ]]; then
     BATS_ERROR_STATUS="$status"
-    BATS_ERROR_STACK_TRACE=( "${BATS_CURRENT_STACK_TRACE[@]}" )
   fi
 
   bats_exit_trap
@@ -289,7 +276,7 @@ bats_exit_trap() {
   fi
 
   if [[ -z "$BATS_TEST_COMPLETED" || -z "$BATS_TEARDOWN_COMPLETED" ]]; then
-    if [[ "${#BATS_ERROR_STACK_TRACE[@]}" -eq 0 ]]; then
+    if [[ "$BATS_ERROR_STATUS" -eq 0 ]]; then
       # For some versions of bash, `$?` may not be set properly for some error
       # conditions before triggering the EXIT trap directly (see #72 and #81).
       # Thanks to the `BATS_TEARDOWN_COMPLETED` signal, this will pinpoint such
@@ -299,14 +286,12 @@ bats_exit_trap() {
       # If instead the test fails, and the `teardown()` error happens while
       # `bats_teardown_trap` runs as the EXIT trap, the test will fail with no
       # output, since there's no way to reach the `bats_exit_trap` call.
-      BATS_ERROR_STACK_TRACE=( "${BATS_PREVIOUS_STACK_TRACE[@]}" )
+      BATS_STACK_TRACE[0]="$BATS_LINENO ${BATS_STACK_TRACE[0]#* }"
       BATS_ERROR_STATUS=1
     fi
     printf 'not ok %d %s\n' "$BATS_TEST_NUMBER" "$BATS_TEST_DESCRIPTION" >&3
-    bats_print_stack_trace "${BATS_ERROR_STACK_TRACE[@]}" >&3
-    bats_print_failed_command \
-      "${BATS_ERROR_STACK_TRACE[${#BATS_ERROR_STACK_TRACE[@]}-1]}" \
-      "$BATS_ERROR_STATUS" >&3
+    bats_print_stack_trace "${BATS_STACK_TRACE[@]}" >&3
+    bats_print_failed_command >&3
 
     while IFS= read -r line; do
       printf '# %s\n' "$line"
@@ -350,7 +335,19 @@ bats_perform_test() {
       BATS_TEST_NUMBER=1
     fi
 
+    # Some versions of Bash will reset BASH_LINENO to the first line of the
+    # function when the ERR trap fires. All versions of Bash appear to reset it
+    # on an unbound variable access error. bats_debug_trap will fire both before
+    # the offending line is executed, and when the error is triggered.
+    # Consequently, we use `BATS_LINENO` to point to the line number seen by the
+    # first call to bats_debug_trap, _before_ the ERR trap or unbound variable
+    # access fires.
+    BATS_CURRENT_LINENO=0
+    BATS_LINENO=0
+    BATS_STACK_TRACE=()
+
     BATS_TEST_COMPLETED=
+    BATS_TEST_SKIPPED=
     BATS_TEARDOWN_COMPLETED=
     BATS_ERROR_STATUS=
     trap "bats_debug_trap \"\$BASH_SOURCE\"" debug
