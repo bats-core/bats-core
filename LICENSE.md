@@ -1,4 +1,4 @@
-Copyright (c) 2017 Bianca Tamayo and bats-core organization
+Copyright (c) 2017 bats-core contributors
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
@@ -18,6 +18,12 @@ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
 LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+---
+
+* [bats-core] is a continuation of [bats]. Copyright for portions of the
+  bats-core project are held by Sam Stephenson, 2014 as part of the project
+  [bats], licensed under MIT:
 
 Copyright (c) 2014 Sam Stephenson
 
@@ -39,3 +45,9 @@ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
 LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+For details, please see the [version control history][commits].
+
+[bats-core]: https://github.com/bats-core/bats-core
+[bats]:https://github.com/sstephenson/bats
+[commits]:https://github.com/bats-core/bats-core/commits/master

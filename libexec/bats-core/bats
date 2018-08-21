@@ -1,169 +1,164 @@
 #!/usr/bin/env bash
 set -e
 
+export BATS_VERSION='1.1.0'
+
 version() {
-  echo "Bats 0.4.0"
+  printf 'Bats %s\n' "$BATS_VERSION"
+}
+
+abort() {
+  printf 'Error: %s\n' "$1" >&2
+  usage >&2
+  exit 1
 }
 
 usage() {
-  version
-  echo "Usage: bats [-c] [-p | -t] <test> [<test> ...]"
-}
+  local cmd="${0##*/}"
+  local line
 
-help() {
-  usage
-  echo
-  echo "  <test> is the path to a Bats test file, or the path to a directory"
-  echo "  containing Bats test files."
-  echo
-  echo "  -c, --count    Count the number of test cases without running any tests"
-  echo "  -h, --help     Display this help message"
-  echo "  -p, --pretty   Show results in pretty format (default for terminals)"
-  echo "  -t, --tap      Show results in TAP format"
-  echo "  -v, --version  Display the version number"
-  echo
-  echo "  For more information, see https://github.com/bats-core/bats-core"
-  echo
-}
+  while IFS= read -r line; do
+    printf '%s\n' "$line"
+  done <<END_OF_HELP_TEXT
+Usage: $cmd [-cr] [-f <regex>] [-p | -t] <test>...
+       $cmd [-h | -v]
 
-BATS_READLINK=
+  <test> is the path to a Bats test file, or the path to a directory
+  containing Bats test files (ending with ".bats").
 
-resolve_link() {
-  if [[ -z "$BATS_READLINK" ]]; then
-    if command -v 'greadlink' >/dev/null; then
-      BATS_READLINK='greadlink'
-    elif command -v 'readlink' >/dev/null; then
-      BATS_READLINK='readlink'
-    else
-      BATS_READLINK='true'
-    fi
-  fi
-  "$BATS_READLINK" "$1" || return 0
-}
+  -c, --count      Count the number of test cases without running any tests
+  -f, --filter     Filter test cases by names matching the regular expression
+  -h, --help       Display this help message
+  -p, --pretty     Show results in pretty format (default for terminals)
+  -r, --recursive  Include tests in subdirectories
+  -t, --tap        Show results in TAP format
+  -v, --version    Display the version number
 
-abs_dirname() {
-  local cwd="$PWD"
-  local path="$1"
+  For more information, see https://github.com/bats-core/bats-core
 
-  while [ -n "$path" ]; do
-    cd "${path%/*}"
-    local name="${path##*/}"
-    path="$(resolve_link "$name")"
-  done
-
-  printf -v "$2" -- '%s' "$PWD"
-  cd "$cwd"
+END_OF_HELP_TEXT
 }
 
 expand_path() {
   local path="${1%/}"
   local dirname="${path%/*}"
+  local result="$2"
 
   if [[ "$dirname" == "$path" ]]; then
     dirname="$PWD"
-  elif cd "$dirname" 2>/dev/null; then
+  else
+    cd "$dirname"
     dirname="$PWD"
     cd "$OLDPWD"
-  else
-    printf '%s' "$path"
-    return
   fi
-  printf -v "$2" '%s/%s' "$dirname" "${path##*/}"
+  printf -v "$result" '%s/%s' "$dirname" "${path##*/}"
 }
 
-abs_dirname "$0" 'BATS_LIBEXEC'
-abs_dirname "$BATS_LIBEXEC" 'BATS_PREFIX'
-abs_dirname '.' 'BATS_CWD'
-
-export BATS_PREFIX
-export BATS_CWD
+export BATS_CWD="$PWD"
 export BATS_TEST_PATTERN="^[[:blank:]]*@test[[:blank:]]+(.*[^[:blank:]])[[:blank:]]+\{(.*)\$"
-export PATH="$BATS_LIBEXEC:$PATH"
+export BATS_TEST_FILTER=
+export PATH="$BATS_ROOT/libexec/bats-core:$PATH"
 
-options=()
 arguments=()
+
+# Unpack single-character options bundled together, e.g. -cr, -pr.
 for arg in "$@"; do
-  if [ "${arg:0:1}" = "-" ]; then
-    if [ "${arg:1:1}" = "-" ]; then
-      options[${#options[*]}]="${arg:2}"
-    else
-      index=1
-      while option="${arg:$index:1}"; do
-        [ -n "$option" ] || break
-        options[${#options[*]}]="$option"
-        let index+=1
-      done
-    fi
+  if [[ "$arg" =~ ^-[^-]. ]]; then
+    index=1
+    while option="${arg:$((index++)):1}"; do
+      if [[ -z "$option" ]]; then
+        break
+      fi
+      arguments+=("-$option")
+    done
   else
-    arguments[${#arguments[*]}]="$arg"
+    arguments+=("$arg")
   fi
+  shift
 done
 
-unset count_flag pretty
-count_flag=''
-pretty=''
-[ -t 0 ] && [ -t 1 ] && pretty="1"
-[ -n "${CI:-}" ] && pretty=""
+set -- "${arguments[@]}"
+arguments=()
 
-if [[ "${#options[@]}" -ne '0' ]]; then
-  for option in "${options[@]}"; do
-    case "$option" in
-    "h" | "help" )
-      help
-      exit 0
-      ;;
-    "v" | "version" )
-      version
-      exit 0
-      ;;
-    "c" | "count" )
-      count_flag="-c"
-      ;;
-    "t" | "tap" )
-      pretty=""
-      ;;
-    "p" | "pretty" )
-      pretty="1"
-      ;;
-    * )
-      usage >&2
-      exit 1
-      ;;
-    esac
-  done
+unset flags pretty recursive
+flags=()
+pretty=
+recursive=
+if [[ -z "${CI:-}" && -t 0 && -t 1 ]] && command -v tput >/dev/null; then
+  pretty=1
 fi
 
-if [ "${#arguments[@]}" -eq 0 ]; then
-  usage >&2
-  exit 1
+while [[ "$#" -ne 0 ]]; do
+  case "$1" in
+  -h|--help)
+    version
+    usage
+    exit 0
+    ;;
+  -v|--version)
+    version
+    exit 0
+    ;;
+  -c|--count)
+    flags+=('-c')
+    ;;
+  -f|--filter)
+    shift
+    flags+=('-f' "$1")
+    ;;
+  -r|--recursive)
+    recursive=1
+    ;;
+  -t|--tap)
+    pretty=
+    ;;
+  -p|--pretty)
+    pretty=1
+    ;;
+  -*)
+    abort "Bad command line option '$1'"
+    ;;
+  *)
+    arguments+=("$1")
+    ;;
+  esac
+  shift
+done
+
+if [[ "${#arguments[@]}" -eq 0 ]]; then
+  abort 'Must specify at least one <test>'
 fi
 
 filenames=()
 for filename in "${arguments[@]}"; do
   expand_path "$filename" 'filename'
 
-  if [ -d "$filename" ]; then
+  if [[ -d "$filename" ]]; then
     shopt -s nullglob
-    for suite_filename in "$filename"/*.bats; do
-      filenames["${#filenames[@]}"]="$suite_filename"
-    done
+    if [[ "$recursive" -eq 1 ]]; then
+      while IFS= read -r -d $'\0' file; do
+        filenames+=("$file")
+      done < <(find "$filename" -type f -name '*.bats' -print0 | sort -z)
+    else
+      for suite_filename in "$filename"/*.bats; do
+        filenames+=("$suite_filename")
+      done
+    fi
     shopt -u nullglob
   else
-    filenames["${#filenames[@]}"]="$filename"
+    filenames+=("$filename")
   fi
 done
 
-if [ "${#filenames[@]}" -eq 1 ]; then
-  command="bats-exec-test"
+if [[ "${#filenames[@]}" -eq 1 ]]; then
+  command='bats-exec-test'
 else
-  command="bats-exec-suite"
+  command='bats-exec-suite'
 fi
 
 set -o pipefail execfail
-if [ -z "$pretty" ]; then
-  exec "$command" $count_flag "${filenames[@]}"
+if [[ -z "$pretty" ]]; then
+  exec "$command" "${flags[@]}" "${filenames[@]}"
 else
-  extended_syntax_flag="-x"
-  formatter="bats-format-tap-stream"
-  exec "$command" $count_flag $extended_syntax_flag "${filenames[@]}" | "$formatter"
+  exec "$command" -x "${flags[@]}" "${filenames[@]}" | bats-format-tap-stream
 fi

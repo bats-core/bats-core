@@ -1,35 +1,53 @@
 #!/usr/bin/env bash
 set -e
 
-count_only_flag=""
-if [ "$1" = "-c" ]; then
-  count_only_flag=1
-  shift
-fi
+count_only_flag=''
+extended_syntax_flag=''
+filter=''
+flags=()
 
-extended_syntax_flag=""
-if [ "$1" = "-x" ]; then
-  extended_syntax_flag="-x"
+while [[ "$#" -ne 0 ]]; do
+  case "$1" in
+  -c)
+    count_only_flag=1
+    ;;
+  -f)
+    filter="$2"
+    flags+=('-f' "$filter")
+    shift
+    ;;
+  -x)
+    extended_syntax_flag='-x'
+    flags+=('-x')
+    ;;
+  *)
+    break
+    ;;
+  esac
   shift
-fi
+done
 
-trap "kill 0; exit 1" int
+trap 'kill 0; exit 1' int
 
 count=0
 for filename in "$@"; do
   while IFS= read -r line; do
     if [[ "$line" =~ $BATS_TEST_PATTERN ]]; then
-      let count+=1
+      test_name="${BASH_REMATCH[1]#[\'\"]}"
+      test_name="${test_name%[\'\"]}"
+      if [[ -z "$filter" || "$test_name" =~ $filter ]]; then
+        ((++count))
+      fi
     fi
   done <"$filename"
 done
 
-if [ -n "$count_only_flag" ]; then
-  echo "$count"
+if [[ -n "$count_only_flag" ]]; then
+  printf '%d\n' "$count"
   exit
 fi
 
-echo "1..$count"
+printf '1..%d\n' "$count"
 status=0
 offset=0
 for filename in "$@"; do
@@ -38,24 +56,28 @@ for filename in "$@"; do
     IFS= read -r # 1..n
     while IFS= read -r line; do
       case "$line" in
-      "begin "* )
-        let index+=1
-        echo "${line/ $index / $(($offset + $index)) }"
+      'begin '* )
+        ((++index))
+        printf '%s\n' "${line/ $index / $(($offset + $index)) }"
         ;;
-      "ok "* | "not ok "* )
-        [ -n "$extended_syntax_flag" ] || let index+=1
-        echo "${line/ $index / $(($offset + $index)) }"
-        [ "${line:0:6}" != "not ok" ] || status=1
+      'ok '* | 'not ok '* )
+        if [[ -z "$extended_syntax_flag" ]]; then
+          ((++index))
+        fi
+        printf '%s\n' "${line/ $index / $(($offset + $index)) }"
+        if [[ "${line:0:6}" == 'not ok' ]]; then
+          status=1
+        fi
         ;;
       "declare"*)
         eval "$line"
         ;;
       * )
-        echo "$line"
+        printf '%s\n' "$line"
         ;;
       esac
     done
-  } < <( bats-exec-test $extended_syntax_flag -s "$filename" )
+  } < <( bats-exec-test "${flags[@]}" -s "$filename" )
   offset=$(($offset + $index))
 done
 
