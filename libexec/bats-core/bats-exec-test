@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -eET
+set -eETuo pipefail
 
 BATS_COUNT_ONLY=''
 BATS_TEST_FILTER=''
@@ -330,10 +330,6 @@ bats_perform_test() {
   BATS_TEST_NAME="$1"
   if declare -F "$BATS_TEST_NAME" >/dev/null; then
     BATS_TEST_NUMBER="$2"
-    if [[ -z "$BATS_TEST_NUMBER" ]]; then
-      printf '1..1\n'
-      BATS_TEST_NUMBER=1
-    fi
 
     # Some versions of Bash will reset BASH_LINENO to the first line of the
     # function when the ERR trap fires. All versions of Bash appear to reset it
@@ -364,7 +360,7 @@ bats_perform_test() {
   fi
 }
 
-if [[ -z "$TMPDIR" ]]; then
+if [[ "${TMPDIR:-}" == '' ]]; then
   BATS_TMPDIR='/tmp'
 else
   BATS_TMPDIR="${TMPDIR%/}"
@@ -413,7 +409,7 @@ bats_detect_duplicate_test_case_names() {
 }
 
 bats_evaluate_preprocessed_source() {
-  if [[ -z "$BATS_TEST_SOURCE" ]]; then
+  if [[ "${BATS_TEST_SOURCE:-}" == '' ]]; then
     BATS_TEST_SOURCE="${BATS_PARENT_TMPNAME}.src"
   fi
   source "$BATS_TEST_SOURCE"

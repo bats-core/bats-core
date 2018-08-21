@@ -4,5 +4,5 @@
 }
 
 @test "variables do not persist across tests" {
-  [ -z "$variable" ]
+  [ "${variable:-}" == '' ]
 }

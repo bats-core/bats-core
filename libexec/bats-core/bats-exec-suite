@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -e
+set -euo pipefail
 
 count_only_flag=''
 extended_syntax_flag=''

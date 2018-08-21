@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -e
+set -euo pipefail
 
 header_pattern='[0-9]+\.\.[0-9]+'
 IFS= read -r header
@@ -58,7 +58,7 @@ fail() {
 }
 
 log() {
-  set_color 1
+  set_color 1 normal
   buffer '   %s\n' "$1"
   clear_color
 }
@@ -114,7 +114,7 @@ set_color() {
   local color="$1"
   local weight=22
 
-  if [[ "$2" == 'bold' ]]; then
+  if [[ "${2:-normal}" == 'bold' ]]; then
     weight=1
   fi
   buffer '\x1B[%d;%dm' "$(( 30 + $color ))" "$weight"

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -e
+set -euo pipefail
 
 BATS_READLINK='true'
 if command -v 'greadlink' >/dev/null; then

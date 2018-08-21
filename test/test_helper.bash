@@ -9,7 +9,7 @@ make_bats_test_suite_tmpdir() {
 }
 
 filter_control_sequences() {
-  "$@" | sed $'s,\x1b\\[[0-9;]*[a-zA-Z],,g'
+  sed $'s,\x1b\\[[0-9;]*[a-zA-Z],,g' <<< "$("$@" || :)"
 }
 
 if ! command -v tput >/dev/null; then
@@ -24,7 +24,7 @@ emit_debug_output() {
 }
 
 teardown() {
-  if [[ -n "$BATS_TEST_SUITE_TMPDIR" ]]; then
+  if [[ "${BATS_TEST_SUITE_TMPDIR:-}" != '' ]]; then
     rm -rf "$BATS_TEST_SUITE_TMPDIR"
   fi
 }
