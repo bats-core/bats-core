@@ -312,7 +312,13 @@ bats_exit_trap() {
     status=0
   fi
 
-  declare -p BATS_BUCKET >&3
+  # Maybe a test has unset BATS_BUCKET. To avoid unbound variables errors, we
+  # make sure BATS_BUCKET is set.
+  if declare -p BATS_BUCKET >/dev/null; then
+    declare -p BATS_BUCKET >&3
+  else
+    echo "$BATS_BUCKET_DECLARATION" >&3
+  fi
 
   rm -f "$BATS_OUT"
   exit "$status"
