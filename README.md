@@ -457,10 +457,7 @@ This [bats-core repo](https://github.com/bats-core/bats-core) is now the officia
 
 ### Why was this fork created?
 
-The original Bats repository needed new maintainers, and had not been actively
-maintained since 2013. While there were volunteers for maintainers, attempts to
-organize issues, and outstanding PRs, the lack of write-access to the repo
-hindered progress severely.
+The original Bats repository is no longer maintained and write access to it could not be obtained. This fork allowed ongoing maintenance and forward progress for Bats.
 
 ### Contact us
 
