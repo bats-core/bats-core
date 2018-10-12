@@ -168,6 +168,8 @@ while IFS= read -r line; do
   '# '* )
     log "${line:2}"
     ;;
+  'suite '* )
+    ;;
   esac
 done
 
