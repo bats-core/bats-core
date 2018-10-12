@@ -3,6 +3,7 @@ set -eET
 
 BATS_COUNT_ONLY=''
 BATS_TEST_FILTER=''
+BATS_ENABLE_TIMING=''
 BATS_EXTENDED_SYNTAX=''
 
 # Command and flags used by bats_perform_tests when it re-invokes bats-exec-test
@@ -18,9 +19,9 @@ while [[ "$#" -ne 0 ]]; do
     BATS_TEST_FILTER="$2"
     shift
     ;;
-  -j)
-    BATS_EXTENDED_SYNTAX='-j'
-    BATS_PERFORM_TEST_CMD+=('-j')
+  -T)
+    BATS_ENABLE_TIMING='-T'
+    BATS_PERFORM_TEST_CMD+=('-T')
     ;;
   -x)
     BATS_EXTENDED_SYNTAX='-x'
@@ -281,7 +282,7 @@ bats_exit_trap() {
   fi
 
   BATS_TEST_TIME=""
-  if [[ -z "${skipped}" && "$BATS_EXTENDED_SYNTAX" == "-j" ]]; then
+  if [[ -z "${skipped}" && -n "$BATS_ENABLE_TIMING" ]]; then
     BATS_TEST_TIME=" in "$((SECONDS - BATS_TEST_START_TIME))"sec"
   fi
 

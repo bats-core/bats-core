@@ -271,8 +271,15 @@ fixtures bats
   [ "${lines[6]}" = 'ok 2 a passing test' ]
 }
 
-@test "junit syntax" {
-  run bats-exec-test -j "$FIXTURE_ROOT/failing_and_passing.bats"
+@test "timing syntax" {
+  run bats-exec-test -T "$FIXTURE_ROOT/failing_and_passing.bats"
+  [ $status -eq 1 ]
+  [ "${lines[1]}" = 'not ok 1 a failing test in 0sec' ]
+  [ "${lines[4]}" = 'ok 2 a passing test in 0sec' ]
+}
+
+@test "extended timing syntax" {
+  run bats-exec-test -x -T "$FIXTURE_ROOT/failing_and_passing.bats"
   [ $status -eq 1 ]
   [ "${lines[1]}" = 'begin 1 a failing test' ]
   [ "${lines[2]}" = 'not ok 1 a failing test in 0sec' ]

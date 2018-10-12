@@ -188,15 +188,17 @@ Usage: bats [-cr] [-f <regex>] [-p | -t] <test>...
   <test> is the path to a Bats test file, or the path to a directory
   containing Bats test files (ending with ".bats").
 
-  -c, --count      Count the number of test cases without running any tests
-  -f, --filter     Filter test cases by names matching the regular expression
-  -h, --help       Display this help message
-  -j, --junit      Export results in JUnit format
-  -o, --output     A directory to output reports to
-  -p, --pretty     Show results in pretty format (default for terminals)
-  -r, --recursive  Include tests in subdirectories
-  -t, --tap        Show results in TAP format
-  -v, --version    Display the version number
+  -c, --count               Count the number of test cases without running any tests
+  -e,--extended-output      Force extended output
+  -f, --filter              Filter test cases by names matching the regular expression
+  -h, --help                Display this help message
+  -j, --junit               Export results in JUnit format
+  -o, --output              A directory to output reports to
+  -p, --pretty              Show results in pretty format (default for terminals)
+  -r, --recursive           Include tests in subdirectories
+  -t, --tap                 Show results in TAP format
+  -T,--timing               Include timing information
+  -v, --version             Display the version number
 
   For more information, see https://github.com/bats-core/bats-core
 ```

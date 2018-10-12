@@ -2,6 +2,7 @@
 set -e
 
 count_only_flag=''
+enable_timing=''
 extended_syntax_flag=''
 filter=''
 flags=()
@@ -16,9 +17,9 @@ while [[ "$#" -ne 0 ]]; do
     flags+=('-f' "$filter")
     shift
     ;;
-  -j)
-    extended_syntax_flag='-j'
-    flags+=('-j')
+  -T)
+    enable_timing=1
+    flags+=('-T')
     ;;
   -x)
     extended_syntax_flag='-x'
@@ -56,8 +57,8 @@ status=0
 offset=0
 for filename in "$@"; do
   index=0
-  if [[ -n "$extended_syntax_flag" ]]; then
-    echo suite bats.$(basename "$filename"| sed -e 's/\.bats//')
+  if [[ -n "$enable_timing" ]]; then
+    echo suite $(basename "$filename")
   fi
   {
     IFS= read -r # 1..n
