@@ -191,6 +191,7 @@ Usage: bats [-cr] [-f <regex>] [-p | -t] <test>...
   -c, --count      Count the number of test cases without running any tests
   -f, --filter     Filter test cases by names matching the regular expression
   -h, --help       Display this help message
+  -j, --junit      Export results in JUnit format
   -p, --pretty     Show results in pretty format (default for terminals)
   -r, --recursive  Include tests in subdirectories
   -t, --tap        Show results in TAP format
