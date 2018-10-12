@@ -16,6 +16,10 @@ while [[ "$#" -ne 0 ]]; do
     flags+=('-f' "$filter")
     shift
     ;;
+  -j)
+    extended_syntax_flag='-j'
+    flags+=('-j')
+    ;;
   -x)
     extended_syntax_flag='-x'
     flags+=('-x')
@@ -52,7 +56,7 @@ status=0
 offset=0
 for filename in "$@"; do
   index=0
-  if test -n "$junit"; then
+  if [[ "$extended_syntax_flag" == "-j" ]]; then
     echo suite bats.$(basename "$filename"| sed -e 's/\.bats//')
   fi
   {
