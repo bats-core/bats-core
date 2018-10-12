@@ -81,8 +81,9 @@ done
 set -- "${arguments[@]}"
 arguments=()
 
-unset flags pretty recursive
+unset flags junit pretty recursive
 flags=()
+junit=
 pretty=
 recursive=
 if [[ -z "${CI:-}" && -t 0 && -t 1 ]] && command -v tput >/dev/null; then

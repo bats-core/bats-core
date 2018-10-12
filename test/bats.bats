@@ -272,7 +272,7 @@ fixtures bats
 }
 
 @test "junit syntax" {
-  run bats-exec-test -x "$FIXTURE_ROOT/failing_and_passing.bats"
+  run bats-exec-test -j "$FIXTURE_ROOT/failing_and_passing.bats"
   [ $status -eq 1 ]
   [ "${lines[1]}" = 'begin 1 a failing test' ]
   [ "${lines[2]}" = 'not ok 1 a failing test in 0sec' ]

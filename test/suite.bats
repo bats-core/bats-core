@@ -66,7 +66,7 @@ fixtures suite
 }
 
 @test "junit syntax in suite" {
-  FLUNK=1 run bats-exec-suite -x "$FIXTURE_ROOT/multiple/"*.bats
+  FLUNK=1 run bats-exec-suite -j "$FIXTURE_ROOT/multiple/"*.bats
   [ $status -eq 1 ]
   [ "${lines[0]}" = "1..3" ]
   [ "${lines[1]}" = "suite bats.a" ]
