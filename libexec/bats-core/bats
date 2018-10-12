@@ -82,14 +82,14 @@ done
 set -- "${arguments[@]}"
 arguments=()
 
-unset flags junit pretty recursive
+unset flags recursive
 flags=()
-junit=
-pretty=
+formatter='cat'
 recursive=
 output=
 if [[ -z "${CI:-}" && -t 0 && -t 1 ]] && command -v tput >/dev/null; then
-  pretty=1
+  flags+=('-x')
+  formatter='bats-format-tap-stream'
 fi
 
 while [[ "$#" -ne 0 ]]; do
@@ -111,21 +111,21 @@ while [[ "$#" -ne 0 ]]; do
     flags+=('-f' "$1")
     ;;
   -j|--junit)
-    pretty=
-    junit=1
+    flags+=('-j')
+    formatter='bats-format-junit'
     ;;
   -o|--output)
     shift
     output="$1"
     ;;
+  -p|--pretty)
+    flags+=('-x')
+    formatter='bats-format-tap-stream'
+    ;;
   -r|--recursive)
     recursive=1
     ;;
   -t|--tap)
-    pretty=
-    ;;
-  -p|--pretty)
-    pretty=1
     ;;
   -*)
     abort "Bad command line option '$1'"
@@ -169,19 +169,5 @@ else
 fi
 
 set -o pipefail execfail
-if [[ -n "$junit" ]]; then
-  [[ -n "$output" ]] && export BATS_JUNIT_OUTPUT_PATH="$output"
-  exec "$command" -j "${flags[@]}" "${filenames[@]}" | bats-format-junit
-elif [[ -n "$pretty" ]]; then
-  if [[ -n "$output" ]]; then
-    exec "$command" -x "${flags[@]}" "${filenames[@]}" | bats-format-tap-stream | tee "$output/report.tap"
-  else
-    exec "$command" -x "${flags[@]}" "${filenames[@]}" | bats-format-tap-stream
-  fi
-else
-  if [[ -n "$output" ]]; then
-    exec "$command" "${flags[@]}" "${filenames[@]}" | tee "$output/report.tap"
-  else
-    exec "$command" "${flags[@]}" "${filenames[@]}" 
-  fi
-fi
+[[ -n "$output" ]] && export BATS_REPORT_OUTPUT_PATH="$output"
+exec "$command" "${flags[@]}" "${filenames[@]}" | "$formatter"

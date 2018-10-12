@@ -83,8 +83,8 @@ finish_suite() {
 
 output_path() {
   path="TestReport-${class-case}.xml"
-  if [[ -n "$BATS_JUNIT_OUTPUT_PATH" ]]; then
-    path="${BATS_JUNIT_OUTPUT_PATH%/}/${path}"
+  if [[ -n "$BATS_REPORT_OUTPUT_PATH" ]]; then
+    path="${BATS_REPORT_OUTPUT_PATH%/}/${path}"
   fi
   echo $path
 }

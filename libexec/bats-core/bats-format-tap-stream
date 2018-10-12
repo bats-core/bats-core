@@ -134,6 +134,7 @@ buffer() {
 
 flush() {
   printf '%s' "$_buffer"
+  [[ -n "$BATS_REPORT_OUTPUT_PATH" ]] && printf '%s' "$_buffer" | tee "$BATS_REPORT_OUTPUT_PATH/report.tap" > /dev/null
   _buffer=
 }
 
