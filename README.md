@@ -192,6 +192,7 @@ Usage: bats [-cr] [-f <regex>] [-p | -t] <test>...
   -f, --filter     Filter test cases by names matching the regular expression
   -h, --help       Display this help message
   -j, --junit      Export results in JUnit format
+  -o, --output     A directory to output reports to
   -p, --pretty     Show results in pretty format (default for terminals)
   -r, --recursive  Include tests in subdirectories
   -t, --tap        Show results in TAP format

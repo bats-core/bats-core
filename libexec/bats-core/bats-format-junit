@@ -76,9 +76,17 @@ finish_suite() {
       header
       flush
       footer
-    ) > "TestReport-${class-case}.xml"
+    ) > "$(output_path)"
   }
   init_suite
+}
+
+output_path() {
+  path="TestReport-${class-case}.xml"
+  if [[ -n "$BATS_JUNIT_OUTPUT_PATH" ]]; then
+    path="${BATS_JUNIT_OUTPUT_PATH%/}/${path}"
+  fi
+  echo $path
 }
 
 trap finish_suite EXIT

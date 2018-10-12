@@ -30,6 +30,7 @@ Usage: $cmd [-cr] [-f <regex>] [-p | -t] <test>...
   -f, --filter     Filter test cases by names matching the regular expression
   -h, --help       Display this help message
   -j, --junit      Export results in JUnit format
+  -o, --output     A directory to output reports to
   -p, --pretty     Show results in pretty format (default for terminals)
   -r, --recursive  Include tests in subdirectories
   -t, --tap        Show results in TAP format
@@ -86,6 +87,7 @@ flags=()
 junit=
 pretty=
 recursive=
+output=
 if [[ -z "${CI:-}" && -t 0 && -t 1 ]] && command -v tput >/dev/null; then
   pretty=1
 fi
@@ -111,6 +113,10 @@ while [[ "$#" -ne 0 ]]; do
   -j|--junit)
     pretty=
     junit=1
+    ;;
+  -o|--output)
+    shift
+    output="$1"
     ;;
   -r|--recursive)
     recursive=1
@@ -164,9 +170,18 @@ fi
 
 set -o pipefail execfail
 if [[ -n "$junit" ]]; then
+  [[ -n "$output" ]] && export BATS_JUNIT_OUTPUT_PATH="$output"
   exec "$command" -j "${flags[@]}" "${filenames[@]}" | bats-format-junit
 elif [[ -n "$pretty" ]]; then
-  exec "$command" -x "${flags[@]}" "${filenames[@]}" | bats-format-tap-stream
+  if [[ -n "$output" ]]; then
+    exec "$command" -x "${flags[@]}" "${filenames[@]}" | bats-format-tap-stream | tee "$output/report.tap"
+  else
+    exec "$command" -x "${flags[@]}" "${filenames[@]}" | bats-format-tap-stream
+  fi
 else
-  exec "$command" "${flags[@]}" "${filenames[@]}"
+  if [[ -n "$output" ]]; then
+    exec "$command" "${flags[@]}" "${filenames[@]}" | tee "$output/report.tap"
+  else
+    exec "$command" "${flags[@]}" "${filenames[@]}" 
+  fi
 fi
