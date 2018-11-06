@@ -32,7 +32,7 @@ load() {
 run() {
   trap bats_interrupt_trap_in_run INT
   local origFlags="$-"
-  set +eET
+  set -f +eET
   local origIFS="$IFS"
   # 'output', 'status', 'lines' are global variables available to tests.
   # shellcheck disable=SC2034
