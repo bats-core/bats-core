@@ -512,6 +512,7 @@ Doing it this way accomplishes a number of things:
 
 Bats is released under an MIT-style license; see `LICENSE.md` for details.
 
-See [AUTHORS](AUTHORS) for the current project maintainer team.
+See the [parent project](https://github.com/bats-core) at GitHub or the
+[AUTHORS](AUTHORS) file for the current project maintainer team.
 
 [gitter]: https://gitter.im/bats-core/bats-core?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
