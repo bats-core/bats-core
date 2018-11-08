@@ -436,7 +436,7 @@ There are several global variables you can use to introspect on Bats tests:
 ```sh
 bin/bats --tap test
 ```
-See also the [CI](.travis.yml) script for the current test environment and
+See also the [CI](.travis.yml) settings for the current test environment and
 scripts.
 
 ## Support
