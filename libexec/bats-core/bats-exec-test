@@ -30,7 +30,7 @@ while [[ "$#" -ne 0 ]]; do
 done
 
 BATS_IN_SUITE=""
-if [ "$1" = "-s" ]; then
+if [[ "$1" == "-s" ]]; then
   BATS_IN_SUITE="$1"
   shift
 fi
