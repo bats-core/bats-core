@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 set -e
 
-IFS= read -r header
-
 index=0
 
 init_suite() {
@@ -17,7 +15,7 @@ init_suite() {
 header() {
     printf "\
 <?xml version=\"1.0\" encoding=\"UTF-8\"?>
-<testsuite name=\"${class}\" tests=\"${count}\" failures=\"${failures}\" skip=\"${skipped}\" time=\"${suitetest_exec_time}\">\n"
+<testsuite name=\"${class}\" tests=\"${count}\" failures=\"${failures}\" skip=\"${skipped}\" time=\"${suitetest_exec_time}\">"
 }
 
 footer() {
@@ -26,12 +24,11 @@ footer() {
 
 
 pass() {
-    echo "    <testcase classname=\"${class}\" name=\"${name}\" time=\"${test_exec_time}\"/>"
+    printf "\n    <testcase classname=\"${class}\" name=\"${name}\" time=\"${test_exec_time}\"/>"
 }
 
 fail() {
-    printf "\
-    <testcase classname=\"${class}\" name=\"${name}\" time=\"${test_exec_time}\">
+    printf "\n    <testcase classname=\"${class}\" name=\"${name}\" time=\"${test_exec_time}\">
         <failure><![CDATA["
 
     echo -n "${1}"
@@ -41,8 +38,7 @@ fail() {
 }
 
 skip() {
-    echo "\
-    <testcase classname=\"${class}\" name=\"${name}\" time=\"${test_exec_time}\">
+    echo "\n    <testcase classname=\"${class}\" name=\"${name}\" time=\"${test_exec_time}\">
         <skipped>$1</skipped>
     </testcase>\n"
 }
@@ -82,7 +78,7 @@ finish_suite() {
 }
 
 output_path() {
-  path="TestReport-${class-case}.xml"
+  path="TestReport-${class}.xml"
   if [[ -n "$BATS_REPORT_OUTPUT_PATH" ]]; then
     path="${BATS_REPORT_OUTPUT_PATH%/}/${path}"
   fi
@@ -107,6 +103,7 @@ while IFS= read -r line; do
     name="${line#* $index }"
     ;;
   "ok "* )
+    echo "$line"
     let count+=1
     expr_ok="ok $index .* in ([0-9]+)sec"
     expr_skip="ok $index # skip (.*)"
@@ -124,6 +121,7 @@ while IFS= read -r line; do
     fi
     ;;
   "not ok "* )
+    echo "$line"
     let count+=1
     let failures+=1
     expr_notok="not ok $index .* in ([0-9]+)sec"
@@ -135,6 +133,8 @@ while IFS= read -r line; do
   "# "* )
     log "${line:2}"
     ;;
+  *)
+    echo "$line"
+    ;;
   esac
 done
-
