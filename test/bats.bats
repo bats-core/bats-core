@@ -61,7 +61,7 @@ fixtures bats
 }
 
 @test "tap passing and skipping tests" {
-  run filter_control_sequences bats --tap "$FIXTURE_ROOT/passing_and_skipping.bats"
+  run filter_control_sequences bats --formatter bats-format-tap "$FIXTURE_ROOT/passing_and_skipping.bats"
   [ $status -eq 0 ]
   [ "${lines[0]}" = "1..3" ]
   [ "${lines[1]}" = "ok 1 a passing test" ]
@@ -82,7 +82,7 @@ fixtures bats
 }
 
 @test "tap passing, failing and skipping tests" {
-  run filter_control_sequences bats --tap "$FIXTURE_ROOT/passing_failing_and_skipping.bats"
+  run filter_control_sequences bats --formatter bats-format-tap "$FIXTURE_ROOT/passing_failing_and_skipping.bats"
   [ $status -eq 0 ]
   [ "${lines[0]}" = "1..3" ]
   [ "${lines[1]}" = "ok 1 a passing test" ]
@@ -288,7 +288,7 @@ fixtures bats
 }
 
 @test "pretty and tap formats" {
-  run bats --tap "$FIXTURE_ROOT/passing.bats"
+  run bats --formatter bats-format-tap "$FIXTURE_ROOT/passing.bats"
   tap_output="$output"
   [ $status -eq 0 ]
 
@@ -300,7 +300,7 @@ fixtures bats
 }
 
 @test "pretty formatter bails on invalid tap" {
-  run bats --tap "$FIXTURE_ROOT/invalid_tap.bats"
+  run bats --formatter bats-format-tap "$FIXTURE_ROOT/invalid_tap.bats"
   [ $status -eq 1 ]
   [ "${lines[0]}" = "This isn't TAP!" ]
   [ "${lines[1]}" = "Good day to you" ]

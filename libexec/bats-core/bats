@@ -27,15 +27,14 @@ Usage: $cmd [-cr] [-f <regex>] [-p | -t] <test>...
   containing Bats test files (ending with ".bats").
 
   -c, --count               Count the number of test cases without running any tests
-  -e,--extended-output      Force extended output
+  -F, --formatter           Switch between formatters (Default: bats-format-tap, Options: bats-format-junit, bats-format-pretty, bats-format-tap)
+  -e, --extra-flags         Extra flags to pass to the bats executor (Options: -T)
   -f, --filter              Filter test cases by names matching the regular expression
   -h, --help                Display this help message
-  -j, --junit               Export results in JUnit format
   -o, --output              A directory to output reports to
-  -p, --pretty              Show results in pretty format (default for terminals)
+  -p, --pretty              [DEPRECATED] Show results in pretty format (default for terminals), use "--formatter bats-format-pretty" instead
   -r, --recursive           Include tests in subdirectories
-  -t, --tap                 Show results in TAP format
-  -T,--timing               Include timing information
+  -t, --tap                 [DEPRECATED] Show results in TAP format, use "--formatter bats-format-tap" instead
   -v, --version             Display the version number
 
   For more information, see https://github.com/bats-core/bats-core
@@ -90,7 +89,7 @@ formatter='cat'
 recursive=
 output=
 if [[ -z "${CI:-}" && -t 0 && -t 1 ]] && command -v tput >/dev/null; then
-  formatter='bats-format-tap-stream'
+  formatter='bats-format-pretty'
 fi
 
 while [[ "$#" -ne 0 ]]; do
@@ -107,32 +106,30 @@ while [[ "$#" -ne 0 ]]; do
   -c|--count)
     flags+=('-c')
     ;;
-  -e|--extended-output)
-    flags+=('-x')
+  -e|--extra-flags)
+    shift
+    flags+=("$1")
     ;;
   -f|--filter)
     shift
     flags+=('-f' "$1")
     ;;
-  -j|--junit)
-    flags+=('-T')
-    formatter='bats-format-junit'
+  -F|--formatter)
+    shift
+    formatter="$1"
     ;;
   -o|--output)
     shift
     output="$1"
     ;;
   -p|--pretty)
-    formatter='bats-format-tap-stream'
+    formatter='bats-format-pretty'
     ;;
   -r|--recursive)
     recursive=1
     ;;
   -t|--tap)
     formatter='cat'
-    ;;
-  -T|--timing)
-    flags+=('-T')
     ;;
   -*)
     abort "Bad command line option '$1'"
@@ -144,7 +141,7 @@ while [[ "$#" -ne 0 ]]; do
   shift
 done
 
-if [[ "$formatter" != 'cat' ]]; then
+if [[ "$formatter" != 'cat' ]] && [[ "$formatter" != "bats-format-tap" ]]; then
   flags+=('-x')
 fi
 

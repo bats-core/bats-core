@@ -20,7 +20,7 @@ Resolving deltas: 100% (661/661), done.
 $ cd bats-core/
 $ docker build --tag bats:latest .
 ...
-$ docker run -it bats:latest --tap /opt/bats/test
+$ docker run -it bats:latest --formatter bats-format-tap /opt/bats/test
 ```
 
 To mount your tests into the container, first build the image as above. Then, for example with `bats`:
