@@ -27,9 +27,9 @@ Usage: $cmd [-cr] [-f <regex>] [-p | -t] <test>...
   containing Bats test files (ending with ".bats").
 
   -c, --count               Count the number of test cases without running any tests
-  -F, --formatter           Switch between formatters (Default: bats-format-tap, Options: bats-format-junit, bats-format-pretty, bats-format-tap)
   -e, --extra-flags         Extra flags to pass to the bats executor (Options: -T)
   -f, --filter              Filter test cases by names matching the regular expression
+  -F, --formatter           Switch between formatters (Default: bats-format-tap, Options: bats-format-junit, bats-format-pretty, bats-format-tap)
   -h, --help                Display this help message
   -o, --output              A directory to output reports to
   -p, --pretty              [DEPRECATED] Show results in pretty format (default for terminals), use "--formatter bats-format-pretty" instead
