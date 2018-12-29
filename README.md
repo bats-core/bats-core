@@ -189,16 +189,16 @@ Usage: bats [-cr] [-f <regex>] [-p | -t] <test>...
   containing Bats test files (ending with ".bats").
 
   -c, --count               Count the number of test cases without running any tests
-  -e,--extended-output      Force extended output
+  -e, --extra-flags         Extra flags to pass to the bats executor (Options: -T)
   -f, --filter              Filter test cases by names matching the regular expression
+  -F, --formatter           Switch between formatters (Default: bats-format-tap, Options: bats-format-junit, bats-format-pretty, bats-format-tap)
   -h, --help                Display this help message
-  -j, --junit               Export results in JUnit format
   -o, --output              A directory to output reports to
-  -p, --pretty              Show results in pretty format (default for terminals)
+  -p, --pretty              [DEPRECATED] Show results in pretty format (default for terminals), use "--formatter bats-format-pretty" instead
   -r, --recursive           Include tests in subdirectories
-  -t, --tap                 Show results in TAP format
-  -T,--timing               Include timing information
+  -t, --tap                 [DEPRECATED] Show results in TAP format, use "--formatter bats-format-tap" instead
   -v, --version             Display the version number
+  -f, --filter              Filter test cases by names matching the regular expression
 
   For more information, see https://github.com/bats-core/bats-core
 ```
@@ -225,10 +225,26 @@ If Bats is not connected to a terminal—in other words, if you run it from a
 continuous integration system, or redirect its output to a file—the results are
 displayed in human-readable, machine-parsable [TAP format][TAP].
 
-You can force TAP output from a terminal by invoking Bats with the `--tap`
+You can force TAP output from a terminal by invoking Bats with the `--formatter`
 option.
 
-    $ bats --tap addition.bats
+    $ bats --formatter bats-format-tap addition.bats
+    1..2
+    ok 1 addition using bc
+    ok 2 addition using dc
+
+By combining `--extra-flag -T` and `--formatter bats-format-junit`, it is possible
+to output junit-compatible report files.
+
+    $ bats --formatter bats-format-junit --extra-flag -T addition.bats
+    1..2
+    ok 1 addition using bc
+    ok 2 addition using dc
+
+Test reports will be output in the executing directory, but may be placed elsewhere
+by specifying the `--output` flag.
+
+    $ bats --formatter bats-format-junit --extra-flag -T addition.bats --output /tmp
     1..2
     ok 1 addition using bc
     ok 2 addition using dc

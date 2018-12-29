@@ -49,16 +49,20 @@ OPTIONS
 
   * `-c`, `--count`:
     Count the number of test cases without running any tests
+  * `-e`, `--extra-flags`:
+    Extra flags to pass to the bats executor (Options: -T)
   * `-f`, `--filter`:
     Filter test cases by names matching the regular expression
+  * -F, --formatter:
+    Switch between formatters (Default: bats-format-tap, Options: bats-format-junit, bats-format-pretty, bats-format-tap)
   * `-h`, `--help`:
     Display help message
   * `-p`, `--pretty`:
-    Show results in pretty format (default for terminals)
+    [DEPRECATED] Show results in pretty format (default for terminals), use "--formatter bats-format-pretty" instead
   * `-r`, `--recursive`:
     Include tests in subdirectories
   * `-t`, `--tap`:
-    Show results in TAP format
+    [DEPRECATED] Show results in TAP format, use "--formatter bats-format-tap" instead
   * `-v`, `--version`:
     Display the version number
 
