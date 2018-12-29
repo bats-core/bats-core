@@ -90,7 +90,6 @@ formatter='cat'
 recursive=
 output=
 if [[ -z "${CI:-}" && -t 0 && -t 1 ]] && command -v tput >/dev/null; then
-  flags+=('-x')
   formatter='bats-format-tap-stream'
 fi
 
@@ -124,13 +123,13 @@ while [[ "$#" -ne 0 ]]; do
     output="$1"
     ;;
   -p|--pretty)
-    flags+=('-x')
     formatter='bats-format-tap-stream'
     ;;
   -r|--recursive)
     recursive=1
     ;;
   -t|--tap)
+    formatter='cat'
     ;;
   -T|--timing)
     flags+=('-T')
@@ -144,6 +143,10 @@ while [[ "$#" -ne 0 ]]; do
   esac
   shift
 done
+
+if [[ "$formatter" != 'cat' ]]; then
+  flags+=('-x')
+fi
 
 if [[ "${#arguments[@]}" -eq 0 ]]; then
   abort 'Must specify at least one <test>'
