@@ -27,6 +27,16 @@ header() {
     printf "\
 <?xml version=\"1.0\" encoding=\"UTF-8\"?>
 <testsuite name=\"${class}\" tests=\"${count}\" failures=\"${failures}\" errors=\"0\" skipped=\"${skipped}\" time=\"${suitetest_exec_time}\" timestamp=\"${timestamp}\" hostname=\"$(host)\">
+  <properties>"
+    while IFS= read -r line; do
+      name="$(echo "$line" | cut -d'=' -f1)"
+      value="$(echo "$line" | cut -d'=' -f2-)"
+      if echo "$name" | grep -qv "^BATS_"; then
+        continue
+      fi
+      printf "\n    <property name=\"${name}\" value=\"${value}\"/>"
+    done < <(env)
+    printf "\n  </properties>"
 }
 
 footer() {
