@@ -12,10 +12,21 @@ init_suite() {
   _buffer=""
 }
 
+host() {
+  hostname="$HOST"
+  [[ -z "$hostname" ]] && hostname="$HOSTNAME"
+  [[ -z "$hostname" ]] && hostname="$(uname -n)"
+  [[ -z "$hostname" ]] && hostname="$(hostname -f)"
+
+  echo "$hostname"
+}
+
 header() {
+    timestamp=$(date -u +"%Y-%m-%dT%H:%M:%S")
+
     printf "\
 <?xml version=\"1.0\" encoding=\"UTF-8\"?>
-<testsuite name=\"${class}\" tests=\"${count}\" failures=\"${failures}\" skip=\"${skipped}\" time=\"${suitetest_exec_time}\">"
+<testsuite name=\"${class}\" tests=\"${count}\" failures=\"${failures}\" errors=\"0\" skipped=\"${skipped}\" time=\"${suitetest_exec_time}\" timestamp=\"${timestamp}\" hostname=\"$(host)\">
 }
 
 footer() {
