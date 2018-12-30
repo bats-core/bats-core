@@ -40,6 +40,8 @@ header() {
 }
 
 footer() {
+    printf "  <system-out></system-out>\n"
+    printf "  <system-err></system-err>\n"
     printf "</testsuite>\n"
 }
 
