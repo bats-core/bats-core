@@ -38,7 +38,7 @@ fail() {
 }
 
 skip() {
-    echo "\n    <testcase classname=\"${class}\" name=\"${name}\" time=\"${test_exec_time}\">
+    printf "\n    <testcase classname=\"${class}\" name=\"${name}\" time=\"${test_exec_time}\">
         <skipped>$1</skipped>
     </testcase>\n"
 }
@@ -106,7 +106,7 @@ while IFS= read -r line; do
     echo "$line"
     let count+=1
     expr_ok="ok $index .* in ([0-9]+)sec"
-    expr_skip="ok $index # skip (.*)"
+    expr_skip="ok $index .* # skip (.*)"
     if [[ "$line" =~ $expr_skip ]]; then
       let skipped+=1
       test_exec_time=0
