@@ -64,12 +64,14 @@ commit [0360811][].  It was created via `git clone --bare` and `git push
   - [File descriptor 3 (read this if Bats hangs)](#file-descriptor-3-read-this-if-bats-hangs)
   - [Printing to the terminal](#printing-to-the-terminal)
   - [Special variables](#special-variables)
+- [Testing](#testing)
 - [Support](#support)
+- [Contributing](#contributing)
+- [Contact](#contact)
 - [Version history](#version-history)
 - [Background](#background)
   - [Why was this fork created?](#why-was-this-fork-created)
   - [What's the plan and why?](#whats-the-plan-and-why)
-  - [Contact us](#contact-us)
 - [Copyright](#copyright)
 
 ## Installation
@@ -429,6 +431,14 @@ There are several global variables you can use to introspect on Bats tests:
 * `$BATS_TMPDIR` is the location to a directory that may be used to store
   temporary files.
 
+## Testing
+
+```sh
+bin/bats --tap test
+```
+See also the [CI](.travis.yml) settings for the current test environment and
+scripts.
+
 ## Support
 
 The Bats source code repository is [hosted on
@@ -443,11 +453,19 @@ To learn how to set up your editor for Bats syntax highlighting, see [Syntax
 Highlighting](https://github.com/bats-core/bats-core/wiki/Syntax-Highlighting)
 on the wiki.
 
+## Contributing
+
+For now see the ``docs`` folder for project guides, work with us on the wiki
+or look at the other communication channels.
+
+## Contact
+
+- We are `#bats` on freenode;
+- Or leave a message on [gitter].
+
 ## Version history
 
 See `docs/CHANGELOG.md`.
-
----
 
 ## Background
 
@@ -485,9 +503,6 @@ Doing it this way accomplishes a number of things:
 1. Prevents lock-out by giving administrative access to more than one person,
    increases transferability
 
-### Contact us
-
-- We are `#bats` on freenode
 
 ## Copyright
 
@@ -496,5 +511,8 @@ Doing it this way accomplishes a number of things:
 © 2011-2016 Sam Stephenson
 
 Bats is released under an MIT-style license; see `LICENSE.md` for details.
+
+See the [parent project](https://github.com/bats-core) at GitHub or the
+[AUTHORS](AUTHORS) file for the current project maintainer team.
 
 [gitter]: https://gitter.im/bats-core/bats-core?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
