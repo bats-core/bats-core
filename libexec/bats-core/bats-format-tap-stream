@@ -36,6 +36,7 @@ begin() {
 
 pass() {
   go_to_column 0
+  set_color 2 bold
   buffer ' ✓ %s' "$name"
   advance
 }
@@ -46,6 +47,7 @@ skip() {
     reason=": $reason"
   fi
   go_to_column 0
+  set_color 6 bold
   buffer ' - %s (skipped%s)' "$name" "$reason"
   advance
 }
