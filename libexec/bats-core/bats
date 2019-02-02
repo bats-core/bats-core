@@ -39,6 +39,11 @@ Usage: $cmd [-cr] [-f <regex>] [-p | -t] <test>...
 END_OF_HELP_TEXT
 }
 
+expand_link() {
+  readlink="$(type -p greadlink readlink | head -1)"
+  "$readlink" -f "$1"
+}
+
 expand_path() {
   local path="${1%/}"
   local dirname="${path%/*}"
@@ -54,10 +59,11 @@ expand_path() {
   printf -v "$result" '%s/%s' "$dirname" "${path##*/}"
 }
 
+BATS_LIBEXEC="$(dirname "$(expand_link "$BASH_SOURCE")")"
 export BATS_CWD="$PWD"
 export BATS_TEST_PATTERN="^[[:blank:]]*@test[[:blank:]]+(.*[^[:blank:]])[[:blank:]]+\{(.*)\$"
 export BATS_TEST_FILTER=
-export PATH="$BATS_ROOT/libexec/bats-core:$PATH"
+export PATH="$BATS_LIBEXEC:$PATH"
 
 arguments=()
 
