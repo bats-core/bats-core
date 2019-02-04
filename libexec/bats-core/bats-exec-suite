@@ -4,6 +4,8 @@ set -e
 count_only_flag=''
 extended_syntax_flag=''
 filter=''
+num_jobs=1
+have_gnu_parallel=
 flags=()
 
 while [[ "$#" -ne 0 ]]; do
@@ -16,6 +18,10 @@ while [[ "$#" -ne 0 ]]; do
     filter="$1"
     flags+=('-f' "$filter")
     ;;
+  -j)
+    shift
+    num_jobs="$1"
+    ;;
   -x)
     extended_syntax_flag='-x'
     flags+=('-x')
@@ -26,6 +32,13 @@ while [[ "$#" -ne 0 ]]; do
   esac
   shift
 done
+
+if ( type -p parallel &>/dev/null ); then
+  have_gnu_parallel=1
+elif [[ "$num_jobs" != 1 ]]; then
+  printf 'bats: cannot execute "%s" jobs without GNU parallel\n' "$num_jobs" >&2
+  exit 1
+fi
 
 trap 'kill 0; exit 1' int
 
@@ -66,9 +79,23 @@ fi
 status=0
 printf '1..%d\n' "${#all_tests[@]}"
 
-test_number=1
-while IFS=$'\t' read -r filename test_name; do
-  bats-exec-test "${flags[@]}" "$filename" "$test_name" "$test_number" || status=1
-  ((++test_number))
-done < <(printf '%s\n' "${all_tests[@]}" | grep -v '^$')
+# No point on continuing if there's no tests.
+if [[ "${#all_tests[@]}" == 0 ]]; then
+  exit
+fi
+
+if [[ "$num_jobs" != 1 ]]; then
+  # Only use GNU parallel when we want parallel execution -- there is a small
+  # amount of overhead using it over a simple loop in the serial case.
+  set -o pipefail
+  printf '%s\n' "${all_tests[@]}" | grep -v '^$' | \
+    parallel -qk -j "$num_jobs" --colsep="\t" -- bats-exec-test "${flags[@]}" '{1}' '{2}' '{#}' || status=1
+else
+  # Just do it serially.
+  test_number=1
+  while IFS=$'\t' read -r filename test_name; do
+    bats-exec-test "${flags[@]}" "$filename" "$test_name" "$test_number" || status=1
+    ((++test_number))
+  done < <(printf '%s\n' "${all_tests[@]}" | grep -v '^$')
+fi
 exit "$status"
