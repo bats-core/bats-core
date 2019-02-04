@@ -284,10 +284,10 @@ fixtures bats
 }
 
 @test "pretty formatter bails on invalid tap" {
-  run bats --tap "$FIXTURE_ROOT/invalid_tap.bats"
-  [ $status -eq 1 ]
-  [ "${lines[0]}" = "This isn't TAP!" ]
-  [ "${lines[1]}" = "Good day to you" ]
+  run bats-format-tap-stream < <(printf "This isn't TAP.\nGood day to you.\n")
+  [ "$status" -eq 0 ]
+  [ "${lines[0]}" = "This isn't TAP." ]
+  [ "${lines[1]}" = "Good day to you." ]
 }
 
 @test "single-line tests" {
