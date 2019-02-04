@@ -52,6 +52,7 @@ fixtures suite
 }
 
 @test "extended syntax in suite" {
+  emulate_bats_env
   FLUNK=1 run bats-exec-suite -x "$FIXTURE_ROOT/multiple/"*.bats
   [ $status -eq 1 ]
   [ "${lines[0]}" = "1..3" ]

@@ -156,15 +156,11 @@ for filename in "${arguments[@]}"; do
   fi
 done
 
-if [[ "${#filenames[@]}" -eq 1 ]]; then
-  command='bats-exec-test'
-else
-  command='bats-exec-suite'
+formatter="cat"
+if [[ -n "$pretty" ]]; then
+  flags+=("-x")
+  formatter="bats-format-tap-stream"
 fi
 
 set -o pipefail execfail
-if [[ -z "$pretty" ]]; then
-  exec "$command" "${flags[@]}" "${filenames[@]}"
-else
-  exec "$command" -x "${flags[@]}" "${filenames[@]}" | bats-format-tap-stream
-fi
+exec bats-exec-suite "${flags[@]}" "${filenames[@]}" | "$formatter"

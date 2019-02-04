@@ -12,9 +12,9 @@ while [[ "$#" -ne 0 ]]; do
     count_only_flag=1
     ;;
   -f)
-    filter="$2"
-    flags+=('-f' "$filter")
     shift
+    filter="$1"
+    flags+=('-f' "$filter")
     ;;
   -x)
     extended_syntax_flag='-x'
@@ -29,53 +29,46 @@ done
 
 trap 'kill 0; exit 1' int
 
-count=0
+all_tests=()
 for filename in "$@"; do
-  while IFS= read -r line; do
-    if [[ "$line" =~ $BATS_TEST_PATTERN ]]; then
-      test_name="${BASH_REMATCH[1]#[\'\"]}"
-      test_name="${test_name%[\'\"]}"
-      if [[ -z "$filter" || "$test_name" =~ $filter ]]; then
-        ((++count))
-      fi
+  if  [[ ! -f "$filename" ]]; then
+    printf 'bats: %s does not exist\n' "$filename" >&2
+    exit 1
+  fi
+
+  test_names=()
+  test_dupes=()
+  while read -r line; do
+    if [[ ! "$line" =~ ^bats_test_function\  ]]; then
+      continue
     fi
-  done <"$filename"
+    line="${line%$'\r'}"
+    line="${line#* }"
+
+    all_tests+=( "$(printf "%s\t%s" "$filename" "$line")" )
+    if [[ " ${test_names[*]} " == *" $line "* ]]; then
+      test_dupes+=("$line")
+      continue
+    fi
+    test_names+=("$line")
+  done < <(BATS_TEST_FILTER="$filter" bats-preprocess "$filename")
+
+  if [[ "${#test_dupes[@]}" -ne 0 ]]; then
+    printf 'bats warning: duplicate test name(s) in %s: %s\n' "$filename" "${test_dupes[*]}" >&2
+  fi
 done
 
 if [[ -n "$count_only_flag" ]]; then
-  printf '%d\n' "$count"
+  printf '%d\n' "${#all_tests[@]}"
   exit
 fi
 
-printf '1..%d\n' "$count"
 status=0
-offset=0
-for filename in "$@"; do
-  index=0
-  {
-    IFS= read -r # 1..n
-    while IFS= read -r line; do
-      case "$line" in
-      'begin '* )
-        ((++index))
-        printf '%s\n' "${line/ $index / $(($offset + $index)) }"
-        ;;
-      'ok '* | 'not ok '* )
-        if [[ -z "$extended_syntax_flag" ]]; then
-          ((++index))
-        fi
-        printf '%s\n' "${line/ $index / $(($offset + $index)) }"
-        if [[ "${line:0:6}" == 'not ok' ]]; then
-          status=1
-        fi
-        ;;
-      * )
-        printf '%s\n' "$line"
-        ;;
-      esac
-    done
-  } < <( bats-exec-test "${flags[@]}" "$filename" )
-  offset=$(($offset + $index))
-done
+printf '1..%d\n' "${#all_tests[@]}"
 
+test_number=1
+while IFS=$'\t' read -r filename test_name; do
+  bats-exec-test "${flags[@]}" "$filename" "$test_name" "$test_number" || status=1
+  ((++test_number))
+done < <(printf '%s\n' "${all_tests[@]}" | grep -v '^$')
 exit "$status"
