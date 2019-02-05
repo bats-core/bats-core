@@ -467,3 +467,19 @@ END_OF_ERR_MSG
   [ "${lines[5]}" = '# bar' ]
   [ "${lines[6]}" = '# baz' ]
 }
+
+@test "parallel test execution with --jobs" {
+  type -p parallel &>/dev/null || skip "--jobs requires GNU parallel"
+
+  SECONDS=0
+  run bats --jobs 10 "$FIXTURE_ROOT/parallel.bats"
+  duration="$SECONDS"
+  [ "$status" -eq 0 ]
+  # Make sure the lines are in-order.
+  [[ "${lines[0]}" == "1..10" ]]
+  for t in {1..10}; do
+    [[ "${lines[$t]}" == "ok $t slow test $t" ]]
+  done
+  # In theory it should take 3s, but let's give it bit of extra time instead.
+  [[ "$duration" -lt 20 ]]
+}

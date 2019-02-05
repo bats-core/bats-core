@@ -126,3 +126,23 @@ fixtures suite
   [ "${lines[1]}" = 'ok 1 baz in a' ]
   [ "${lines[2]}" = 'ok 2 bar_in_b' ]
 }
+
+@test "parallel suite execution with --jobs" {
+  type -p parallel &>/dev/null || skip "--jobs requires GNU parallel"
+
+  SECONDS=0
+  run bats --jobs 40 "$FIXTURE_ROOT/parallel"
+  duration="$SECONDS"
+  [ "$status" -eq 0 ]
+  # Make sure the lines are in-order.
+  [[ "${lines[0]}" == "1..40" ]]
+  i=0
+  for s in {1..4}; do
+    for t in {1..10}; do
+      ((++i))
+      [[ "${lines[$i]}" == "ok $i slow test $t" ]]
+    done
+  done
+  # In theory it should take 3s, but let's give it bit of extra time instead.
+  [[ "$duration" -lt 20 ]]
+}
