@@ -367,7 +367,7 @@ service that will run indefinitely), Bats will be similarly blocked for the same
 amount of time.
 
 **To prevent this from happening, close FD 3 explicitly when running any command
-that may launch long-running child processes**, e.g. `command_name 3>- &`.
+that may launch long-running child processes**, e.g. `command_name 3>&-` .
 
 ### Printing to the terminal
 
