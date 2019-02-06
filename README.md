@@ -249,6 +249,10 @@ command, saves the exit status and output into special global variables, and
 then returns with a `0` status code so you can continue to make assertions in
 your test case.
 
+> Note that the `run` helper executes its argument(s) in a subshell, so if
+> writing tests against environmental side-effects like a variable's value
+> being changed, these changes will not persist after `run` completes.
+
 For example, let's say you're testing that the `foo` command, when passed a
 nonexistent filename, exits with a `1` status code and prints an error message.
 
