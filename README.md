@@ -337,6 +337,8 @@ Or you can skip conditionally:
 }
 ```
 
+`setup` and `teardown` hooks still run for skipped tests.
+
 ### `setup` and `teardown`: Pre- and post-test hooks
 
 You can define special `setup` and `teardown` functions, which run before and
