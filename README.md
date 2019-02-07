@@ -49,6 +49,35 @@ commit [0360811][].  It was created via `git clone --bare` and `git push
 
 <!-- toc -->
 
+- [Installation](#installation)
+  * [Supported Bash versions](#supported-bash-versions)
+  * [Homebrew](#homebrew)
+  * [npm](#npm)
+  * [Installing Bats from source](#installing-bats-from-source)
+  * [Running Bats in Docker](#running-bats-in-docker)
+    + [Building a Docker image](#building-a-docker-image)
+- [Usage](#usage)
+- [Writing tests](#writing-tests)
+  * [`run`: Test other commands](#run-test-other-commands)
+  * [`load`: Share common code](#load-share-common-code)
+  * [`skip`: Easily skip tests](#skip-easily-skip-tests)
+  * [`setup` and `teardown`: Pre- and post-test hooks](#setup-and-teardown-pre--and-post-test-hooks)
+  * [Code outside of test cases](#code-outside-of-test-cases)
+  * [File descriptor 3 (read this if Bats hangs)](#file-descriptor-3-read-this-if-bats-hangs)
+  * [Printing to the terminal](#printing-to-the-terminal)
+  * [Special variables](#special-variables)
+- [Testing](#testing)
+- [Support](#support)
+- [Contributing](#contributing)
+- [Contact](#contact)
+- [Version history](#version-history)
+- [Background](#background)
+  * [Why was this fork created?](#why-was-this-fork-created)
+  * [What's the plan and why?](#whats-the-plan-and-why)
+- [Copyright](#copyright)
+
+<!-- tocstop -->
+
 ## Installation
 
 ### Supported Bash versions
