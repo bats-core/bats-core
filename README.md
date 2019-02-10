@@ -65,8 +65,8 @@ each line is an assertion of truth.
 - [Contact](#contact)
 - [Version history](#version-history)
 - [Background](#background)
-  * [Why was this fork created?](#why-was-this-fork-created)
   * [What's the plan and why?](#whats-the-plan-and-why)
+  * [Why was this fork created?](#why-was-this-fork-created)
 - [Copyright](#copyright)
 
 <!-- tocstop -->
