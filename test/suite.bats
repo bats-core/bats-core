@@ -146,3 +146,69 @@ fixtures suite
   # In theory it should take 3s, but let's give it bit of extra time instead.
   [[ "$duration" -lt 20 ]]
 }
+
+@test "randomise suite execution order with --shuffle" {
+  # We can't be sure what the order will be -- but it should be different
+  # between different runs. We ignore all #-lines because they always include
+  # BATS_SHUFFLE_SEED which should always be different anyway.
+
+  run bats --shuffle "$FIXTURE_ROOT/shuffle"
+  [ "$status" -eq 0 ]
+  linesA=()
+  for line in "${lines[@]}"
+  do
+    [[ "$line" =~ ^# ]] || linesA+=("$line")
+  done
+
+  run bats --shuffle "$FIXTURE_ROOT/shuffle"
+  [ "$status" -eq 0 ]
+  linesB=()
+  for line in "${lines[@]}"
+  do
+    [[ "$line" =~ ^# ]] || linesB+=("$line")
+  done
+
+  run bats --shuffle "$FIXTURE_ROOT/shuffle"
+  [ "$status" -eq 0 ]
+  linesC=()
+  for line in "${lines[@]}"
+  do
+    [[ "$line" =~ ^# ]] || linesC+=("$line")
+  done
+
+  [[ "${linesA[0]}" == "1..9" ]] && [ "${#linesA[@]}" -eq "$(( 1 + 9 ))" ]
+  [[ "${linesB[0]}" == "1..9" ]] && [ "${#linesB[@]}" -eq "$(( 1 + 9 ))" ]
+  [[ "${linesC[0]}" == "1..9" ]] && [ "${#linesC[@]}" -eq "$(( 1 + 9 ))" ]
+
+  run arrays_equal linesA linesB
+  [ "$status" -ne 0 ]
+  run arrays_equal linesB linesC
+  [ "$status" -ne 0 ]
+  run arrays_equal linesC linesA
+  [ "$status" -ne 0 ]
+}
+
+@test "replay randomised test execution order with \$BATS_SHUFFLE_SEED" {
+  # The order should be exactly the same between runs, and the #-lines should
+  # also be identical.
+  export BATS_SHUFFLE_SEED="$RANDOM$RANDOM$RANDOM"
+
+  run bats --shuffle "$FIXTURE_ROOT/shuffle"
+  [ "$status" -eq 0 ]
+  linesA=( "${lines[@]}" )
+
+  run bats --shuffle "$FIXTURE_ROOT/shuffle"
+  [ "$status" -eq 0 ]
+  linesB=( "${lines[@]}" )
+
+  run bats --shuffle "$FIXTURE_ROOT/shuffle"
+  [ "$status" -eq 0 ]
+  linesC=( "${lines[@]}" )
+
+  [[ "${linesA[0]}" == "1..9" ]] && [ "${#linesA[@]}" -eq "$(( 1 + 2 + 9 ))" ]
+  [[ "${linesB[0]}" == "1..9" ]] && [ "${#linesB[@]}" -eq "$(( 1 + 2 + 9 ))" ]
+  [[ "${linesC[0]}" == "1..9" ]] && [ "${#linesC[@]}" -eq "$(( 1 + 2 + 9 ))" ]
+
+  run arrays_equal linesA linesB linesC
+  [ "$status" -eq 0 ]
+}
