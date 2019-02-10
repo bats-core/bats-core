@@ -38,13 +38,6 @@ Test cases consist of standard shell commands. Bats makes use of Bash's
 test case exits with a `0` status code (success), the test passes. In this way,
 each line is an assertion of truth.
 
-**Tuesday, September 19, 2017:** This is a mirrored fork of [Bats][bats-orig] at
-commit [0360811][].  It was created via `git clone --bare` and `git push
---mirror`. See the [Background](#background) section below for more information.
-
-[bats-orig]: https://github.com/sstephenson/bats
-[0360811]: https://github.com/sstephenson/bats/commit/03608115df2071fff4eaaff1605768c275e5f81f
-
 ## Table of contents
 
 <!-- toc -->
@@ -479,39 +472,20 @@ See `docs/CHANGELOG.md`.
 
 ## Background
 
-### Why was this fork created?
-
-The original Bats repository needed new maintainers, and has not been actively
-maintained since 2013. While there were volunteers for maintainers, attempts to
-organize issues, and outstanding PRs, the lack of write-access to the repo
-hindered progress severely.
-
 ### What's the plan and why?
 
-The rough plan, originally [outlined
-here](https://github.com/sstephenson/bats/issues/150#issuecomment-323845404) is
-to create a new, mirrored mainline (this repo!). An excerpt:
+**Tuesday, September 19, 2017:** This was forked from [Bats][bats-orig] at
+commit [0360811][].  It was created via `git clone --bare` and `git push
+--mirror`. See the [Background](#background) section above for more information.
 
-> **1. Roadmap 1.0:**
-> There are already existing high-quality PRs, and often-requested features and
-> issues, especially here at
-> [#196](https://github.com/sstephenson/bats/issues/196). Leverage these and
-> **consolidate into a single roadmap**.
->
-> **2. Create or choose a fork or *mirror* of this repo to use as the new
-> mainline:**
-> Repoint existing PRs (whichever ones are possible) to the new mainline, get
-> that repo to a stable 1.0. IMO we should create an organization and grant 2-3
-> people admin and write access.
+[bats-orig]: https://github.com/sstephenson/bats
+[0360811]: https://github.com/sstephenson/bats/commit/03608115df2071fff4eaaff1605768c275e5f81f
 
-Doing it this way accomplishes a number of things:
+This [bats-core repo](https://github.com/bats-core/bats-core) is now the official Bats project.
 
-1. Removes the dependency on the original maintainer
-1. Enables collaboration and contribution flow again
-1. Allows the possibility of merging back to original, or merging from original
-   if or when the need arises
-1. Prevents lock-out by giving administrative access to more than one person,
-   increases transferability
+### Why was this fork created?
+
+The original Bats repository is no longer maintained and write access to it could not be obtained. This fork allowed ongoing maintenance and forward progress for Bats.
 
 
 ## Copyright
