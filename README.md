@@ -47,32 +47,36 @@ commit [0360811][].  It was created via `git clone --bare` and `git push
 
 ## Table of contents
 
+<!-- toc -->
+
 - [Installation](#installation)
-  - [Supported Bash versions](#supported-bash-versions)
-  - [Homebrew](#homebrew)
-  - [npm](#npm)
-  - [Installing Bats from source](#installing-bats-from-source)
-  - [Running Bats in Docker](#running-bats-in-docker)
-    - [Building a Docker image](#building-a-docker-image)
+  * [Supported Bash versions](#supported-bash-versions)
+  * [Homebrew](#homebrew)
+  * [npm](#npm)
+  * [Installing Bats from source](#installing-bats-from-source)
+  * [Running Bats in Docker](#running-bats-in-docker)
+    + [Building a Docker image](#building-a-docker-image)
 - [Usage](#usage)
 - [Writing tests](#writing-tests)
-  - [`run`: Test other commands](#run-test-other-commands)
-  - [`load`: Share common code](#load-share-common-code)
-  - [`skip`: Easily skip tests](#skip-easily-skip-tests)
-  - [`setup` and `teardown`: Pre- and post-test hooks](#setup-and-teardown-pre--and-post-test-hooks)
-  - [Code outside of test cases](#code-outside-of-test-cases)
-  - [File descriptor 3 (read this if Bats hangs)](#file-descriptor-3-read-this-if-bats-hangs)
-  - [Printing to the terminal](#printing-to-the-terminal)
-  - [Special variables](#special-variables)
+  * [`run`: Test other commands](#run-test-other-commands)
+  * [`load`: Share common code](#load-share-common-code)
+  * [`skip`: Easily skip tests](#skip-easily-skip-tests)
+  * [`setup` and `teardown`: Pre- and post-test hooks](#setup-and-teardown-pre--and-post-test-hooks)
+  * [Code outside of test cases](#code-outside-of-test-cases)
+  * [File descriptor 3 (read this if Bats hangs)](#file-descriptor-3-read-this-if-bats-hangs)
+  * [Printing to the terminal](#printing-to-the-terminal)
+  * [Special variables](#special-variables)
 - [Testing](#testing)
 - [Support](#support)
 - [Contributing](#contributing)
 - [Contact](#contact)
 - [Version history](#version-history)
 - [Background](#background)
-  - [Why was this fork created?](#why-was-this-fork-created)
-  - [What's the plan and why?](#whats-the-plan-and-why)
+  * [Why was this fork created?](#why-was-this-fork-created)
+  * [What's the plan and why?](#whats-the-plan-and-why)
 - [Copyright](#copyright)
+
+<!-- tocstop -->
 
 ## Installation
 
@@ -132,7 +136,7 @@ install Bats into `/usr/local`,
     $ cd bats-core
     $ ./install.sh /usr/local
 
-Note that you may need to run `install.sh` with `sudo` if you do not have
+__Note:__ You may need to run `install.sh` with `sudo` if you do not have
 permission to write to the installation prefix.
 
 ### Running Bats in Docker
@@ -249,10 +253,6 @@ command, saves the exit status and output into special global variables, and
 then returns with a `0` status code so you can continue to make assertions in
 your test case.
 
-> Note that the `run` helper executes its argument(s) in a subshell, so if
-> writing tests against environmental side-effects like a variable's value
-> being changed, these changes will not persist after `run` completes.
-
 For example, let's say you're testing that the `foo` command, when passed a
 nonexistent filename, exits with a `1` status code and prints an error message.
 
@@ -279,6 +279,10 @@ without any arguments prints usage information on the first line:
   [ "${lines[0]}" = "usage: foo <filename>" ]
 }
 ```
+
+__Note:__ The `run` helper executes its argument(s) in a subshell, so if
+writing tests against environmental side-effects like a variable's value
+being changed, these changes will not persist after `run` completes.
 
 ### `load`: Share common code
 
@@ -337,7 +341,7 @@ Or you can skip conditionally:
 }
 ```
 
-`setup` and `teardown` hooks still run for skipped tests.
+__Note:__ `setup` and `teardown` hooks still run for skipped tests.
 
 ### `setup` and `teardown`: Pre- and post-test hooks
 
