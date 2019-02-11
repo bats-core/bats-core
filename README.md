@@ -47,6 +47,7 @@ each line is an assertion of truth.
   * [Homebrew](#homebrew)
   * [npm](#npm)
   * [Installing Bats from source](#installing-bats-from-source)
+  * [Installing Bats from source onto Windows Git Bash](#installing-bats-from-source-onto-windows-git-bash)
   * [Running Bats in Docker](#running-bats-in-docker)
     + [Building a Docker image](#building-a-docker-image)
 - [Usage](#usage)
