@@ -132,6 +132,16 @@ install Bats into `/usr/local`,
 __Note:__ You may need to run `install.sh` with `sudo` if you do not have
 permission to write to the installation prefix.
 
+### Installing Bats from source onto Windows Git Bash
+
+Check out a copy of the Bats repository and install it to `$HOME`. This
+will place the `bats` executable in `$HOME/bin`, which should already be
+in `$PATH`.
+
+    $ git clone https://github.com/bats-core/bats-core.git
+    $ cd bats-core
+    $ ./install.sh $HOME
+
 ### Running Bats in Docker
 
 There is an official image on the Docker Hub:
