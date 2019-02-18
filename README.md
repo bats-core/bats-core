@@ -496,7 +496,7 @@ This [bats-core repo](https://github.com/bats-core/bats-core) is the community-m
 
 ### Why was this fork created?
 
-There was an initial [call for maintainers][call-maintain] for the original Bats repository, but write access to it could not be obtained. As the main repository appeared inactive, this fork allowed ongoing maintenance and forward progress for Bats.
+There was an initial [call for maintainers][call-maintain] for the original Bats repository, but write access to it could not be obtained. With development activity stalled, this fork allowed ongoing maintenance and forward progress for Bats.
 
 [call-maintain]: https://github.com/sstephenson/bats/issues/150
 
