@@ -492,12 +492,13 @@ commit [0360811][].  It was created via `git clone --bare` and `git push
 [bats-orig]: https://github.com/sstephenson/bats
 [0360811]: https://github.com/sstephenson/bats/commit/03608115df2071fff4eaaff1605768c275e5f81f
 
-This [bats-core repo](https://github.com/bats-core/bats-core) is now the official Bats project.
+This [bats-core repo](https://github.com/bats-core/bats-core) is the community-maintained Bats project.
 
 ### Why was this fork created?
 
-The original Bats repository is no longer maintained and write access to it could not be obtained. This fork allowed ongoing maintenance and forward progress for Bats.
+There was an initial [call for maintainers][call-maintain] for the original Bats repository, but write access to it could not be obtained. With development activity stalled, this fork allowed ongoing maintenance and forward progress for Bats.
 
+[call-maintain]: https://github.com/sstephenson/bats/issues/150
 
 ## Copyright
 
