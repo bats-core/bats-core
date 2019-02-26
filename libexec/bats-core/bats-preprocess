@@ -35,7 +35,7 @@ tests=()
 
 while IFS= read -r line; do
   line="${line//$'\r'}"
-  if [[ "$line" =~ $BATS_TEST_PATTERN ]]; then
+  if [[ "$line" =~ $BATS_TEST_PATTERN ]] || [[ "$line" =~ $BATS_TEST_PATTERN_COMMENT ]]; then
     name="${BASH_REMATCH[1]#[\'\"]}"
     name="${name%[\'\"]}"
     body="${BASH_REMATCH[2]}"

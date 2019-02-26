@@ -56,6 +56,7 @@ expand_path() {
 
 export BATS_CWD="$PWD"
 export BATS_TEST_PATTERN="^[[:blank:]]*@test[[:blank:]]+(.*[^[:blank:]])[[:blank:]]+\{(.*)\$"
+export BATS_TEST_PATTERN_COMMENT="[[:blank:]]*([^[:blank:]()]+)[[:blank:]]*\(?\)?[[:blank:]]*\{[[:blank:]]*#[[:blank:]]*@test[[:blank:]]*\$"
 export BATS_TEST_FILTER=
 export PATH="$BATS_ROOT/libexec/bats-core:$PATH"
 
