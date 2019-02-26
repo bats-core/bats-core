@@ -71,6 +71,7 @@ expand_path() {
 BATS_LIBEXEC="$(dirname "$(bats_readlinkf "${BASH_SOURCE[0]}")")"
 export BATS_CWD="$PWD"
 export BATS_TEST_PATTERN="^[[:blank:]]*@test[[:blank:]]+(.*[^[:blank:]])[[:blank:]]+\{(.*)\$"
+export BATS_TEST_PATTERN_COMMENT="[[:blank:]]*([^[:blank:]()]+)[[:blank:]]*\(?\)?[[:blank:]]*\{[[:blank:]]*#[[:blank:]]*@test[[:blank:]]*\$"
 export BATS_TEST_FILTER=
 export PATH="$BATS_LIBEXEC:$PATH"
 export BATS_ROOT_PID=$$
