@@ -5,22 +5,17 @@ BATS_COUNT_ONLY=''
 BATS_TEST_FILTER=''
 BATS_EXTENDED_SYNTAX=''
 
-# Command and flags used by bats_perform_tests when it re-invokes bats-exec-test
-# in a new process to run bats_perform_test.
-BATS_PERFORM_TEST_CMD=("$0")
-
 while [[ "$#" -ne 0 ]]; do
   case "$1" in
   -c)
     BATS_COUNT_ONLY=1
     ;;
   -f)
-    BATS_TEST_FILTER="$2"
     shift
+    BATS_TEST_FILTER="$1"
     ;;
   -x)
     BATS_EXTENDED_SYNTAX='-x'
-    BATS_PERFORM_TEST_CMD+=('-x')
     ;;
   *)
     break
@@ -30,14 +25,13 @@ while [[ "$#" -ne 0 ]]; do
 done
 
 BATS_TEST_FILENAME="$1"
+shift
 if [[ -z "$BATS_TEST_FILENAME" ]]; then
   printf 'usage: bats-exec-test <filename>\n' >&2
   exit 1
 elif [[ ! -f "$BATS_TEST_FILENAME" ]]; then
   printf 'bats: %s does not exist\n' "$BATS_TEST_FILENAME" >&2
   exit 1
-else
-  shift
 fi
 
 BATS_TEST_DIRNAME="${BATS_TEST_FILENAME%/*}"
@@ -310,58 +304,37 @@ bats_exit_trap() {
   exit "$status"
 }
 
-bats_perform_tests() {
-  local test_number=1
-  local status=0
-
-  printf '1..%d\n' "$#"
-
-  for test_name in "$@"; do
-    if ! "${BATS_PERFORM_TEST_CMD[@]}" "$BATS_TEST_FILENAME" "$test_name" \
-      "$test_number"; then
-      status=1
-    fi
-    ((++test_number))
-  done
-  exit "$status"
-}
-
 bats_perform_test() {
   BATS_TEST_NAME="$1"
-  if declare -F "$BATS_TEST_NAME" >/dev/null; then
-    BATS_TEST_NUMBER="$2"
-    if [[ -z "$BATS_TEST_NUMBER" ]]; then
-      printf '1..1\n'
-      BATS_TEST_NUMBER=1
-    fi
+  BATS_TEST_NUMBER="$2"
 
-    # Some versions of Bash will reset BASH_LINENO to the first line of the
-    # function when the ERR trap fires. All versions of Bash appear to reset it
-    # on an unbound variable access error. bats_debug_trap will fire both before
-    # the offending line is executed, and when the error is triggered.
-    # Consequently, we use `BATS_LINENO` to point to the line number seen by the
-    # first call to bats_debug_trap, _before_ the ERR trap or unbound variable
-    # access fires.
-    BATS_CURRENT_LINENO=0
-    BATS_LINENO=0
-    BATS_STACK_TRACE=()
-
-    BATS_TEST_COMPLETED=
-    BATS_TEST_SKIPPED=
-    BATS_TEARDOWN_COMPLETED=
-    BATS_ERROR_STATUS=
-    trap "bats_debug_trap \"\$BASH_SOURCE\"" debug
-    trap 'bats_error_trap' err
-    trap 'bats_teardown_trap' exit
-    "$BATS_TEST_NAME" >>"$BATS_OUT" 2>&1
-    BATS_TEST_COMPLETED=1
-    trap 'bats_exit_trap' exit
-    bats_teardown_trap
-
-  else
+  if ! declare -F "$BATS_TEST_NAME" &>/dev/null; then
     printf "bats: unknown test name \`%s'\n" "$BATS_TEST_NAME" >&2
     exit 1
   fi
+
+  # Some versions of Bash will reset BASH_LINENO to the first line of the
+  # function when the ERR trap fires. All versions of Bash appear to reset it
+  # on an unbound variable access error. bats_debug_trap will fire both before
+  # the offending line is executed, and when the error is triggered.
+  # Consequently, we use `BATS_LINENO` to point to the line number seen by the
+  # first call to bats_debug_trap, _before_ the ERR trap or unbound variable
+  # access fires.
+  BATS_CURRENT_LINENO=0
+  BATS_LINENO=0
+  BATS_STACK_TRACE=()
+
+  BATS_TEST_COMPLETED=
+  BATS_TEST_SKIPPED=
+  BATS_TEARDOWN_COMPLETED=
+  BATS_ERROR_STATUS=
+  trap "bats_debug_trap \"\$BASH_SOURCE\"" debug
+  trap 'bats_error_trap' err
+  trap 'bats_teardown_trap' exit
+  "$BATS_TEST_NAME" >>"$BATS_OUT" 2>&1
+  BATS_TEST_COMPLETED=1
+  trap 'bats_exit_trap' exit
+  bats_teardown_trap
 }
 
 if [[ -z "$TMPDIR" ]]; then
@@ -376,40 +349,13 @@ BATS_OUT="${BATS_TMPNAME}.out"
 
 bats_preprocess_source() {
   BATS_TEST_SOURCE="${BATS_TMPNAME}.src"
-  . bats-preprocess <<< "$(< "$BATS_TEST_FILENAME")"$'\n' > "$BATS_TEST_SOURCE"
+  bats-preprocess "$BATS_TEST_FILENAME" >"$BATS_TEST_SOURCE"
   trap 'bats_cleanup_preprocessed_source' err exit
   trap 'bats_cleanup_preprocessed_source; exit 1' int
-
-  bats_detect_duplicate_test_case_names
 }
 
 bats_cleanup_preprocessed_source() {
   rm -f "$BATS_TEST_SOURCE"
-}
-
-bats_detect_duplicate_test_case_names() {
-  local test_names=()
-  local test_dupes=()
-  local line
-
-  while read -r line; do
-    if [[ ! "$line" =~ ^bats_test_function\  ]]; then
-      continue
-    fi
-    line="${line%$'\r'}"
-    line="${line#* }"
-
-    if [[ " ${test_names[*]} " == *" $line "* ]]; then
-      test_dupes+=("$line")
-      continue
-    fi
-    test_names+=("$line")
-  done <"$BATS_TEST_SOURCE"
-
-  if [[ "${#test_dupes[@]}" -ne 0 ]]; then
-    printf 'bats warning: duplicate test name(s) in %s: %s\n' \
-      "$BATS_TEST_FILENAME" "${test_dupes[*]}" >&2
-  fi
 }
 
 bats_evaluate_preprocessed_source() {
@@ -421,20 +367,7 @@ bats_evaluate_preprocessed_source() {
 
 exec 3<&1
 
-# When bats-exec-test is invoked by bats or bats-exec-suite, bats_perform_tests
-# reinvokes bats-exec-suite to run a single test case via bats_perform_test in a
-# new process. This is necessary so that `set -e` and all the traps set by
-# `bats_perform_test` don't interfere with the parent bats-exec-test process.
-if [[ "$#" -eq 0 ]]; then
-  bats_preprocess_source
-  bats_evaluate_preprocessed_source
-
-  if [[ -n "$BATS_COUNT_ONLY" ]]; then
-    printf '%d\n' "${#BATS_TEST_NAMES[@]}"
-  else
-    bats_perform_tests "${BATS_TEST_NAMES[@]}"
-  fi
-else
-  bats_evaluate_preprocessed_source
-  bats_perform_test "$@"
-fi
+# Run the given test.
+bats_preprocess_source
+bats_evaluate_preprocessed_source
+bats_perform_test "$@"

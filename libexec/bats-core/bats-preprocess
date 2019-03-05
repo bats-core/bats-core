@@ -31,24 +31,27 @@ bats_encode_test_name() {
   printf -v "$2" '%s' "$result"
 }
 
+test_file="$1"
 tests=()
 
-while IFS= read -r line; do
-  line="${line//$'\r'}"
-  if [[ "$line" =~ $BATS_TEST_PATTERN ]]; then
-    name="${BASH_REMATCH[1]#[\'\"]}"
-    name="${name%[\'\"]}"
-    body="${BASH_REMATCH[2]}"
-    bats_encode_test_name "$name" 'encoded_name'
-    printf '%s() { bats_test_begin "%s"; %s\n' "$encoded_name" "$name" "$body"
+{
+  while IFS= read -r line; do
+    line="${line//$'\r'}"
+    if [[ "$line" =~ $BATS_TEST_PATTERN ]]; then
+      name="${BASH_REMATCH[1]#[\'\"]}"
+      name="${name%[\'\"]}"
+      body="${BASH_REMATCH[2]}"
+      bats_encode_test_name "$name" 'encoded_name'
+      printf '%s() { bats_test_begin "%s"; %s\n' "$encoded_name" "$name" "$body" || :
 
-    if [[ -z "$BATS_TEST_FILTER" || "$name" =~ $BATS_TEST_FILTER ]]; then
-      tests+=("$encoded_name")
+      if [[ -z "$BATS_TEST_FILTER" || "$name" =~ $BATS_TEST_FILTER ]]; then
+        tests+=("$encoded_name")
+      fi
+    else
+      printf '%s\n' "$line"
     fi
-  else
-    printf '%s\n' "$line"
-  fi
-done
+  done
+} <<< "$(< "$test_file")"$'\n'
 
 for test_name in "${tests[@]}"; do
   printf 'bats_test_function %s\n' "$test_name"
