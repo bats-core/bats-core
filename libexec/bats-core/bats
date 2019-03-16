@@ -41,8 +41,30 @@ END_OF_HELP_TEXT
 }
 
 expand_link() {
-  readlink="$(type -p greadlink readlink | head -1)"
-  "$readlink" -f "$1"
+  IFS='/' read -ra parts <<<"$1"
+
+  # Starting point.
+  local path="/"
+  [[ "$1" =~ ^/ ]] || path="."
+
+  # Process each component.
+  for part in "${parts[@]}"
+  do
+    # All components must exist.
+    [ -e "$path/$part" ] || return 1
+
+    # If it's a link, we need to resolve it first.
+    [ -L "$path/$part" ] && part="$(readlink "$path/$part")"
+
+    # If the component starts with "/" we stomp the existing $path.
+    [[ "$part" =~ ^/ ]] && path=""
+
+    # Add the component to the path.
+    path+="/$part"
+  done
+
+  # Remove any duplicate slashes.
+  echo "$path" | tr -s /
 }
 
 expand_path() {
