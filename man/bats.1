@@ -1,7 +1,7 @@
 .\" generated with Ronn/v0.7.3
 .\" http://github.com/rtomayko/ronn/tree/0.7.3
 .
-.TH "BATS" "1" "July 2018" "" ""
+.TH "BATS" "1" "April 2019" "" ""
 .
 .SH "NAME"
 \fBbats\fR \- Bash Automated Testing System
@@ -60,6 +60,10 @@ Include tests in subdirectories
 Show results in TAP format
 .
 .TP
+\fB\-l\fR, \fB\-\-lava\fR
+Show results in LAVA format
+.
+.TP
 \fB\-v\fR, \fB\-\-version\fR
 Display the version number
 .
@@ -81,7 +85,7 @@ $ bats addition\.bats
 .IP "" 0
 .
 .P
-If Bats is not connected to a terminal\-\-in other words, if you run it from a continuous integration system or redirect its output to a file\-\-the results are displayed in human\-readable, machine\-parsable TAP format\. You can force TAP output from a terminal by invoking Bats with the \fB\-\-tap\fR option\.
+If Bats is not connected to a terminal\-\-in other words, if you run it from a continuous integration system or redirect its output to a file\-\-the results are displayed in human\-readable, machine\-parsable TAP format, unless the \fB\-\-lava\fR option is used\. You can force TAP output from a terminal by invoking Bats with the \fB\-\-tap\fR option\. Similarly, LAVA output can be forced from a terminal with the \fB\-\-lava\fR option\.
 .
 .IP "" 4
 .

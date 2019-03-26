@@ -59,6 +59,8 @@ OPTIONS
     Include tests in subdirectories
   * `-t`, `--tap`:
     Show results in TAP format
+  * `-l`, `--lava`:
+    Show results in LAVA format
   * `-v`, `--version`:
     Display the version number
 
@@ -79,8 +81,9 @@ an "X" if it fails.
 If Bats is not connected to a terminal--in other words, if you run it
 from a continuous integration system or redirect its output to a
 file--the results are displayed in human-readable, machine-parsable
-TAP format. You can force TAP output from a terminal by invoking Bats
-with the `--tap` option.
+TAP format, unless the `--lava` option is used. You can force TAP output
+from a terminal by invoking Bats with the `--tap` option. Similarly,
+LAVA output can be forced from a terminal with the `--lava` option.
 
     $ bats --tap addition.bats
     1..2

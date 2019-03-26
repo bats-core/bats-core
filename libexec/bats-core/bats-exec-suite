@@ -26,6 +26,9 @@ while [[ "$#" -ne 0 ]]; do
     extended_syntax_flag='-x'
     flags+=('-x')
     ;;
+  -l)
+    flags+=('-l')
+    ;;
   *)
     break
     ;;
