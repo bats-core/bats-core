@@ -65,11 +65,16 @@ run() {
   local origFlags="$-"
   set +eET
   local origIFS="$IFS"
+
+  before_run
+
   output="$("$@" 2>&1)"
   status="$?"
   IFS=$'\n' lines=($output)
   IFS="$origIFS"
   set "-$origFlags"
+
+  after_run
 }
 
 setup() {
@@ -77,6 +82,14 @@ setup() {
 }
 
 teardown() {
+  return 0
+}
+
+before_run() {
+  return 0
+}
+
+after_run() {
   return 0
 }
 
@@ -114,7 +127,7 @@ bats_capture_stack_trace() {
     BATS_STACK_TRACE+=("${BASH_LINENO[$((i-1))]} $funcname $test_file")
     if [[ "$test_file" == "$BATS_TEST_SOURCE" ]]; then
       case "$funcname" in
-      "$BATS_TEST_NAME"|setup|teardown)
+      "$BATS_TEST_NAME"|setup|teardown|before_run|after_run)
         break
         ;;
       esac

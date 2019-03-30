@@ -152,6 +152,22 @@ fixtures bats
   [ ${#lines[@]} -eq 3 ]
 }
 
+@test "after_run is run once after each run, even if it fails" {
+  make_bats_test_suite_tmpdir
+  run bats "$FIXTURE_ROOT/after_run.bats"
+  [ $status -eq 1 ]
+  run cat "$BATS_TEST_SUITE_TMPDIR/after_run.log"
+  echo "# cat in after_run test: output is $output" >&3
+  #echo "# num lines is ${#lines[@]}"
+  [ ${#lines[@]} -eq 3 ]
+
+  cat "$BATS_TEST_SUITE_TMPDIR/after_run.log" | sed 's/^/# after_run.log: /' >&3
+
+  run grep "after_run" "$BATS_TEST_SUITE_TMPDIR/after_run.log"
+  echo "# grep in after_run test: output is $output" >&3
+  [ $status -eq 0 ]
+}
+
 @test "setup failure" {
   run bats "$FIXTURE_ROOT/failing_setup.bats"
   [ $status -eq 1 ]
