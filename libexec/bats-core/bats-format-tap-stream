@@ -42,7 +42,8 @@ pass() {
   if [ -z "$test_duration" ]; then
     buffer ' ✓ %s' "$name"
   else
-    buffer ' ✓ %s (setup: %ss, test: %ss)' "$name" "$setup_duration" "$test_duration"
+    buffer ' ✓ %s (setup: %ss, test: %ss)' "$name" "$setup_duration" \
+      "$test_duration"
   fi
 
   advance
@@ -65,7 +66,8 @@ fail() {
   if [ -z "$test_duration" ]; then
     buffer ' ✗ %s' "$name"
   else
-    buffer ' ✗ %s (setup: %ss, test: %ss)' "$name" "$setup_duration" "$test_duration"
+    buffer ' ✗ %s (setup: %ss, test: %ss)' "$name" "$setup_duration" \
+      "$test_duration"
   fi
 
   advance
