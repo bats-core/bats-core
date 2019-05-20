@@ -10,7 +10,8 @@ if [[ "$header" =~ $header_pattern ]]; then
   failures=0
   skipped=0
   name=
-  duration=
+  setup_duration=
+  test_duration=
   count_column_width=$(( ${#count} * 2 + 2 ))
 else
   # If the first line isn't a TAP plan, print it and pass the rest through
@@ -38,10 +39,10 @@ begin() {
 pass() {
   go_to_column 0
 
-  if [ -z "$duration" ]; then
+  if [ -z "$test_duration" ]; then
     buffer ' ✓ %s' "$name"
   else
-    buffer ' ✓ %s (%ss)' "$name" "$duration"
+    buffer ' ✓ %s (setup: %ss, test: %ss)' "$name" "$setup_duration" "$test_duration"
   fi
 
   advance
@@ -61,10 +62,10 @@ fail() {
   go_to_column 0
   set_color 1 bold
 
-  if [ -z "$duration" ]; then
+  if [ -z "$test_duration" ]; then
     buffer ' ✗ %s' "$name"
   else
-    buffer ' ✗ %s (%ss)' "$name" "$duration"
+    buffer ' ✗ %s (setup: %ss, test: %ss)' "$name" "$setup_duration" "$test_duration"
   fi
 
   advance
@@ -167,11 +168,13 @@ while IFS= read -r line; do
     ;;
   'ok '* )
     # Parse out test timing information
-    duration_expr="ok $index (.*) \(duration (.*)s\)?"
+    duration_expr="ok $index (.*) \(setup: (.*)s, test: (.*)s\)?"
     if [[ "$line" =~ $duration_expr ]]; then
-      duration=${BASH_REMATCH[2]}
+      setup_duration=${BASH_REMATCH[2]}
+      test_duration=${BASH_REMATCH[3]}
     else
-      duration=
+      setup_duration=
+      test_duration=
     fi
 
     skip_expr="ok $index (.*) # skip ?(([[:print:]]*))?"
@@ -184,11 +187,13 @@ while IFS= read -r line; do
     ;;
   'not ok '* )
     # Parse out test timing information
-    duration_expr="ok $index (.*) \(duration (.*)s\)?"
+    duration_expr="ok $index (.*) \(setup: (.*)s, test: (.*)s\)?"
     if [[ "$line" =~ $duration_expr ]]; then
-      duration=${BASH_REMATCH[2]}
+      setup_duration=${BASH_REMATCH[2]}
+      test_duration=${BASH_REMATCH[3]}
     else
-      duration=
+      setup_duration=
+      test_duration=
     fi
 
     ((++failures))
