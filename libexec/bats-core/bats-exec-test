@@ -89,7 +89,11 @@ bats_test_begin() {
   BATS_SETUP_START_TS=$(date +%s)
   setup
   BATS_SETUP_END_TS=$(date +%s)
-  BATS_SETUP_DURATION=$(expr ${BATS_SETUP_END_TS} - ${BATS_SETUP_START_TS})
+
+  echo ${BATS_SETUP_END_TS}
+  echo ${BATS_SETUP_START_TS}
+  BATS_SETUP_DURATION=$((${BATS_SETUP_END_TS} - ${BATS_SETUP_START_TS}))
+  echo ${BATS_SETUP_DURATION}
 
   # We log test start timestamp here so setup call time is excluded from test
   # timing information
@@ -247,7 +251,7 @@ bats_error_trap() {
     fi
     BATS_STACK_TRACE[0]="$BATS_LINENO ${BATS_STACK_TRACE[0]#* }"
     BATS_TEST_END_TS=$(date +%s)
-    BATS_TEST_DURATION=$(expr ${BATS_TEST_END_TS} - ${BATS_TEST_START_TS})
+    BATS_TEST_DURATION=$((${BATS_TEST_END_TS} - ${BATS_TEST_START_TS}))
     trap - debug
   fi
 }
@@ -348,7 +352,7 @@ bats_perform_test() {
 
   "$BATS_TEST_NAME" >>"$BATS_OUT" 2>&1
   BATS_TEST_END_TS=$(date +%s)
-  BATS_TEST_DURATION=$(expr ${BATS_TEST_END_TS} - ${BATS_TEST_START_TS})
+  BATS_TEST_DURATION=$((${BATS_TEST_END_TS} - ${BATS_TEST_START_TS}))
 
   BATS_TEST_COMPLETED=1
   trap 'bats_exit_trap' exit
