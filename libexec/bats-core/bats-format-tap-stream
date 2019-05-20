@@ -55,7 +55,15 @@ skip() {
     reason=": $reason"
   fi
   go_to_column 0
-  buffer ' - %s (skipped%s)' "$name" "$reason"
+
+
+  if [ -z "$test_duration" ]; then
+    buffer ' - %s (skipped%s)' "$name" "$reason"
+  else
+    buffer ' - %s (skipped%s | setup: %ss, test: %ss)' "$name" "$reason" \
+      "$setup_duration" "$test_duration"
+  fi
+
   advance
 }
 
@@ -170,7 +178,7 @@ while IFS= read -r line; do
     ;;
   'ok '* )
     # Parse out test timing information
-    duration_expr="ok $index (.*) \(setup: (.*)s, test: (.*)s\)?"
+    duration_expr="ok $index (.*) setup: (.*)s, test: (.*)s"
     if [[ "$line" =~ $duration_expr ]]; then
       setup_duration=${BASH_REMATCH[2]}
       test_duration=${BASH_REMATCH[3]}
@@ -179,7 +187,7 @@ while IFS= read -r line; do
       test_duration=
     fi
 
-    skip_expr="ok $index (.*) # skip ?(([[:print:]]*))?"
+    skip_expr="ok $index (.*) # skip ?(([[:print:]]*))? \|"
     if [[ "$line" =~ $skip_expr ]]; then
       ((++skipped))
       skip "${BASH_REMATCH[2]}"
@@ -189,7 +197,7 @@ while IFS= read -r line; do
     ;;
   'not ok '* )
     # Parse out test timing information
-    duration_expr="ok $index (.*) \(setup: (.*)s, test: (.*)s\)?"
+    duration_expr="ok $index (.*) setup: (.*)s, test: (.*)s"
     if [[ "$line" =~ $duration_expr ]]; then
       setup_duration=${BASH_REMATCH[2]}
       test_duration=${BASH_REMATCH[3]}

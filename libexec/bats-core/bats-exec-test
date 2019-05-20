@@ -280,10 +280,10 @@ bats_exit_trap() {
       skipped+=" $BATS_TEST_SKIPPED"
     fi
 
-    timing_info=$(printf ' (setup: %ss, test: %ss)' "${BATS_SETUP_DURATION}" \
+    timing_info=$(printf ' | setup: %ss, test: %ss' "${BATS_SETUP_DURATION}" \
     "${BATS_TEST_DURATION}")
   else
-    timing_info=$(printf ' # (setup: %ss, test: %ss)' "${BATS_SETUP_DURATION}" \
+    timing_info=$(printf ' # setup: %ss, test: %ss' "${BATS_SETUP_DURATION}" \
     "${BATS_TEST_DURATION}")
   fi
 
