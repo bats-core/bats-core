@@ -12,6 +12,7 @@ if [[ "$header" =~ $header_pattern ]]; then
   name=
   setup_duration=
   test_duration=
+  teardown_duration=
   count_column_width=$(( ${#count} * 2 + 2 ))
 else
   # If the first line isn't a TAP plan, print it and pass the rest through
@@ -42,8 +43,8 @@ pass() {
   if [ -z "$test_duration" ]; then
     buffer ' ✓ %s' "$name"
   else
-    buffer ' ✓ %s (setup: %ss, test: %ss)' "$name" "$setup_duration" \
-      "$test_duration"
+    buffer ' ✓ %s (setup: %ss, test: %ss, teardown: %ss)' "$name" \
+      "$setup_duration" "$test_duration" "$teardown_duration"
   fi
 
   advance
@@ -60,8 +61,8 @@ skip() {
   if [ -z "$test_duration" ]; then
     buffer ' - %s (skipped%s)' "$name" "$reason"
   else
-    buffer ' - %s (skipped%s | setup: %ss, test: %ss)' "$name" "$reason" \
-      "$setup_duration" "$test_duration"
+    buffer ' - %s (skipped%s | setup: %ss, test: %ss, teardown: %ss)' "$name" \
+      "$reason" "$setup_duration" "$test_duration" "$teardown_duration"
   fi
 
   advance
@@ -74,8 +75,8 @@ fail() {
   if [ -z "$test_duration" ]; then
     buffer ' ✗ %s' "$name"
   else
-    buffer ' ✗ %s (setup: %ss, test: %ss)' "$name" "$setup_duration" \
-      "$test_duration"
+    buffer ' ✗ %s (setup: %ss, test: %ss, teardown: %ss)' "$name" \
+      "$setup_duration" "$test_duration" "$teardown_duration"
   fi
 
   advance
@@ -178,13 +179,15 @@ while IFS= read -r line; do
     ;;
   'ok '* )
     # Parse out test timing information
-    duration_expr="ok $index (.*) setup: (.*)s, test: (.*)s"
+    duration_expr="ok $index (.*) setup: (.*)s, test: (.*)s, teardown: (.*)s"
     if [[ "$line" =~ $duration_expr ]]; then
       setup_duration=${BASH_REMATCH[2]}
       test_duration=${BASH_REMATCH[3]}
+      teardown_duration=${BASH_REMATCH[4]}
     else
       setup_duration=
       test_duration=
+      teardown_duration=
     fi
 
     skip_expr="ok $index (.*) # skip ?(([[:print:]]*))? \|"
@@ -197,13 +200,15 @@ while IFS= read -r line; do
     ;;
   'not ok '* )
     # Parse out test timing information
-    duration_expr="ok $index (.*) setup: (.*)s, test: (.*)s"
+    duration_expr="ok $index (.*) setup: (.*)s, test: (.*)s, teardown: (.*)s"
     if [[ "$line" =~ $duration_expr ]]; then
       setup_duration=${BASH_REMATCH[2]}
       test_duration=${BASH_REMATCH[3]}
+      teardown_duration=${BASH_REMATCH[4]}
     else
       setup_duration=
       test_duration=
+      teardown_duration=
     fi
 
     ((++failures))

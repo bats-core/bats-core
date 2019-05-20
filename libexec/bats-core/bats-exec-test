@@ -256,7 +256,11 @@ bats_error_trap() {
 bats_teardown_trap() {
   bats_error_trap
   local status=0
+
+  BATS_TEARDOWN_START_TS=$(date +%s)
   teardown >>"$BATS_OUT" 2>&1 || status="$?"
+  BATS_TEARDOWN_END_TS=$(date +%s)
+  BATS_TEARDOWN_DURATION=$((${BATS_TEARDOWN_END_TS} - ${BATS_TEARDOWN_START_TS}))
 
   if [[ $status -eq 0 ]]; then
     BATS_TEARDOWN_COMPLETED=1
@@ -280,11 +284,13 @@ bats_exit_trap() {
       skipped+=" $BATS_TEST_SKIPPED"
     fi
 
-    timing_info=$(printf ' | setup: %ss, test: %ss' "${BATS_SETUP_DURATION}" \
-    "${BATS_TEST_DURATION}")
+    timing_info=$(printf ' | setup: %ss, test: %ss, teardown: %ss' \
+      "${BATS_SETUP_DURATION}" "${BATS_TEST_DURATION}" \
+      "${BATS_TEARDOWN_DURATION}")
   else
-    timing_info=$(printf ' # setup: %ss, test: %ss' "${BATS_SETUP_DURATION}" \
-    "${BATS_TEST_DURATION}")
+    timing_info=$(printf ' # setup: %ss, test: %ss, teardown: %ss' \
+      "${BATS_SETUP_DURATION}" "${BATS_TEST_DURATION}" \
+      "${BATS_TEARDOWN_DURATION}")
   fi
 
   if [[ -z "$BATS_TEST_COMPLETED" || -z "$BATS_TEARDOWN_COMPLETED" ]]; then
