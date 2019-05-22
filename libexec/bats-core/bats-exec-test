@@ -354,6 +354,17 @@ bats_perform_test() {
   BATS_TEARDOWN_COMPLETED=
   BATS_ERROR_STATUS=
 
+  BATS_SETUP_START_TS=0
+  BATS_SETUP_END_TS=0
+  BATS_TEST_START_TS=0
+  BATS_TEST_END_TS=0
+  BATS_TEARDOWN_START_TS=0
+  BATS_TEARDOWN_END_TS=0
+
+  BATS_SETUP_DURATION=0
+  BATS_TEST_DURATION=0
+  BATS_TEARDOWN_DURATION=0
+
   trap "bats_debug_trap \"\$BASH_SOURCE\"" debug
   trap 'bats_error_trap' err
   trap 'bats_teardown_trap' exit
