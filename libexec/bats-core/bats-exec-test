@@ -246,8 +246,6 @@ bats_error_trap() {
     if [[ "$BATS_ERROR_STATUS" -eq 0 ]]; then
       BATS_ERROR_STATUS=1
     fi
-    BATS_TEST_END_TS=$(date +%s)
-    BATS_TEST_DURATION=$((${BATS_TEST_END_TS} - ${BATS_TEST_START_TS}))
     BATS_STACK_TRACE[0]="$BATS_LINENO ${BATS_STACK_TRACE[0]#* }"
     trap - debug
   fi
@@ -256,6 +254,13 @@ bats_error_trap() {
 bats_teardown_trap() {
   bats_error_trap
   local status=0
+
+  # Also set BATS_TEST_END_TS if not already set (e.g. on test failure)
+  # NOTE: We can't call that in "bash_error_trap" since it causes a segfault
+  if [ ${BATS_TEST_END_TS} -eq 0 ]; then
+      BATS_TEST_END_TS=$(date +%s)
+      BATS_TEST_DURATION=$((${BATS_TEST_END_TS} - ${BATS_TEST_START_TS}))
+  fi
 
   BATS_TEARDOWN_START_TS=$(date +%s)
   teardown >>"$BATS_OUT" 2>&1 || status="$?"
