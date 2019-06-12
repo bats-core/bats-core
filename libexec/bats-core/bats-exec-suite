@@ -95,10 +95,15 @@ if [[ "$num_jobs" != 1 ]]; then
 else
   # Just do it serially.
   test_number=0
-  while IFS=$'\t' read -r filename test_name; do
-    ((++test_number))
-    bats-exec-test "${flags[@]}" "$filename" "$test_name" "$test_number" || status=1
-  done < <(printf '%s\n' "${all_tests[@]}" | grep -v '^$')
+  for test_line in "${all_tests[@]}"; do
+    # Only handle non-empty lines
+    if [[ $test_line ]]; then
+      filename="${test_line%%$'\t'*}"
+      test_name="${test_line##*$'\t'}"
+      ((++test_number))
+      bats-exec-test "${flags[@]}" "$filename" "$test_name" "$test_number" || status=1
+    fi
+  done
   if [[ "${test_number}" != "${test_count}" ]]; then
     printf '# bats warning: Only executed %s of %s tests\n' "$test_number" "$test_count"
     status=1
