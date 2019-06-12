@@ -146,3 +146,14 @@ fixtures suite
   # In theory it should take 3s, but let's give it bit of extra time instead.
   [[ "$duration" -lt 20 ]]
 }
+
+@test "run tests which consume stdin (see #197)" {
+  run bats "$FIXTURE_ROOT/read_from_stdin"
+  echo "Status: $status"
+  echo "Output: $output"
+  [ "$status" -eq 0 ]
+  [[ "${lines[0]}" == "1..3" ]]
+  [[ "${lines[1]}" == "ok 1 test 1" ]]
+  [[ "${lines[2]}" == "ok 2 test 2 with	TAB in name" ]]
+  [[ "${lines[3]}" == "ok 3 test 3" ]]
+}
