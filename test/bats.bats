@@ -62,6 +62,7 @@ fixtures bats
 
 @test "tap passing and skipping tests" {
   run filter_control_sequences bats --tap "$FIXTURE_ROOT/passing_and_skipping.bats"
+  echo "$output"
   [ $status -eq 0 ]
   [ "${lines[0]}" = "1..3" ]
   [ "${lines[1]}" = "ok 1 a passing test" ]
@@ -482,4 +483,39 @@ END_OF_ERR_MSG
   done
   # In theory it should take 3s, but let's give it bit of extra time instead.
   [[ "$duration" -lt 20 ]]
+}
+
+@test "report correct line on unset variables" {
+  run bats "$FIXTURE_ROOT/unbound_variable.bats"
+  echo "$output"
+  [ "$status" -eq 1 ]
+  [ "${#lines[@]}" -eq 5 ]
+  [ "${lines[1]}" = 'not ok 1 access unbound variable' ]
+  [ "${lines[2]}" = "# (in test file $RELATIVE_FIXTURE_ROOT/unbound_variable.bats, line 6)" ]
+  [ "${lines[3]}" = "#   \`foo=\$unset_variable' failed" ]
+}
+
+@test "report correct line on external function calls" {
+  run bats "$FIXTURE_ROOT/external_function_calls.bats"
+  echo "$output"
+  [ "$status" -eq 1 ]
+  numTests=$((3*4))
+  [ "${#lines[@]}" -gt $((numTests * 3 + 1)) ]
+  outputOffset=1
+  currentErrorLine=9
+  linesPerTest=5
+  for t in $(seq $numTests); do
+    [[ "${lines[$outputOffset]}" =~ "not ok $t " ]]
+    # Skip backtrace into external function if set
+    if [[ "${lines[$((outputOffset + 1))]}" =~ "# (from function " ]]; then
+      outputOffset=$((outputOffset + 1))
+      parenChar=" "
+    else
+      parenChar="("
+    fi
+     [ "${lines[$((outputOffset + 1))]}" = "# ${parenChar}in test file $RELATIVE_FIXTURE_ROOT/external_function_calls.bats, line $currentErrorLine)" ]
+    [[ "${lines[$((outputOffset + 2))]}" =~ " failed" ]]
+    outputOffset=$((outputOffset + 3))
+    currentErrorLine=$((currentErrorLine + linesPerTest))
+  done
 }
