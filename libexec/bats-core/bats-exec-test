@@ -298,7 +298,7 @@ bats_exit_trap() {
       BATS_STACK_TRACE[0]="$BATS_LINENO ${BATS_STACK_TRACE[0]#* }"
       BATS_ERROR_STATUS=1
     fi
-    printf 'not ok %d %s\n' "$BATS_TEST_NUMBER" "$BATS_TEST_DESCRIPTION" \
+    printf 'not ok %d %s%s\n' "$BATS_TEST_NUMBER" "$BATS_TEST_DESCRIPTION" \
       "$todo" >&3
     bats_print_stack_trace "${BATS_STACK_TRACE[@]}" >&3
     bats_print_failed_command >&3
@@ -311,7 +311,7 @@ bats_exit_trap() {
     fi
     status=1
   else
-    printf 'ok %d %s%s\n' "$BATS_TEST_NUMBER" "$BATS_TEST_DESCRIPTION" \
+    printf 'ok %d %s%s%s\n' "$BATS_TEST_NUMBER" "$BATS_TEST_DESCRIPTION" \
       "$skipped" "$done_" >&3
     status=0
   fi

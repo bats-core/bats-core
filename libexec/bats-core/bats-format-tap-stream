@@ -52,23 +52,23 @@ skip() {
   advance
 }
 
-todo() {
+todo_print() {
   local reason="$1"
   if [[ -n "$reason" ]]; then
     reason=": $reason"
   fi
   go_to_column 0
-  printf " - %s (todo%s)" "$name" "$reason"
+  buffer " - %s (todo%s)" "$name" "$reason"
   advance
 }
 
-done_() {
+done_print() {
   local reason="$1"
   if [[ -n "$reason" ]]; then
       reason=": $reason"
   fi
   go_to_column 0
-  printf " ✓ %s (done%s)" "$name" "$reason"
+  buffer " ✓ %s (done%s)" "$name" "$reason"
   advance
 }
 
@@ -99,13 +99,13 @@ summary() {
   if [[ "$skipped" -gt 0 ]]; then
     buffer ', %d skipped' "$skipped"
   fi
-  
+
   if [[ "$todo" -gt 0 ]]; then
-    printf ", %d todo" "$todo"
+    buffer ", %d todo" "$todo"
   fi
   
   if [[ "$done_" -gt 0 ]]; then
-    printf ", %d done" "$done_"
+    buffer ", %d done" "$done_"
   fi
 
   buffer '\n'
@@ -190,7 +190,7 @@ while IFS= read -r line; do
       skip "${BASH_REMATCH[2]}"
     elif [[ "$line" =~ $done_expr ]]; then
       ((++done_))
-      done_ "${BASH_REMATCH[2]}"
+      done_print "${BASH_REMATCH[2]}"
     else
       pass
     fi
@@ -199,7 +199,7 @@ while IFS= read -r line; do
     todo_expr="not ok $index (.*) # todo ?(([^)]*))?"
     if [[ "$line" =~ $todo_expr ]]; then  
       ((++todo))
-      todo "${BASH_REMATCH[2]}"
+      todo_print "${BASH_REMATCH[2]}"
     else
       ((++failures))
       fail
