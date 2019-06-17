@@ -189,8 +189,8 @@ while IFS= read -r line; do
       ((++skipped))
       skip "${BASH_REMATCH[2]}"
     elif [[ "$line" =~ $done_expr ]]; then
-      let done_+=1
-      buffer done_ "${BASH_REMATCH[2]}"
+      ((++done_))
+      done_ "${BASH_REMATCH[2]}"
     else
       pass
     fi
@@ -198,8 +198,8 @@ while IFS= read -r line; do
   "not ok "* )
     todo_expr="not ok $index (.*) # todo ?(([^)]*))?"
     if [[ "$line" =~ $todo_expr ]]; then  
-      let todo+=1
-      buffer todo "${BASH_REMATCH[2]}"
+      ((++todo))
+      todo "${BASH_REMATCH[2]}"
     else
       ((++failures))
       fail
