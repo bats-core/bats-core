@@ -62,7 +62,6 @@ fixtures bats
 
 @test "tap passing and skipping tests" {
   run filter_control_sequences bats --tap "$FIXTURE_ROOT/passing_and_skipping.bats"
-  echo "$output"
   [ $status -eq 0 ]
   [ "${lines[0]}" = "1..3" ]
   [ "${lines[1]}" = "ok 1 a passing test" ]
@@ -487,7 +486,6 @@ END_OF_ERR_MSG
 
 @test "report correct line on unset variables" {
   run bats "$FIXTURE_ROOT/unbound_variable.bats"
-  echo "$output"
   [ "$status" -eq 1 ]
   [ "${#lines[@]}" -eq 5 ]
   [ "${lines[1]}" = 'not ok 1 access unbound variable' ]
@@ -497,7 +495,6 @@ END_OF_ERR_MSG
 
 @test "report correct line on external function calls" {
   run bats "$FIXTURE_ROOT/external_function_calls.bats"
-  echo "$output"
   [ "$status" -eq 1 ]
   numTests=$((3*4))
   [ "${#lines[@]}" -gt $((numTests * 3 + 1)) ]
