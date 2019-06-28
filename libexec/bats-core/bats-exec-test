@@ -301,6 +301,7 @@ bats_exit_trap() {
   fi
 
   rm -f "$BATS_OUT"
+  bats_cleanup_preprocessed_source
   exit "$status"
 }
 
