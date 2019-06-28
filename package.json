@@ -1,8 +1,31 @@
 {
   "name": "bats",
-  "version": "v0.4.0",
+  "version": "1.1.0",
   "description": "Bash Automated Testing System",
-  "install": "./install.sh ${PREFIX:-/usr/local}",
-  "scripts": [ "libexec/bats", "libexec/bats-exec-suite", "libexec/bats-exec-test", "libexec/bats-format-tap-stream", "libexec/bats-preprocess", "bin/bats" ]
+  "homepage": "https://github.com/bats-core/bats-core#readme",
+  "license": "MIT",
+  "author": "Sam Stephenson <sstephenson@gmail.com> (http://sstephenson.us/)",
+  "repository": "github:bats-core/bats-core",
+  "bugs": "https://github.com/bats-core/bats-core/issues",
+  "files": [
+    "bin",
+    "libexec",
+    "man"
+  ],
+  "directories": {
+    "bin": "bin",
+    "doc": "docs",
+    "man": "man",
+    "test": "test"
+  },
+  "scripts": {
+    "test": "bin/bats test"
+  },
+  "keywords": [
+    "bats",
+    "bash",
+    "shell",
+    "test",
+    "unit"
+  ]
 }
-

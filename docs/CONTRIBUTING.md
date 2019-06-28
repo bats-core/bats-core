@@ -50,6 +50,7 @@ CONTRIBUTING.md file][atom].
       * [Command substitution](#command-substitution)
       * [Process substitution](#process-substitution)
       * [Conditionals and loops](#conditionals-and-loops)
+      * [Generating output](#generating-output)
       * [Gotchas](#gotchas)
   * [Open Source License](#open-source-license)
   * [Credits](#credits)
@@ -58,14 +59,18 @@ CONTRIBUTING.md file][atom].
 
 - [Gitter channel →][gitterurl]: These messages sync with the IRC channel
 - [IRC Channel (#bats on freenode) →][ircurl]: These messages sync with Gitter
-- [README →](README.md)
-- [Code of conduct →](CODE_OF_CONDUCT.md)
-- [License information →](LICENSE.md)
+- [README →][README]
+- [Code of conduct →][CODE_OF_CONDUCT]
+- [License information →][LICENSE]
 - [Original repository →][repohome]
 - [Issues →][repoissues]
 - [Pull requests →][repoprs]
 - [Milestones →][repomilestones]
 - [Projects →][repoprojects]
+
+[README]: https://github.com/bats-core/bats-core/blob/master/README.md
+[CODE_OF_CONDUCT]: https://github.com/bats-core/bats-core/blob/master/docs/CODE_OF_CONDUCT.md
+[LICENSE]: https://github.com/bats-core/bats-core/blob/master/LICENSE.md
 
 ## Contributor License Agreement
 
@@ -87,13 +92,13 @@ See also: ["Does my project need an additional contributor agreement? Probably
 ## Code of conduct
 
 Harrassment or rudeness of any kind will not be tolerated, period. For
-specifics, see the [CODE_OF_CONDUCT](CODE_OF_CONDUCT.md) file.
+specifics, see the [CODE_OF_CONDUCT][] file.
 
 ## Asking questions and reporting issues
 
 ### Asking questions
 
-Please check the [README](README.md) or existing [issues][repoissues] first.
+Please check the [README][] or existing [issues][repoissues] first.
 
 If you cannot find an answer to your question, please feel free to hop on our 
 [gitter][gitterurl] [![Gitter](https://badges.gitter.im/bats-core/bats-core.svg)](https://gitter.im/bats-core/bats-core?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge) or [via IRC (#bats on freenode)][ircurl].
@@ -159,7 +164,7 @@ preferred, but even one nit is one nit too many.
 Make sure you have Bash installed per the [Environment setup in the
 README][env-setup].
 
-[env-setup]: README.md#environment-setup
+[env-setup]: https://github.com/bats-core/bats-core/blob/master/README.md#environment-setup
 
 ## Workflow
 
@@ -255,22 +260,10 @@ The following are intended to prevent too-compact code:
 
 ### Variable and parameter declarations
 
-- Declare all constants near the top of the file using `declare -r`.
-  - Exception: `declare` is not available in test files run using `bats`.
-  - Exception: In module code (i.e. code imported via `. "$_GO_USE_MODULES"`),
-    use `readonly` instead. Otherwise if a module is imported into a function,
-    variables declared with `declare` will go out of scope after the first
-    function call, and will not be redefined for subsequent calls, causing
-    errors.
-- Avoid globals; but if you must, declare all globals near the top of the file,
-  outside of any function, using `declare`.
-  - Exception: `declare` is not available in test files run using `bats`.
-  - _Gotcha:_ Never initialize an array on the same line as an `export` or
-    `declare -g` statement. See [the Gotchas section](#gotchas) below for more
-    details.
+- _Gotcha:_ Never initialize an array on the same line as an `export` or
+  `declare -g` statement. See [the Gotchas section](#gotchas) below for more
+  details.
 - Declare all variables inside functions using `local`.
-  - Exception: If a function needs to set a one-time initialization flag, it
-    may declare that value using `readonly`.
 - Declare temporary file-level variables using `declare`. Use `unset` to remove
   them when finished.
 - Don't use `local -r`, as a readonly local variable in one scope can cause a
@@ -296,14 +289,30 @@ The following are intended to prevent too-compact code:
 
 ### Command substitution
 
-- Use `$()` instead of backticks.
+- If possible, don't. While this capability is one of Bash's core strengths,
+  every new process created by Bats makes the framework slower, and speed is
+  critical to encouraging the practice of automated testing. (This is especially
+  true on Windows, [where process creation is one or two orders of magnitude
+  slower][win-slow]. See [bats-core/bats-core#8][pr-8] for an illustration of
+  the difference avoiding subshells makes.) Bash is quite powerful; see if you
+  can do what you need in pure Bash first.
+- If you need to capture the output from a function, store the output using
+  `printf -v` instead if possible. `-v` specfies the name of the variable into
+  which to write the result; the caller can supply this name as a parameter.
+- If you must use command substituion, use `$()` instead of backticks, as it's
+  more robust, more searchable, and can be nested.
+
+[win-slow]: https://rufflewind.com/2014-08-23/windows-bash-slow
+[pr-8]: https://github.com/bats-core/bats-core/pull/8
 
 ### Process substitution
 
-- Use wherever possible, such as when piping input into a `while` loop (which
-  avoids having the loop body execute in a subshell) or running a command taking
-  multiple filename arguments based on output from a function or pipeline (e.g.
-  `diff`).
+- If possible, don't use it. See the advice on avoiding subprocesses and using
+  `printf -v` in the **Command substitution** section above.
+- Use wherever necessary and possible, such as when piping input into a `while`
+  loop (which avoids having the loop body execute in a subshell) or running a
+  command taking multiple filename arguments based on output from a function or
+  pipeline (e.g.  `diff`).
 - *Warning*: It is impossible to directly determine the exit status of a process
   substitution; emitting an exit status as the last line of output is a possible
   workaround.
@@ -314,6 +323,18 @@ The following are intended to prevent too-compact code:
   **Formatting**, quote variables and strings within the brackets, but not
   regular expressions (or variables containing regular expressions) appearing
   on the right side of the `=~` operator.
+
+### Generating output
+
+- Use `printf` instead of `echo`. Both are Bash builtins, and there's no
+  perceptible performance difference when running Bats under the `time` builtin.
+  However, `printf` provides a more consistent experience in general, as `echo`
+  has limitations to the arguments it accepts, and even the same version of Bash
+  may produce different results for `echo` based on how the binary was compiled.
+  See [Stack Overflow: Why is printf better than echo?][printf-vs-echo] for
+  excruciating details.
+
+[printf-vs-echo]: https://unix.stackexchange.com/a/65819
 
 ### Gotchas
 
@@ -335,7 +356,7 @@ The following are intended to prevent too-compact code:
 ## Open Source License
 
 This software is made available under the [MIT License][osmit].
-For the text of the license, see the [LICENSE](LICENSE.md) file.
+For the text of the license, see the [LICENSE][] file.
 
 ## Credits
 

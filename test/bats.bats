@@ -3,10 +3,18 @@
 load test_helper
 fixtures bats
 
-@test "no arguments prints usage instructions" {
+@test "no arguments prints message and usage instructions" {
   run bats
   [ $status -eq 1 ]
-  [ $(expr "${lines[1]}" : "Usage:") -ne 0 ]
+  [ "${lines[0]}" == 'Error: Must specify at least one <test>' ]
+  [ "${lines[1]%% *}" == 'Usage:' ]
+}
+
+@test "invalid option prints message and usage instructions" {
+  run bats --invalid-option
+  [ $status -eq 1 ]
+  [ "${lines[0]}" == "Error: Bad command line option '--invalid-option'" ]
+  [ "${lines[1]%% *}" == 'Usage:' ]
 }
 
 @test "-v and --version print version number" {
@@ -80,6 +88,13 @@ fixtures bats
   [ "${lines[1]}" = "ok 1 a passing test" ]
   [ "${lines[2]}" = "ok 2 a skipping test # skip" ]
   [ "${lines[3]}" = "not ok 3 a failing test" ]
+}
+
+@test "BATS_CWD is correctly set to PWD as validated by bats_trim_filename" {
+  local trimmed
+  bats_trim_filename "$PWD/foo/bar" 'trimmed'
+  printf 'ACTUAL: %s\n' "$trimmed" >&2
+  [ "$trimmed" = 'foo/bar' ]
 }
 
 @test "one failing test" {
@@ -237,8 +252,19 @@ fixtures bats
   [ "${lines[2]}" = "ok 2 a skipped test with a reason # skip a reason" ]
 }
 
+@test "skipped test with parens (pretty formatter)" {
+  run bats --pretty "$FIXTURE_ROOT/skipped_with_parens.bats"
+  [ $status -eq 0 ]
+
+  # Some systems (Alpine, for example) seem to emit an extra whitespace into
+  # entries in the 'lines' array when a carriage return is present from the
+  # pretty formatter.  This is why a '+' is used after the 'skipped' note.
+  [[ "${lines[@]}" =~ "- a skipped test with parentheses in the reason (skipped: "+"a reason (with parentheses))" ]]
+}
+
 @test "extended syntax" {
-  run bats-exec-test -x "$FIXTURE_ROOT/failing_and_passing.bats"
+  emulate_bats_env
+  run bats-exec-suite -x "$FIXTURE_ROOT/failing_and_passing.bats"
   [ $status -eq 1 ]
   [ "${lines[1]}" = 'begin 1 a failing test' ]
   [ "${lines[2]}" = 'not ok 1 a failing test' ]
@@ -259,10 +285,10 @@ fixtures bats
 }
 
 @test "pretty formatter bails on invalid tap" {
-  run bats --tap "$FIXTURE_ROOT/invalid_tap.bats"
-  [ $status -eq 1 ]
-  [ "${lines[0]}" = "This isn't TAP!" ]
-  [ "${lines[1]}" = "Good day to you" ]
+  run bats-format-tap-stream < <(printf "This isn't TAP.\nGood day to you.\n")
+  [ "$status" -eq 0 ]
+  [ "${lines[0]}" = "This isn't TAP." ]
+  [ "${lines[1]}" = "Good day to you." ]
 }
 
 @test "single-line tests" {
@@ -301,7 +327,7 @@ fixtures bats
 
   # Run Bats under `set -u` to catch as many unset variable accesses as
   # possible.
-  run bash -u "${BATS_TEST_DIRNAME%/*}/libexec/bats" \
+  run bash -u "${BATS_TEST_DIRNAME%/*}/bin/bats" \
     "$FIXTURE_ROOT/unofficial_bash_strict_mode.bats"
   if [[ "$status" -ne 0 || "${lines[1]}" != "$expected" ]]; then
     cat <<END_OF_ERR_MSG
@@ -426,4 +452,34 @@ END_OF_ERR_MSG
   [ "${lines[2]}" = "# (in test file $RELATIVE_FIXTURE_ROOT/exported_function.bats, line 7)" ]
   [ "${lines[3]}" = "#   \`false' failed" ]
   [ "${lines[4]}" = "# a='exported_function'" ]
+}
+
+@test "output printed even when no final newline" {
+  run bats "$FIXTURE_ROOT/no-final-newline.bats"
+  printf 'num lines: %d\n' "${#lines[@]}" >&2
+  printf 'LINE: %s\n' "${lines[@]}" >&2
+  [ "$status" -eq 1 ]
+  [ "${#lines[@]}" -eq 7 ]
+  [ "${lines[1]}" = 'not ok 1 no final newline' ]
+  [ "${lines[2]}" = "# (in test file $RELATIVE_FIXTURE_ROOT/no-final-newline.bats, line 2)" ]
+  [ "${lines[3]}" = "#   \`printf 'foo\nbar\nbaz' >&2 && return 1' failed" ]
+  [ "${lines[4]}" = '# foo' ]
+  [ "${lines[5]}" = '# bar' ]
+  [ "${lines[6]}" = '# baz' ]
+}
+
+@test "parallel test execution with --jobs" {
+  type -p parallel &>/dev/null || skip "--jobs requires GNU parallel"
+
+  SECONDS=0
+  run bats --jobs 10 "$FIXTURE_ROOT/parallel.bats"
+  duration="$SECONDS"
+  [ "$status" -eq 0 ]
+  # Make sure the lines are in-order.
+  [[ "${lines[0]}" == "1..10" ]]
+  for t in {1..10}; do
+    [[ "${lines[$t]}" == "ok $t slow test $t" ]]
+  done
+  # In theory it should take 3s, but let's give it bit of extra time instead.
+  [[ "$duration" -lt 20 ]]
 }

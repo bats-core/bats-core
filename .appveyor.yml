@@ -1,4 +1,4 @@
-version: 'v0.4.0.{build}'
+version: 'v1.1.0+appveyor.{build}'
 
 build: off
 
@@ -13,4 +13,4 @@ test_script:
   - where bash
   - bash --version
   - bash -c 'export'
-  - bash -c 'time bin/bats test'
+  - bash -c 'time PATH="/usr/bin:${PATH}" bin/bats test'
