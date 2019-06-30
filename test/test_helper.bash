@@ -14,6 +14,40 @@ make_bats_test_suite_tmpdir() {
   mkdir -p "$BATS_TEST_SUITE_TMPDIR"
 }
 
+arrays_equal() {
+  [ "$#" -ge 2 ] || return 0
+
+  # Simple pair-wise comparison.
+  if [ "$#" -eq 2 ]
+  then
+    # An eval-based version of "declare -n" which works on old Bash versions.
+    fmt='%s=( "${%s[@]}" )'
+    eval "$(printf "$fmt" "left"  "$1")"
+    eval "$(printf "$fmt" "right" "$2")"
+
+    # Must be same length.
+    [ "${#left[@]}" -eq "${#right[@]}" ] || return 1
+    # Each element must be equal.
+    for (( i = 0; i < "${#left[@]}"; i++ ))
+    do
+      [[ "${left[$i]}" == "${right[$i]}" ]] || return 1
+    done
+
+    # They must be equal.
+    return 0
+  fi
+
+  # If there are more than two arguments, we have to compare them pair-wise. So
+  # we take the input list of things to compare, and rotate it by one and then
+  # do pair-wise comparisons that way.
+  local lvars=( "$@" )
+  local rvars=( "${@:2}" "$1" )
+  for (( i = 0; i < "$#"; i++ ))
+  do
+    eval arrays_equal "${lvars[$i]}" "${rvars[$i]}" || return 1
+  done
+}
+
 filter_control_sequences() {
   "$@" | sed $'s,\x1b\\[[0-9;]*[a-zA-Z],,g'
 }

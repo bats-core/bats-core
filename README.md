@@ -190,7 +190,7 @@ supports:
 
 ```
 Bats x.y.z
-Usage: bats [-cr] [-f <regex>] [-j <jobs>] [-p | -t] <test>...
+Usage: bats [-crs] [-f <regex>] [-j <jobs>] [-p | -t] <test>...
        bats [-h | -v]
 
   <test> is the path to a Bats test file, or the path to a directory
@@ -202,6 +202,7 @@ Usage: bats [-cr] [-f <regex>] [-j <jobs>] [-p | -t] <test>...
   -j, --jobs       Number of parallel jobs to run (requires GNU parallel)
   -p, --pretty     Show results in pretty format (default for terminals)
   -r, --recursive  Include tests in subdirectories
+  -s, --shuffle    Shuffle the order of tests (using BATS_SHUFFLE_SEED, if set)
   -t, --tap        Show results in TAP format
   -v, --version    Display the version number
 

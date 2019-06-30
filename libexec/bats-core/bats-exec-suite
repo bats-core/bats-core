@@ -1,7 +1,38 @@
 #!/usr/bin/env bash
 set -e
 
+# Emulate a bad RNG that looks like /dev/urandom -- writes "random" bytes until
+# the reader closes the stream.
+random_stream() {
+  # This should work on OS X without needing GNU awk.
+  awk="$(type -p gawk awk | head -1)"
+  yes | "$awk" -v SEED="$1" \
+        'BEGIN { srand(SEED); } { printf("%c", int(256 * rand())); }'
+}
+
+random_numbers() {
+  random_stream "$@" | tr -cd '0-9' | fold -w 16
+}
+
+random_number() {
+  random_numbers "$RANDOM$RANDOM" | head -1
+}
+
+random_shuffle() {
+  # Instead of using shuf (which doesn't exist on OS X) we generate a random
+  # stream of numbers, paste(1) the stream with the input file, sort it, then
+  # remove our number stream. Some versions of paste(1) act strangely when one
+  # of the input streams EOFs, so we need to add an infinite stream of empty
+  # lines to ensure that the awk pipeline can terminate it.
+  paste  -d: <(random_numbers "$BATS_SHUFFLE_SEED") <(cat ; yes "") |
+    awk  -F: '{ if ($2 == "") exit 0; print; }' |
+    sort -t: -n -k 1 | cut -d: -f 2-
+}
+
+BATS_SHUFFLE_SEED="${BATS_SHUFFLE_SEED:-$(random_number)}"
+
 count_only_flag=''
+shuffle_flag=''
 extended_syntax_flag=''
 filter=''
 num_jobs=1
@@ -21,6 +52,9 @@ while [[ "$#" -ne 0 ]]; do
   -j)
     shift
     num_jobs="$1"
+    ;;
+  -s)
+    shuffle_flag=1
     ;;
   -x)
     extended_syntax_flag='-x'
@@ -84,11 +118,22 @@ if [[ "${#all_tests[@]}" == 0 ]]; then
   exit
 fi
 
+shuffle_cmd=cat
+if [[ -n "$shuffle_flag" ]]; then
+  printf '# bats is running with --shuffle, the test suite order is randomised!\n'
+  printf '# In order to reproduce this run, set BATS_SHUFFLE_SEED=%s in your environment.\n' "$BATS_SHUFFLE_SEED"
+  shuffle_cmd=random_shuffle
+fi
+
+output_tests() {
+  printf '%s\n' "${all_tests[@]}" | grep -v '^$' | "$shuffle_cmd"
+}
+
 if [[ "$num_jobs" != 1 ]]; then
   # Only use GNU parallel when we want parallel execution -- there is a small
   # amount of overhead using it over a simple loop in the serial case.
   set -o pipefail
-  printf '%s\n' "${all_tests[@]}" | grep -v '^$' | \
+  output_tests | \
     parallel -qk -j "$num_jobs" --colsep="\t" -- bats-exec-test "${flags[@]}" '{1}' '{2}' '{#}' || status=1
 else
   # Just do it serially.
@@ -96,6 +141,6 @@ else
   while IFS=$'\t' read -r filename test_name; do
     bats-exec-test "${flags[@]}" "$filename" "$test_name" "$test_number" || status=1
     ((++test_number))
-  done < <(printf '%s\n' "${all_tests[@]}" | grep -v '^$')
+  done < <(output_tests)
 fi
 exit "$status"
