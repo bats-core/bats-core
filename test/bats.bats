@@ -484,6 +484,15 @@ END_OF_ERR_MSG
   [[ "$duration" -lt 20 ]]
 }
 
+@test "run tests which consume stdin (see #197)" {
+  run bats "$FIXTURE_ROOT/read_from_stdin.bats"
+  [ "$status" -eq 0 ]
+  [[ "${lines[0]}" == "1..3" ]]
+  [[ "${lines[1]}" == "ok 1 test 1" ]]
+  [[ "${lines[2]}" == "ok 2 test 2 with	TAB in name" ]]
+  [[ "${lines[3]}" == "ok 3 test 3" ]]
+}
+
 @test "report correct line on unset variables" {
   run bats "$FIXTURE_ROOT/unbound_variable.bats"
   [ "$status" -eq 1 ]

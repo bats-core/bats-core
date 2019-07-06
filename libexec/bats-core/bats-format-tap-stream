@@ -7,6 +7,7 @@ IFS= read -r header
 if [[ "$header" =~ $header_pattern ]]; then
   count="${header:3}"
   index=0
+  passed=0
   failures=0
   skipped=0
   name=
@@ -76,6 +77,11 @@ summary() {
 
   if [[ "$skipped" -gt 0 ]]; then
     buffer ', %d skipped' "$skipped"
+  fi
+
+  not_run=$((count - passed - failures - skipped))
+  if [[ "$not_run" -gt 0 ]]; then
+    buffer ', %d not run' "$not_run"
   fi
 
   buffer '\n'
@@ -158,6 +164,7 @@ while IFS= read -r line; do
       ((++skipped))
       skip "${BASH_REMATCH[2]}"
     else
+      ((++passed))
       pass
     fi
     ;;
