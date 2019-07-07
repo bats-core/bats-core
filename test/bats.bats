@@ -496,21 +496,30 @@ END_OF_ERR_MSG
 @test "report correct line on unset variables" {
   run bats "$FIXTURE_ROOT/unbound_variable.bats"
   [ "$status" -eq 1 ]
-  [ "${#lines[@]}" -eq 5 ]
+  [ "${#lines[@]}" -eq 9 ]
   [ "${lines[1]}" = 'not ok 1 access unbound variable' ]
-  [ "${lines[2]}" = "# (in test file $RELATIVE_FIXTURE_ROOT/unbound_variable.bats, line 6)" ]
+  [ "${lines[2]}" = "# (in test file $RELATIVE_FIXTURE_ROOT/unbound_variable.bats, line 8)" ]
   [ "${lines[3]}" = "#   \`foo=\$unset_variable' failed" ]
+  [[ "${lines[4]}" =~ ".src: line 8:" ]]
+  [ "${lines[5]}" = 'not ok 2 access second unbound variable' ]
+  [ "${lines[6]}" = "# (in test file $RELATIVE_FIXTURE_ROOT/unbound_variable.bats, line 13)" ]
+  [ "${lines[7]}" = "#   \`foo=\$second_unset_variable' failed" ]
+  [[ "${lines[8]}" =~ ".src: line 13:" ]]
 }
 
 @test "report correct line on external function calls" {
   run bats "$FIXTURE_ROOT/external_function_calls.bats"
   [ "$status" -eq 1 ]
-  numTests=$((3*4))
-  [ "${#lines[@]}" -gt $((numTests * 3 + 1)) ]
+
+  expectedNumberOfTests=12
+  linesOfOutputPerTest=3
+  [ "${#lines[@]}" -gt $((expectedNumberOfTests * linesOfOutputPerTest + 1)) ]
+
   outputOffset=1
   currentErrorLine=9
   linesPerTest=5
-  for t in $(seq $numTests); do
+
+  for t in $(seq $expectedNumberOfTests); do
     [[ "${lines[$outputOffset]}" =~ "not ok $t " ]]
     # Skip backtrace into external function if set
     if [[ "${lines[$((outputOffset + 1))]}" =~ "# (from function " ]]; then
@@ -519,7 +528,8 @@ END_OF_ERR_MSG
     else
       parenChar="("
     fi
-     [ "${lines[$((outputOffset + 1))]}" = "# ${parenChar}in test file $RELATIVE_FIXTURE_ROOT/external_function_calls.bats, line $currentErrorLine)" ]
+
+    [ "${lines[$((outputOffset + 1))]}" = "# ${parenChar}in test file $RELATIVE_FIXTURE_ROOT/external_function_calls.bats, line $currentErrorLine)" ]
     [[ "${lines[$((outputOffset + 2))]}" =~ " failed" ]]
     outputOffset=$((outputOffset + 3))
     currentErrorLine=$((currentErrorLine + linesPerTest))

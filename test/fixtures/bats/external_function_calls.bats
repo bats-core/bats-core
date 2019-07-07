@@ -1,8 +1,8 @@
 load test_helper
 
-# Test various combinations that may fail line# detection
+# Test various combinations that may fail line number detection in stack trace
 # Tests are designed so the first statement succeeds and 2nd fails
-# All are same line# so checking can be automated
+# All tests fail on the same line so checking can be automated
 
 @test "Call true function && false" {
     help_me
@@ -21,7 +21,7 @@ load test_helper
 
 @test "Call false function || false" {
     ! failing_helper
-    failing_helper || false 
+    failing_helper || false
 }
 
 @test "Call false function && return 1" {
@@ -51,7 +51,7 @@ load test_helper
 
 @test "Call return_1 function || false" {
     ! return_1
-    return_1 || false 
+    return_1 || false
 }
 
 @test "Call return_1 function && return 1" {
