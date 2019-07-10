@@ -336,6 +336,21 @@ The following are intended to prevent too-compact code:
 
 [printf-vs-echo]: https://unix.stackexchange.com/a/65819
 
+### Signal names
+
+Always use upper case signal names (e.g. `trap - INT EXIT`) to avoid locale 
+dependent errors. In some locales (for example Turkish, see 
+[Turkish dotless i](https://en.wikipedia.org/wiki/Dotted_and_dotless_I)) lower 
+case signal names cause Bash to error. An example of the problem:
+
+```bash
+$ echo "tr_TR.UTF-8 UTF-8" >> /etc/locale.gen && locale-gen tr_TR.UTF-8 # Ubuntu derivatives
+$ LC_CTYPE=tr_TR.UTF-8 LC_MESSAGES=C bash -c 'trap - int && echo success'
+bash: line 0: trap: int: invalid signal specification
+$ LC_CTYPE=tr_TR.UTF-8 LC_MESSAGES=C bash -c 'trap - INT && echo success'
+success
+```
+
 ### Gotchas
 
 - If you wish to use command substitution to initialize a `local` variable, and
