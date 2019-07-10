@@ -207,6 +207,7 @@ Usage: bats [-cr] [-f <regex>] [-j <jobs>] [-p | -t] <test>...
 
   For more information, see https://github.com/bats-core/bats-core
 ```
+> **Mac OSX/Darwin Warning:** If you're executing bats directly (`bin/bats`) you need to `brew install coreutils` to obtain `greadlink`. Darwin's readlink does not include the -f option. This may be fixed [by this PR](https://github.com/bats-core/bats-core/pull/217), which needs reviewers.
 
 To run your tests, invoke the `bats` interpreter with one or more paths to test
 files ending with the `.bats` extension, or paths to directories containing test
