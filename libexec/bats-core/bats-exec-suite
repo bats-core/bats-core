@@ -40,7 +40,7 @@ elif [[ "$num_jobs" != 1 ]]; then
   exit 1
 fi
 
-trap 'kill 0; exit 1' int
+trap 'kill 0; exit 1' INT
 
 all_tests=()
 for filename in "$@"; do
