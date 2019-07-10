@@ -15,12 +15,13 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 * The `-f, --filter` flag to run only the tests matching a regular expression  (#126)
 * Optimize stack trace capture (#138)
 * `--jobs n` flag to support parallel execution of tests with GNU parallel (#172)
-* Fix wrong line numbers of errors in bash < 4.4 (#229)
 
 ### Changed
 * AppVeyor builds are now semver-compliant (#123)
 * Add Bash 5 as test target (#181)
+* Always use upper case signal names to avoid locale dependent err… (#215)
 * Fix for tests reading from stdin (#227)
+* Fix wrong line numbers of errors in bash < 4.4 (#229)
 * Remove preprocessed source after test run (#232)
 
 ## [1.1.0] - 2018-07-08
