@@ -212,9 +212,13 @@ bats_trim_filename() {
 
 bats_debug_trap() {
   if [[ "$BASH_SOURCE" != "$1" ]]; then
+    # The last entry in the stack trace is not useful when en error occured:
+    # It is either duplicated (kinda correct) or has wrong line number (Bash < 4.4)
+    # Therefore we capture the stacktrace but use it only after the next debug
+    # trap fired.
+    # Expansion is required for empty arrays which otherwise error
+    BATS_CURRENT_STACK_TRACE=( "${BATS_STACK_TRACE[@]+"${BATS_STACK_TRACE[@]}"}" )
     bats_capture_stack_trace
-    BATS_LINENO="$BATS_CURRENT_LINENO"
-    BATS_CURRENT_LINENO="${BASH_LINENO[0]}"
   fi
 }
 
@@ -223,10 +227,9 @@ bats_debug_trap() {
 # set `$?` properly. See #72 and #81 for details.
 #
 # For this reason, we call `bats_error_trap` at the very beginning of
-# `bats_teardown_trap` (the `DEBUG` trap for the call will move
-# `BATS_CURRENT_LINENO` to `BATS_LINENO`) and check the value of
-# `$BATS_TEST_COMPLETED` before taking other actions. We also adjust the exit
-# status value if needed.
+# `bats_teardown_trap` (the `DEBUG` trap for the call will fix the stack trace)
+# and check the value of `$BATS_TEST_COMPLETED` before taking other actions.
+# We also adjust the exit status value if needed.
 #
 # See `bats_exit_trap` for an additional EXIT error handling case when `$?`
 # isn't set properly during `teardown()` errors.
@@ -237,7 +240,7 @@ bats_error_trap() {
     if [[ "$BATS_ERROR_STATUS" -eq 0 ]]; then
       BATS_ERROR_STATUS=1
     fi
-    BATS_STACK_TRACE[0]="$BATS_LINENO ${BATS_STACK_TRACE[0]#* }"
+    BATS_STACK_TRACE=( "${BATS_CURRENT_STACK_TRACE[@]}" )
     trap - DEBUG
   fi
 }
@@ -280,7 +283,7 @@ bats_exit_trap() {
       # If instead the test fails, and the `teardown()` error happens while
       # `bats_teardown_trap` runs as the EXIT trap, the test will fail with no
       # output, since there's no way to reach the `bats_exit_trap` call.
-      BATS_STACK_TRACE[0]="$BATS_LINENO ${BATS_STACK_TRACE[0]#* }"
+      BATS_STACK_TRACE=( "${BATS_CURRENT_STACK_TRACE[@]}" )
       BATS_ERROR_STATUS=1
     fi
     printf 'not ok %d %s\n' "$BATS_TEST_NUMBER" "$BATS_TEST_DESCRIPTION" >&3
@@ -301,6 +304,7 @@ bats_exit_trap() {
   fi
 
   rm -f "$BATS_OUT"
+  bats_cleanup_preprocessed_source
   exit "$status"
 }
 
@@ -317,18 +321,17 @@ bats_perform_test() {
   # function when the ERR trap fires. All versions of Bash appear to reset it
   # on an unbound variable access error. bats_debug_trap will fire both before
   # the offending line is executed, and when the error is triggered.
-  # Consequently, we use `BATS_LINENO` to point to the line number seen by the
+  # Consequently, we use `BATS_CURRENT_STACK_TRACE` recorded by the
   # first call to bats_debug_trap, _before_ the ERR trap or unbound variable
   # access fires.
-  BATS_CURRENT_LINENO=0
-  BATS_LINENO=0
   BATS_STACK_TRACE=()
+  BATS_CURRENT_STACK_TRACE=()
 
   BATS_TEST_COMPLETED=
   BATS_TEST_SKIPPED=
   BATS_TEARDOWN_COMPLETED=
   BATS_ERROR_STATUS=
-  trap "bats_debug_trap \"\$BASH_SOURCE\"" DEBUG
+  trap 'bats_debug_trap "$BASH_SOURCE"' DEBUG
   trap 'bats_error_trap' ERR
   trap 'bats_teardown_trap' EXIT
   "$BATS_TEST_NAME" >>"$BATS_OUT" 2>&1
