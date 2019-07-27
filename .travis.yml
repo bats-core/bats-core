@@ -20,8 +20,19 @@ matrix:
 services:
   - docker
 
+before_script:
+ - |
+   if [[ "${TRAVIS_OS_NAME:-}" == 'linux' ]]; then
+     sudo apt-get install shellcheck
+   fi
+
 script:
 - |
+  if [[ "${TRAVIS_OS_NAME:-}" == 'linux' ]]; then
+    # @todo: Remove "|| true" once all coding standards issues are fixed.
+    ./shellcheck.sh || true
+  fi
+
   if [[ "${TRAVIS_OS_NAME:-}" == 'linux' && -n "${BASHVER}" ]]; then
     docker build --build-arg bashver="${BASHVER}" --tag "bats/bats:bash-${BASHVER}" . &&
       docker run -it "bash:${BASHVER}" --version &&
