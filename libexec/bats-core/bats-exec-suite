@@ -23,6 +23,7 @@ while [[ "$#" -ne 0 ]]; do
     num_jobs="$1"
     ;;
   -x)
+    # shellcheck disable=SC2034
     extended_syntax_flag='-x'
     flags+=('-x')
     ;;
@@ -34,6 +35,7 @@ while [[ "$#" -ne 0 ]]; do
 done
 
 if ( type -p parallel &>/dev/null ); then
+  # shellcheck disable=SC2034
   have_gnu_parallel=1
 elif [[ "$num_jobs" != 1 ]]; then
   printf 'bats: cannot execute "%s" jobs without GNU parallel\n' "$num_jobs" >&2

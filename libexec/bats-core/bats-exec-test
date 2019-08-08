@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -eET
 
+# Variables used in other scripts.
 BATS_COUNT_ONLY=''
 BATS_TEST_FILTER=''
 BATS_EXTENDED_SYNTAX=''
@@ -8,10 +9,12 @@ BATS_EXTENDED_SYNTAX=''
 while [[ "$#" -ne 0 ]]; do
   case "$1" in
   -c)
+    # shellcheck disable=SC2034
     BATS_COUNT_ONLY=1
     ;;
   -f)
     shift
+    # shellcheck disable=SC2034
     BATS_TEST_FILTER="$1"
     ;;
   -x)
@@ -52,6 +55,8 @@ load() {
     exit 1
   fi
 
+  # Dynamically loaded user files provided outside of Bats.
+  # shellcheck disable=SC1090
   source "${filename}"
 }
 
@@ -59,8 +64,12 @@ run() {
   local origFlags="$-"
   set +eET
   local origIFS="$IFS"
+  # 'output', 'status', 'lines' are global variables available to tests.
+  # shellcheck disable=SC2034
   output="$("$@" 2>&1)"
+  # shellcheck disable=SC2034
   status="$?"
+  # shellcheck disable=SC2034,SC2206
   IFS=$'\n' lines=($output)
   IFS="$origIFS"
   set "-$origFlags"
@@ -211,7 +220,7 @@ bats_trim_filename() {
 }
 
 bats_debug_trap() {
-  if [[ "$BASH_SOURCE" != "$1" ]]; then
+  if [[ "${BASH_SOURCE[0]}" != "$1" ]]; then
     # The last entry in the stack trace is not useful when en error occured:
     # It is either duplicated (kinda correct) or has wrong line number (Bash < 4.4)
     # Therefore we capture the stacktrace but use it only after the next debug
@@ -365,6 +374,8 @@ bats_evaluate_preprocessed_source() {
   if [[ -z "$BATS_TEST_SOURCE" ]]; then
     BATS_TEST_SOURCE="${BATS_PARENT_TMPNAME}.src"
   fi
+  # Dynamically loaded user files provided outside of Bats.
+  # shellcheck disable=SC1090
   source "$BATS_TEST_SOURCE"
 }
 
