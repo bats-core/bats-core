@@ -9,11 +9,10 @@ done < <(
   find \
     bin/bats \
     libexec/bats-core \
+    lib/bats-core \
     shellcheck.sh \
     -type f \
     -print0
   )
 
-for file in "${targets[@]}"; do
-  [ -f "${file}" ] && LC_ALL=C.UTF-8 shellcheck "${file}"
-done;
+LC_ALL=C.UTF-8 shellcheck "${targets[@]}"

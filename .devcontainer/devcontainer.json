@@ -1,0 +1,4 @@
+{
+    "name": "Bats core development environment",
+    "dockerFile": "Dockerfile"
+}

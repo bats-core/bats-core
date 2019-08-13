@@ -44,12 +44,16 @@ Count the number of test cases without running any tests
 Filter test cases by names matching the regular expression
 .
 .TP
+\-F, \-\-formatter
+Switch between formatters (Default: tap, Options: junit, pretty, tap)
+.
+.TP
 \fB\-h\fR, \fB\-\-help\fR
 Display help message
 .
 .TP
 \fB\-p\fR, \fB\-\-pretty\fR
-Show results in pretty format (default for terminals)
+[DEPRECATED] Show results in pretty format (default for terminals), use "\-\-formatter pretty" instead
 .
 .TP
 \fB\-r\fR, \fB\-\-recursive\fR
@@ -57,7 +61,7 @@ Include tests in subdirectories
 .
 .TP
 \fB\-t\fR, \fB\-\-tap\fR
-Show results in TAP format
+[DEPRECATED] Show results in TAP format, use "\-\-formatter tap" instead
 .
 .TP
 \fB\-v\fR, \fB\-\-version\fR
