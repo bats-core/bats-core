@@ -10,6 +10,7 @@
 @test "test 2 with	TAB in name" {
     run bash -c "echo EXIT | $BATS_TEST_DIRNAME/cmd_using_stdin.bash"
     [ "$status" -eq 0 ]
+    echo "$output"
     [ "$output" = "Found" ]
 }
 
