@@ -224,6 +224,14 @@ if [[ "${#arguments[@]}" -eq 0 ]]; then
   abort 'Must specify at least one <test>'
 fi
 
+
+if [[ -n "$output" ]]; then
+  if [[ ! -w "${output}" ]]; then
+    abort "Output path ${output} is not writeable"
+  fi
+  export BATS_REPORT_OUTPUT_PATH="$output"
+fi
+
 filenames=()
 for filename in "${arguments[@]}"; do
   expand_path "$filename" 'filename'
@@ -247,14 +255,6 @@ done
 
 # shellcheck source=lib/bats-core/validator.bash
 source "$BATS_ROOT/lib/bats-core/validator.bash"
-
-if [[ -n "$output" ]]; then
-  if [[ ! -w "${output}" ]]; then
-    printf "Error: output path %s is not writeable\n" "${output}" >&2
-    exit 1
-  fi
- export BATS_REPORT_OUTPUT_PATH="$output"
-fi
 
 set -o pipefail execfail
 exec bats-exec-suite "${flags[@]}" "${filenames[@]}" | bats_test_count_validator | "bats-format-${formatter}" "${formatter_flags[@]}"

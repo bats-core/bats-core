@@ -16,3 +16,5 @@ done < <(
   )
 
 LC_ALL=C.UTF-8 shellcheck "${targets[@]}"
+
+exit $?
