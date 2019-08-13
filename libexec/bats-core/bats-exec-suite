@@ -57,7 +57,6 @@ for filename in "$@"; do
     fi
     line="${line%$'\r'}"
     line="${line#* }"
-
     all_tests+=( "$(printf "%s\t%s" "$filename" "$line")" )
     if [[ " ${test_names[*]} " == *" $line "* ]]; then
       test_dupes+=("$line")
@@ -66,6 +65,7 @@ for filename in "$@"; do
     test_names+=("$line")
   done < <(BATS_TEST_FILTER="$filter" bats-preprocess "$filename")
 
+  all_tests=("${all_tests[@]}" "${all_file_tests[@]}")
   if [[ "${#test_dupes[@]}" -ne 0 ]]; then
     printf 'bats warning: duplicate test name(s) in %s: %s\n' "$filename" "${test_dupes[*]}" >&2
   fi
@@ -95,14 +95,19 @@ if [[ "$num_jobs" != 1 ]]; then
 else
   # Just do it serially.
   test_number=0
-  for test_line in "${all_tests[@]}"; do
-    # Only handle non-empty lines
-    if [[ $test_line ]]; then
-      filename="${test_line%%$'\t'*}"
-      test_name="${test_line##*$'\t'}"
-      ((++test_number))
-      bats-exec-test "${flags[@]}" "$filename" "$test_name" "$test_number" || status=1
-    fi
+  for filename in "$@"; do
+    TESTS_FILE=`mktemp`
+    file_tests=''
+    initial_test_number=$test_number
+    for test_line in "${all_tests[@]}"; do
+      if [[ "${test_line%%$'\t'*}" == "$filename" ]]; then
+        test_name="${test_line##*$'\t'}"
+        printf "$test_name"$'\n' >> "$TESTS_FILE"
+        (( ++test_number))
+      fi
+    done
+    bats-exec-file "${flags[@]}" "$filename" $initial_test_number "$TESTS_FILE" || status=1
+    rm "$TESTS_FILE"
   done
   if [[ "${test_number}" != "${test_count}" ]]; then
     printf '# bats warning: Only executed %s of %s tests\n' "$test_number" "$test_count"

@@ -370,6 +370,11 @@ You can define special `setup` and `teardown` functions, which run before and
 after each test case, respectively. Use these to load fixtures, set up your
 environment, and clean up when you're done.
 
+You can also define `setup_file` and `teardown_file`, which will run once per file,
+before the first and after the last test, respectively. 
+__WARNING__ these will not be run in parallel mode!
+
+
 ### Code outside of test cases
 
 You can include code in your test file outside of `@test` functions.  For

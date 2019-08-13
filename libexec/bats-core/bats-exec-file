@@ -1,0 +1,135 @@
+#!/usr/bin/env bash
+set -e
+
+flags=()
+num_jobs=1
+filter=''
+
+while [[ "$#" -ne 0 ]]; do
+  case "$1" in
+  -c)
+    ;;
+  -f)
+    shift
+    filter="$1"
+    flags+=('-f' "$filter")
+    ;;
+  -j)
+    shift
+    num_jobs="$1"
+    ;;
+  -x)
+    extended_syntax_flag='-x'
+    flags+=('-x')
+    ;;
+  *)
+    break
+    ;;
+  esac
+  shift
+done
+
+filename=$1
+test_number=$2
+TESTS_FILE="$3"
+
+if [[ ! -f "$filename" ]]; then
+    printf 'Testfile "%s" not found\n' "$filename" >&2
+    exit 1
+fi
+
+BATS_TEST_FILENAME="$filename"
+
+if [[ -z "$TMPDIR" ]]; then
+BATS_TMPDIR='/tmp'
+else
+BATS_TMPDIR="${TMPDIR%/}"
+fi
+BATS_SUITE_TMPNAME="$BATS_TMPDIR/bats-suite.$$"
+BATS_FILE_OUT="$BATS_SUITE_TMPNAME.out"
+
+bats_suite_preprocess_source() {
+    BATS_FILE_TEST_SOURCE="${BATS_SUITE_TMPNAME}.src"
+    bats-preprocess "$1" >"$BATS_FILE_TEST_SOURCE"
+    trap 'bats_suite_cleanup_preprocessed_source' ERR EXIT
+    trap 'bats_suite_cleanup_preprocessed_source; exit 1' INT
+}
+
+bats_suite_cleanup_preprocessed_source() {
+    rm -f "$BATS_FILE_TEST_SOURCE"
+}
+
+bats_file_error_trap() {
+    echo setup_error >&2
+}
+
+function setup_file() { 
+    return 0 
+}
+
+function teardown_file() { 
+    return 0 
+}
+
+# TODO: we want to run setup/teardown file but have following problems
+# 1. we need to get their definitions which can only be loaded from the preprocessed file
+# 1.1 the preprocessing is defined in bats-exec-test so we don't have it here
+# 1.2 the load command is also defined in bats-exec-test
+# -> it is preferable to run this from bats-exec-test to avoid duplicating the preprocessing/helper commands
+# 2. we need the file setup to be run only once but its results (e.g. conditionally defined variables) 
+#    might need to be present in all tests of the file, not only the first
+# -> evaluate in suite, so that these results are inherited by the subshells
+# 3. prevent environment changes in sourced test files to leak over into other test files
+# -> each file gets its own context
+# 
+# Running the preprocessing here (using shared code with bats-exec-test) requires us to do the clean up ourselves -> more traps
+
+# get the setup_file/teardown_file functions for this file (if it has them)
+bats_suite_preprocess_source $filename
+
+source "$BATS_ROOT/lib/tracing.bash"
+source "$BATS_ROOT/lib/test_functions.bash"
+
+exec 3<&1
+
+BATS_STACK_TRACE=()
+BATS_CURRENT_STACK_TRACE=()
+
+BATS_TEST_COMPLETED=
+BATS_TEST_SKIPPED=
+BATS_TEARDOWN_COMPLETED=
+BATS_ERROR_STATUS=
+#trap 'bats_debug_trap "$BASH_SOURCE"' DEBUG
+trap 'bats_file_error_trap' ERR
+#trap 'bats_teardown_trap' EXIT
+
+touch "$BATS_FILE_OUT"
+source "$BATS_FILE_TEST_SOURCE"
+setup_file >>"$BATS_FILE_OUT" 2>&1 && BATS_SETUP_FILE_SUCCESSFUL="$?" 
+
+#trap - EXIT
+if [[ ! $BATS_SETUP_FILE_SUCCESSFUL == "0" ]]; then
+    printf "not ok %d %s\n" "$test_number" "setup_file in $filename" 
+    bats_print_stack_trace "${BATS_STACK_TRACE[@]}" 
+    #bats_print_failed_command 
+    while IFS= read -r line; do
+        printf "# %s\n" "$line"
+    done < "$BATS_FILE_OUT" >&3
+    rm -rf "$BATS_FILE_OUT"
+    exit 1
+fi
+
+status=0
+tests_to_run=()
+while read test_name; do
+  tests_to_run+=("$test_name")
+done < "$TESTS_FILE"
+
+for test_name in "${tests_to_run[@]}"; do
+    # Only handle non-empty lines
+    if [[ $test_name ]]; then
+        ((++test_number))
+        bats-exec-test "${flags[@]}" "$filename" "$test_name" "$test_number" || status=1
+    fi
+done
+exit $status

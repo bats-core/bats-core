@@ -33,7 +33,6 @@ bats_encode_test_name() {
 
 test_file="$1"
 tests=()
-
 {
   while IFS= read -r line; do
     line="${line//$'\r'}"
