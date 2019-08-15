@@ -51,14 +51,18 @@ OPTIONS
     Count the number of test cases without running any tests
   * `-f`, `--filter`:
     Filter test cases by names matching the regular expression
+  * -F, --formatter:
+    Switch between formatters (Default: tap, Options: junit, pretty, tap)
   * `-h`, `--help`:
     Display help message
   * `-p`, `--pretty`:
-    Show results in pretty format (default for terminals)
+    [DEPRECATED] Show results in pretty format (default for terminals), use "--formatter pretty" instead
   * `-r`, `--recursive`:
     Include tests in subdirectories
   * `-t`, `--tap`:
-    Show results in TAP format
+    [DEPRECATED] Show results in TAP format, use "--formatter tap" instead
+  * `-T`, `--timing`:
+    Add timing information
   * `-v`, `--version`:
     Display the version number
 

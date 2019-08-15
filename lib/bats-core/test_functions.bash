@@ -47,7 +47,10 @@ teardown() {
 }
 
 skip() {
+  # Following variables are used in bats-exec-test which sources this file
+  # shellcheck disable=SC2034
   BATS_TEST_SKIPPED="${1:-1}"
+  # shellcheck disable=SC2034
   BATS_TEST_COMPLETED=1
   exit 0
 }
