@@ -163,6 +163,7 @@ fixtures bats
 @test "passing test with teardown failure" {
   PASS=1 run bats "$FIXTURE_ROOT/failing_teardown.bats"
   [ $status -eq 1 ]
+  echo "$output"
   [ "${lines[1]}" = 'not ok 1 truth' ]
   [ "${lines[2]}" = "# (from function \`teardown' in test file $RELATIVE_FIXTURE_ROOT/failing_teardown.bats, line 2)" ]
   [ "${lines[3]}" = "#   \`eval \"( exit \${STATUS:-1} )\"' failed" ]
@@ -180,51 +181,6 @@ fixtures bats
   PASS=1 STATUS=2 run bats "$FIXTURE_ROOT/failing_teardown.bats"
   [ $status -eq 1 ]
   [ "${lines[3]}" = "#   \`eval \"( exit \${STATUS:-1} )\"' failed with status 2" ]
-}
-
-@test "setup_file is run once per file" {
-  bats "$FIXTURE_ROOT/setup_file.bats"
-}
-
-@test "teardown_file is run once per file" {
-  false
-}
-
-@test "setup_file is called correctly in multi file suite" {
-  # also have a file without setup_file in between
-  false
-}
-
-@test "teardown_file is called correctly in multi file suite" {
-  # also have a file without setup_file in between
-  false
-}
-
-@test "setup_file failure aborts tests for this file" {
-  # this might need to mark them as skipped as the test count is already determined at this point
-  false
-}
-
-@test "teardown_file failure fails at least one test from the file" {
-  false
-}
-
-@test "teardown_file runs even if any test in the file failed" {
-  # also should work for user abort mid test!
-  false
-}
-
-@test "setup_file runs even if all tests in the file are skipped" {
-  false
-}
-
-@test "teardown_file runs even if all tests in the file are skipped" {
-  false
-}
-
-@test "setup/teardown_file must not leak context between tests in the same suite" {
-  # example: BATS_ROOT was unset in one test but used in others, therefore, the suite failed
-  false
 }
 
 @test "failing test file outside of BATS_CWD" {

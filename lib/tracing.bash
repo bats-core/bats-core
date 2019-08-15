@@ -116,7 +116,6 @@ printf -v "$2" '%s' "${1#$BATS_CWD/}"
 }
 
 bats_debug_trap() {
-echo "Debug trap ${FUNCNAME[@]} ${BASH_SOURCE[@]} ${BASHLINENO[@]}"
 if [[ "$BASH_SOURCE" != "$1" ]]; then
     # The last entry in the stack trace is not useful when en error occured:
     # It is either duplicated (kinda correct) or has wrong line number (Bash < 4.4)
