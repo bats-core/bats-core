@@ -3,16 +3,16 @@
 load test_helper
 
 INSTALL_DIR=
-BATS_ROOT=
+PATH_TO_INSTALL_SHELL=
 
 setup() {
   make_bats_test_suite_tmpdir
   INSTALL_DIR="$BATS_TEST_SUITE_TMPDIR/bats-core"
-  BATS_ROOT="${BATS_TEST_DIRNAME%/*}"
+  PATH_TO_INSTALL_SHELL="${BATS_TEST_DIRNAME%/*}/install.sh"
 }
 
 @test "install.sh creates a valid installation" {
-  run "$BATS_ROOT/install.sh" "$INSTALL_DIR"
+  run "$PATH_TO_INSTALL_SHELL" "$INSTALL_DIR"
   [ "$status" -eq 0 ]
   [ "$output" == "Installed Bats to $INSTALL_DIR/bin/bats" ]
   [ -x "$INSTALL_DIR/bin/bats" ]
@@ -38,7 +38,7 @@ setup() {
   local dummy_libexec="$INSTALL_DIR/libexec/bats-core/dummy"
   printf 'dummy' >"$dummy_libexec"
 
-  run "$BATS_ROOT/install.sh" "$INSTALL_DIR"
+  run "$PATH_TO_INSTALL_SHELL" "$INSTALL_DIR"
   [ "$status" -eq 0 ]
   [ -f "$dummy_bin" ]
   [ ! -x "$dummy_bin" ]
@@ -47,7 +47,7 @@ setup() {
 }
 
 @test "bin/bats is resilient to symbolic links" {
-  run "$BATS_ROOT/install.sh" "$INSTALL_DIR"
+  run "$PATH_TO_INSTALL_SHELL" "$INSTALL_DIR"
   [ "$status" -eq 0 ]
 
   # Simulate a symlink to bin/bats (without using a symlink, for Windows sake)
