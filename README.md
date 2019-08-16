@@ -158,8 +158,8 @@ Check out a copy of the Bats repository, then build a container image:
     $ docker build --tag bats/bats:latest .
 
 This creates a local Docker image called `bats/bats:latest` based on [Alpine
-Linux](https://github.com/gliderlabs/docker-alpine/blob/master/docs/usage.md) 
-(to push to private registries, tag it with another organisation, e.g. 
+Linux](https://github.com/gliderlabs/docker-alpine/blob/master/docs/usage.md)
+(to push to private registries, tag it with another organisation, e.g.
 `my-org/bats:latest`).
 
 To run Bats' internal test suite (which is in the container image at
@@ -172,8 +172,8 @@ to its path inside the container:
 
     $ docker run -it -v "$(pwd):/code" bats/bats:latest /code/test
 
-This is a minimal Docker image. If more tools are required this can be used as a 
-base image in a Dockerfile using `FROM <Docker image>`.  In the future there may 
+This is a minimal Docker image. If more tools are required this can be used as a
+base image in a Dockerfile using `FROM <Docker image>`.  In the future there may
 be images based on Debian, and/or with more tools installed (`curl` and `openssl`,
 for example). If you require a specific configuration please search and +1 an
 issue or [raise a new issue](https://github.com/bats-core/bats-core/issues).
@@ -263,6 +263,8 @@ process.
 
 For more details about how Bats evaluates test files, see [Bats Evaluation
 Process][bats-eval] on the wiki.
+
+For sample test files, see [examples](/docs/examples).
 
 [bats-eval]: https://github.com/bats-core/bats-core/wiki/Bats-Evaluation-Process
 
