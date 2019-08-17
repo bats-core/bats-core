@@ -116,7 +116,8 @@ printf -v "$2" '%s' "${1#$BATS_CWD/}"
 }
 
 bats_debug_trap() {
-if [[ "$BASH_SOURCE" != "$1" ]]; then
+# don't update the trace within library functions or we get backtraces from inside traps
+if [[ "$1" != $BATS_ROOT/lib/* && "$1" != $BATS_ROOT/libexec/* ]]; then
     # The last entry in the stack trace is not useful when en error occured:
     # It is either duplicated (kinda correct) or has wrong line number (Bash < 4.4)
     # Therefore we capture the stacktrace but use it only after the next debug
