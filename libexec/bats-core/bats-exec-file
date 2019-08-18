@@ -68,23 +68,24 @@ run_setup_file() {
   setup_file >>"$BATS_OUT" 2>&1
 
   BATS_SETUP_FILE_COMPLETED=1
-  trap 'bats_file_exit_trap' EXIT
 }
 
 run_teardown_file() {
+  # avoid running the therdown trap due to errors in teardown_file
+  trap 'bats_file_exit_trap' EXIT
   teardown_file >>"$BATS_OUT" 2>&1 || status="$?"
-  BATS_TEARDOWN_FILE_COMPLETED=1
+  if [[ $status -eq 0 ]]; then
+    BATS_TEARDOWN_FILE_COMPLETED=1
+  else
+    BATS_ERROR_STATUS="$status"
+  fi
+
 }
 
 bats_file_teardown_trap() {
   bats_error_trap
   local status=0
   run_teardown_file
-  if [[ $status -eq 0 ]]; then
-    BATS_TEARDOWN_FILE_COMPLETED=1
-  elif [[ -n "$BATS_TEST_COMPLETED" ]]; then
-    BATS_ERROR_STATUS="$status"
-  fi
 
   bats_file_exit_trap
 }

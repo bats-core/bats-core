@@ -59,9 +59,12 @@ not ok 1 setup_file failed
 @test "teardown_file failure fails at least one test from the file" {
   run bats "$FIXTURE_ROOT/teardown_file_failed.bats"
   [[ $status -ne 0 ]]
-  echo $output
+  echo "$output"
   [[ $output == "1..1
-not ok 1 teardown_file failed" ]]
+ok 1 test
+not ok 2 teardown_file failed
+# (from function \`teardown_file' in test file $RELATIVE_FIXTURE_ROOT/teardown_file_failed.bats, line 3)
+#   \`false' failed" ]]
 }
 
 @test "teardown_file runs even if any test in the file failed" {
