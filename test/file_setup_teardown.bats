@@ -76,7 +76,7 @@ not ok 2 teardown_file failed
   echo "$output"
   [[ $output == "1..1
 not ok 1 failing test
-# (in test file test/fixtures/file_setup_teardown/teardown_file_after_failing_test.bats, line 6)
+# (in test file $RELATIVE_FIXTURE_ROOT/teardown_file_after_failing_test.bats, line 6)
 #   \`false' failed" ]]
 }
 
@@ -141,7 +141,7 @@ ok 2 must not see variable from first run" ]]
   echo "$output"
   [[ "$output" == "1..1
 not ok 1 setup_file failed
-# (from function \`setup_file' in test file test/fixtures/file_setup_teardown/setup_file_halfway_error.bats, line 3)
+# (from function \`setup_file' in test file $RELATIVE_FIXTURE_ROOT/setup_file_halfway_error.bats, line 3)
 #   \`false' failed" ]]
 }
 
