@@ -146,5 +146,12 @@ not ok 1 setup_file failed
 }
 
 @test "halfway teardown_file errors are caught and reported" {
-  false
+  run bats "$FIXTURE_ROOT/teardown_file_halfway_error.bats"
+  echo "$output"
+  [[ $status -ne 0 ]]
+  [[ "$output" == "1..1
+ok 1 empty
+not ok 2 teardown_file failed
+# (from function \`teardown_file' in test file $RELATIVE_FIXTURE_ROOT/teardown_file_halfway_error.bats, line 3)
+#   \`false' failed" ]]
 }
