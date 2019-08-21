@@ -110,7 +110,12 @@ not ok 1 failing test
 }
 
 @test "teardown_file runs even if all tests in the file are skipped" {
-  false
+  make_bats_test_suite_tmpdir
+  export LOG="$BATS_TEST_SUITE_TMPDIR/teardown_file.log" 
+  run bats "$FIXTURE_ROOT/teardown_file_even_if_all_tests_are_skipped.bats"
+  [[ $status -eq 0 ]]
+  [[ -f "$LOG" ]]
+  grep teardown_file_even_if_all_tests_are_skipped.bats "$LOG"
 }
 
 @test "setup_file must not leak context between tests in the same suite" {
