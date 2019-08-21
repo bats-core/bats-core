@@ -127,7 +127,12 @@ not ok 1 failing test
 
 @test "teardown_file must not leak context between tests in the same suite" {
   # example: BATS_ROOT was unset in one test but used in others, therefore, the suite failed
-  false
+  run bats "$FIXTURE_ROOT/teardown_file_does_not_leak.bats" "$FIXTURE_ROOT/teardown_file_does_not_leak2.bats"
+  echo "$output"
+  [[ $status -eq 0 ]]
+  [[ $output == "1..2
+ok 1 test
+ok 2 must not see variable from first run" ]]
 }
 
 @test "halfway setup_file errors are caught and reported" {
