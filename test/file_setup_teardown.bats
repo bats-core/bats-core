@@ -68,9 +68,19 @@ not ok 2 teardown_file failed
 }
 
 @test "teardown_file runs even if any test in the file failed" {
-  # also should work for user abort mid test!
-  false
+  make_bats_test_suite_tmpdir
+  export LOG="$BATS_TEST_SUITE_TMPDIR/teardown_file.log"
+  run bats "$FIXTURE_ROOT/teardown_file_after_failing_test.bats"
+  [[ $status -ne 0 ]]
+  grep teardown_file_after_failing_test.bats "$LOG"
+  echo "$output"
+  [[ $output == "1..1
+not ok 1 failing test
+# (in test file test/fixtures/file_setup_teardown/teardown_file_after_failing_test.bats, line 6)
+#   \`false' failed" ]]
 }
+
+# also should work for user abort mid test!
 
 @test "setup_file runs even if all tests in the file are skipped" {
   make_bats_test_suite_tmpdir
