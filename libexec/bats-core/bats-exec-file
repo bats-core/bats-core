@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -eET
 
-flags=()
+export flags=()
 num_jobs=1
 filter=''
 
@@ -76,7 +76,7 @@ bats_run_teardown_file() {
   local status=0
   # rely on bats_error_trap to catch failures
   teardown_file >>"$BATS_OUT" 2>&1 
-  
+
   BATS_TEARDOWN_FILE_COMPLETED=1
 }
 
@@ -128,7 +128,11 @@ bats_run_tests() {
       # Only handle non-empty lines
       if [[ $test_name ]]; then
           ((++test_number))
-          bats-exec-test "${flags[@]}" "$filename" "$test_name" "$test_number" || status=1
+          if [[ "${#flags[@]}" -gt 0 ]]; then
+            bats-exec-test "${flags[@]}" "$filename" "$test_name" "$test_number" || status=1
+          else
+            bats-exec-test "$filename" "$test_name" "$test_number" || status=1
+          fi
       fi
   done
   export status
