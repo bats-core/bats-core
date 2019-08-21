@@ -80,7 +80,26 @@ not ok 1 failing test
 #   \`false' failed" ]]
 }
 
-# also should work for user abort mid test!
+@test "teardown_file should run even after user abort via CTRL-C" {
+  make_bats_test_suite_tmpdir
+  export LOG="$BATS_TEST_SUITE_TMPDIR/teardown_file.log"
+  STARTTIME=$SECONDS
+  # guarantee that background processes get their own process group -> pid=pgid
+  set -m
+  # run testsubprocess in background to not avoid blocking this test
+  bats "$FIXTURE_ROOT/teardown_file_after_long_test.bats"&
+  SUBPROCESS_PID=$!
+  # wait until we enter the test
+  sleep 2
+  # fake sending SIGINT (CTRL-C) to the process group of the background subprocess
+  kill -SIGINT -- -$SUBPROCESS_PID
+  wait # for the test to finish either way (SIGINT or normal execution)
+  # check that teardown_file ran and created the log file
+  [[ -f "$LOG" ]]
+  grep teardown_file_after_long_test.bats "$LOG"
+  # but the test must not have run to the end!
+  ! grep "test finished successfully" "$LOG"
+}
 
 @test "setup_file runs even if all tests in the file are skipped" {
   make_bats_test_suite_tmpdir
