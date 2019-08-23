@@ -96,12 +96,15 @@ bats_file_exit_trap() {
       else 
         FAILURE_REASON='teardown_file'
       fi
-      printf "not ok %d %s\n" "$(( test_number + 1))" "$FAILURE_REASON failed"
-      bats_print_stack_trace "${BATS_STACK_TRACE[@]}" 
-      bats_print_failed_command 
+      printf "not ok %d %s\n" "$(( test_number + 1))" "$FAILURE_REASON failed" >&3
+      bats_print_stack_trace "${BATS_STACK_TRACE[@]}" >&3
+      bats_print_failed_command >&3
       while IFS= read -r line; do
           printf "# %s\n" "$line"
       done < "$BATS_OUT" >&3
+      if [[ -n "$line" ]]; then
+        printf '# %s\n' "$line"
+      fi
       rm -rf "$BATS_OUT"
       status=1
     fi
