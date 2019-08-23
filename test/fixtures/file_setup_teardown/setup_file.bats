@@ -6,7 +6,7 @@ setup_file() {
     [[ -f "$LOG" ]]
     run wc -l < "$LOG"
     echo $output
-    [[ $output == "1" ]]
+    [[ $output -eq 1 ]]
 }
 
 @test "Second setup_file test" {
@@ -14,5 +14,5 @@ setup_file() {
     [[ -f "$LOG" ]]
     run wc -l < "$LOG"
     echo $output
-    [[ $output == "1" ]]
+    [[ $output -eq 1 ]]
 }

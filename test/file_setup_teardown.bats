@@ -18,7 +18,7 @@ fixtures file_setup_teardown
   grep 'teardown_file.bats' "$LOG"
   # it should be the only entry
   run wc -l < "$LOG"
-  [[ $output == 1 ]]
+  [[ $output -eq 1 ]]
 }
 
 @test "setup_file is called correctly in multi file suite" {
@@ -28,7 +28,7 @@ fixtures file_setup_teardown
     [[ $status -eq 0 ]]
     run wc -l < "$LOG"
     # each setup_file[2].bats is in the log exactly once!
-    [[ $output == "2" ]]
+    [[ $output -eq 2 ]]
     grep setup_file.bats "$LOG"
     grep setup_file2.bats "$LOG"
 }
@@ -40,7 +40,7 @@ fixtures file_setup_teardown
   [[ $status -eq 0 ]]
   run wc -l < "$LOG"
   # each teardown_file[2].bats is in the log exactly once!
-  [[ $output == "2" ]]
+  [[ $output -eq 2 ]]
   grep teardown_file.bats "$LOG"
   grep teardown_file2.bats "$LOG"
 
