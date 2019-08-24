@@ -127,17 +127,25 @@ bats_run_tests() {
     tests_to_run+=("$test_name")
   done < "$TESTS_FILE"
 
-  for test_name in "${tests_to_run[@]}"; do
-      # Only handle non-empty lines
-      if [[ $test_name ]]; then
-          ((++test_number))
-          if [[ "${#flags[@]}" -gt 0 ]]; then
-            bats-exec-test "${flags[@]}" "$filename" "$test_name" "$test_number" || status=1
-          else
-            bats-exec-test "$filename" "$test_name" "$test_number" || status=1
-          fi
-      fi
-  done
+  if [[ "$num_jobs" != 1 ]]; then
+    # Only use GNU parallel when we want parallel execution -- there is a small
+    # amount of overhead using it over a simple loop in the serial case.
+    set -o pipefail
+    printf '%s\n' "${tests_to_run[@]}" | grep -v '^$' | \
+      parallel -qk -j "$num_jobs" --colsep="\t" -- bats-exec-test "${flags[@]}" "$filename" '{1}' "{=\$_=\$job->seq()+$test_number=}" || status=1
+  else
+    for test_name in "${tests_to_run[@]}"; do
+        # Only handle non-empty lines
+        if [[ $test_name ]]; then
+            ((++test_number))
+            if [[ "${#flags[@]}" -gt 0 ]]; then
+              bats-exec-test "${flags[@]}" "$filename" "$test_name" "$test_number" || status=1
+            else
+              bats-exec-test "$filename" "$test_name" "$test_number" || status=1
+            fi
+        fi
+    done
+  fi
   export status
 }
 

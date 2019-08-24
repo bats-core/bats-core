@@ -21,6 +21,7 @@ while [[ "$#" -ne 0 ]]; do
   -j)
     shift
     num_jobs="$1"
+    flags+=('-j' "$num_jobs")
     ;;
   -x)
     extended_syntax_flag='-x'
@@ -86,32 +87,23 @@ if [[ "${test_count}" == 0 ]]; then
   exit
 fi
 
-if [[ "$num_jobs" != 1 ]]; then
-  # Only use GNU parallel when we want parallel execution -- there is a small
-  # amount of overhead using it over a simple loop in the serial case.
-  set -o pipefail
-  printf '%s\n' "${all_tests[@]}" | grep -v '^$' | \
-    parallel -qk -j "$num_jobs" --colsep="\t" -- bats-exec-test "${flags[@]}" '{1}' '{2}' '{#}' || status=1
-else
-  # Just do it serially.
-  test_number=0
-  for filename in "$@"; do
-    TESTS_FILE=`mktemp`
-    file_tests=''
-    initial_test_number=$test_number
-    for test_line in "${all_tests[@]}"; do
-      if [[ "${test_line%%$'\t'*}" == "$filename" ]]; then
-        test_name="${test_line##*$'\t'}"
-        printf "$test_name"$'\n' >> "$TESTS_FILE"
-        (( ++test_number))
-      fi
-    done
-    bats-exec-file "${flags[@]}" "$filename" $initial_test_number "$TESTS_FILE" || status=1
-    rm "$TESTS_FILE"
+test_number=0
+for filename in "$@"; do
+  TESTS_FILE=`mktemp`
+  file_tests=''
+  initial_test_number=$test_number
+  for test_line in "${all_tests[@]}"; do
+    if [[ "${test_line%%$'\t'*}" == "$filename" ]]; then
+      test_name="${test_line##*$'\t'}"
+      printf "$test_name"$'\n' >> "$TESTS_FILE"
+      (( ++test_number))
+    fi
   done
-  if [[ "${test_number}" != "${test_count}" ]]; then
-    printf '# bats warning: Only executed %s of %s tests\n' "$test_number" "$test_count"
-    status=1
-  fi
+  bats-exec-file "${flags[@]}" "$filename" $initial_test_number "$TESTS_FILE" || status=1
+  rm "$TESTS_FILE"
+done
+if [[ "${test_number}" != "${test_count}" ]]; then
+  printf '# bats warning: Only executed %s of %s tests\n' "$test_number" "$test_count"
+  status=1
 fi
 exit "$status"
