@@ -40,11 +40,11 @@ fi
 
 BATS_TEST_FILENAME="$filename"
 
-source "$BATS_ROOT/lib/preprocessing.bash"
+source "$BATS_ROOT/lib/bats-core/preprocessing.bash"
 
 bats_run_setup_file() {
-  source "$BATS_ROOT/lib/tracing.bash"
-  source "$BATS_ROOT/lib/test_functions.bash"
+  source "$BATS_ROOT/lib/bats-core/tracing.bash"
+  source "$BATS_ROOT/lib/bats-core/test_functions.bash"
 
   exec 3<&1
 
