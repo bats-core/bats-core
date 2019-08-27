@@ -42,7 +42,7 @@ tests=()
       name="${name%[\'\"]}"
       body="${BASH_REMATCH[2]}"
       bats_encode_test_name "$name" 'encoded_name'
-      printf '%s() { bats_test_begin "%s"; %s\n' "$encoded_name" "$name" "$body" || :
+      printf '%s() { bats_test_begin "%s"; %s\n' "${encoded_name:?}" "$name" "$body" || :
 
       if [[ -z "$BATS_TEST_FILTER" || "$name" =~ $BATS_TEST_FILTER ]]; then
         tests+=("$encoded_name")

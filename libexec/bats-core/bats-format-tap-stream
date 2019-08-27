@@ -20,7 +20,7 @@ fi
 
 update_screen_width() {
   screen_width="$(tput cols)"
-  count_column_left=$(( $screen_width - $count_column_width ))
+  count_column_left=$(( screen_width - count_column_width ))
 }
 
 trap update_screen_width WINCH
@@ -28,7 +28,7 @@ update_screen_width
 
 begin() {
   go_to_column 0
-  buffer_with_truncation $(( $count_column_left - 1 )) '   %s' "$name"
+  buffer_with_truncation $(( count_column_left - 1 )) '   %s' "$name"
   clear_to_end_of_line
   go_to_column $count_column_left
   buffer "%${#count}s/${count}" "$index"
@@ -92,10 +92,11 @@ buffer_with_truncation() {
   shift
   local string
 
+  # shellcheck disable=SC2059
   printf -v 'string' -- "$@"
 
   if [[ "${#string}" -gt "$width" ]]; then
-    buffer '%s...' "${string:0:$(( $width - 4 ))}"
+    buffer '%s...' "${string:0:$(( width - 4 ))}"
   else
     buffer '%s' "$string"
   fi
@@ -103,7 +104,7 @@ buffer_with_truncation() {
 
 go_to_column() {
   local column="$1"
-  buffer '\x1B[%dG' $(( $column + 1 ))
+  buffer '\x1B[%dG' $(( column + 1 ))
 }
 
 clear_to_end_of_line() {
@@ -123,7 +124,7 @@ set_color() {
   if [[ "$2" == 'bold' ]]; then
     weight=1
   fi
-  buffer '\x1B[%d;%dm' "$(( 30 + $color ))" "$weight"
+  buffer '\x1B[%d;%dm' "$(( 30 + color ))" "$weight"
 }
 
 clear_color() {
@@ -134,6 +135,7 @@ _buffer=
 
 buffer() {
   local content
+  # shellcheck disable=SC2059
   printf -v content -- "$@"
   _buffer+="$content"
 }
