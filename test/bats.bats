@@ -163,6 +163,7 @@ fixtures bats
 @test "passing test with teardown failure" {
   PASS=1 run bats "$FIXTURE_ROOT/failing_teardown.bats"
   [ $status -eq 1 ]
+  echo "$output"
   [ "${lines[1]}" = 'not ok 1 truth' ]
   [ "${lines[2]}" = "# (from function \`teardown' in test file $RELATIVE_FIXTURE_ROOT/failing_teardown.bats, line 2)" ]
   [ "${lines[3]}" = "#   \`eval \"( exit \${STATUS:-1} )\"' failed" ]
@@ -263,7 +264,8 @@ fixtures bats
 }
 
 @test "extended syntax" {
-  run bats-exec-test -x "$FIXTURE_ROOT/failing_and_passing.bats"
+  emulate_bats_env
+  run bats-exec-suite -x "$FIXTURE_ROOT/failing_and_passing.bats"
   [ $status -eq 1 ]
   [ "${lines[1]}" = 'begin 1 a failing test' ]
   [ "${lines[2]}" = 'not ok 1 a failing test' ]
@@ -481,4 +483,72 @@ END_OF_ERR_MSG
   [ "${lines[4]}" = '# foo' ]
   [ "${lines[5]}" = '# bar' ]
   [ "${lines[6]}" = '# baz' ]
+}
+
+@test "parallel test execution with --jobs" {
+  type -p parallel &>/dev/null || skip "--jobs requires GNU parallel"
+
+  SECONDS=0
+  run bats --jobs 10 "$FIXTURE_ROOT/parallel.bats"
+  duration="$SECONDS"
+  [ "$status" -eq 0 ]
+  # Make sure the lines are in-order.
+  [[ "${lines[0]}" == "1..10" ]]
+  for t in {1..10}; do
+    [[ "${lines[$t]}" == "ok $t slow test $t" ]]
+  done
+  # In theory it should take 3s, but let's give it bit of extra time instead.
+  [[ "$duration" -lt 20 ]]
+}
+
+@test "run tests which consume stdin (see #197)" {
+  run bats "$FIXTURE_ROOT/read_from_stdin.bats"
+  [ "$status" -eq 0 ]
+  [[ "${lines[0]}" == "1..3" ]]
+  [[ "${lines[1]}" == "ok 1 test 1" ]]
+  [[ "${lines[2]}" == "ok 2 test 2 with	TAB in name" ]]
+  [[ "${lines[3]}" == "ok 3 test 3" ]]
+}
+
+@test "report correct line on unset variables" {
+  run bats "$FIXTURE_ROOT/unbound_variable.bats"
+  [ "$status" -eq 1 ]
+  [ "${#lines[@]}" -eq 9 ]
+  [ "${lines[1]}" = 'not ok 1 access unbound variable' ]
+  [ "${lines[2]}" = "# (in test file $RELATIVE_FIXTURE_ROOT/unbound_variable.bats, line 8)" ]
+  [ "${lines[3]}" = "#   \`foo=\$unset_variable' failed" ]
+  [[ "${lines[4]}" =~ ".src: line 8:" ]]
+  [ "${lines[5]}" = 'not ok 2 access second unbound variable' ]
+  [ "${lines[6]}" = "# (in test file $RELATIVE_FIXTURE_ROOT/unbound_variable.bats, line 13)" ]
+  [ "${lines[7]}" = "#   \`foo=\$second_unset_variable' failed" ]
+  [[ "${lines[8]}" =~ ".src: line 13:" ]]
+}
+
+@test "report correct line on external function calls" {
+  run bats "$FIXTURE_ROOT/external_function_calls.bats"
+  [ "$status" -eq 1 ]
+
+  expectedNumberOfTests=12
+  linesOfOutputPerTest=3
+  [ "${#lines[@]}" -gt $((expectedNumberOfTests * linesOfOutputPerTest + 1)) ]
+
+  outputOffset=1
+  currentErrorLine=9
+  linesPerTest=5
+
+  for t in $(seq $expectedNumberOfTests); do
+    [[ "${lines[$outputOffset]}" =~ "not ok $t " ]]
+    # Skip backtrace into external function if set
+    if [[ "${lines[$((outputOffset + 1))]}" =~ "# (from function " ]]; then
+      outputOffset=$((outputOffset + 1))
+      parenChar=" "
+    else
+      parenChar="("
+    fi
+
+    [ "${lines[$((outputOffset + 1))]}" = "# ${parenChar}in test file $RELATIVE_FIXTURE_ROOT/external_function_calls.bats, line $currentErrorLine)" ]
+    [[ "${lines[$((outputOffset + 2))]}" =~ " failed" ]]
+    outputOffset=$((outputOffset + 3))
+    currentErrorLine=$((currentErrorLine + linesPerTest))
+  done
 }

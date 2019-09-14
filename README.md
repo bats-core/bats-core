@@ -38,41 +38,39 @@ Test cases consist of standard shell commands. Bats makes use of Bash's
 test case exits with a `0` status code (success), the test passes. In this way,
 each line is an assertion of truth.
 
-**Tuesday, September 19, 2017:** This is a mirrored fork of [Bats][bats-orig] at
-commit [0360811][].  It was created via `git clone --bare` and `git push
---mirror`. See the [Background](#background) section below for more information.
-
-[bats-orig]: https://github.com/sstephenson/bats
-[0360811]: https://github.com/sstephenson/bats/commit/03608115df2071fff4eaaff1605768c275e5f81f
-
 ## Table of contents
 
+<!-- toc -->
+
 - [Installation](#installation)
-  - [Supported Bash versions](#supported-bash-versions)
-  - [Homebrew](#homebrew)
-  - [npm](#npm)
-  - [Installing Bats from source](#installing-bats-from-source)
-  - [Running Bats in Docker](#running-bats-in-docker)
-    - [Building a Docker image](#building-a-docker-image)
+  * [Supported Bash versions](#supported-bash-versions)
+  * [Homebrew](#homebrew)
+  * [npm](#npm)
+  * [Installing Bats from source](#installing-bats-from-source)
+  * [Installing Bats from source onto Windows Git Bash](#installing-bats-from-source-onto-windows-git-bash)
+  * [Running Bats in Docker](#running-bats-in-docker)
+    + [Building a Docker image](#building-a-docker-image)
 - [Usage](#usage)
 - [Writing tests](#writing-tests)
-  - [`run`: Test other commands](#run-test-other-commands)
-  - [`load`: Share common code](#load-share-common-code)
-  - [`skip`: Easily skip tests](#skip-easily-skip-tests)
-  - [`setup` and `teardown`: Pre- and post-test hooks](#setup-and-teardown-pre--and-post-test-hooks)
-  - [Code outside of test cases](#code-outside-of-test-cases)
-  - [File descriptor 3 (read this if Bats hangs)](#file-descriptor-3-read-this-if-bats-hangs)
-  - [Printing to the terminal](#printing-to-the-terminal)
-  - [Special variables](#special-variables)
+  * [`run`: Test other commands](#run-test-other-commands)
+  * [`load`: Share common code](#load-share-common-code)
+  * [`skip`: Easily skip tests](#skip-easily-skip-tests)
+  * [`setup` and `teardown`: Pre- and post-test hooks](#setup-and-teardown-pre--and-post-test-hooks)
+  * [Code outside of test cases](#code-outside-of-test-cases)
+  * [File descriptor 3 (read this if Bats hangs)](#file-descriptor-3-read-this-if-bats-hangs)
+  * [Printing to the terminal](#printing-to-the-terminal)
+  * [Special variables](#special-variables)
 - [Testing](#testing)
 - [Support](#support)
 - [Contributing](#contributing)
 - [Contact](#contact)
 - [Version history](#version-history)
 - [Background](#background)
-  - [Why was this fork created?](#why-was-this-fork-created)
-  - [What's the plan and why?](#whats-the-plan-and-why)
+  * [What's the plan and why?](#whats-the-plan-and-why)
+  * [Why was this fork created?](#why-was-this-fork-created)
 - [Copyright](#copyright)
+
+<!-- tocstop -->
 
 ## Installation
 
@@ -132,8 +130,18 @@ install Bats into `/usr/local`,
     $ cd bats-core
     $ ./install.sh /usr/local
 
-Note that you may need to run `install.sh` with `sudo` if you do not have
+__Note:__ You may need to run `install.sh` with `sudo` if you do not have
 permission to write to the installation prefix.
+
+### Installing Bats from source onto Windows Git Bash
+
+Check out a copy of the Bats repository and install it to `$HOME`. This
+will place the `bats` executable in `$HOME/bin`, which should already be
+in `$PATH`.
+
+    $ git clone https://github.com/bats-core/bats-core.git
+    $ cd bats-core
+    $ ./install.sh $HOME
 
 ### Running Bats in Docker
 
@@ -182,7 +190,7 @@ supports:
 
 ```
 Bats x.y.z
-Usage: bats [-cr] [-f <regex>] [-p | -t] <test>...
+Usage: bats [-cr] [-f <regex>] [-j <jobs>] [-p | -t] <test>...
        bats [-h | -v]
 
   <test> is the path to a Bats test file, or the path to a directory
@@ -193,15 +201,16 @@ Usage: bats [-cr] [-f <regex>] [-p | -t] <test>...
   -f, --filter              Filter test cases by names matching the regular expression
   -F, --formatter           Switch between formatters (Default: bats-format-tap, Options: bats-format-junit, bats-format-pretty, bats-format-tap)
   -h, --help                Display this help message
+  -j, --jobs                Number of parallel jobs to run (requires GNU parallel)
   -o, --output              A directory to output reports to
   -p, --pretty              [DEPRECATED] Show results in pretty format (default for terminals), use "--formatter bats-format-pretty" instead
   -r, --recursive           Include tests in subdirectories
   -t, --tap                 [DEPRECATED] Show results in TAP format, use "--formatter bats-format-tap" instead
   -v, --version             Display the version number
-  -f, --filter              Filter test cases by names matching the regular expression
 
   For more information, see https://github.com/bats-core/bats-core
 ```
+> **Mac OSX/Darwin Warning:** If you're executing bats directly (`bin/bats`) you need to `brew install coreutils` to obtain `greadlink`. Darwin's readlink does not include the -f option. This may be fixed [by this PR](https://github.com/bats-core/bats-core/pull/217), which needs reviewers.
 
 To run your tests, invoke the `bats` interpreter with one or more paths to test
 files ending with the `.bats` extension, or paths to directories containing test
@@ -249,6 +258,21 @@ by specifying the `--output` flag.
     ok 1 addition using bc
     ok 2 addition using dc
 
+### Parallel Execution
+
+By default, Bats will execute your tests serially. However, Bats supports
+parallel execution of tests (provided you have [GNU parallel][gnu-parallel] or
+a compatible replacement installed) using the `--jobs` parameter. This can
+result in your tests completing faster (depending on your tests and the testing
+hardware).
+
+Ordering of parallised tests is not guaranteed, so this mode may break suites
+with dependencies between tests (or tests that write to shared locations). When
+enabling `--jobs` for the first time be sure to re-run bats multiple times to
+identify any inter-test dependencies or non-deterministic test behaviour.
+
+[gnu-parallel]: https://www.gnu.org/software/parallel/
+
 ## Writing tests
 
 Each Bats test file is evaluated _n+1_ times, where _n_ is the number of
@@ -295,6 +319,10 @@ without any arguments prints usage information on the first line:
   [ "${lines[0]}" = "usage: foo <filename>" ]
 }
 ```
+
+__Note:__ The `run` helper executes its argument(s) in a subshell, so if
+writing tests against environmental side-effects like a variable's value
+being changed, these changes will not persist after `run` completes.
 
 ### `load`: Share common code
 
@@ -353,11 +381,18 @@ Or you can skip conditionally:
 }
 ```
 
+__Note:__ `setup` and `teardown` hooks still run for skipped tests.
+
 ### `setup` and `teardown`: Pre- and post-test hooks
 
 You can define special `setup` and `teardown` functions, which run before and
 after each test case, respectively. Use these to load fixtures, set up your
 environment, and clean up when you're done.
+
+You can also define `setup_file` and `teardown_file`, which will run once per file,
+before the first and after the last test, respectively. 
+__WARNING__ these will not be run in parallel mode!
+
 
 ### Code outside of test cases
 
@@ -387,7 +422,7 @@ service that will run indefinitely), Bats will be similarly blocked for the same
 amount of time.
 
 **To prevent this from happening, close FD 3 explicitly when running any command
-that may launch long-running child processes**, e.g. `command_name 3>- &`.
+that may launch long-running child processes**, e.g. `command_name 3>&-` .
 
 ### Printing to the terminal
 
@@ -489,40 +524,22 @@ See `docs/CHANGELOG.md`.
 
 ## Background
 
-### Why was this fork created?
-
-The original Bats repository needed new maintainers, and has not been actively
-maintained since 2013. While there were volunteers for maintainers, attempts to
-organize issues, and outstanding PRs, the lack of write-access to the repo
-hindered progress severely.
-
 ### What's the plan and why?
 
-The rough plan, originally [outlined
-here](https://github.com/sstephenson/bats/issues/150#issuecomment-323845404) is
-to create a new, mirrored mainline (this repo!). An excerpt:
+**Tuesday, September 19, 2017:** This was forked from [Bats][bats-orig] at
+commit [0360811][].  It was created via `git clone --bare` and `git push
+--mirror`. See the [Background](#background) section above for more information.
 
-> **1. Roadmap 1.0:**
-> There are already existing high-quality PRs, and often-requested features and
-> issues, especially here at
-> [#196](https://github.com/sstephenson/bats/issues/196). Leverage these and
-> **consolidate into a single roadmap**.
->
-> **2. Create or choose a fork or *mirror* of this repo to use as the new
-> mainline:**
-> Repoint existing PRs (whichever ones are possible) to the new mainline, get
-> that repo to a stable 1.0. IMO we should create an organization and grant 2-3
-> people admin and write access.
+[bats-orig]: https://github.com/sstephenson/bats
+[0360811]: https://github.com/sstephenson/bats/commit/03608115df2071fff4eaaff1605768c275e5f81f
 
-Doing it this way accomplishes a number of things:
+This [bats-core repo](https://github.com/bats-core/bats-core) is the community-maintained Bats project.
 
-1. Removes the dependency on the original maintainer
-1. Enables collaboration and contribution flow again
-1. Allows the possibility of merging back to original, or merging from original
-   if or when the need arises
-1. Prevents lock-out by giving administrative access to more than one person,
-   increases transferability
+### Why was this fork created?
 
+There was an initial [call for maintainers][call-maintain] for the original Bats repository, but write access to it could not be obtained. With development activity stalled, this fork allowed ongoing maintenance and forward progress for Bats.
+
+[call-maintain]: https://github.com/sstephenson/bats/issues/150
 
 ## Copyright
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-export BATS_VERSION='1.1.0'
+export BATS_VERSION='1.2.0-dev'
 
 version() {
   printf 'Bats %s\n' "$BATS_VERSION"
@@ -20,7 +20,7 @@ usage() {
   while IFS= read -r line; do
     printf '%s\n' "$line"
   done <<END_OF_HELP_TEXT
-Usage: $cmd [-cr] [-f <regex>] [-p | -t] <test>...
+Usage: $cmd [-cr] [-f <regex>] [-j <jobs>] [-p | -t] <test>...
        $cmd [-h | -v]
 
   <test> is the path to a Bats test file, or the path to a directory
@@ -31,6 +31,7 @@ Usage: $cmd [-cr] [-f <regex>] [-p | -t] <test>...
   -f, --filter              Filter test cases by names matching the regular expression
   -F, --formatter           Switch between formatters (Default: bats-format-tap, Options: bats-format-junit, bats-format-pretty, bats-format-tap)
   -h, --help                Display this help message
+  -j, --jobs                Number of parallel jobs to run (requires GNU parallel)
   -o, --output              A directory to output reports to
   -p, --pretty              [DEPRECATED] Show results in pretty format (default for terminals), use "--formatter bats-format-pretty" instead
   -r, --recursive           Include tests in subdirectories
@@ -40,6 +41,11 @@ Usage: $cmd [-cr] [-f <regex>] [-p | -t] <test>...
   For more information, see https://github.com/bats-core/bats-core
 
 END_OF_HELP_TEXT
+}
+
+expand_link() {
+  readlink="$(type -p greadlink readlink | head -1)"
+  "$readlink" -f "$1"
 }
 
 expand_path() {
@@ -57,10 +63,11 @@ expand_path() {
   printf -v "$result" '%s/%s' "$dirname" "${path##*/}"
 }
 
+BATS_LIBEXEC="$(dirname "$(expand_link "$BASH_SOURCE")")"
 export BATS_CWD="$PWD"
 export BATS_TEST_PATTERN="^[[:blank:]]*@test[[:blank:]]+(.*[^[:blank:]])[[:blank:]]+\{(.*)\$"
 export BATS_TEST_FILTER=
-export PATH="$BATS_ROOT/libexec/bats-core:$PATH"
+export PATH="$BATS_LIBEXEC:$PATH"
 
 arguments=()
 
@@ -125,6 +132,10 @@ while [[ "$#" -ne 0 ]]; do
   -p|--pretty)
     formatter='bats-format-pretty'
     ;;
+  -j|--jobs)
+    shift
+    flags+=('-j' "$1")
+    ;;
   -r|--recursive)
     recursive=1
     ;;
@@ -170,13 +181,13 @@ for filename in "${arguments[@]}"; do
   fi
 done
 
-if [[ "${#filenames[@]}" -eq 1 ]]; then
-  command='bats-exec-test'
-else
-  command='bats-exec-suite'
+formatter="cat"
+if [[ -n "$pretty" ]]; then
+  flags+=("-x")
+  formatter="bats-format-tap-stream"
 fi
 
 set -o pipefail execfail
 [[ -n "$output" ]] && export BATS_REPORT_OUTPUT_PATH="$output"
 export BATS_EXECUTOR_FLAGS="$flags"
-exec "$command" "${flags[@]}" "${filenames[@]}" | "$formatter"
+exec bats-exec-suite "${flags[@]}" "${filenames[@]}" | "$formatter"

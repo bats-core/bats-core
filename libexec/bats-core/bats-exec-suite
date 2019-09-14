@@ -5,6 +5,8 @@ count_only_flag=''
 enable_timing=''
 extended_syntax_flag=''
 filter=''
+num_jobs=1
+have_gnu_parallel=
 flags=()
 
 while [[ "$#" -ne 0 ]]; do
@@ -13,9 +15,14 @@ while [[ "$#" -ne 0 ]]; do
     count_only_flag=1
     ;;
   -f)
-    filter="$2"
-    flags+=('-f' "$filter")
     shift
+    filter="$1"
+    flags+=('-f' "$filter")
+    ;;
+  -j)
+    shift
+    num_jobs="$1"
+    flags+=('-j' "$num_jobs")
     ;;
   -T)
     enable_timing=1
@@ -32,58 +39,79 @@ while [[ "$#" -ne 0 ]]; do
   shift
 done
 
-trap 'kill 0; exit 1' int
+if ( type -p parallel &>/dev/null ); then
+  have_gnu_parallel=1
+elif [[ "$num_jobs" != 1 ]]; then
+  printf 'bats: cannot execute "%s" jobs without GNU parallel\n' "$num_jobs" >&2
+  exit 1
+fi
 
-count=0
+trap 'kill 0; exit 1' INT
+
+all_tests=()
 for filename in "$@"; do
-  while IFS= read -r line; do
-    if [[ "$line" =~ $BATS_TEST_PATTERN ]]; then
-      test_name="${BASH_REMATCH[1]#[\'\"]}"
-      test_name="${test_name%[\'\"]}"
-      if [[ -z "$filter" || "$test_name" =~ $filter ]]; then
-        ((++count))
-      fi
+  if  [[ ! -f "$filename" ]]; then
+    printf 'bats: %s does not exist\n' "$filename" >&2
+    exit 1
+  fi
+
+  test_names=()
+  test_dupes=()
+  while read -r line; do
+    if [[ ! "$line" =~ ^bats_test_function\  ]]; then
+      continue
     fi
-  done <"$filename"
+    line="${line%$'\r'}"
+    line="${line#* }"
+    all_tests+=( "$(printf "%s\t%s" "$filename" "$line")" )
+    if [[ " ${test_names[*]} " == *" $line "* ]]; then
+      test_dupes+=("$line")
+      continue
+    fi
+    test_names+=("$line")
+  done < <(BATS_TEST_FILTER="$filter" bats-preprocess "$filename")
+
+  all_tests=("${all_tests[@]}" "${all_file_tests[@]}")
+  if [[ "${#test_dupes[@]}" -ne 0 ]]; then
+    printf 'bats warning: duplicate test name(s) in %s: %s\n' "$filename" "${test_dupes[*]}" >&2
+  fi
 done
 
+test_count="${#all_tests[@]}"
+
 if [[ -n "$count_only_flag" ]]; then
-  printf '%d\n' "$count"
+  printf '%d\n' "${test_count}"
   exit
 fi
 
-printf '1..%d\n' "$count"
 status=0
-offset=0
+printf '1..%d\n' "${test_count}"
+
+# No point on continuing if there's no tests.
+if [[ "${test_count}" == 0 ]]; then
+  exit
+fi
+
+test_number=0
 for filename in "$@"; do
-  index=0
   if [[ -n "$enable_timing" ]]; then
     echo suite $(basename "$filename")
   fi
-  {
-    IFS= read -r # 1..n
-    while IFS= read -r line; do
-      case "$line" in
-      'begin '* )
-        ((++index))
-        printf '%s\n' "${line/ $index / $(($offset + $index)) }"
-        ;;
-      'ok '* | 'not ok '* )
-        if [[ -z "$extended_syntax_flag" ]]; then
-          ((++index))
-        fi
-        printf '%s\n' "${line/ $index / $(($offset + $index)) }"
-        if [[ "${line:0:6}" == 'not ok' ]]; then
-          status=1
-        fi
-        ;;
-      * )
-        printf '%s\n' "$line"
-        ;;
-      esac
-    done
-  } < <( bats-exec-test "${flags[@]}" "$filename" )
-  offset=$(($offset + $index))
+  TESTS_FILE=`mktemp`
+  file_tests=''
+  initial_test_number=$test_number
+  for test_line in "${all_tests[@]}"; do
+    if [[ "${test_line%%$'\t'*}" == "$filename" ]]; then
+      test_name="${test_line##*$'\t'}"
+      printf "$test_name"$'\n' >> "$TESTS_FILE"
+      (( ++test_number))
+    fi
+  done
+  bats-exec-file "${flags[@]}" "$filename" $initial_test_number "$TESTS_FILE" || status=1
+  rm "$TESTS_FILE"
 done
-
+if [[ "${test_number}" != "${test_count}" ]]; then
+  printf '# bats warning: Only executed %s of %s tests\n' "$test_number" "$test_count"
+  status=1
+fi
 exit "$status"
