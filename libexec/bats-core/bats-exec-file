@@ -18,6 +18,9 @@ while [[ "$#" -ne 0 ]]; do
     shift
     num_jobs="$1"
     ;;
+  -T)
+    flags+=('-T')
+    ;;
   -x)
     extended_syntax_flag='-x'
     flags+=('-x')

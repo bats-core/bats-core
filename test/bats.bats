@@ -274,19 +274,19 @@ fixtures bats
 }
 
 @test "timing syntax" {
-  run bats-exec-test -T "$FIXTURE_ROOT/failing_and_passing.bats"
+  run bats -T "$FIXTURE_ROOT/failing_and_passing.bats"
   [ $status -eq 1 ]
-  [ "${lines[1]}" = 'not ok 1 a failing test in 0sec' ]
-  [ "${lines[4]}" = 'ok 2 a passing test in 0sec' ]
+  [ "${lines[2]}" = 'not ok 1 a failing test in 0sec' ]
+  [ "${lines[5]}" = 'ok 2 a passing test in 0sec' ]
 }
 
 @test "extended timing syntax" {
-  run bats-exec-test -x -T "$FIXTURE_ROOT/failing_and_passing.bats"
+  run bats-exec-suite -x -T "$FIXTURE_ROOT/failing_and_passing.bats"
   [ $status -eq 1 ]
-  [ "${lines[1]}" = 'begin 1 a failing test' ]
-  [ "${lines[2]}" = 'not ok 1 a failing test in 0sec' ]
-  [ "${lines[5]}" = 'begin 2 a passing test' ]
-  [ "${lines[6]}" = 'ok 2 a passing test in 0sec' ]
+  [ "${lines[2]}" = 'begin 1 a failing test' ]
+  [ "${lines[3]}" = 'not ok 1 a failing test in 0sec' ]
+  [ "${lines[6]}" = 'begin 2 a passing test' ]
+  [ "${lines[7]}" = 'ok 2 a passing test in 0sec' ]
 }
 
 @test "pretty and tap formats" {
@@ -302,8 +302,8 @@ fixtures bats
 }
 
 @test "pretty formatter bails on invalid tap" {
-  run bats --formatter bats-format-tap "$FIXTURE_ROOT/invalid_tap.bats"
-  [ $status -eq 1 ]
+  run bats-format-pretty < <(printf "This isn't TAP!\nGood day to you\n")
+  [ $status -eq 0 ]
   [ "${lines[0]}" = "This isn't TAP!" ]
   [ "${lines[1]}" = "Good day to you" ]
 }

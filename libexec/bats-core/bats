@@ -142,6 +142,9 @@ while [[ "$#" -ne 0 ]]; do
   -t|--tap)
     formatter='cat'
     ;;
+  -T)
+    flags+=('-T')
+    ;;
   -*)
     abort "Bad command line option '$1'"
     ;;
@@ -180,12 +183,6 @@ for filename in "${arguments[@]}"; do
     filenames+=("$filename")
   fi
 done
-
-formatter="cat"
-if [[ -n "$pretty" ]]; then
-  flags+=("-x")
-  formatter="bats-format-tap-stream"
-fi
 
 set -o pipefail execfail
 [[ -n "$output" ]] && export BATS_REPORT_OUTPUT_PATH="$output"
