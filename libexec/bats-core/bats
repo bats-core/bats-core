@@ -4,22 +4,22 @@ set -e
 export BATS_VERSION='1.2.0-dev'
 
 version() {
-  printf 'Bats %s\n' "$BATS_VERSION"
+	printf 'Bats %s\n' "$BATS_VERSION"
 }
 
 abort() {
-  printf 'Error: %s\n' "$1" >&2
-  usage >&2
-  exit 1
+	printf 'Error: %s\n' "$1" >&2
+	usage >&2
+	exit 1
 }
 
 usage() {
-  local cmd="${0##*/}"
-  local line
+	local cmd="${0##*/}"
+	local line
 
-  while IFS= read -r line; do
-    printf '%s\n' "$line"
-  done <<END_OF_HELP_TEXT
+	while IFS= read -r line; do
+		printf '%s\n' "$line"
+	done <<END_OF_HELP_TEXT
 Usage: $cmd [-cr] [-f <regex>] [-j <jobs>] [-p | -t] <test>...
        $cmd [-h | -v]
 
@@ -44,23 +44,23 @@ END_OF_HELP_TEXT
 }
 
 expand_link() {
-  readlink="$(type -p greadlink readlink | head -1)"
-  "$readlink" -f "$1"
+	readlink="$(type -p greadlink readlink | head -1)"
+	"$readlink" -f "$1"
 }
 
 expand_path() {
-  local path="${1%/}"
-  local dirname="${path%/*}"
-  local result="$2"
+	local path="${1%/}"
+	local dirname="${path%/*}"
+	local result="$2"
 
-  if [[ "$dirname" == "$path" ]]; then
-    dirname="$PWD"
-  else
-    cd "$dirname"
-    dirname="$PWD"
-    cd "$OLDPWD"
-  fi
-  printf -v "$result" '%s/%s' "$dirname" "${path##*/}"
+	if [[ "$dirname" == "$path" ]]; then
+		dirname="$PWD"
+	else
+		cd "$dirname"
+		dirname="$PWD"
+		cd "$OLDPWD"
+	fi
+	printf -v "$result" '%s/%s' "$dirname" "${path##*/}"
 }
 
 BATS_LIBEXEC="$(dirname "$(expand_link "${BASH_SOURCE[0]}")")"
@@ -73,18 +73,18 @@ arguments=()
 
 # Unpack single-character options bundled together, e.g. -cr, -pr.
 for arg in "$@"; do
-  if [[ "$arg" =~ ^-[^-]. ]]; then
-    index=1
-    while option="${arg:$((index++)):1}"; do
-      if [[ -z "$option" ]]; then
-        break
-      fi
-      arguments+=("-$option")
-    done
-  else
-    arguments+=("$arg")
-  fi
-  shift
+	if [[ "$arg" =~ ^-[^-]. ]]; then
+		index=1
+		while option="${arg:$((index++)):1}"; do
+			if [[ -z "$option" ]]; then
+				break
+			fi
+			arguments+=("-$option")
+		done
+	else
+		arguments+=("$arg")
+	fi
+	shift
 done
 
 set -- "${arguments[@]}"
@@ -97,94 +97,94 @@ formatter='tap'
 recursive=
 output=
 if [[ -z "${CI:-}" && -t 0 && -t 1 ]] && command -v tput >/dev/null; then
-  formatter='pretty'
+	formatter='pretty'
 fi
 
 while [[ "$#" -ne 0 ]]; do
-  case "$1" in
-  -h|--help)
-    version
-    usage
-    exit 0
-    ;;
-  -v|--version)
-    version
-    exit 0
-    ;;
-  -c|--count)
-    flags+=('-c')
-    ;;
-  -f|--filter)
-    shift
-    flags+=('-f' "$1")
-    ;;
-  -F|--formatter)
-    shift
-    if [[ $1 =~ ^(pretty|junit|tap)$ ]]; then
-      formatter="$1"
-    else
-      printf "Unknown formatter '%s', valid options are pretty, junit, tap\n" "$1"
-      exit 1
-    fi
-    ;;
-  -o|--output)
-    shift
-    output="$1"
-    ;;
-  -p|--pretty)
-    formatter='pretty'
-    ;;
-  -j|--jobs)
-    shift
-    flags+=('-j' "$1")
-    ;;
-  -r|--recursive)
-    recursive=1
-    ;;
-  -t|--tap)
-    formatter='tap'
-    ;;
-  -T|--timing)
-    flags+=('-T')
-    formatter_flags+=('-T')
-    ;;
-  -*)
-    abort "Bad command line option '$1'"
-    ;;
-  *)
-    arguments+=("$1")
-    ;;
-  esac
-  shift
+	case "$1" in
+	-h | --help)
+		version
+		usage
+		exit 0
+		;;
+	-v | --version)
+		version
+		exit 0
+		;;
+	-c | --count)
+		flags+=('-c')
+		;;
+	-f | --filter)
+		shift
+		flags+=('-f' "$1")
+		;;
+	-F | --formatter)
+		shift
+		if [[ $1 =~ ^(pretty|junit|tap)$ ]]; then
+			formatter="$1"
+		else
+			printf "Unknown formatter '%s', valid options are pretty, junit, tap\n" "$1"
+			exit 1
+		fi
+		;;
+	-o | --output)
+		shift
+		output="$1"
+		;;
+	-p | --pretty)
+		formatter='pretty'
+		;;
+	-j | --jobs)
+		shift
+		flags+=('-j' "$1")
+		;;
+	-r | --recursive)
+		recursive=1
+		;;
+	-t | --tap)
+		formatter='tap'
+		;;
+	-T | --timing)
+		flags+=('-T')
+		formatter_flags+=('-T')
+		;;
+	-*)
+		abort "Bad command line option '$1'"
+		;;
+	*)
+		arguments+=("$1")
+		;;
+	esac
+	shift
 done
 
 if [[ "$formatter" != "tap" ]]; then
-  flags+=('-x')
+	flags+=('-x')
 fi
 
 if [[ "${#arguments[@]}" -eq 0 ]]; then
-  abort 'Must specify at least one <test>'
+	abort 'Must specify at least one <test>'
 fi
 
 filenames=()
 for filename in "${arguments[@]}"; do
-  expand_path "$filename" 'filename'
+	expand_path "$filename" 'filename'
 
-  if [[ -d "$filename" ]]; then
-    shopt -s nullglob
-    if [[ "$recursive" -eq 1 ]]; then
-      while IFS= read -r -d $'\0' file; do
-        filenames+=("$file")
-      done < <(find "$filename" -type f -name '*.bats' -print0 | sort -z)
-    else
-      for suite_filename in "$filename"/*.bats; do
-        filenames+=("$suite_filename")
-      done
-    fi
-    shopt -u nullglob
-  else
-    filenames+=("$filename")
-  fi
+	if [[ -d "$filename" ]]; then
+		shopt -s nullglob
+		if [[ "$recursive" -eq 1 ]]; then
+			while IFS= read -r -d $'\0' file; do
+				filenames+=("$file")
+			done < <(find "$filename" -type f -name '*.bats' -print0 | sort -z)
+		else
+			for suite_filename in "$filename"/*.bats; do
+				filenames+=("$suite_filename")
+			done
+		fi
+		shopt -u nullglob
+	else
+		filenames+=("$filename")
+	fi
 done
 
 set -o pipefail execfail

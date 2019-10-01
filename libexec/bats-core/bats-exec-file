@@ -6,29 +6,29 @@ num_jobs=1
 filter=''
 
 while [[ "$#" -ne 0 ]]; do
-  case "$1" in
-  -c)
-    ;;
-  -f)
-    shift
-    filter="$1"
-    flags+=('-f' "$filter")
-    ;;
-  -j)
-    shift
-    num_jobs="$1"
-    ;;
-  -T)
-    flags+=('-T')
-    ;;
-  -x)
-    flags+=('-x')
-    ;;
-  *)
-    break
-    ;;
-  esac
-  shift
+	case "$1" in
+	-c) ;;
+
+	-f)
+		shift
+		filter="$1"
+		flags+=('-f' "$filter")
+		;;
+	-j)
+		shift
+		num_jobs="$1"
+		;;
+	-T)
+		flags+=('-T')
+		;;
+	-x)
+		flags+=('-x')
+		;;
+	*)
+		break
+		;;
+	esac
+	shift
 done
 
 filename=$1
@@ -36,8 +36,8 @@ test_number=$2
 TESTS_FILE="$3"
 
 if [[ ! -f "$filename" ]]; then
-    printf 'Testfile "%s" not found\n' "$filename" >&2
-    exit 1
+	printf 'Testfile "%s" not found\n' "$filename" >&2
+	exit 1
 fi
 
 BATS_TEST_FILENAME="$filename"
@@ -47,115 +47,115 @@ BATS_TEST_FILENAME="$filename"
 source "$BATS_ROOT/lib/bats-core/preprocessing.bash"
 
 bats_run_setup_file() {
-  # shellcheck source=lib/bats-core/tracing.bash
-  # shellcheck disable=SC2153
-  source "$BATS_ROOT/lib/bats-core/tracing.bash"
-  # shellcheck source=lib/bats-core/test_functions.bash
-  # shellcheck disable=SC2153
-  source "$BATS_ROOT/lib/bats-core/test_functions.bash"
+	# shellcheck source=lib/bats-core/tracing.bash
+	# shellcheck disable=SC2153
+	source "$BATS_ROOT/lib/bats-core/tracing.bash"
+	# shellcheck source=lib/bats-core/test_functions.bash
+	# shellcheck disable=SC2153
+	source "$BATS_ROOT/lib/bats-core/test_functions.bash"
 
-  exec 3<&1
+	exec 3<&1
 
-  BATS_STACK_TRACE=()
-  BATS_CURRENT_STACK_TRACE=()
+	BATS_STACK_TRACE=()
+	BATS_CURRENT_STACK_TRACE=()
 
-  # these are defined only to avoid errors when referencing undefined variables down the line
-  BATS_TEST_NAME=
-  BATS_TEST_COMPLETED=
+	# these are defined only to avoid errors when referencing undefined variables down the line
+	BATS_TEST_NAME=
+	BATS_TEST_COMPLETED=
 
-  BATS_SETUP_FILE_COMPLETED=
-  BATS_TEARDOWN_FILE_COMPLETED=
-  BATS_ERROR_STATUS=
-  trap 'bats_debug_trap "$BASH_SOURCE"' DEBUG
-  trap 'bats_error_trap' ERR
-  trap 'bats_file_teardown_trap' EXIT
+	BATS_SETUP_FILE_COMPLETED=
+	BATS_TEARDOWN_FILE_COMPLETED=
+	BATS_ERROR_STATUS=
+	trap 'bats_debug_trap "$BASH_SOURCE"' DEBUG
+	trap 'bats_error_trap' ERR
+	trap 'bats_file_teardown_trap' EXIT
 
-  touch "$BATS_OUT"
-  # get the setup_file/teardown_file functions for this file (if it has them)
-  # shellcheck disable=SC1090
-  source "$BATS_TEST_SOURCE"
-  setup_file >>"$BATS_OUT" 2>&1
+	touch "$BATS_OUT"
+	# get the setup_file/teardown_file functions for this file (if it has them)
+	# shellcheck disable=SC1090
+	source "$BATS_TEST_SOURCE"
+	setup_file >>"$BATS_OUT" 2>&1
 
-  BATS_SETUP_FILE_COMPLETED=1
+	BATS_SETUP_FILE_COMPLETED=1
 }
 
 bats_run_teardown_file() {
-  # avoid running the therdown trap due to errors in teardown_file
-  trap 'bats_file_exit_trap' EXIT
-  local status=0
-  # rely on bats_error_trap to catch failures
-  teardown_file >>"$BATS_OUT" 2>&1 
+	# avoid running the therdown trap due to errors in teardown_file
+	trap 'bats_file_exit_trap' EXIT
+	local status=0
+	# rely on bats_error_trap to catch failures
+	teardown_file >>"$BATS_OUT" 2>&1
 
-  BATS_TEARDOWN_FILE_COMPLETED=1
+	BATS_TEARDOWN_FILE_COMPLETED=1
 }
 
 bats_file_teardown_trap() {
-  bats_error_trap
-  local status=0
-  bats_run_teardown_file
+	bats_error_trap
+	local status=0
+	bats_run_teardown_file
 
-  bats_file_exit_trap
+	bats_file_exit_trap
 }
 
 bats_file_exit_trap() {
-    trap - ERR EXIT
-    if [[ -z "$BATS_SETUP_FILE_COMPLETED" || -z "$BATS_TEARDOWN_FILE_COMPLETED" ]]; then
-      if [[ -z "$BATS_SETUP_FILE_COMPLETED" ]]; then
-        FAILURE_REASON='setup_file'
-      else 
-        FAILURE_REASON='teardown_file'
-      fi
-      printf "not ok %d %s\n" "$(( test_number + 1))" "$FAILURE_REASON failed" >&3
-      bats_print_stack_trace "${BATS_STACK_TRACE[@]}" >&3
-      bats_print_failed_command >&3
-      while IFS= read -r line; do
-          printf "# %s\n" "$line"
-      done < "$BATS_OUT" >&3
-      if [[ -n "$line" ]]; then
-        printf '# %s\n' "$line"
-      fi
-      rm -rf "$BATS_OUT"
-      status=1
-    fi
-    bats_cleanup_preprocessed_source
-    exit $status
+	trap - ERR EXIT
+	if [[ -z "$BATS_SETUP_FILE_COMPLETED" || -z "$BATS_TEARDOWN_FILE_COMPLETED" ]]; then
+		if [[ -z "$BATS_SETUP_FILE_COMPLETED" ]]; then
+			FAILURE_REASON='setup_file'
+		else
+			FAILURE_REASON='teardown_file'
+		fi
+		printf "not ok %d %s\n" "$((test_number + 1))" "$FAILURE_REASON failed" >&3
+		bats_print_stack_trace "${BATS_STACK_TRACE[@]}" >&3
+		bats_print_failed_command >&3
+		while IFS= read -r line; do
+			printf "# %s\n" "$line"
+		done <"$BATS_OUT" >&3
+		if [[ -n "$line" ]]; then
+			printf '# %s\n' "$line"
+		fi
+		rm -rf "$BATS_OUT"
+		status=1
+	fi
+	bats_cleanup_preprocessed_source
+	exit $status
 }
 
-function setup_file() { 
-    return 0 
+function setup_file() {
+	return 0
 }
 
-function teardown_file() { 
-    return 0 
+function teardown_file() {
+	return 0
 }
 
 bats_run_tests() {
-  status=0
-  tests_to_run=()
-  while read -r test_name; do
-    tests_to_run+=("$test_name")
-  done < "$TESTS_FILE"
+	status=0
+	tests_to_run=()
+	while read -r test_name; do
+		tests_to_run+=("$test_name")
+	done <"$TESTS_FILE"
 
-  if [[ "$num_jobs" != 1 ]]; then
-    # Only use GNU parallel when we want parallel execution -- there is a small
-    # amount of overhead using it over a simple loop in the serial case.
-    set -o pipefail
-    printf '%s\n' "${tests_to_run[@]}" | grep -v '^$' | \
-      parallel -qk -j "$num_jobs" --colsep="\t" -- bats-exec-test "${flags[@]}" "$filename" '{1}' "{=\$_=\$job->seq()+$test_number=}" || status=1
-  else
-    for test_name in "${tests_to_run[@]}"; do
-        # Only handle non-empty lines
-        if [[ $test_name ]]; then
-            ((++test_number))
-            if [[ "${#flags[@]}" -gt 0 ]]; then
-              bats-exec-test "${flags[@]}" "$filename" "$test_name" "$test_number" || status=1
-            else
-              bats-exec-test "$filename" "$test_name" "$test_number" || status=1
-            fi
-        fi
-    done
-  fi
-  export status
+	if [[ "$num_jobs" != 1 ]]; then
+		# Only use GNU parallel when we want parallel execution -- there is a small
+		# amount of overhead using it over a simple loop in the serial case.
+		set -o pipefail
+		printf '%s\n' "${tests_to_run[@]}" | grep -v '^$' |
+			parallel -qk -j "$num_jobs" --colsep="\t" -- bats-exec-test "${flags[@]}" "$filename" '{1}' "{=\$_=\$job->seq()+$test_number=}" || status=1
+	else
+		for test_name in "${tests_to_run[@]}"; do
+			# Only handle non-empty lines
+			if [[ $test_name ]]; then
+				((++test_number))
+				if [[ "${#flags[@]}" -gt 0 ]]; then
+					bats-exec-test "${flags[@]}" "$filename" "$test_name" "$test_number" || status=1
+				else
+					bats-exec-test "$filename" "$test_name" "$test_number" || status=1
+				fi
+			fi
+		done
+	fi
+	export status
 }
 
 # TODO: we want to run setup/teardown file but have following problems
@@ -163,12 +163,12 @@ bats_run_tests() {
 # 1.1 the preprocessing is defined in bats-exec-test so we don't have it here
 # 1.2 the load command is also defined in bats-exec-test
 # -> it is preferable to run this from bats-exec-test to avoid duplicating the preprocessing/helper commands
-# 2. we need the file setup to be run only once but its results (e.g. conditionally defined variables) 
+# 2. we need the file setup to be run only once but its results (e.g. conditionally defined variables)
 #    might need to be present in all tests of the file, not only the first
 # -> evaluate in suite, so that these results are inherited by the subshells
 # 3. prevent environment changes in sourced test files to leak over into other test files
 # -> each file gets its own context
-# 
+#
 # Running the preprocessing here (using shared code with bats-exec-test) requires us to do the clean up ourselves -> more traps
 
 bats_preprocess_source "$filename"
