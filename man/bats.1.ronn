@@ -49,8 +49,6 @@ OPTIONS
 
   * `-c`, `--count`:
     Count the number of test cases without running any tests
-  * `-e`, `--extra-flags`:
-    Extra flags to pass to the bats executor (Options: -T)
   * `-f`, `--filter`:
     Filter test cases by names matching the regular expression
   * -F, --formatter:

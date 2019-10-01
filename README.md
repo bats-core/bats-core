@@ -197,7 +197,6 @@ Usage: bats [-cr] [-f <regex>] [-j <jobs>] [-p | -t] <test>...
   containing Bats test files (ending with ".bats").
 
   -c, --count               Count the number of test cases without running any tests
-  -e, --extra-flags         Extra flags to pass to the bats executor (Options: -T)
   -f, --filter              Filter test cases by names matching the regular expression
   -F, --formatter           Switch between formatters (Default: bats-format-tap, Options: bats-format-junit, bats-format-pretty, bats-format-tap)
   -h, --help                Display this help message
