@@ -205,6 +205,7 @@ Usage: bats [-cr] [-f <regex>] [-j <jobs>] [-p | -t] <test>...
   -p, --pretty              [DEPRECATED] Show results in pretty format (default for terminals), use "--formatter pretty" instead
   -r, --recursive           Include tests in subdirectories
   -t, --tap                 [DEPRECATED] Show results in TAP format, use "--formatter tap" instead
+  -T, --timing              Add timing information
   -v, --version             Display the version number
 
   For more information, see https://github.com/bats-core/bats-core
@@ -241,10 +242,10 @@ option.
     ok 1 addition using bc
     ok 2 addition using dc
 
-By combining `--extra-flag -T` and `--formatter junit`, it is possible
+By combining `-T` and `--formatter junit`, it is possible
 to output junit-compatible report files.
 
-    $ bats --formatter junit --extra-flag -T addition.bats
+    $ bats --formatter junit -T addition.bats
     1..2
     ok 1 addition using bc
     ok 2 addition using dc
@@ -252,7 +253,7 @@ to output junit-compatible report files.
 Test reports will be output in the executing directory, but may be placed elsewhere
 by specifying the `--output` flag.
 
-    $ bats --formatter junit --extra-flag -T addition.bats --output /tmp
+    $ bats --formatter junit -T addition.bats --output /tmp
     1..2
     ok 1 addition using bc
     ok 2 addition using dc

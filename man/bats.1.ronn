@@ -61,6 +61,8 @@ OPTIONS
     Include tests in subdirectories
   * `-t`, `--tap`:
     [DEPRECATED] Show results in TAP format, use "--formatter tap" instead
+  * `-T`, `--timing`:
+    Add timing information
   * `-v`, `--version`:
     Display the version number
 
