@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 bats_capture_stack_trace() {
 local test_file
 local funcname

@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 if [[ -z "$TMPDIR" ]]; then
   BATS_TMPDIR='/tmp'
 else
