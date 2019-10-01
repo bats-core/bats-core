@@ -93,7 +93,7 @@ arguments=()
 unset flags recursive formatter_flags
 flags=()
 formatter_flags=()
-formatter='cat'
+formatter='bats-format-tap'
 recursive=
 output=
 if [[ -z "${CI:-}" && -t 0 && -t 1 ]] && command -v tput >/dev/null; then
@@ -141,7 +141,7 @@ while [[ "$#" -ne 0 ]]; do
     recursive=1
     ;;
   -t|--tap)
-    formatter='cat'
+    formatter='bats-format-tap'
     ;;
   -T)
     flags+=('-T')
@@ -157,7 +157,7 @@ while [[ "$#" -ne 0 ]]; do
   shift
 done
 
-if [[ "$formatter" != 'cat' ]] && [[ "$formatter" != "bats-format-tap" ]]; then
+if [[ "$formatter" != "bats-format-tap" ]]; then
   flags+=('-x')
 fi
 
