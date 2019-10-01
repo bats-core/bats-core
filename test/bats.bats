@@ -552,3 +552,18 @@ END_OF_ERR_MSG
     currentErrorLine=$((currentErrorLine + linesPerTest))
   done
 }
+
+@test "parallel timing is reported correctly" {
+  run bats --jobs 2 -T "$FIXTURE_ROOT/parallel_timing.bats"
+  
+  [ "$status" -eq 0 ]
+  
+  timing_expr="in (([0-9]+))sec"
+  # first test should take at 1 second
+  [[ "${lines[2]}" =~ $timing_expr ]]
+  [ "${BASH_REMATCH[2]}" -eq 1 ]
+
+  # second test should take at 2 seconds
+  [[ "${lines[3]}" =~ $timing_expr ]]
+  [ "${BASH_REMATCH[2]}" -eq 2 ]
+}
