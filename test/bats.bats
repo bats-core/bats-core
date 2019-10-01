@@ -555,9 +555,9 @@ END_OF_ERR_MSG
 
 @test "parallel timing is reported correctly" {
   run bats --jobs 2 -T "$FIXTURE_ROOT/parallel_timing.bats"
-  
+  echo "$output"
   [ "$status" -eq 0 ]
-  
+
   timing_expr="in (([0-9]+))sec"
   # first test should take at 1 second
   [[ "${lines[2]}" =~ $timing_expr ]]
