@@ -71,10 +71,13 @@ fixtures suite
   [ $status -eq 1 ]
   [ "${lines[0]}" = "1..3" ]
   [ "${lines[1]}" = "suite a.bats" ]
-  [ "${lines[2]}" = "ok 1 truth in 0sec" ]
+  regex="ok 1 truth in [0-1]sec"
+  [[ "${lines[2]}" =~ $regex ]]
   [ "${lines[3]}" = "suite b.bats" ]
-  [ "${lines[4]}" = "ok 2 more truth in 0sec" ]
-  [ "${lines[5]}" = "not ok 3 quasi-truth in 0sec" ]
+  regex="ok 2 more truth in [0-1]sec"
+  [[ "${lines[4]}" =~  $regex ]]
+  regex="not ok 3 quasi-truth in [0-1]sec"
+  [[ "${lines[5]}" =~  $regex ]]
 }
 
 @test "extended timing syntax in suite" {
@@ -83,12 +86,15 @@ fixtures suite
   [ "${lines[0]}" = "1..3" ]
   [ "${lines[1]}" = "suite a.bats" ]
   [ "${lines[2]}" = "begin 1 truth" ]
-  [ "${lines[3]}" = "ok 1 truth in 0sec" ]
+  regex="ok 1 truth in [0-1]sec"
+  [[ "${lines[3]}" =~ $regex ]]
   [ "${lines[4]}" = "suite b.bats" ]
   [ "${lines[5]}" = "begin 2 more truth" ]
-  [ "${lines[6]}" = "ok 2 more truth in 0sec" ]
+  regex="ok 2 more truth in [0-1]sec"
+  [[ "${lines[6]}" =~ $regex ]]
   [ "${lines[7]}" = "begin 3 quasi-truth" ]
-  [ "${lines[8]}" = "not ok 3 quasi-truth in 0sec" ]
+  regex="not ok 3 quasi-truth in [0-1]sec"
+  [[ "${lines[8]}" =~ $regex ]]
 }
 
 @test "recursive support (short option)" {
