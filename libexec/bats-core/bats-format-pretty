@@ -17,7 +17,7 @@ update_count_column_width() {
   count_column_width=$(( ${#count} * 2 + 2 ))
   if [[ -n "$BATS_ENABLE_TIMING" ]]; then
     # additional space for ' in %s sec'
-    count_column_width=$(($count_column_width + ${#SECONDS} + 8))
+    count_column_width=$(( count_column_width + ${#SECONDS} + 8))
   fi
   # also update dependent value
   update_count_column_left
@@ -213,7 +213,7 @@ while IFS= read -r line; do
       ((++passed))
       if [[ -n "$BATS_ENABLE_TIMING" ]]; then
         if [[ "$line" =~ $timing_expr ]]; then
-          pass ${BASH_REMATCH[2]}
+          pass "${BASH_REMATCH[2]}"
         else
           echo "Could not match output line to timing regex: $line" >&2
           exit 1
@@ -227,7 +227,7 @@ while IFS= read -r line; do
     ((++failures))
     if [[ -n "$BATS_ENABLE_TIMING" ]]; then
       if [[ "$line" =~ $timing_expr ]]; then
-        fail ${BASH_REMATCH[2]}
+        fail "${BASH_REMATCH[2]}"
       else
         echo "Could not match failure line to timing regex: $line" >&2
         exit 1

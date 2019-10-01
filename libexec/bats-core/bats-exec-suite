@@ -3,7 +3,6 @@ set -e
 
 count_only_flag=''
 enable_timing=''
-extended_syntax_flag=''
 filter=''
 num_jobs=1
 have_gnu_parallel=
@@ -29,8 +28,6 @@ while [[ "$#" -ne 0 ]]; do
     flags+=('-T')
     ;;
   -x)
-    # shellcheck disable=SC2034
-    extended_syntax_flag='-x'
     flags+=('-x')
     ;;
   *)
@@ -97,15 +94,14 @@ fi
 test_number=0
 for filename in "$@"; do
   if [[ -n "$enable_timing" ]]; then
-    echo suite $(basename "$filename")
+    echo "suite $(basename "$filename")"
   fi
-  TESTS_FILE=`mktemp`
-  file_tests=''
+  TESTS_FILE=$(mktemp)
   initial_test_number=$test_number
   for test_line in "${all_tests[@]}"; do
     if [[ "${test_line%%$'\t'*}" == "$filename" ]]; then
       test_name="${test_line##*$'\t'}"
-      printf "$test_name"$'\n' >> "$TESTS_FILE"
+      printf "%s"$'\n' "$test_name" >> "$TESTS_FILE"
       (( ++test_number))
     fi
   done

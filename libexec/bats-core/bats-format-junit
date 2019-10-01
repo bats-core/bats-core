@@ -26,15 +26,15 @@ header() {
 
     printf "\
 <?xml version=\"1.0\" encoding=\"UTF-8\"?>
-<testsuite name=\"${class}\" tests=\"${count}\" failures=\"${failures}\" errors=\"0\" skipped=\"${skipped}\" time=\"${suitetest_exec_time}\" timestamp=\"${timestamp}\" hostname=\"$(host)\">
-  <properties>"
+<testsuite name=\"%s\" tests=\"%s\" failures=\"%s\" errors=\"0\" skipped=\"%s\" time=\"%s\" timestamp=\"%s\" hostname=\"%s\">
+  <properties>" "${class}" "${count}" "${failures}" "${skipped}" "${suitetest_exec_time}" "${timestamp}" "$(host)"
     while IFS= read -r line; do
       name="$(echo "$line" | cut -d'=' -f1)"
       value="$(echo "$line" | cut -d'=' -f2-)"
       if echo "$name" | grep -qv "^BATS_"; then
         continue
       fi
-      printf "\n    <property name=\"${name}\" value=\"${value}\"/>"
+      printf "\n    <property name=\"%s\" value=\"%s\"/>" "${name}" "${value}"
     done < <(env)
     printf "\n  </properties>"
 }
@@ -47,12 +47,12 @@ footer() {
 
 
 pass() {
-    printf "\n    <testcase classname=\"${class}\" name=\"${name}\" time=\"${test_exec_time}\"/>"
+    printf "\n    <testcase classname=\"%s\" name=\"%s\" time=\"%s\"/>" "${class}" "${name}" "${test_exec_time}"
 }
 
 fail() {
-    printf "\n    <testcase classname=\"${class}\" name=\"${name}\" time=\"${test_exec_time}\">
-        <failure type=\"unknown\"><![CDATA["
+    printf "\n    <testcase classname=\"%s\" name=\"%s\" time=\"%s\">
+        <failure type=\"unknown\"><![CDATA[" "${class}" "${name}" "${test_exec_time}"
 
     echo -n "${1}"
 
@@ -61,9 +61,10 @@ fail() {
 }
 
 skip() {
-    printf "\n    <testcase classname=\"${class}\" name=\"${name}\" time=\"${test_exec_time}\">
-        <skipped>$1</skipped>
-    </testcase>\n"
+    # shellcheck disable=SC2183
+    printf "\n    <testcase classname=\"%s\" name=\"%s\" time=\"%s\">
+        <skipped>%s</skipped>
+    </testcase>\n" "${class}" "${name}" "${test_exec_time}" "$1"
 }
 
 buffer() {
@@ -105,7 +106,7 @@ output_path() {
   if [[ -n "$BATS_REPORT_OUTPUT_PATH" ]]; then
     path="${BATS_REPORT_OUTPUT_PATH%/}/${path}"
   fi
-  echo $path
+  echo "$path"
 }
 
 trap finish_suite EXIT
@@ -122,16 +123,16 @@ while IFS= read -r line; do
     ;;
   "begin "* )
     flush_log
-    let index+=1
+    (( index+=1 ))
     name="${line#* $index }"
     ;;
   "ok "* )
     echo "$line"
-    let count+=1
+    (( count+=1 ))
     expr_ok="ok $index .* in ([0-9]+)sec"
     expr_skip="ok $index .* # skip (.*)"
     if [[ "$line" =~ $expr_skip ]]; then
-      let skipped+=1
+      (( skipped+=1 ))
       test_exec_time=0
       buffer skip "${BASH_REMATCH[1]}"
     elif [[ "$line" =~ $expr_ok ]]; then
@@ -140,13 +141,13 @@ while IFS= read -r line; do
       buffer pass
     else
       log "Wrong output format: ${line}"
-      let failures+=1
+      (( failures+=1 ))
     fi
     ;;
   "not ok "* )
     echo "$line"
-    let count+=1
-    let failures+=1
+    (( count+=1 ))
+    (( failures+=1 ))
     expr_notok="not ok $index .* in ([0-9]+)sec"
     if [[ "$line" =~ $expr_notok ]]; then
       test_exec_time="${BASH_REMATCH[1]}"

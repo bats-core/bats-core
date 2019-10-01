@@ -47,8 +47,8 @@ teardown() {
 }
 
 skip() {
-  BATS_TEST_SKIPPED="${1:-1}"
-  BATS_TEST_COMPLETED=1
+  export BATS_TEST_SKIPPED="${1:-1}"
+  export BATS_TEST_COMPLETED=1
   exit 0
 }
 

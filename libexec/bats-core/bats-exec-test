@@ -43,9 +43,11 @@ elif [[ ! -f "$BATS_TEST_FILENAME" ]]; then
 fi
 
 # load the test helper functions like `load` or `run` that are needed to run a (preprocessed) .bats file without bash errors
-# shellcheck source=../../lib/bats-core/test_functions.bash
+# shellcheck source=lib/bats-core/test_functions.bash
+# shellcheck disable=SC2153
 source "$BATS_ROOT/lib/bats-core/test_functions.bash"
-# shellcheck source=../../lib/bats-core/tracing.bash
+# shellcheck source=lib/bats-core/tracing.bash
+# shellcheck disable=SC2153
 source "$BATS_ROOT/lib/bats-core/tracing.bash"
 
 bats_teardown_trap() {
@@ -150,7 +152,7 @@ bats_perform_test() {
   bats_teardown_trap
 }
 
-# shellcheck source=../../lib/bats-core/processing.bash
+# shellcheck source=lib/bats-core/preprocessing.bash
 source "$BATS_ROOT/lib/bats-core/preprocessing.bash"
 
 exec 3<&1

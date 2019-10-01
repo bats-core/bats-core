@@ -188,5 +188,4 @@ done
 
 set -o pipefail execfail
 [[ -n "$output" ]] && export BATS_REPORT_OUTPUT_PATH="$output"
-export BATS_EXECUTOR_FLAGS="$flags"
 exec bats-exec-suite "${flags[@]}" "${filenames[@]}" | "$formatter" "${formatter_flags[@]}"
