@@ -17,7 +17,9 @@ load() {
     printf 'bats: %s does not exist\n' "$filename" >&2
     exit 1
   fi
-
+  
+  # Dynamically loaded user files provided outside of Bats.
+  # shellcheck disable=SC1090
   source "${filename}"
 }
 
@@ -25,8 +27,12 @@ run() {
   local origFlags="$-"
   set +eET
   local origIFS="$IFS"
+  # 'output', 'status', 'lines' are global variables available to tests.
+  # shellcheck disable=SC2034
   output="$("$@" 2>&1)"
+  # shellcheck disable=SC2034
   status="$?"
+  # shellcheck disable=SC2034,SC2206
   IFS=$'\n' lines=($output)
   IFS="$origIFS"
   set "-$origFlags"

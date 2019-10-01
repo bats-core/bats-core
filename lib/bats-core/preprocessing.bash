@@ -23,5 +23,7 @@ bats_evaluate_preprocessed_source() {
   if [[ -z "$BATS_TEST_SOURCE" ]]; then
     BATS_TEST_SOURCE="${BATS_PARENT_TMPNAME}.src"
   fi
+  # Dynamically loaded user files provided outside of Bats.
+  # shellcheck disable=SC1090
   source "$BATS_TEST_SOURCE"
 }

@@ -30,7 +30,7 @@ script:
 - |
   if [[ "${TRAVIS_OS_NAME:-}" == 'linux' ]]; then
     # @todo: Remove "|| true" once all coding standards issues are fixed.
-    ./shellcheck.sh || true
+    ./shellcheck.sh
   fi
 
   if [[ "${TRAVIS_OS_NAME:-}" == 'linux' && -n "${BASHVER}" ]]; then
