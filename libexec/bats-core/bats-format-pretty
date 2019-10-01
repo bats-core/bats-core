@@ -1,8 +1,37 @@
 #!/usr/bin/env bash
 set -e
 
+while [[ "$#" -ne 0 ]]; do
+  case "$1" in
+  -T)
+    BATS_ENABLE_TIMING="-T"
+    ;;
+  esac
+  shift
+done
+
 header_pattern='[0-9]+\.\.[0-9]+'
 IFS= read -r header
+
+update_count_column_width() {
+  count_column_width=$(( ${#count} * 2 + 2 ))
+  if [[ -n "$BATS_ENABLE_TIMING" ]]; then
+    # additional space for ' in %s sec'
+    count_column_width=$(($count_column_width + ${#SECONDS} + 8))
+  fi
+  # also update dependent value
+  update_count_column_left
+}
+
+update_screen_width() {
+  screen_width="$(tput cols)"
+  # also update dependent value
+  update_count_column_left
+}
+
+update_count_column_left() {
+  count_column_left=$(( $screen_width - $count_column_width ))
+}
 
 if [[ "$header" =~ $header_pattern ]]; then
   count="${header:3}"
@@ -11,33 +40,37 @@ if [[ "$header" =~ $header_pattern ]]; then
   failures=0
   skipped=0
   name=
-  count_column_width=$(( ${#count} * 2 + 2 ))
+  update_count_column_width
 else
   # If the first line isn't a TAP plan, print it and pass the rest through
   printf '%s\n' "$header"
   exec cat
 fi
 
-update_screen_width() {
-  screen_width="$(tput cols)"
-  count_column_left=$(( $screen_width - $count_column_width ))
-}
-
 trap update_screen_width WINCH
 update_screen_width
 
 begin() {
   go_to_column 0
+  update_count_column_width
   buffer_with_truncation $(( $count_column_left - 1 )) '   %s' "$name"
   clear_to_end_of_line
   go_to_column $count_column_left
-  buffer "%${#count}s/${count}" "$index"
+  if [[ -n "$BATS_ENABLE_TIMING" ]]; then
+    buffer "%${#count}s/${count} in %s sec" "$index" "$SECONDS"
+  else
+    buffer "%${#count}s/${count}" "$index"
+  fi
   go_to_column 1
 }
 
 pass() {
   go_to_column 0
-  buffer ' ✓ %s' "$name"
+  if [[ -n "$BATS_ENABLE_TIMING" ]]; then
+    buffer ' ✓ %s [%s]' "$name" "$1"
+  else
+    buffer ' ✓ %s ' "$name"
+  fi
   advance
 }
 
@@ -54,7 +87,11 @@ skip() {
 fail() {
   go_to_column 0
   set_color 1 bold
-  buffer ' ✗ %s' "$name"
+  if [[ -n "$BATS_ENABLE_TIMING" ]]; then
+    buffer ' ✗ %s [%s]' "$name" "$1"
+  else
+    buffer ' ✗ %s' "$name"
+  fi
   advance
 }
 
@@ -82,6 +119,10 @@ summary() {
   not_run=$((count - passed - failures - skipped))
   if [[ "$not_run" -gt 0 ]]; then
     buffer ', %d not run' "$not_run"
+  fi
+
+  if [[ -n "$BATS_ENABLE_TIMING" ]]; then
+    buffer " in $SECONDS seconds"
   fi
 
   buffer '\n'
@@ -151,6 +192,8 @@ finish() {
 
 trap finish EXIT
 
+timing_expr="in (([0-9]+sec))$"
+
 while IFS= read -r line; do
   case "$line" in
   'begin '* )
@@ -166,12 +209,30 @@ while IFS= read -r line; do
       skip "${BASH_REMATCH[2]}"
     else
       ((++passed))
-      pass
+      if [[ -n "$BATS_ENABLE_TIMING" ]]; then
+        if [[ "$line" =~ $timing_expr ]]; then
+          pass ${BASH_REMATCH[2]}
+        else
+          echo "Could not match output line to timing regex: $line" >&2
+          exit 1
+        fi
+      else
+        pass
+      fi      
     fi
     ;;
   'not ok '* )
     ((++failures))
-    fail
+    if [[ -n "$BATS_ENABLE_TIMING" ]]; then
+      if [[ "$line" =~ $timing_expr ]]; then
+        fail ${BASH_REMATCH[2]}
+      else
+        echo "Could not match failure line to timing regex: $line" >&2
+        exit 1
+      fi
+    else
+      fail
+    fi    
     ;;
   '# '* )
     log "${line:2}"
