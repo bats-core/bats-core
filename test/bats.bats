@@ -554,6 +554,8 @@ END_OF_ERR_MSG
 }
 
 @test "parallel timing is reported correctly" {
+  type -p parallel &>/dev/null || skip "--jobs requires GNU parallel"
+  
   run bats --jobs 2 -T "$FIXTURE_ROOT/parallel_timing.bats"
   echo "$output"
   [ "$status" -eq 0 ]
