@@ -52,15 +52,15 @@ OPTIONS
   * `-f`, `--filter`:
     Filter test cases by names matching the regular expression
   * -F, --formatter:
-    Switch between formatters (Default: bats-format-tap, Options: bats-format-junit, bats-format-pretty, bats-format-tap)
+    Switch between formatters (Default: tap, Options: junit, pretty, tap)
   * `-h`, `--help`:
     Display help message
   * `-p`, `--pretty`:
-    [DEPRECATED] Show results in pretty format (default for terminals), use "--formatter bats-format-pretty" instead
+    [DEPRECATED] Show results in pretty format (default for terminals), use "--formatter pretty" instead
   * `-r`, `--recursive`:
     Include tests in subdirectories
   * `-t`, `--tap`:
-    [DEPRECATED] Show results in TAP format, use "--formatter bats-format-tap" instead
+    [DEPRECATED] Show results in TAP format, use "--formatter tap" instead
   * `-v`, `--version`:
     Display the version number
 

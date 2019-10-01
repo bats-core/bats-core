@@ -28,13 +28,13 @@ Usage: $cmd [-cr] [-f <regex>] [-j <jobs>] [-p | -t] <test>...
 
   -c, --count               Count the number of test cases without running any tests
   -f, --filter              Filter test cases by names matching the regular expression
-  -F, --formatter           Switch between formatters (Default: bats-format-tap, Options: bats-format-junit, bats-format-pretty, bats-format-tap)
+  -F, --formatter           Switch between formatters (Default: tap, Options: junit, pretty, tap)
   -h, --help                Display this help message
   -j, --jobs                Number of parallel jobs to run (requires GNU parallel)
   -o, --output              A directory to output reports to
-  -p, --pretty              [DEPRECATED] Show results in pretty format (default for terminals), use "--formatter bats-format-pretty" instead
+  -p, --pretty              [DEPRECATED] Show results in pretty format (default for terminals), use "--formatter pretty" instead
   -r, --recursive           Include tests in subdirectories
-  -t, --tap                 [DEPRECATED] Show results in TAP format, use "--formatter bats-format-tap" instead
+  -t, --tap                 [DEPRECATED] Show results in TAP format, use "--formatter tap" instead
   -v, --version             Display the version number
 
   For more information, see https://github.com/bats-core/bats-core
@@ -92,11 +92,11 @@ arguments=()
 unset flags recursive formatter_flags
 flags=()
 formatter_flags=()
-formatter='bats-format-tap'
+formatter='tap'
 recursive=
 output=
 if [[ -z "${CI:-}" && -t 0 && -t 1 ]] && command -v tput >/dev/null; then
-  formatter='bats-format-pretty'
+  formatter='pretty'
 fi
 
 while [[ "$#" -ne 0 ]]; do
@@ -119,14 +119,19 @@ while [[ "$#" -ne 0 ]]; do
     ;;
   -F|--formatter)
     shift
-    formatter="$1"
+    if [[ $1 =~ ^(pretty|junit|tap)$ ]]; then
+      formatter="$1"
+    else
+      printf "Unknown formatter '%s', valid options are pretty, junit, tap\n" "$1"
+      exit 1
+    fi
     ;;
   -o|--output)
     shift
     output="$1"
     ;;
   -p|--pretty)
-    formatter='bats-format-pretty'
+    formatter='pretty'
     ;;
   -j|--jobs)
     shift
@@ -136,7 +141,7 @@ while [[ "$#" -ne 0 ]]; do
     recursive=1
     ;;
   -t|--tap)
-    formatter='bats-format-tap'
+    formatter='tap'
     ;;
   -T)
     flags+=('-T')
@@ -152,7 +157,7 @@ while [[ "$#" -ne 0 ]]; do
   shift
 done
 
-if [[ "$formatter" != "bats-format-tap" ]]; then
+if [[ "$formatter" != "tap" ]]; then
   flags+=('-x')
 fi
 
@@ -183,4 +188,4 @@ done
 
 set -o pipefail execfail
 [[ -n "$output" ]] && export BATS_REPORT_OUTPUT_PATH="$output"
-exec bats-exec-suite "${flags[@]}" "${filenames[@]}" | "$formatter" "${formatter_flags[@]}"
+exec bats-exec-suite "${flags[@]}" "${filenames[@]}" | "bats-format-$formatter" "${formatter_flags[@]}"
