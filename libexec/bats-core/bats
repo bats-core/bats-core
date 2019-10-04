@@ -161,6 +161,10 @@ done
 if [[ "$formatter" != "tap" ]]; then
 	flags+=('-x')
 fi
+if [[ "$formatter" == "junit" ]]; then
+	flags+=('-T')
+	formatter_flags+=('-T')
+fi
 
 if [[ "${#arguments[@]}" -eq 0 ]]; then
 	abort 'Must specify at least one <test>'
