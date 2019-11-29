@@ -93,7 +93,7 @@ if [[ "$num_jobs" != 1 ]]; then
   # amount of overhead using it over a simple loop in the serial case.
   set -o pipefail
   printf '%s\n' "${all_tests[@]}" | grep -v '^$' | \
-    parallel -qk -j "$num_jobs" --colsep="\t" -- bats-exec-test "${flags[@]}" '{1}' '{2}' '{#}' || status=1
+    parallel -qk -j "$num_jobs" --colsep="\t" -- bats-exec-test "${flags[@]}" '{1}' '{2}' '{#}' '{%}' || status=1
 else
   # Just do it serially.
   test_number=0
@@ -103,7 +103,7 @@ else
       filename="${test_line%%$'\t'*}"
       test_name="${test_line##*$'\t'}"
       ((++test_number))
-      bats-exec-test "${flags[@]}" "$filename" "$test_name" "$test_number" || status=1
+      bats-exec-test "${flags[@]}" "$filename" "$test_name" "$test_number" 1 || status=1
     fi
   done
   if [[ "${test_number}" != "${test_count}" ]]; then

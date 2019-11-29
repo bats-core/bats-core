@@ -320,6 +320,7 @@ bats_exit_trap() {
 bats_perform_test() {
   BATS_TEST_NAME="$1"
   BATS_TEST_NUMBER="$2"
+  BATS_JOB_SLOT="$3"
 
   if ! declare -F "$BATS_TEST_NAME" &>/dev/null; then
     printf "bats: unknown test name \`%s'\n" "$BATS_TEST_NAME" >&2

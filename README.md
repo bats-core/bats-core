@@ -459,6 +459,10 @@ There are several global variables you can use to introspect on Bats tests:
 * `$BATS_TEST_DESCRIPTION` is the description of the current test case.
 * `$BATS_TEST_NUMBER` is the (1-based) index of the current test case in the
   test file.
+* `$BATS_JOB_SLOT` is the (1-based) job slot number being used. Only set
+  relevant when running tests in parallel (`--jobs` flag), otherwise set to 1. 
+  See GNU Parallel's documentation on the `{%}` replacement string 
+  for more details.
 * `$BATS_TMPDIR` is the location to a directory that may be used to store
   temporary files.
 
