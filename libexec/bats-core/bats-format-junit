@@ -51,7 +51,7 @@ pass() {
 
 fail() {
 	printf "\n    <testcase classname=\"%s\" name=\"%s\" time=\"%s\">
-        <failure type=\"unknown\"><![CDATA[" "${class}" "${name}" "${test_exec_time}"
+        <failure type=\"failure\"><![CDATA[" "${class}" "${name}" "${test_exec_time}"
 
 	echo -n "${1}"
 
