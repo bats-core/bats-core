@@ -276,8 +276,10 @@ fixtures bats
 @test "timing syntax" {
   run bats -T "$FIXTURE_ROOT/failing_and_passing.bats"
   [ $status -eq 1 ]
-  [ "${lines[2]}" = 'not ok 1 a failing test in 0sec' ]
-  [ "${lines[5]}" = 'ok 2 a passing test in 0sec' ]
+  regex='not ok 1 a failing test in [0-1]sec'
+  [[ "${lines[2]}" =~ $regex ]]
+  regex='ok 2 a passing test in [0-1]sec'
+  [[ "${lines[5]}" =~ $regex ]]
 }
 
 @test "extended timing syntax" {
