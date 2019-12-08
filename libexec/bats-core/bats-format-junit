@@ -129,7 +129,7 @@ while IFS= read -r line; do
 		echo "$line"
 		((count += 1))
 		expr_ok="ok $index .* in ([0-9]+)sec"
-		expr_skip="ok $index .* # skip (.*)"
+		expr_skip="ok $index .* # skip[ ]?(.*)"
 		if [[ "$line" =~ $expr_skip ]]; then
 			((skipped += 1))
 			test_exec_time=0
