@@ -10,4 +10,6 @@ RUN apk add --no-cache parallel && \
 RUN ln -s /opt/bats/bin/bats /usr/sbin/bats
 COPY . /opt/bats/
 
+WORKDIR /code/
+
 ENTRYPOINT ["bash", "/usr/sbin/bats"]

@@ -170,7 +170,7 @@ To run Bats' internal test suite (which is in the container image at
 To run a test suite from your local machine, mount in a volume and direct Bats
 to its path inside the container:
 
-    $ docker run -it -v "$(pwd):/code" bats/bats:latest /code/test
+    $ docker run -it -v "$(pwd):/code" bats/bats:latest test
 
 This is a minimal Docker image. If more tools are required this can be used as a 
 base image in a Dockerfile using `FROM <Docker image>`.  In the future there may 
