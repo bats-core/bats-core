@@ -8,7 +8,8 @@ RUN apk add --no-cache parallel ncurses && \
     mkdir -p ~/.parallel && touch ~/.parallel/will-cite
 
 RUN ln -s /opt/bats/bin/bats /usr/local/bin/bats
-WORKDIR /opt/bats
-COPY . .
+COPY . /opt/bats/
+
+WORKDIR /code/
 
 ENTRYPOINT ["bash", "bats"]

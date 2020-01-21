@@ -169,10 +169,14 @@ To run Bats' internal test suite (which is in the container image at
 
     $ docker run -it bats/bats:latest /opt/bats/test
 
-To run a test suite from your local machine, mount in a volume and direct Bats
-to its path inside the container:
+To run a test suite from a directory called `test` in the current directory of
+your local machine, mount in a volume and direct Bats to its path inside the
+container:
 
-    $ docker run -it -v "$(pwd):/opt/bats" bats/bats:latest /opt/bats/test
+    $ docker run -it -v "${PWD}:/code" bats/bats:latest test
+
+> `/code` is the working directory of the Docker image. "${PWD}/test" is the
+> location of the test directory on the local machine.
 
 This is a minimal Docker image. If more tools are required this can be used as a
 base image in a Dockerfile using `FROM <Docker image>`.  In the future there may
@@ -180,7 +184,8 @@ be images based on Debian, and/or with more tools installed (`curl` and `openssl
 for example). If you require a specific configuration please search and +1 an
 issue or [raise a new issue](https://github.com/bats-core/bats-core/issues).
 
-Further usage examples are in [the wiki](https://github.com/bats-core/bats-core/wiki/Docker-Usage-Examples).
+Further usage examples are in
+[the wiki](https://github.com/bats-core/bats-core/wiki/Docker-Usage-Examples).
 
 ## Usage
 
@@ -277,10 +282,10 @@ with dependencies between tests (or tests that write to shared locations). When
 enabling `--jobs` for the first time be sure to re-run bats multiple times to
 identify any inter-test dependencies or non-deterministic test behaviour.
 
-If your code relies on variables from the environment, or from `setup_file()`, 
-you need to specify `--parallel-preserve-environment` as well. Note that this 
-requires running `parallel --record-env` first as a setup step as GNU Parallel 
-will refuse to run without. Only environment variables that were **not** set 
+If your code relies on variables from the environment, or from `setup_file()`,
+you need to specify `--parallel-preserve-environment` as well. Note that this
+requires running `parallel --record-env` first as a setup step as GNU Parallel
+will refuse to run without. Only environment variables that were **not** set
 during this setup step will be preserved!
 
 [gnu-parallel]: https://www.gnu.org/software/parallel/
@@ -404,7 +409,7 @@ after each test case, respectively. Use these to load fixtures, set up your
 environment, and clean up when you're done.
 
 You can also define `setup_file` and `teardown_file`, which will run once per file,
-before the first and after the last test, respectively. 
+before the first and after the last test, respectively.
 __WARNING__ these will not be run in parallel mode!
 
 
