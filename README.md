@@ -103,7 +103,7 @@ On macOS, you can install [Homebrew](https://brew.sh/) if you haven't already,
 then run:
 
 ```bash
-$ brew install bats-core
+$ brew install bats
 ```
 
 ### npm
