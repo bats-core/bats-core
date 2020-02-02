@@ -61,18 +61,26 @@ load() {
 }
 
 run() {
-  local origFlags="$-"
-  set +eET
-  local origIFS="$IFS"
+  local e E T
+  [[ ! "$-" =~ e ]] || e=1
+  [[ ! "$-" =~ E ]] || E=1
+  [[ ! "$-" =~ T ]] || T=1
+  set +e
+  set +E
+  set +T
   # 'output', 'status', 'lines' are global variables available to tests.
   # shellcheck disable=SC2034
   output="$("$@" 2>&1)"
   # shellcheck disable=SC2034
   status="$?"
   # shellcheck disable=SC2034,SC2206
-  IFS=$'\n' lines=($output)
-  IFS="$origIFS"
-  set "-$origFlags"
+  lines=()
+  while read -r; do
+    lines+=("$REPLY")
+  done < <(printf '%s\n' "$lines")
+  [ -z "$e" ] || set -e
+  [ -z "$E" ] || set -E
+  [ -z "$T" ] || set -T
 }
 
 setup() {
