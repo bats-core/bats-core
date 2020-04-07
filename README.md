@@ -51,6 +51,7 @@ each line is an assertion of truth.
   * [Running Bats in Docker](#running-bats-in-docker)
     + [Building a Docker image](#building-a-docker-image)
 - [Usage](#usage)
+  * [Parallel Execution](#parallel-execution)
 - [Writing tests](#writing-tests)
   * [`run`: Test other commands](#run-test-other-commands)
   * [`load`: Share common code](#load-share-common-code)
@@ -60,6 +61,7 @@ each line is an assertion of truth.
   * [File descriptor 3 (read this if Bats hangs)](#file-descriptor-3-read-this-if-bats-hangs)
   * [Printing to the terminal](#printing-to-the-terminal)
   * [Special variables](#special-variables)
+  * [Libraries and Add-ons](#libraries-and-add-ons)
 - [Testing](#testing)
 - [Support](#support)
 - [Contributing](#contributing)
@@ -158,8 +160,8 @@ Check out a copy of the Bats repository, then build a container image:
     $ docker build --tag bats/bats:latest .
 
 This creates a local Docker image called `bats/bats:latest` based on [Alpine
-Linux](https://github.com/gliderlabs/docker-alpine/blob/master/docs/usage.md) 
-(to push to private registries, tag it with another organisation, e.g. 
+Linux](https://github.com/gliderlabs/docker-alpine/blob/master/docs/usage.md)
+(to push to private registries, tag it with another organisation, e.g.
 `my-org/bats:latest`).
 
 To run Bats' internal test suite (which is in the container image at
@@ -172,8 +174,8 @@ to its path inside the container:
 
     $ docker run -it -v "$(pwd):/code" bats/bats:latest /code/test
 
-This is a minimal Docker image. If more tools are required this can be used as a 
-base image in a Dockerfile using `FROM <Docker image>`.  In the future there may 
+This is a minimal Docker image. If more tools are required this can be used as a
+base image in a Dockerfile using `FROM <Docker image>`.  In the future there may
 be images based on Debian, and/or with more tools installed (`curl` and `openssl`,
 for example). If you require a specific configuration please search and +1 an
 issue or [raise a new issue](https://github.com/bats-core/bats-core/issues).
@@ -461,6 +463,21 @@ There are several global variables you can use to introspect on Bats tests:
   test file.
 * `$BATS_TMPDIR` is the location to a directory that may be used to store
   temporary files.
+
+### Libraries and Add-ons
+
+Bats supports loading external assertion libraries and helpers. Those under `bats-core` are officially supported libraries (integration tests welcome!):
+
+- https://github.com/bats-core/bats-assert - common assertions for Bats
+- https://github.com/bats-core/bats-support - supporting library for Bats test helpers
+- https://github.com/bats-core/bats-detik - e2e tests of applications in K8s environments
+
+and some external libraries, supported on a "best-effort" besis:
+
+- https://github.com/ztombol/bats-file (still compatible? Requires review)
+- https://github.com/ztombol/bats-docs (still relevant? Requires review)
+- https://github.com/grayhemp/bats-mock (as per #147)
+- https://github.com/jasonkarns/bats-mock (how is this different from grayhemp/bats-mock?)
 
 ## Testing
 
