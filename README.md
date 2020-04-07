@@ -442,7 +442,7 @@ some detailed guidelines to refer to:
 
   - Text printed in such a way, will disable pretty formatting. Also, it will
     make output non-compliant with the TAP spec. The reason for this is that
-    each test file is evaluated n+1 times (as metioned
+    each test file is evaluated n+1 times (as mentioned
     [earlier](#writing-tests)). The first run will cause such output to be
     produced before the [_plan line_][tap-plan] is printed, contrary to the spec
     that requires the _plan line_ to be either the first or the last line of the
