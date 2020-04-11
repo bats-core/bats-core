@@ -477,7 +477,7 @@ Bats supports loading external assertion libraries and helpers. Those under `bat
 - https://github.com/bats-core/bats-support - supporting library for Bats test helpers
 - https://github.com/bats-core/bats-detik - e2e tests of applications in K8s environments
 
-and some external libraries, supported on a "best-effort" besis:
+and some external libraries, supported on a "best-effort" basis:
 
 - https://github.com/ztombol/bats-file (still compatible? Requires review)
 - https://github.com/ztombol/bats-docs (still relevant? Requires review)
