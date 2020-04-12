@@ -7,7 +7,8 @@ FROM bash:${bashver}
 RUN apk add --no-cache parallel ncurses && \
     mkdir -p ~/.parallel && touch ~/.parallel/will-cite
 
-RUN ln -s /opt/bats/bin/bats /usr/sbin/bats
-COPY . /opt/bats/
+RUN ln -s /opt/bats/bin/bats /usr/local/bin/bats
+WORKDIR /opt/bats
+COPY . .
 
-ENTRYPOINT ["bash", "/usr/sbin/bats"]
+ENTRYPOINT ["bash", "bats"]
