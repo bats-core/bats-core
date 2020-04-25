@@ -3,7 +3,7 @@
 %global repo            bats-core
 
 Name:           bats
-Version:        1.1.0
+Version:        1.2.0
 Release:        1%{?dist}
 Summary:        Bash Automated Testing System
 
@@ -25,7 +25,7 @@ Bats is most useful when testing software written in Bash, but you can use it to
 %setup -q -n %{repo}-%{version}
 
 %install
-mkdir -p ${RPM_BUILD_ROOT}%{_prefix} ${RPM_BUILD_ROOT}%{_libexecdir} ${RPM_BUILD_ROOT}%{_mandir} 
+mkdir -p ${RPM_BUILD_ROOT}%{_prefix} ${RPM_BUILD_ROOT}%{_libexecdir} ${RPM_BUILD_ROOT}%{_mandir}
 ./install.sh ${RPM_BUILD_ROOT}%{_prefix}
 
 %clean
