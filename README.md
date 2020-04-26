@@ -295,6 +295,8 @@ process.
 For more details about how Bats evaluates test files, see [Bats Evaluation
 Process][bats-eval] on the wiki.
 
+For sample test files, see [examples](/docs/examples).
+
 [bats-eval]: https://github.com/bats-core/bats-core/wiki/Bats-Evaluation-Process
 
 ### `run`: Test other commands
