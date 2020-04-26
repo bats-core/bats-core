@@ -51,6 +51,7 @@ each line is an assertion of truth.
   * [Running Bats in Docker](#running-bats-in-docker)
     + [Building a Docker image](#building-a-docker-image)
 - [Usage](#usage)
+  * [Parallel Execution](#parallel-execution)
 - [Writing tests](#writing-tests)
   * [`run`: Test other commands](#run-test-other-commands)
   * [`load`: Share common code](#load-share-common-code)
