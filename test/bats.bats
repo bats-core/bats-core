@@ -196,6 +196,11 @@ fixtures bats
   [ $status -eq 0 ]
 }
 
+@test "load sources relative scripts with filename extension" {
+  HELPER_NAME="test_helper.bash" run bats "$FIXTURE_ROOT/load.bats"
+  [ $status -eq 0 ]
+}
+
 @test "load aborts if the specified script does not exist" {
   HELPER_NAME="nonexistent" run bats "$FIXTURE_ROOT/load.bats"
   [ $status -eq 1 ]
@@ -209,6 +214,19 @@ fixtures bats
 @test "load aborts if the script, specified by an absolute path, does not exist" {
   HELPER_NAME="${FIXTURE_ROOT}/nonexistent" run bats "$FIXTURE_ROOT/load.bats"
   [ $status -eq 1 ]
+}
+
+@test "load relative script with ambiguous name" {
+  HELPER_NAME="ambiguous" run bats "$FIXTURE_ROOT/load.bats"
+  [ $status -eq 0 ]
+}
+
+@test "load supports scripts on the PATH" {
+  path_dir="$BATS_TMPNAME/path"
+  mkdir -p "$path_dir"
+  cp "${FIXTURE_ROOT}/test_helper.bash" "${path_dir}/on_path"
+  PATH="${path_dir}:$PATH"  HELPER_NAME="on_path" run bats "$FIXTURE_ROOT/load.bats"
+  [ $status -eq 0 ]
 }
 
 @test "output is discarded for passing tests and printed for failing tests" {

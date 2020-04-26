@@ -3,24 +3,30 @@
 BATS_TEST_DIRNAME="${BATS_TEST_FILENAME%/*}"
 BATS_TEST_NAMES=()
 
+# Shorthand for source-ing files relative to the BATS_TEST_DIRNAME,
+# optionally with a .bash suffix appended. If the argument doesn't
+# resolve relative to BATS_TEST_DIRNAME it is sourced as-is.
 load() {
-  local name="$1"
-  local filename
+  local file="${1:?}"
 
-  if [[ "${name:0:1}" == '/' ]]; then
-    filename="${name}"
-  else
-    filename="$BATS_TEST_DIRNAME/${name}.bash"
+  # For backwards-compatibility first look for a .bash-suffixed file.
+  # TODO consider flipping the order here; it would be more consistent
+  # and less surprising to look for an exact-match first.
+  if [[ -f "${BATS_TEST_DIRNAME}/${file}.bash" ]]; then
+    file="${BATS_TEST_DIRNAME}/${file}.bash"
+  elif [[ -f "${BATS_TEST_DIRNAME}/${file}" ]]; then
+    file="${BATS_TEST_DIRNAME}/${file}"
   fi
 
-  if [[ ! -f "$filename" ]]; then
-    printf 'bats: %s does not exist\n' "$filename" >&2
+  if [[ ! -f "$file" ]] && ! type -P "$file" >/dev/null; then
+    printf 'bats: %s does not exist\n' "$file" >&2
     exit 1
   fi
 
-  # Dynamically loaded user files provided outside of Bats.
+  # Dynamically loaded user file provided outside of Bats.
+  # Note: 'source "$file" || exit' doesn't work on bash3.2.
   # shellcheck disable=SC1090
-  source "${filename}"
+  source "${file}"
 }
 
 run() {
