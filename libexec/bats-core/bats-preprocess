@@ -15,7 +15,7 @@ bats_encode_test_name() {
     local length="${#name}"
     local char i
 
-    for ((i=0; i<length; i++)); do
+    for ((i = 0; i < length; i++)); do
       char="${name:$i:1}"
       if [[ "$char" == ' ' ]]; then
         result+='_'
@@ -33,10 +33,9 @@ bats_encode_test_name() {
 
 test_file="$1"
 tests=()
-
 {
   while IFS= read -r line; do
-    line="${line//$'\r'}"
+    line="${line//$'\r'/}"
     if [[ "$line" =~ $BATS_TEST_PATTERN ]]; then
       name="${BASH_REMATCH[1]#[\'\"]}"
       name="${name%[\'\"]}"
@@ -51,7 +50,7 @@ tests=()
       printf '%s\n' "$line"
     fi
   done
-} <<< "$(< "$test_file")"$'\n'
+} <<<"$(<"$test_file")"$'\n'
 
 for test_name in "${tests[@]}"; do
   printf 'bats_test_function %s\n' "$test_name"

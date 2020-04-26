@@ -61,7 +61,7 @@ fixtures bats
 }
 
 @test "tap passing and skipping tests" {
-  run filter_control_sequences bats --tap "$FIXTURE_ROOT/passing_and_skipping.bats"
+  run filter_control_sequences bats --formatter tap "$FIXTURE_ROOT/passing_and_skipping.bats"
   [ $status -eq 0 ]
   [ "${lines[0]}" = "1..3" ]
   [ "${lines[1]}" = "ok 1 a passing test" ]
@@ -82,7 +82,7 @@ fixtures bats
 }
 
 @test "tap passing, failing and skipping tests" {
-  run filter_control_sequences bats --tap "$FIXTURE_ROOT/passing_failing_and_skipping.bats"
+  run filter_control_sequences bats --formatter tap "$FIXTURE_ROOT/passing_failing_and_skipping.bats"
   [ $status -eq 0 ]
   [ "${lines[0]}" = "1..3" ]
   [ "${lines[1]}" = "ok 1 a passing test" ]
@@ -163,6 +163,7 @@ fixtures bats
 @test "passing test with teardown failure" {
   PASS=1 run bats "$FIXTURE_ROOT/failing_teardown.bats"
   [ $status -eq 1 ]
+  echo "$output"
   [ "${lines[1]}" = 'not ok 1 truth' ]
   [ "${lines[2]}" = "# (from function \`teardown' in test file $RELATIVE_FIXTURE_ROOT/failing_teardown.bats, line 2)" ]
   [ "${lines[3]}" = "#   \`eval \"( exit \${STATUS:-1} )\"' failed" ]
@@ -265,15 +266,40 @@ fixtures bats
 @test "extended syntax" {
   emulate_bats_env
   run bats-exec-suite -x "$FIXTURE_ROOT/failing_and_passing.bats"
+  echo "$output"
   [ $status -eq 1 ]
-  [ "${lines[1]}" = 'begin 1 a failing test' ]
-  [ "${lines[2]}" = 'not ok 1 a failing test' ]
-  [ "${lines[5]}" = 'begin 2 a passing test' ]
-  [ "${lines[6]}" = 'ok 2 a passing test' ]
+  [ "${lines[1]}" = 'suite failing_and_passing.bats' ]
+  [ "${lines[2]}" = 'begin 1 a failing test' ]
+  [ "${lines[3]}" = 'not ok 1 a failing test' ]
+  [ "${lines[6]}" = 'begin 2 a passing test' ]
+  [ "${lines[7]}" = 'ok 2 a passing test' ]
+}
+
+@test "timing syntax" {
+  run bats -T "$FIXTURE_ROOT/failing_and_passing.bats"
+  echo "$output"
+  [ $status -eq 1 ]
+  regex='not ok 1 a failing test in [0-1]sec'
+  [[ "${lines[1]}" =~ $regex ]]
+  regex='ok 2 a passing test in [0-1]sec'
+  [[ "${lines[4]}" =~ $regex ]]
+}
+
+@test "extended timing syntax" {
+  emulate_bats_env
+  run bats-exec-suite -x -T "$FIXTURE_ROOT/failing_and_passing.bats"
+  echo "$output"
+  [ $status -eq 1 ]
+  regex="not ok 1 a failing test in [0-1]sec"
+  [ "${lines[2]}" = 'begin 1 a failing test' ]
+  [[ "${lines[3]}" =~ $regex ]]
+  [ "${lines[6]}" = 'begin 2 a passing test' ]
+  regex="ok 2 a passing test in [0-1]sec"
+  [[ "${lines[7]}" =~ $regex ]]
 }
 
 @test "pretty and tap formats" {
-  run bats --tap "$FIXTURE_ROOT/passing.bats"
+  run bats --formatter tap "$FIXTURE_ROOT/passing.bats"
   tap_output="$output"
   [ $status -eq 0 ]
 
@@ -285,10 +311,10 @@ fixtures bats
 }
 
 @test "pretty formatter bails on invalid tap" {
-  run bats-format-tap-stream < <(printf "This isn't TAP.\nGood day to you.\n")
-  [ "$status" -eq 0 ]
-  [ "${lines[0]}" = "This isn't TAP." ]
-  [ "${lines[1]}" = "Good day to you." ]
+  run bats-format-pretty < <(printf "This isn't TAP!\nGood day to you\n")
+  [ $status -eq 0 ]
+  [ "${lines[0]}" = "This isn't TAP!" ]
+  [ "${lines[1]}" = "Good day to you" ]
 }
 
 @test "single-line tests" {
@@ -468,22 +494,6 @@ END_OF_ERR_MSG
   [ "${lines[6]}" = '# baz' ]
 }
 
-@test "parallel test execution with --jobs" {
-  type -p parallel &>/dev/null || skip "--jobs requires GNU parallel"
-
-  SECONDS=0
-  run bats --jobs 10 "$FIXTURE_ROOT/parallel.bats"
-  duration="$SECONDS"
-  [ "$status" -eq 0 ]
-  # Make sure the lines are in-order.
-  [[ "${lines[0]}" == "1..10" ]]
-  for t in {1..10}; do
-    [[ "${lines[$t]}" == "ok $t slow test $t" ]]
-  done
-  # In theory it should take 3s, but let's give it bit of extra time instead.
-  [[ "$duration" -lt 20 ]]
-}
-
 @test "run tests which consume stdin (see #197)" {
   run bats "$FIXTURE_ROOT/read_from_stdin.bats"
   [ "$status" -eq 0 ]
@@ -534,4 +544,17 @@ END_OF_ERR_MSG
     outputOffset=$((outputOffset + 3))
     currentErrorLine=$((currentErrorLine + linesPerTest))
   done
+}
+
+@test "test count validator catches mismatch and returns non zero" {
+  source "$BATS_ROOT/lib/bats-core/validator.bash"
+  export -f bats_test_count_validator
+  run bash -c "echo $'1..1\n' | bats_test_count_validator"
+  [[ $status -ne 0 ]]
+
+  run bash -c "echo $'1..1\nok 1\nok 2' | bats_test_count_validator"
+  [[ $status -ne 0 ]]
+
+  run bash -c "echo $'1..1\nok 1' | bats_test_count_validator"
+  [[ $status -eq 0 ]]
 }

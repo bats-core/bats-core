@@ -38,7 +38,7 @@ script:
       docker run -it "bash:${BASHVER}" --version &&
       time docker run -it "bats/bats:bash-${BASHVER}" --tap /opt/bats/test
   else
-    time bin/bats --tap test
+    time bin/bats --formatter tap test
   fi
 
 notifications:

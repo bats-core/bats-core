@@ -4,6 +4,7 @@ set -eET
 # Variables used in other scripts.
 BATS_COUNT_ONLY=''
 BATS_TEST_FILTER=''
+BATS_ENABLE_TIMING=''
 BATS_EXTENDED_SYNTAX=''
 
 while [[ "$#" -ne 0 ]]; do
@@ -17,7 +18,12 @@ while [[ "$#" -ne 0 ]]; do
     # shellcheck disable=SC2034
     BATS_TEST_FILTER="$1"
     ;;
+  -T)
+    BATS_ENABLE_TIMING='-T'
+    BATS_PERFORM_TEST_CMD+=('-T')
+    ;;
   -x)
+    # shellcheck disable=SC2034
     BATS_EXTENDED_SYNTAX='-x'
     ;;
   *)
@@ -37,222 +43,11 @@ elif [[ ! -f "$BATS_TEST_FILENAME" ]]; then
   exit 1
 fi
 
-BATS_TEST_DIRNAME="${BATS_TEST_FILENAME%/*}"
-BATS_TEST_NAMES=()
-
-load() {
-  local name="$1"
-  local filename
-
-  if [[ "${name:0:1}" == '/' ]]; then
-    filename="${name}"
-  else
-    filename="$BATS_TEST_DIRNAME/${name}.bash"
-  fi
-
-  if [[ ! -f "$filename" ]]; then
-    printf 'bats: %s does not exist\n' "$filename" >&2
-    exit 1
-  fi
-
-  # Dynamically loaded user files provided outside of Bats.
-  # shellcheck disable=SC1090
-  source "${filename}"
-}
-
-run() {
-  local origFlags="$-"
-  set +eET
-  local origIFS="$IFS"
-  # 'output', 'status', 'lines' are global variables available to tests.
-  # shellcheck disable=SC2034
-  output="$("$@" 2>&1)"
-  # shellcheck disable=SC2034
-  status="$?"
-  # shellcheck disable=SC2034,SC2206
-  IFS=$'\n' lines=($output)
-  IFS="$origIFS"
-  set "-$origFlags"
-}
-
-setup() {
-  return 0
-}
-
-teardown() {
-  return 0
-}
-
-skip() {
-  BATS_TEST_SKIPPED="${1:-1}"
-  BATS_TEST_COMPLETED=1
-  exit 0
-}
-
-bats_test_begin() {
-  BATS_TEST_DESCRIPTION="$1"
-  if [[ -n "$BATS_EXTENDED_SYNTAX" ]]; then
-    printf 'begin %d %s\n' "$BATS_TEST_NUMBER" "$BATS_TEST_DESCRIPTION" >&3
-  fi
-  setup
-}
-
-bats_test_function() {
-  local test_name="$1"
-  BATS_TEST_NAMES+=("$test_name")
-}
-
-bats_capture_stack_trace() {
-  local test_file
-  local funcname
-  local i
-
-  BATS_STACK_TRACE=()
-
-  for ((i=2; i != ${#FUNCNAME[@]}; ++i)); do
-    # Use BATS_TEST_SOURCE if necessary to work around Bash < 4.4 bug whereby
-    # calling an exported function erases the test file's BASH_SOURCE entry.
-    test_file="${BASH_SOURCE[$i]:-$BATS_TEST_SOURCE}"
-    funcname="${FUNCNAME[$i]}"
-    BATS_STACK_TRACE+=("${BASH_LINENO[$((i-1))]} $funcname $test_file")
-    if [[ "$test_file" == "$BATS_TEST_SOURCE" ]]; then
-      case "$funcname" in
-      "$BATS_TEST_NAME"|setup|teardown)
-        break
-        ;;
-      esac
-    fi
-  done
-}
-
-bats_print_stack_trace() {
-  local frame
-  local index=1
-  local count="${#@}"
-  local filename
-  local lineno
-
-  for frame in "$@"; do
-    bats_frame_filename "$frame" 'filename'
-    bats_trim_filename "$filename" 'filename'
-    bats_frame_lineno "$frame" 'lineno'
-
-    if [[ $index -eq 1 ]]; then
-      printf '# ('
-    else
-      printf '#  '
-    fi
-
-    local fn
-    bats_frame_function "$frame" 'fn'
-    if [[ "$fn" != "$BATS_TEST_NAME" ]]; then
-      printf "from function \`%s' " "$fn"
-    fi
-
-    if [[ $index -eq $count ]]; then
-      printf 'in test file %s, line %d)\n' "$filename" "$lineno"
-    else
-      printf 'in file %s, line %d,\n' "$filename" "$lineno"
-    fi
-
-    ((++index))
-  done
-}
-
-bats_print_failed_command() {
-  local frame="${BATS_STACK_TRACE[${#BATS_STACK_TRACE[@]}-1]}"
-  local filename
-  local lineno
-  local failed_line
-  local failed_command
-
-  bats_frame_filename "$frame" 'filename'
-  bats_frame_lineno "$frame" 'lineno'
-  bats_extract_line "$filename" "$lineno" 'failed_line'
-  bats_strip_string "$failed_line" 'failed_command'
-  printf '%s' "#   \`${failed_command}' "
-
-  if [[ "$BATS_ERROR_STATUS" -eq 1 ]]; then
-    printf 'failed\n'
-  else
-    printf 'failed with status %d\n' "$BATS_ERROR_STATUS"
-  fi
-}
-
-bats_frame_lineno() {
-  printf -v "$2" '%s' "${1%% *}"
-}
-
-bats_frame_function() {
-  local __bff_function="${1#* }"
-  printf -v "$2" '%s' "${__bff_function%% *}"
-}
-
-bats_frame_filename() {
-  local __bff_filename="${1#* }"
-  __bff_filename="${__bff_filename#* }"
-
-  if [[ "$__bff_filename" == "$BATS_TEST_SOURCE" ]]; then
-    __bff_filename="$BATS_TEST_FILENAME"
-  fi
-  printf -v "$2" '%s' "$__bff_filename"
-}
-
-bats_extract_line() {
-  local __bats_extract_line_line
-  local __bats_extract_line_index=0
-
-  while IFS= read -r __bats_extract_line_line; do
-    if [[ "$((++__bats_extract_line_index))" -eq "$2" ]]; then
-      printf -v "$3" '%s' "${__bats_extract_line_line%$'\r'}"
-      break
-    fi
-  done <"$1"
-}
-
-bats_strip_string() {
-  [[ "$1" =~ ^[[:space:]]*(.*)[[:space:]]*$ ]]
-  printf -v "$2" '%s' "${BASH_REMATCH[1]}"
-}
-
-bats_trim_filename() {
-  printf -v "$2" '%s' "${1#$BATS_CWD/}"
-}
-
-bats_debug_trap() {
-  if [[ "${BASH_SOURCE[0]}" != "$1" ]]; then
-    # The last entry in the stack trace is not useful when en error occured:
-    # It is either duplicated (kinda correct) or has wrong line number (Bash < 4.4)
-    # Therefore we capture the stacktrace but use it only after the next debug
-    # trap fired.
-    # Expansion is required for empty arrays which otherwise error
-    BATS_CURRENT_STACK_TRACE=( "${BATS_STACK_TRACE[@]+"${BATS_STACK_TRACE[@]}"}" )
-    bats_capture_stack_trace
-  fi
-}
-
-# For some versions of Bash, the `ERR` trap may not always fire for every
-# command failure, but the `EXIT` trap will. Also, some command failures may not
-# set `$?` properly. See #72 and #81 for details.
-#
-# For this reason, we call `bats_error_trap` at the very beginning of
-# `bats_teardown_trap` (the `DEBUG` trap for the call will fix the stack trace)
-# and check the value of `$BATS_TEST_COMPLETED` before taking other actions.
-# We also adjust the exit status value if needed.
-#
-# See `bats_exit_trap` for an additional EXIT error handling case when `$?`
-# isn't set properly during `teardown()` errors.
-bats_error_trap() {
-  local status="$?"
-  if [[ -z "$BATS_TEST_COMPLETED" ]]; then
-    BATS_ERROR_STATUS="${BATS_ERROR_STATUS:-$status}"
-    if [[ "$BATS_ERROR_STATUS" -eq 0 ]]; then
-      BATS_ERROR_STATUS=1
-    fi
-    BATS_STACK_TRACE=( "${BATS_CURRENT_STACK_TRACE[@]}" )
-    trap - DEBUG
-  fi
-}
+# load the test helper functions like `load` or `run` that are needed to run a (preprocessed) .bats file without bash errors
+# shellcheck source=lib/bats-core/test_functions.bash disable=SC2153
+source "$BATS_ROOT/lib/bats-core/test_functions.bash"
+# shellcheck source=lib/bats-core/tracing.bash disable=SC2153
+source "$BATS_ROOT/lib/bats-core/tracing.bash"
 
 bats_teardown_trap() {
   bats_error_trap
@@ -281,6 +76,11 @@ bats_exit_trap() {
     fi
   fi
 
+  BATS_TEST_TIME=""
+  if [[ -z "${skipped}" && -n "$BATS_ENABLE_TIMING" ]]; then
+    BATS_TEST_TIME=" in "$((SECONDS - BATS_TEST_START_TIME))"sec"
+  fi
+
   if [[ -z "$BATS_TEST_COMPLETED" || -z "$BATS_TEARDOWN_COMPLETED" ]]; then
     if [[ "$BATS_ERROR_STATUS" -eq 0 ]]; then
       # For some versions of bash, `$?` may not be set properly for some error
@@ -292,10 +92,10 @@ bats_exit_trap() {
       # If instead the test fails, and the `teardown()` error happens while
       # `bats_teardown_trap` runs as the EXIT trap, the test will fail with no
       # output, since there's no way to reach the `bats_exit_trap` call.
-      BATS_STACK_TRACE=( "${BATS_CURRENT_STACK_TRACE[@]}" )
+      BATS_STACK_TRACE=("${BATS_CURRENT_STACK_TRACE[@]}")
       BATS_ERROR_STATUS=1
     fi
-    printf 'not ok %d %s\n' "$BATS_TEST_NUMBER" "$BATS_TEST_DESCRIPTION" >&3
+    printf 'not ok %d %s\n' "$BATS_TEST_NUMBER" "${BATS_TEST_DESCRIPTION}${BATS_TEST_TIME}" >&3
     bats_print_stack_trace "${BATS_STACK_TRACE[@]}" >&3
     bats_print_failed_command >&3
 
@@ -307,7 +107,7 @@ bats_exit_trap() {
     fi
     status=1
   else
-    printf 'ok %d %s%s\n' "$BATS_TEST_NUMBER" "$BATS_TEST_DESCRIPTION" \
+    printf 'ok %d %s%s\n' "$BATS_TEST_NUMBER" "${BATS_TEST_DESCRIPTION}${BATS_TEST_TIME}" \
       "$skipped" >&3
     status=0
   fi
@@ -343,41 +143,16 @@ bats_perform_test() {
   trap 'bats_debug_trap "$BASH_SOURCE"' DEBUG
   trap 'bats_error_trap' ERR
   trap 'bats_teardown_trap' EXIT
+
   "$BATS_TEST_NAME" >>"$BATS_OUT" 2>&1
+
   BATS_TEST_COMPLETED=1
   trap 'bats_exit_trap' EXIT
   bats_teardown_trap
 }
 
-if [[ -z "$TMPDIR" ]]; then
-  BATS_TMPDIR='/tmp'
-else
-  BATS_TMPDIR="${TMPDIR%/}"
-fi
-
-BATS_TMPNAME="$BATS_TMPDIR/bats.$$"
-BATS_PARENT_TMPNAME="$BATS_TMPDIR/bats.$PPID"
-BATS_OUT="${BATS_TMPNAME}.out"
-
-bats_preprocess_source() {
-  BATS_TEST_SOURCE="${BATS_TMPNAME}.src"
-  bats-preprocess "$BATS_TEST_FILENAME" >"$BATS_TEST_SOURCE"
-  trap 'bats_cleanup_preprocessed_source' ERR EXIT
-  trap 'bats_cleanup_preprocessed_source; exit 1' INT
-}
-
-bats_cleanup_preprocessed_source() {
-  rm -f "$BATS_TEST_SOURCE"
-}
-
-bats_evaluate_preprocessed_source() {
-  if [[ -z "$BATS_TEST_SOURCE" ]]; then
-    BATS_TEST_SOURCE="${BATS_PARENT_TMPNAME}.src"
-  fi
-  # Dynamically loaded user files provided outside of Bats.
-  # shellcheck disable=SC1090
-  source "$BATS_TEST_SOURCE"
-}
+# shellcheck source=lib/bats-core/preprocessing.bash
+source "$BATS_ROOT/lib/bats-core/preprocessing.bash"
 
 exec 3<&1
 

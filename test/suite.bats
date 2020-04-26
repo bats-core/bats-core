@@ -54,14 +54,50 @@ fixtures suite
 @test "extended syntax in suite" {
   emulate_bats_env
   FLUNK=1 run bats-exec-suite -x "$FIXTURE_ROOT/multiple/"*.bats
+  echo "output: $output"
   [ $status -eq 1 ]
   [ "${lines[0]}" = "1..3" ]
-  [ "${lines[1]}" = "begin 1 truth" ]
-  [ "${lines[2]}" = "ok 1 truth" ]
-  [ "${lines[3]}" = "begin 2 more truth" ]
-  [ "${lines[4]}" = "ok 2 more truth" ]
-  [ "${lines[5]}" = "begin 3 quasi-truth" ]
-  [ "${lines[6]}" = "not ok 3 quasi-truth" ]
+  [ "${lines[1]}" = "suite a.bats" ]
+  [ "${lines[2]}" = "begin 1 truth" ]
+  [ "${lines[3]}" = "ok 1 truth" ]
+  [ "${lines[4]}" = "suite b.bats" ]
+  [ "${lines[5]}" = "begin 2 more truth" ]
+  [ "${lines[6]}" = "ok 2 more truth" ]
+  [ "${lines[7]}" = "begin 3 quasi-truth" ]
+  [ "${lines[8]}" = "not ok 3 quasi-truth" ]
+}
+
+@test "timing syntax in suite" {
+  emulate_bats_env
+  FLUNK=1 run bats-exec-suite -T "$FIXTURE_ROOT/multiple/"*.bats
+  echo "$output"
+  [ $status -eq 1 ]
+  [ "${lines[0]}" = "1..3" ]
+  regex="ok 1 truth in [0-1]sec"
+  [[ "${lines[1]}" =~ $regex ]]
+  regex="ok 2 more truth in [0-1]sec"
+  [[ "${lines[2]}" =~  $regex ]]
+  regex="not ok 3 quasi-truth in [0-1]sec"
+  [[ "${lines[3]}" =~  $regex ]]
+}
+
+@test "extended timing syntax in suite" {
+  emulate_bats_env
+  FLUNK=1 run bats-exec-suite -x -T "$FIXTURE_ROOT/multiple/"*.bats
+  echo "$output"
+  [ $status -eq 1 ]
+  [ "${lines[0]}" = "1..3" ]
+  [ "${lines[1]}" = "suite a.bats" ]
+  [ "${lines[2]}" = "begin 1 truth" ]
+  regex="ok 1 truth in [0-1]sec"
+  [[ "${lines[3]}" =~ $regex ]]
+  [ "${lines[4]}" = "suite b.bats" ]
+  [ "${lines[5]}" = "begin 2 more truth" ]
+  regex="ok 2 more truth in [0-1]sec"
+  [[ "${lines[6]}" =~ $regex ]]
+  [ "${lines[7]}" = "begin 3 quasi-truth" ]
+  regex="not ok 3 quasi-truth in [0-1]sec"
+  [[ "${lines[8]}" =~ $regex ]]
 }
 
 @test "recursive support (short option)" {
@@ -125,24 +161,4 @@ fixtures suite
   [ "${lines[0]}" = '1..2' ]
   [ "${lines[1]}" = 'ok 1 baz in a' ]
   [ "${lines[2]}" = 'ok 2 bar_in_b' ]
-}
-
-@test "parallel suite execution with --jobs" {
-  type -p parallel &>/dev/null || skip "--jobs requires GNU parallel"
-
-  SECONDS=0
-  run bats --jobs 40 "$FIXTURE_ROOT/parallel"
-  duration="$SECONDS"
-  [ "$status" -eq 0 ]
-  # Make sure the lines are in-order.
-  [[ "${lines[0]}" == "1..40" ]]
-  i=0
-  for s in {1..4}; do
-    for t in {1..10}; do
-      ((++i))
-      [[ "${lines[$i]}" == "ok $i slow test $t" ]]
-    done
-  done
-  # In theory it should take 3s, but let's give it bit of extra time instead.
-  [[ "$duration" -lt 20 ]]
 }

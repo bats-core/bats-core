@@ -172,7 +172,7 @@ To run Bats' internal test suite (which is in the container image at
 To run a test suite from your local machine, mount in a volume and direct Bats
 to its path inside the container:
 
-    $ docker run -it -v "$(pwd):/code" bats/bats:latest /code/test
+    $ docker run -it -v "$(pwd):/opt/bats" bats/bats:latest /opt/bats/test
 
 This is a minimal Docker image. If more tools are required this can be used as a
 base image in a Dockerfile using `FROM <Docker image>`.  In the future there may
@@ -192,24 +192,31 @@ supports:
 
 ```
 Bats x.y.z
-Usage: bats [-cr] [-f <regex>] [-j <jobs>] [-p | -t] <test>...
+Usage: bats [OPTIONS] <tests>
        bats [-h | -v]
 
-  <test> is the path to a Bats test file, or the path to a directory
-  containing Bats test files (ending with ".bats").
+  <tests> is the path to a Bats test file, or the path to a directory
+  containing Bats test files (ending with ".bats")
 
-  -c, --count      Count the number of test cases without running any tests
-  -f, --filter     Filter test cases by names matching the regular expression
-  -h, --help       Display this help message
-  -j, --jobs       Number of parallel jobs to run (requires GNU parallel)
-  -p, --pretty     Show results in pretty format (default for terminals)
-  -r, --recursive  Include tests in subdirectories
-  -t, --tap        Show results in TAP format
-  -v, --version    Display the version number
+  -c, --count               Count test cases without running any tests
+  -f, --filter <regex>      Only run tests that match the regular expression
+  -F, --formatter <type>    Switch between formatters: pretty (default),
+                              tap (default w/o term), junit
+  -h, --help                Display this help message
+  -j, --jobs <jobs>         Number of parallel jobs (requires GNU parallel)
+  --parallel-preserve-environment
+                            Preserve the current environment for "--jobs"
+                              (run `parallel --record-env` before)
+  --no-tempdir-cleanup      Preserve test output temporary directory
+  -o, --output <dir>        Directory to write report files
+  -p, --pretty              Shorthand for "--formatter pretty"
+  -r, --recursive           Include tests in subdirectories
+  -t, --tap                 Shorthand for "--formatter tap"
+  -T, --timing              Add timing information to tests
+  -v, --version             Display the version number
 
   For more information, see https://github.com/bats-core/bats-core
 ```
-> **Mac OSX/Darwin Warning:** If you're executing bats directly (`bin/bats`) you need to `brew install coreutils` to obtain `greadlink`. Darwin's readlink does not include the -f option. This may be fixed [by this PR](https://github.com/bats-core/bats-core/pull/217), which needs reviewers.
 
 To run your tests, invoke the `bats` interpreter with one or more paths to test
 files ending with the `.bats` extension, or paths to directories containing test
@@ -233,10 +240,26 @@ If Bats is not connected to a terminal—in other words, if you run it from a
 continuous integration system, or redirect its output to a file—the results are
 displayed in human-readable, machine-parsable [TAP format][TAP].
 
-You can force TAP output from a terminal by invoking Bats with the `--tap`
+You can force TAP output from a terminal by invoking Bats with the `--formatter tap`
 option.
 
-    $ bats --tap addition.bats
+    $ bats --formatter tap addition.bats
+    1..2
+    ok 1 addition using bc
+    ok 2 addition using dc
+
+By combining `-T` and `--formatter junit`, it is possible
+to output junit-compatible report files.
+
+    $ bats --formatter junit -T addition.bats
+    1..2
+    ok 1 addition using bc
+    ok 2 addition using dc
+
+Test reports will be output in the executing directory, but may be placed elsewhere
+by specifying the `--output` flag.
+
+    $ bats --formatter junit -T addition.bats --output /tmp
     1..2
     ok 1 addition using bc
     ok 2 addition using dc
@@ -253,6 +276,12 @@ Ordering of parallised tests is not guaranteed, so this mode may break suites
 with dependencies between tests (or tests that write to shared locations). When
 enabling `--jobs` for the first time be sure to re-run bats multiple times to
 identify any inter-test dependencies or non-deterministic test behaviour.
+
+If your code relies on variables from the environment, or from `setup_file()`, 
+you need to specify `--parallel-preserve-environment` as well. Note that this 
+requires running `parallel --record-env` first as a setup step as GNU Parallel 
+will refuse to run without. Only environment variables that were **not** set 
+during this setup step will be preserved!
 
 [gnu-parallel]: https://www.gnu.org/software/parallel/
 
@@ -371,6 +400,11 @@ __Note:__ `setup` and `teardown` hooks still run for skipped tests.
 You can define special `setup` and `teardown` functions, which run before and
 after each test case, respectively. Use these to load fixtures, set up your
 environment, and clean up when you're done.
+
+You can also define `setup_file` and `teardown_file`, which will run once per file,
+before the first and after the last test, respectively. 
+__WARNING__ these will not be run in parallel mode!
+
 
 ### Code outside of test cases
 
@@ -521,7 +555,7 @@ See `docs/CHANGELOG.md`.
 
 **Tuesday, September 19, 2017:** This was forked from [Bats][bats-orig] at
 commit [0360811][].  It was created via `git clone --bare` and `git push
---mirror`.
+--mirror`. See the [Background](#background) section above for more information.
 
 [bats-orig]: https://github.com/sstephenson/bats
 [0360811]: https://github.com/sstephenson/bats/commit/03608115df2071fff4eaaff1605768c275e5f81f
