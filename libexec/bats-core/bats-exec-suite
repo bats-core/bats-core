@@ -24,10 +24,10 @@ while [[ "$#" -ne 0 ]]; do
     num_jobs="$1"
     flags+=('-j' "$num_jobs")
     ;;
-	-T)
-		enable_timing=1
-		flags+=('-T')
-		;;
+  -T)
+    enable_timing=1
+    flags+=('-T')
+    ;;
   -x)
     flags+=('-x')
     ;;
@@ -56,7 +56,7 @@ TESTS_LIST_FILE="${BATS_RUN_TMPDIR}/test_list_file.txt"
 
 all_tests=()
 for filename in "$@"; do
-	if [[ ! -f "$filename" ]]; then
+  if [[ ! -f "$filename" ]]; then
     printf 'bats: %s does not exist\n' "$filename" >&2
     exit 1
   fi
@@ -70,8 +70,8 @@ for filename in "$@"; do
     line="${line%$'\r'}"
     line="${line#* }"
     test_line=$(printf "%s\t%s" "$filename" "$line")
-    all_tests+=( "$test_line" )
-    printf "%s\n" "$test_line" >> "$TESTS_LIST_FILE"
+    all_tests+=("$test_line")
+    printf "%s\n" "$test_line" >>"$TESTS_LIST_FILE"
     if [[ " ${test_names[*]} " == *" $line "* ]]; then
       test_dupes+=("$line")
       continue
