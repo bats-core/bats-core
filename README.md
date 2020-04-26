@@ -192,30 +192,31 @@ supports:
 
 ```
 Bats x.y.z
-Usage: bats [-cr] [-f <regex>] [-j <jobs>] [-p | -t] <test>...
+Usage: bats [OPTIONS] <tests>
        bats [-h | -v]
 
-  <test> is the path to a Bats test file, or the path to a directory
-  containing Bats test files (ending with ".bats").
+  <tests> is the path to a Bats test file, or the path to a directory
+  containing Bats test files (ending with ".bats")
 
-  -c, --count               Count the number of test cases without running any tests
-  -f, --filter              Filter test cases by names matching the regular expression
-  -F, --formatter           Switch between formatters (Default: tap, Options: junit, pretty, tap)
+  -c, --count               Count test cases without running any tests
+  -f, --filter <regex>      Only run tests that match the regular expression
+  -F, --formatter <type>    Switch between formatters: pretty (default),
+                              tap (default w/o term), junit
   -h, --help                Display this help message
-  -j, --jobs                Number of parallel jobs to run (requires GNU parallel)
-  --parallel-preserve-environment 
-                   Preserve the environment When running via GNU parallel (run 
-                   `parallel --record-env` before!)
-  -o, --output              A directory to output reports to
-  -p, --pretty              [DEPRECATED] Show results in pretty format (default for terminals), use "--formatter pretty" instead
+  -j, --jobs <jobs>         Number of parallel jobs (requires GNU parallel)
+  --parallel-preserve-environment
+                            Preserve the current environment for "--jobs"
+                              (run `parallel --record-env` before)
+  --no-tempdir-cleanup      Preserve test output temporary directory
+  -o, --output <dir>        Directory to write report files
+  -p, --pretty              Shorthand for "--formatter pretty"
   -r, --recursive           Include tests in subdirectories
-  -t, --tap                 [DEPRECATED] Show results in TAP format, use "--formatter tap" instead
-  -T, --timing              Add timing information
+  -t, --tap                 Shorthand for "--formatter tap"
+  -T, --timing              Add timing information to tests
   -v, --version             Display the version number
 
   For more information, see https://github.com/bats-core/bats-core
 ```
-> **Mac OSX/Darwin Warning:** If you're executing bats directly (`bin/bats`) you need to `brew install coreutils` to obtain `greadlink`. Darwin's readlink does not include the -f option. This may be fixed [by this PR](https://github.com/bats-core/bats-core/pull/217), which needs reviewers.
 
 To run your tests, invoke the `bats` interpreter with one or more paths to test
 files ending with the `.bats` extension, or paths to directories containing test

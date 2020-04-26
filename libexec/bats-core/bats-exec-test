@@ -18,10 +18,10 @@ while [[ "$#" -ne 0 ]]; do
     # shellcheck disable=SC2034
     BATS_TEST_FILTER="$1"
     ;;
-	-T)
-		BATS_ENABLE_TIMING='-T'
-		BATS_PERFORM_TEST_CMD+=('-T')
-		;;
+  -T)
+    BATS_ENABLE_TIMING='-T'
+    BATS_PERFORM_TEST_CMD+=('-T')
+    ;;
   -x)
     # shellcheck disable=SC2034
     BATS_EXTENDED_SYNTAX='-x'
@@ -76,10 +76,10 @@ bats_exit_trap() {
     fi
   fi
 
-	BATS_TEST_TIME=""
-	if [[ -z "${skipped}" && -n "$BATS_ENABLE_TIMING" ]]; then
-		BATS_TEST_TIME=" in "$((SECONDS - BATS_TEST_START_TIME))"sec"
-	fi
+  BATS_TEST_TIME=""
+  if [[ -z "${skipped}" && -n "$BATS_ENABLE_TIMING" ]]; then
+    BATS_TEST_TIME=" in "$((SECONDS - BATS_TEST_START_TIME))"sec"
+  fi
 
   if [[ -z "$BATS_TEST_COMPLETED" || -z "$BATS_TEARDOWN_COMPLETED" ]]; then
     if [[ "$BATS_ERROR_STATUS" -eq 0 ]]; then
@@ -107,7 +107,7 @@ bats_exit_trap() {
     fi
     status=1
   else
-		printf 'ok %d %s%s\n' "$BATS_TEST_NUMBER" "${BATS_TEST_DESCRIPTION}${BATS_TEST_TIME}" \
+    printf 'ok %d %s%s\n' "$BATS_TEST_NUMBER" "${BATS_TEST_DESCRIPTION}${BATS_TEST_TIME}" \
       "$skipped" >&3
     status=0
   fi
