@@ -51,10 +51,11 @@ setup() {
       [[ "${lines[$i]}" == "ok $i slow test $t" ]]
     done
   done
-  # In theory it should take 3s, but let's give it bit of extra time instead.
-  # also check that parallelization happens accross all files instead of 
+  # In theory it should take 3s, but let's give it bit of extra time for load tolerance.
+  # (Since there is no limit to load, we cannot totally avoid erronous failures by limited tolerance.)
+  # Also check that parallelization happens accross all files instead of
   # linearizing between files, which requires at least 12s
-  [[ "$duration" -lt 12 ]]
+  [[ "$duration" -lt 12 ]] || (echo "If this fails on Travis, make sure the failure is repeatable and not due to heavy load."; false)
 }
 
 @test "setup_file is not over parallelized" {
