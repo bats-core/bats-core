@@ -1,44 +1,69 @@
 #!/usr/bin/env bash
 
-set -e
+set -euo pipefail
 
 BATS_READLINK='true'
+BATS_REALPATH=''
 if command -v 'greadlink' >/dev/null; then
   BATS_READLINK='greadlink'
 elif command -v 'readlink' >/dev/null; then
   BATS_READLINK='readlink'
 fi
 
-bats_resolve_absolute_root_dir() {
-  local cwd="$PWD"
-  local path="$1"
-  local result="$2"
-  local target_dir
-  local target_name
-  local original_shell_options="$-"
+if ! "${BATS_READLINK}" -m $0 &>/dev/null; then
+  BATS_REALPATH='realpath'
+fi
 
-  # Resolve the parent directory, e.g. /bin => /usr/bin on CentOS (#113).
-  set -P
+resolve_path() {
+  local path_to_bats=$1
+  local target_path
 
-  while true; do
-    target_dir="${path%/*}"
-    target_name="${path##*/}"
-
-    if [[ "$target_dir" != "$path" ]]; then
-      cd "$target_dir"
-    fi
-
-    if [[ -L "$target_name" ]]; then
-      path="$("$BATS_READLINK" "$target_name")"
+  if [[ -L "${path_to_bats}" ]]; then
+    # Busybox has no readlink from coreutils
+    if [[ ! -z "$BATS_REALPATH" ]]; then
+      target_path="$("$BATS_REALPATH" "$path_to_bats")"
+      # we need to traverse the paths
+      target_path="$(dirname "$target_path")" # strip bats
+      target_path="$(dirname "$target_path")" # strip bin
     else
-      printf -v "$result" -- '%s' "${PWD%/*}"
-      set +P "-$original_shell_options"
-      cd "$cwd"
-      return
+      target_path="$("$BATS_READLINK" -m "$path_to_bats/../../")"
     fi
-  done
+  elif [[ -f "${path_to_bats}" ]]; then
+    target_path=$(dirname "$path_to_bats")
+    if [[ ! -z "$BATS_REALPATH" ]]; then
+      target_path="$("$BATS_REALPATH" "$target_path")"
+    else
+      target_path="$("$BATS_READLINK" -m "$target_path")"
+    fi
+    target_path="$(dirname "$target_path")" # strip bin
+  elif [[ -d "${path_to_bats}" ]]; then
+    if [[ ! -z "$BATS_REALPATH" ]]; then
+      target_path="$("$BATS_REALPATH" "$path_to_bats")"
+      target_path="$(dirname "$target_path")"
+    else
+      target_path="$("$BATS_READLINK" -m "$path_to_bats/../")"
+    fi
+  fi
+
+  echo "$target_path"
+}
+
+bats_resolve_absolute_root_dir() {
+  local path_to_bats="$1"
+  local result="$2"
+  local target_path
+
+  if [[ "$path_to_bats" == "$(basename "${path_to_bats}")" ]]; then
+    path_to_bats=$(type -p "$path_to_bats")
+  fi
+
+  target_path=$(resolve_path "${path_to_bats}")
+  if [[ "$target_path" == '.' ]]; then
+    target_path="$(resolve_path "$target_path")"
+  fi
+  printf -v "$result" -- '%s' "$target_path"
 }
 
 export BATS_ROOT
 bats_resolve_absolute_root_dir "$0" 'BATS_ROOT'
-exec "$BATS_ROOT/libexec/bats-core/bats" "$@"
+exec env BATS_ROOT="$BATS_ROOT" "$BATS_ROOT/libexec/bats-core/bats" "$@"
