@@ -8,6 +8,12 @@ have_gnu_parallel=
 bats_parallel_args=()
 flags=()
 
+abort() {
+  printf 'Error: %s\n' "$1" >&2
+  usage >&2
+  exit 1
+}
+
 while [[ "$#" -ne 0 ]]; do
   case "$1" in
   -c)
@@ -43,7 +49,7 @@ if (type -p parallel &>/dev/null); then
   # shellcheck disable=SC2034
   have_gnu_parallel=1
 elif [[ "$num_jobs" != 1 ]]; then
-  printf 'bats: cannot execute "%s" jobs without GNU parallel\n' "$num_jobs" >&2
+  abort "Cannot execute \"${num_jobs}\" jobs without GNU parallel"
   exit 1
 fi
 
@@ -55,8 +61,7 @@ TESTS_LIST_FILE="${BATS_RUN_TMPDIR}/test_list_file.txt"
 all_tests=()
 for filename in "$@"; do
   if [[ ! -f "$filename" ]]; then
-    printf 'bats: %s does not exist\n' "$filename" >&2
-    exit 1
+    abort "Test file \"${filename}\" does not exist"
   fi
 
   test_names=()
@@ -78,7 +83,7 @@ for filename in "$@"; do
   done < <(BATS_TEST_FILTER="$filter" bats-preprocess "$filename")
 
   if [[ "${#test_dupes[@]}" -ne 0 ]]; then
-    printf 'bats warning: duplicate test name(s) in %s: %s\n' "$filename" "${test_dupes[*]}" >&2
+    abort "Duplicate test name(s) in file \"${filename}\": ${test_dupes[*]}"
   fi
 done
 
