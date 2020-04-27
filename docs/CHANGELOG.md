@@ -14,6 +14,7 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 * JUnit output and extensible formatter rewrite (#246) 
 * `load` function now reads from absolute and relative paths, and $PATH (#282)
 * Beginner-friendly examples in /docs/examples (#243)
+* @peshay's `bats-file` fork contributed to `bats-core/bats-file` (#276) 
 
 ### Changed
 * Duplicate test names now error (previous behaviour was to issue a warning) (#286)
