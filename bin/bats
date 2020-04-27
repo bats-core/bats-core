@@ -10,7 +10,7 @@ elif command -v 'readlink' >/dev/null; then
   BATS_READLINK='readlink'
 fi
 
-if ! "${BATS_READLINK}" -m $0 &>/dev/null; then
+if ! "${BATS_READLINK}" -m "$0" &>/dev/null; then
   BATS_REALPATH='realpath'
 fi
 
@@ -20,7 +20,7 @@ resolve_path() {
 
   if [[ -L "${path_to_bats}" ]]; then
     # Busybox has no readlink from coreutils
-    if [[ ! -z "$BATS_REALPATH" ]]; then
+    if [[ -n "$BATS_REALPATH" ]]; then
       target_path="$("$BATS_REALPATH" "$path_to_bats")"
       # we need to traverse the paths
       target_path="$(dirname "$target_path")" # strip bats
@@ -30,14 +30,14 @@ resolve_path() {
     fi
   elif [[ -f "${path_to_bats}" ]]; then
     target_path=$(dirname "$path_to_bats")
-    if [[ ! -z "$BATS_REALPATH" ]]; then
+    if [[ -n "$BATS_REALPATH" ]]; then
       target_path="$("$BATS_REALPATH" "$target_path")"
     else
       target_path="$("$BATS_READLINK" -m "$target_path")"
     fi
     target_path="$(dirname "$target_path")" # strip bin
   elif [[ -d "${path_to_bats}" ]]; then
-    if [[ ! -z "$BATS_REALPATH" ]]; then
+    if [[ -n "$BATS_REALPATH" ]]; then
       target_path="$("$BATS_REALPATH" "$path_to_bats")"
       target_path="$(dirname "$target_path")"
     else

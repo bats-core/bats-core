@@ -8,7 +8,21 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 [kac]: https://keepachangelog.com/en/1.0.0/
 [semver]: https://semver.org/
 
+## [Unreleased]
+
+### Added
+* JUnit output and extensible formatter rewrite (#246) 
+* `load` function now reads from absolute and relative paths, and $PATH (#282)
+* Beginner-friendly examples in /docs/examples (#243)
+
+### Changed
+* Duplicate test names now error (previous behaviour was to issue a warning) (#286)
+* Changed default formatter in Docker to pretty by adding `ncurses` to Dockerfile, override with `--tap` (#239)
+* Replace "readlink -f" dependency with Bash solution (#217)
+
 ## [1.2.0] - 2020-04-25
+
+Support parallel suite execution and filtering by test name.
 
 ### Added
 * docs/CHANGELOG.md and docs/releasing.md (#122)

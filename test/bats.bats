@@ -424,7 +424,7 @@ END_OF_ERR_MSG
 }
 
 @test "duplicate tests error and generate a warning on stderr" {
-  run bats "$FIXTURE_ROOT/duplicate-tests.bats"
+  run bats --tap "$FIXTURE_ROOT/duplicate-tests.bats"
   [ $status -eq 1 ]
 
   local expected='Error: Duplicate test name(s) in file '
@@ -435,7 +435,7 @@ END_OF_ERR_MSG
   [ "${lines[0]}" = "$expected" ]
 
   printf 'num lines: %d\n' "${#lines[*]}" >&2
-  [ "${#lines[*]}" = "2" ]
+  [ "${#lines[*]}" = "1" ]
 }
 
 @test "sourcing a nonexistent file in setup produces error output" {
