@@ -351,18 +351,17 @@ location of the current test file. For example, if you have a Bats test in
 `test/foo.bats`, the command
 
 ```bash
-load test_helper
+load test_helper.bash
 ```
 
 will source the script `test/test_helper.bash` in your test file. This can be
 useful for sharing functions to set up your environment or load fixtures.
+`load` delegates to Bash's `source` command after resolving relative paths.
 
-If you want to source a file using an absolute file path then the file extension
-must be included. For example
-
-```bash
-load /test_helpers/test_helper.bash
-```
+> For backwards compatibility `load` first searches for a file ending in
+> `.bash` (e.g. `load test_helper` searches for `test_helper.bash` before
+> it looks for `test_helper`). This behaviour is deprecated and subject to
+> change, please use exact filenames instead.
 
 ### `skip`: Easily skip tests
 
