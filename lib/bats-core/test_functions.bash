@@ -53,11 +53,27 @@ teardown() {
 }
 
 skip() {
-  # Following variables are used in bats-exec-test which sources this file
-  # shellcheck disable=SC2034
-  BATS_TEST_SKIPPED="${1:-1}"
-  # shellcheck disable=SC2034
-  BATS_TEST_COMPLETED=1
+  # if this is a skip in teardown ...
+  if [[ -n "$BATS_TEARDOWN_STARTED" ]]; then
+    # ... we want to skip the rest of teardown.
+    # communicate to bats_exit_trap that the teardown was completed without error
+    # shellcheck disable=SC2034
+    BATS_TEARDOWN_COMPLETED=1
+    # if we are already in the exit trap (e.g. due to previous skip) ...
+    if [[ "$BATS_TEARDOWN_STARTED" == as-exit-trap ]]; then
+      # ... we need to do the rest of the tear_down_trap that would otherwise be skipped after the next call to exit
+      bats_exit_trap
+      # and then do the exit (at the end of this function)
+    fi
+    # if we aren't in exit trap, the normal exit handling should suffice
+  else
+    # ... this is either skip in test or skip in setup.
+    # Following variables are used in bats-exec-test which sources this file
+    # shellcheck disable=SC2034
+    BATS_TEST_SKIPPED="${1:-1}"
+    # shellcheck disable=SC2034
+    BATS_TEST_COMPLETED=1
+  fi
   exit 0
 }
 

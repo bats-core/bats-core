@@ -52,6 +52,10 @@ source "$BATS_ROOT/lib/bats-core/tracing.bash"
 bats_teardown_trap() {
   bats_error_trap
   local status=0
+  # mark the start of this function to distinguish where skip is called
+  # parameter 1 will signify the reason why this function was called
+  # this is used to identify when this is called as exit trap function
+  BATS_TEARDOWN_STARTED=${1:-1}
   teardown >>"$BATS_OUT" 2>&1 || status="$?"
 
   if [[ $status -eq 0 ]]; then
@@ -142,7 +146,8 @@ bats_perform_test() {
   BATS_ERROR_STATUS=
   trap 'bats_debug_trap "$BASH_SOURCE"' DEBUG
   trap 'bats_error_trap' ERR
-  trap 'bats_teardown_trap' EXIT
+  # mark this call as trap call
+  trap 'bats_teardown_trap as-exit-trap' EXIT
 
   "$BATS_TEST_NAME" >>"$BATS_OUT" 2>&1
 

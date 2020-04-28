@@ -162,3 +162,7 @@ fixtures suite
   [ "${lines[1]}" = 'ok 1 baz in a' ]
   [ "${lines[2]}" = 'ok 2 bar_in_b' ]
 }
+
+@test "skip is handled correctly in setup, test, and teardown" {
+  bats "${FIXTURE_ROOT}/skip"
+}
