@@ -156,15 +156,18 @@ bats_run_tests() {
   if [[ "$num_jobs" != 1 ]]; then
     test_pids_and_numbers=()
     output_folder="$BATS_RUN_TMPDIR/parallel_output"
+    parallel_log_file="$BATS_RUN_TMPDIR/parallel.log"
     for test_name in "${tests_to_run[@]}"; do
       # Only handle non-empty lines
       if [[ $test_name ]]; then
         ((++test_number))
+        test_output_dir="$output_folder/$test_number"
+        mkdir -p "$test_output_dir"
         # parallelize across files using parallel's semaphore mode
         # use --results to gather output in separate files
         # use --fg mode to retrieve exit codes (all non zero exit codes seem to mapped to 1), but which requires us to suppress its output
         # shellcheck disable=SC2154 #bats_parallel_args is inherited from exec-suite
-        parallel --semaphore -j "$num_jobs" "${bats_parallel_args[@]}" --fg --results "$output_folder/$test_number/{}" -- bats-exec-test "${flags[@]}" "$filename" "$test_name" "$test_number" 2>/dev/null >/dev/null &
+        parallel --semaphore -j "$num_jobs" "${bats_parallel_args[@]}" --fg --results "$test_output_dir/{}/" -- bats-exec-test "${flags[@]}" "$filename" "$test_name" "$test_number" >>"$parallel_log_file" 2>&1 &
         pid=$!
         test_pids_and_numbers+=("$pid,$test_number")
       fi
