@@ -49,6 +49,7 @@ HELP_TEXT_BODY
 }
 
 expand_link() {
+  readlink="$(command -v greadlink readlink | head -1)"
   IFS='/' read -ra parts <<<"$1"
 
   # Starting point.
@@ -61,7 +62,7 @@ expand_link() {
     [ -e "$path/$part" ] || return 1
 
     # If it's a link, we need to resolve it first.
-    [ -L "$path/$part" ] && part="$(readlink "$path/$part")"
+    [ -L "$path/$part" ] && part="$("$readlink" "$path/$part")"
 
     # If the component starts with "/" we stomp the existing $path.
     [[ "$part" =~ ^/ ]] && path=""
