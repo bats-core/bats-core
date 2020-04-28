@@ -8,6 +8,10 @@ setup () {
   true
 }
 
+@test "skip in setup, test and teardown" {
+  skip
+}
+
 teardown() {
 	skip "This is not working (https://github.com/clearcontainers/runtime/issues/1042)"
 }
