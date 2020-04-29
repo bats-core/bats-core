@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-export BATS_VERSION='1.1.0'
+export BATS_VERSION='1.2.0'
 
 version() {
   printf 'Bats %s\n' "$BATS_VERSION"
@@ -17,26 +17,62 @@ usage() {
   local cmd="${0##*/}"
   local line
 
-  while IFS= read -r line; do
-    printf '%s\n' "$line"
-  done <<END_OF_HELP_TEXT
-Usage: $cmd [-cr] [-f <regex>] [-p | -t] <test>...
-       $cmd [-h | -v]
+  cat <<HELP_TEXT_HEADER
+Usage: ${cmd} [OPTIONS] <tests>
+       ${cmd} [-h | -v]
 
-  <test> is the path to a Bats test file, or the path to a directory
-  containing Bats test files (ending with ".bats").
+HELP_TEXT_HEADER
 
-  -c, --count      Count the number of test cases without running any tests
-  -f, --filter     Filter test cases by names matching the regular expression
-  -h, --help       Display this help message
-  -p, --pretty     Show results in pretty format (default for terminals)
-  -r, --recursive  Include tests in subdirectories
-  -t, --tap        Show results in TAP format
-  -v, --version    Display the version number
+  cat <<'HELP_TEXT_BODY'
+  <tests> is the path to a Bats test file, or the path to a directory
+  containing Bats test files (ending with ".bats")
+
+  -c, --count               Count test cases without running any tests
+  -f, --filter <regex>      Only run tests that match the regular expression
+  -F, --formatter <type>    Switch between formatters: pretty (default),
+                              tap (default w/o term), junit
+  -h, --help                Display this help message
+  -j, --jobs <jobs>         Number of parallel jobs (requires GNU parallel)
+  --parallel-preserve-environment
+                            Preserve the current environment for "--jobs"
+                              (run `parallel --record-env` before)
+  --no-tempdir-cleanup      Preserve test output temporary directory
+  -o, --output <dir>        Directory to write report files
+  -p, --pretty              Shorthand for "--formatter pretty"
+  -r, --recursive           Include tests in subdirectories
+  -t, --tap                 Shorthand for "--formatter tap"
+  -T, --timing              Add timing information to tests
+  -v, --version             Display the version number
 
   For more information, see https://github.com/bats-core/bats-core
+HELP_TEXT_BODY
+}
 
-END_OF_HELP_TEXT
+expand_link() {
+  readlink="$(command -v greadlink readlink | head -1)"
+  IFS='/' read -ra parts <<<"$1"
+
+  # Starting point.
+  local path="/"
+  [[ "$1" =~ ^/ ]] || path="."
+
+  # Process each component.
+  for part in "${parts[@]}"; do
+    # All components must exist.
+    [ -e "$path/$part" ] || return 1
+
+    # If it's a link, we need to resolve it first.
+    [ -L "$path/$part" ] && part="$("$readlink" "$path/$part")"
+
+    # If the component starts with "/" we stomp the existing $path.
+    [[ "$part" =~ ^/ ]] && path=""
+
+    # Add the component to the path.
+    path+="/$part"
+  done
+
+  # Remove any duplicate slashes.
+  echo "$path" | tr -s /
 }
 
 expand_path() {
@@ -54,11 +90,19 @@ expand_path() {
   printf -v "$result" '%s/%s' "$dirname" "${path##*/}"
 }
 
+BATS_LIBEXEC="$(dirname "$(expand_link "${BASH_SOURCE[0]}")")"
 export BATS_CWD="$PWD"
 export BATS_TEST_PATTERN="^[[:blank:]]*@test[[:blank:]]+(.*[^[:blank:]])[[:blank:]]+\{(.*)\$"
 export BATS_TEST_PATTERN_COMMENT="[[:blank:]]*([^[:blank:]()]+)[[:blank:]]*\(?\)?[[:blank:]]*\{[[:blank:]]*#[[:blank:]]*@test[[:blank:]]*\$"
 export BATS_TEST_FILTER=
-export PATH="$BATS_ROOT/libexec/bats-core:$PATH"
+export PATH="$BATS_LIBEXEC:$PATH"
+export BATS_ROOT_PID=$$
+if [[ -z "$TMPDIR" ]]; then
+  export BATS_TMPDIR="/tmp"
+else
+  export BATS_TMPDIR="${TMPDIR%/}"
+fi
+export BATS_RUN_TMPDIR="$BATS_TMPDIR/bats-run-$BATS_ROOT_PID"
 
 arguments=()
 
@@ -81,40 +125,74 @@ done
 set -- "${arguments[@]}"
 arguments=()
 
-unset flags pretty recursive
+unset flags recursive formatter_flags
 flags=()
-pretty=
+formatter_flags=()
+formatter='tap'
 recursive=
+tempdir_cleanup=1
+output=
 if [[ -z "${CI:-}" && -t 0 && -t 1 ]] && command -v tput >/dev/null; then
-  pretty=1
+  formatter='pretty'
 fi
 
 while [[ "$#" -ne 0 ]]; do
   case "$1" in
-  -h|--help)
+  -h | --help)
     version
     usage
     exit 0
     ;;
-  -v|--version)
+  -v | --version)
     version
     exit 0
     ;;
-  -c|--count)
+  -c | --count)
     flags+=('-c')
     ;;
-  -f|--filter)
+  -f | --filter)
     shift
     flags+=('-f' "$1")
     ;;
-  -r|--recursive)
+  -F | --formatter)
+    shift
+    if [[ $1 =~ ^(pretty|junit|tap)$ ]]; then
+      formatter="$1"
+    else
+      printf "Unknown formatter '%s', valid options are pretty, junit, tap\n" "$1"
+      exit 1
+    fi
+    ;;
+  -o | --output)
+    shift
+    output="$1"
+    ;;
+  -p | --pretty)
+    formatter='pretty'
+    ;;
+  -j | --jobs)
+    shift
+    flags+=('-j' "$1")
+    ;;
+  -r | --recursive)
     recursive=1
     ;;
-  -t|--tap)
-    pretty=
+  -t | --tap)
+    formatter='tap'
     ;;
-  -p|--pretty)
-    pretty=1
+  -T | --timing)
+    flags+=('-T')
+    formatter_flags+=('-T')
+    ;;
+  --parallel-preserve-environment)
+    flags+=("--parallel-preserve-environment")
+    # check if parallel's env setup was run before
+    # will print on stderr and return 255 on failure
+    # suppress stdout (on success)
+    parallel --env _ echo ::: 1 >/dev/null || exit 1
+    ;;
+  --no-tempdir-cleanup)
+    tempdir_cleanup=''
     ;;
   -*)
     abort "Bad command line option '$1'"
@@ -126,8 +204,34 @@ while [[ "$#" -ne 0 ]]; do
   shift
 done
 
+if [[ -d "$BATS_RUN_TMPDIR" ]]; then
+  printf "Error: BATS_RUN_TMPDIR (%s) already exists\n" "$BATS_RUN_TMPDIR" >&2
+  printf "Reusing old run directories can lead to unexpected results ... aborting!\n" >&2
+  exit 1
+fi
+mkdir -p "$BATS_RUN_TMPDIR"
+if [[ -n "$tempdir_cleanup" ]]; then
+  trap 'rm -rf "$BATS_RUN_TMPDIR"' ERR EXIT
+fi
+
+if [[ "$formatter" != "tap" ]]; then
+  flags+=('-x')
+fi
+if [[ "$formatter" == "junit" ]]; then
+  flags+=('-T')
+  formatter_flags+=('-T')
+fi
+
 if [[ "${#arguments[@]}" -eq 0 ]]; then
   abort 'Must specify at least one <test>'
+fi
+
+
+if [[ -n "$output" ]]; then
+  if [[ ! -w "${output}" ]]; then
+    abort "Output path ${output} is not writeable"
+  fi
+  export BATS_REPORT_OUTPUT_PATH="$output"
 fi
 
 filenames=()
@@ -151,15 +255,8 @@ for filename in "${arguments[@]}"; do
   fi
 done
 
-if [[ "${#filenames[@]}" -eq 1 ]]; then
-  command='bats-exec-test'
-else
-  command='bats-exec-suite'
-fi
+# shellcheck source=lib/bats-core/validator.bash
+source "$BATS_ROOT/lib/bats-core/validator.bash"
 
 set -o pipefail execfail
-if [[ -z "$pretty" ]]; then
-  exec "$command" "${flags[@]}" "${filenames[@]}"
-else
-  exec "$command" -x "${flags[@]}" "${filenames[@]}" | bats-format-tap-stream
-fi
+exec bats-exec-suite "${flags[@]}" "${filenames[@]}" | bats_test_count_validator | "bats-format-${formatter}" "${formatter_flags[@]}"

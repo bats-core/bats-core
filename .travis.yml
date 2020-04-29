@@ -11,6 +11,7 @@ env:
   - BASHVER=4.2
   - BASHVER=4.3
   - BASHVER=4.4
+  - BASHVER=5
 
 matrix:
   include:
@@ -19,14 +20,25 @@ matrix:
 services:
   - docker
 
+before_script:
+ - |
+   if [[ "${TRAVIS_OS_NAME:-}" == 'linux' ]]; then
+     sudo apt-get install shellcheck
+   fi
+
 script:
 - |
-  if [[ "$TRAVIS_OS_NAME" == 'linux' && -n "$BASHVER" ]]; then
-    docker build --build-arg bashver=${BASHVER} --tag bats/bats:bash-${BASHVER} .
-    docker run -it bash:${BASHVER} --version
-    time docker run -it bats/bats:bash-${BASHVER} --tap /opt/bats/test
+  if [[ "${TRAVIS_OS_NAME:-}" == 'linux' ]]; then
+    # @todo: Remove "|| true" once all coding standards issues are fixed.
+    ./shellcheck.sh
+  fi
+
+  if [[ "${TRAVIS_OS_NAME:-}" == 'linux' && -n "${BASHVER}" ]]; then
+    docker build --build-arg bashver="${BASHVER}" --tag "bats/bats:bash-${BASHVER}" . &&
+      docker run -it "bash:${BASHVER}" --version &&
+      time docker run -it "bats/bats:bash-${BASHVER}" --tap /opt/bats/test
   else
-    time bin/bats --tap test
+    time bin/bats --formatter tap test
   fi
 
 notifications:

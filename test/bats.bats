@@ -61,7 +61,7 @@ fixtures bats
 }
 
 @test "tap passing and skipping tests" {
-  run filter_control_sequences bats --tap "$FIXTURE_ROOT/passing_and_skipping.bats"
+  run filter_control_sequences bats --formatter tap "$FIXTURE_ROOT/passing_and_skipping.bats"
   [ $status -eq 0 ]
   [ "${lines[0]}" = "1..3" ]
   [ "${lines[1]}" = "ok 1 a passing test" ]
@@ -82,7 +82,7 @@ fixtures bats
 }
 
 @test "tap passing, failing and skipping tests" {
-  run filter_control_sequences bats --tap "$FIXTURE_ROOT/passing_failing_and_skipping.bats"
+  run filter_control_sequences bats --formatter tap "$FIXTURE_ROOT/passing_failing_and_skipping.bats"
   [ $status -eq 0 ]
   [ "${lines[0]}" = "1..3" ]
   [ "${lines[1]}" = "ok 1 a passing test" ]
@@ -163,6 +163,7 @@ fixtures bats
 @test "passing test with teardown failure" {
   PASS=1 run bats "$FIXTURE_ROOT/failing_teardown.bats"
   [ $status -eq 1 ]
+  echo "$output"
   [ "${lines[1]}" = 'not ok 1 truth' ]
   [ "${lines[2]}" = "# (from function \`teardown' in test file $RELATIVE_FIXTURE_ROOT/failing_teardown.bats, line 2)" ]
   [ "${lines[3]}" = "#   \`eval \"( exit \${STATUS:-1} )\"' failed" ]
@@ -195,6 +196,11 @@ fixtures bats
   [ $status -eq 0 ]
 }
 
+@test "load sources relative scripts with filename extension" {
+  HELPER_NAME="test_helper.bash" run bats "$FIXTURE_ROOT/load.bats"
+  [ $status -eq 0 ]
+}
+
 @test "load aborts if the specified script does not exist" {
   HELPER_NAME="nonexistent" run bats "$FIXTURE_ROOT/load.bats"
   [ $status -eq 1 ]
@@ -208,6 +214,19 @@ fixtures bats
 @test "load aborts if the script, specified by an absolute path, does not exist" {
   HELPER_NAME="${FIXTURE_ROOT}/nonexistent" run bats "$FIXTURE_ROOT/load.bats"
   [ $status -eq 1 ]
+}
+
+@test "load relative script with ambiguous name" {
+  HELPER_NAME="ambiguous" run bats "$FIXTURE_ROOT/load.bats"
+  [ $status -eq 0 ]
+}
+
+@test "load supports scripts on the PATH" {
+  path_dir="$BATS_TMPNAME/path"
+  mkdir -p "$path_dir"
+  cp "${FIXTURE_ROOT}/test_helper.bash" "${path_dir}/on_path"
+  PATH="${path_dir}:$PATH"  HELPER_NAME="on_path" run bats "$FIXTURE_ROOT/load.bats"
+  [ $status -eq 0 ]
 }
 
 @test "output is discarded for passing tests and printed for failing tests" {
@@ -263,16 +282,42 @@ fixtures bats
 }
 
 @test "extended syntax" {
-  run bats-exec-test -x "$FIXTURE_ROOT/failing_and_passing.bats"
+  emulate_bats_env
+  run bats-exec-suite -x "$FIXTURE_ROOT/failing_and_passing.bats"
+  echo "$output"
   [ $status -eq 1 ]
-  [ "${lines[1]}" = 'begin 1 a failing test' ]
-  [ "${lines[2]}" = 'not ok 1 a failing test' ]
-  [ "${lines[5]}" = 'begin 2 a passing test' ]
-  [ "${lines[6]}" = 'ok 2 a passing test' ]
+  [ "${lines[1]}" = 'suite failing_and_passing.bats' ]
+  [ "${lines[2]}" = 'begin 1 a failing test' ]
+  [ "${lines[3]}" = 'not ok 1 a failing test' ]
+  [ "${lines[6]}" = 'begin 2 a passing test' ]
+  [ "${lines[7]}" = 'ok 2 a passing test' ]
+}
+
+@test "timing syntax" {
+  run bats -T "$FIXTURE_ROOT/failing_and_passing.bats"
+  echo "$output"
+  [ $status -eq 1 ]
+  regex='not ok 1 a failing test in [0-1]sec'
+  [[ "${lines[1]}" =~ $regex ]]
+  regex='ok 2 a passing test in [0-1]sec'
+  [[ "${lines[4]}" =~ $regex ]]
+}
+
+@test "extended timing syntax" {
+  emulate_bats_env
+  run bats-exec-suite -x -T "$FIXTURE_ROOT/failing_and_passing.bats"
+  echo "$output"
+  [ $status -eq 1 ]
+  regex="not ok 1 a failing test in [0-1]sec"
+  [ "${lines[2]}" = 'begin 1 a failing test' ]
+  [[ "${lines[3]}" =~ $regex ]]
+  [ "${lines[6]}" = 'begin 2 a passing test' ]
+  regex="ok 2 a passing test in [0-1]sec"
+  [[ "${lines[7]}" =~ $regex ]]
 }
 
 @test "pretty and tap formats" {
-  run bats --tap "$FIXTURE_ROOT/passing.bats"
+  run bats --formatter tap "$FIXTURE_ROOT/passing.bats"
   tap_output="$output"
   [ $status -eq 0 ]
 
@@ -284,8 +329,8 @@ fixtures bats
 }
 
 @test "pretty formatter bails on invalid tap" {
-  run bats --tap "$FIXTURE_ROOT/invalid_tap.bats"
-  [ $status -eq 1 ]
+  run bats-format-pretty < <(printf "This isn't TAP!\nGood day to you\n")
+  [ $status -eq 0 ]
   [ "${lines[0]}" = "This isn't TAP!" ]
   [ "${lines[1]}" = "Good day to you" ]
 }
@@ -378,19 +423,19 @@ END_OF_ERR_MSG
   [ "${lines[11]}" = 'ok 11 ' ]   # empty name from single quote
 }
 
-@test "duplicate tests cause a warning on stderr" {
-  run bats "$FIXTURE_ROOT/duplicate-tests.bats"
+@test "duplicate tests error and generate a warning on stderr" {
+  run bats --tap "$FIXTURE_ROOT/duplicate-tests.bats"
   [ $status -eq 1 ]
 
-  local expected='bats warning: duplicate test name(s) in '
-  expected+="$FIXTURE_ROOT/duplicate-tests.bats: test_gizmo_test"
+  local expected='Error: Duplicate test name(s) in file '
+  expected+="\"${FIXTURE_ROOT}/duplicate-tests.bats\": test_gizmo_test"
 
   printf 'expected: "%s"\n' "$expected" >&2
   printf 'actual:   "%s"\n' "${lines[0]}" >&2
   [ "${lines[0]}" = "$expected" ]
 
   printf 'num lines: %d\n' "${#lines[*]}" >&2
-  [ "${#lines[*]}" = "7" ]
+  [ "${#lines[*]}" = "1" ]
 }
 
 @test "sourcing a nonexistent file in setup produces error output" {
@@ -465,6 +510,71 @@ END_OF_ERR_MSG
   [ "${lines[4]}" = '# foo' ]
   [ "${lines[5]}" = '# bar' ]
   [ "${lines[6]}" = '# baz' ]
+}
+
+@test "run tests which consume stdin (see #197)" {
+  run bats "$FIXTURE_ROOT/read_from_stdin.bats"
+  [ "$status" -eq 0 ]
+  [[ "${lines[0]}" == "1..3" ]]
+  [[ "${lines[1]}" == "ok 1 test 1" ]]
+  [[ "${lines[2]}" == "ok 2 test 2 with	TAB in name" ]]
+  [[ "${lines[3]}" == "ok 3 test 3" ]]
+}
+
+@test "report correct line on unset variables" {
+  run bats "$FIXTURE_ROOT/unbound_variable.bats"
+  [ "$status" -eq 1 ]
+  [ "${#lines[@]}" -eq 9 ]
+  [ "${lines[1]}" = 'not ok 1 access unbound variable' ]
+  [ "${lines[2]}" = "# (in test file $RELATIVE_FIXTURE_ROOT/unbound_variable.bats, line 8)" ]
+  [ "${lines[3]}" = "#   \`foo=\$unset_variable' failed" ]
+  [[ "${lines[4]}" =~ ".src: line 8:" ]]
+  [ "${lines[5]}" = 'not ok 2 access second unbound variable' ]
+  [ "${lines[6]}" = "# (in test file $RELATIVE_FIXTURE_ROOT/unbound_variable.bats, line 13)" ]
+  [ "${lines[7]}" = "#   \`foo=\$second_unset_variable' failed" ]
+  [[ "${lines[8]}" =~ ".src: line 13:" ]]
+}
+
+@test "report correct line on external function calls" {
+  run bats "$FIXTURE_ROOT/external_function_calls.bats"
+  [ "$status" -eq 1 ]
+
+  expectedNumberOfTests=12
+  linesOfOutputPerTest=3
+  [ "${#lines[@]}" -gt $((expectedNumberOfTests * linesOfOutputPerTest + 1)) ]
+
+  outputOffset=1
+  currentErrorLine=9
+  linesPerTest=5
+
+  for t in $(seq $expectedNumberOfTests); do
+    [[ "${lines[$outputOffset]}" =~ "not ok $t " ]]
+    # Skip backtrace into external function if set
+    if [[ "${lines[$((outputOffset + 1))]}" =~ "# (from function " ]]; then
+      outputOffset=$((outputOffset + 1))
+      parenChar=" "
+    else
+      parenChar="("
+    fi
+
+    [ "${lines[$((outputOffset + 1))]}" = "# ${parenChar}in test file $RELATIVE_FIXTURE_ROOT/external_function_calls.bats, line $currentErrorLine)" ]
+    [[ "${lines[$((outputOffset + 2))]}" =~ " failed" ]]
+    outputOffset=$((outputOffset + 3))
+    currentErrorLine=$((currentErrorLine + linesPerTest))
+  done
+}
+
+@test "test count validator catches mismatch and returns non zero" {
+  source "$BATS_ROOT/lib/bats-core/validator.bash"
+  export -f bats_test_count_validator
+  run bash -c "echo $'1..1\n' | bats_test_count_validator"
+  [[ $status -ne 0 ]]
+
+  run bash -c "echo $'1..1\nok 1\nok 2' | bats_test_count_validator"
+  [[ $status -ne 0 ]]
+
+  run bash -c "echo $'1..1\nok 1' | bats_test_count_validator"
+  [[ $status -eq 0 ]]
 }
 
 @test "test comment style" {

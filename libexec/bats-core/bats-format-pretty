@@ -1,0 +1,247 @@
+#!/usr/bin/env bash
+set -e
+
+while [[ "$#" -ne 0 ]]; do
+  case "$1" in
+  -T)
+    BATS_ENABLE_TIMING="-T"
+    ;;
+  esac
+  shift
+done
+
+header_pattern='[0-9]+\.\.[0-9]+'
+IFS= read -r header
+
+update_count_column_width() {
+  count_column_width=$((${#count} * 2 + 2))
+  if [[ -n "$BATS_ENABLE_TIMING" ]]; then
+    # additional space for ' in %s sec'
+    count_column_width=$((count_column_width + ${#SECONDS} + 8))
+  fi
+  # also update dependent value
+  update_count_column_left
+}
+
+update_screen_width() {
+  screen_width="$(tput cols)"
+  # also update dependent value
+  update_count_column_left
+}
+
+update_count_column_left() {
+  count_column_left=$((screen_width - count_column_width))
+}
+
+if [[ "$header" =~ $header_pattern ]]; then
+  count="${header:3}"
+  index=0
+  passed=0
+  failures=0
+  skipped=0
+  name=
+  update_count_column_width
+else
+  # If the first line isn't a TAP plan, print it and pass the rest through
+  printf '%s\n' "$header"
+  exec cat
+fi
+
+trap update_screen_width WINCH
+update_screen_width
+
+begin() {
+  go_to_column 0
+  update_count_column_width
+  buffer_with_truncation $((count_column_left - 1)) '   %s' "$name"
+  clear_to_end_of_line
+  go_to_column $count_column_left
+  if [[ -n "$BATS_ENABLE_TIMING" ]]; then
+    buffer "%${#count}s/${count} in %s sec" "$index" "$SECONDS"
+  else
+    buffer "%${#count}s/${count}" "$index"
+  fi
+  go_to_column 1
+}
+
+pass() {
+  go_to_column 0
+  if [[ -n "$BATS_ENABLE_TIMING" ]]; then
+    buffer ' ✓ %s [%s]' "$name" "$1"
+  else
+    buffer ' ✓ %s ' "$name"
+  fi
+  advance
+}
+
+skip() {
+  local reason="$1"
+  if [[ -n "$reason" ]]; then
+    reason=": $reason"
+  fi
+  go_to_column 0
+  buffer ' - %s (skipped%s)' "$name" "$reason"
+  advance
+}
+
+fail() {
+  go_to_column 0
+  set_color 1 bold
+  if [[ -n "$BATS_ENABLE_TIMING" ]]; then
+    buffer ' ✗ %s [%s]' "$name" "$1"
+  else
+    buffer ' ✗ %s' "$name"
+  fi
+  advance
+}
+
+log() {
+  set_color 1
+  buffer '   %s\n' "$1"
+  clear_color
+}
+
+summary() {
+  buffer '\n%d test' "$count"
+  if [[ "$count" -ne 1 ]]; then
+    buffer 's'
+  fi
+
+  buffer ', %d failure' "$failures"
+  if [[ "$failures" -ne 1 ]]; then
+    buffer 's'
+  fi
+
+  if [[ "$skipped" -gt 0 ]]; then
+    buffer ', %d skipped' "$skipped"
+  fi
+
+  not_run=$((count - passed - failures - skipped))
+  if [[ "$not_run" -gt 0 ]]; then
+    buffer ', %d not run' "$not_run"
+  fi
+
+  if [[ -n "$BATS_ENABLE_TIMING" ]]; then
+    buffer " in $SECONDS seconds"
+  fi
+
+  buffer '\n'
+}
+
+buffer_with_truncation() {
+  local width="$1"
+  shift
+  local string
+
+  # shellcheck disable=SC2059
+  printf -v 'string' -- "$@"
+
+  if [[ "${#string}" -gt "$width" ]]; then
+    buffer '%s...' "${string:0:$((width - 4))}"
+  else
+    buffer '%s' "$string"
+  fi
+}
+
+go_to_column() {
+  local column="$1"
+  buffer '\x1B[%dG' $((column + 1))
+}
+
+clear_to_end_of_line() {
+  buffer '\x1B[K'
+}
+
+advance() {
+  clear_to_end_of_line
+  buffer '\n'
+  clear_color
+}
+
+set_color() {
+  local color="$1"
+  local weight=22
+
+  if [[ "$2" == 'bold' ]]; then
+    weight=1
+  fi
+  buffer '\x1B[%d;%dm' "$((30 + color))" "$weight"
+}
+
+clear_color() {
+  buffer '\x1B[0m'
+}
+
+_buffer=
+
+buffer() {
+  local content
+  # shellcheck disable=SC2059
+  printf -v content -- "$@"
+  _buffer+="$content"
+}
+
+flush() {
+  printf '%s' "$_buffer"
+  [[ -n "$BATS_REPORT_OUTPUT_PATH" ]] && printf '%s' "$_buffer" | tee "$BATS_REPORT_OUTPUT_PATH/report.tap" >/dev/null
+  _buffer=
+}
+
+finish() {
+  flush
+  printf '\n'
+}
+
+trap finish EXIT
+
+timing_expr="in (([0-9]+sec))$"
+
+while IFS= read -r line; do
+  case "$line" in
+  'begin '*)
+    ((++index))
+    name="${line#* $index }"
+    begin
+    flush
+    ;;
+  'ok '*)
+    skip_expr="ok $index (.*) # skip ?(([[:print:]]*))?"
+    if [[ "$line" =~ $skip_expr ]]; then
+      ((++skipped))
+      skip "${BASH_REMATCH[2]}"
+    else
+      ((++passed))
+      if [[ -n "$BATS_ENABLE_TIMING" ]]; then
+        if [[ "$line" =~ $timing_expr ]]; then
+          pass "${BASH_REMATCH[2]}"
+        else
+          echo "Could not match output line to timing regex: $line" >&2
+          exit 1
+        fi
+      else
+        pass
+      fi
+    fi
+    ;;
+  'not ok '*)
+    ((++failures))
+    if [[ -n "$BATS_ENABLE_TIMING" ]]; then
+      if [[ "$line" =~ $timing_expr ]]; then
+        fail "${BASH_REMATCH[2]}"
+      else
+        echo "Could not match failure line to timing regex: $line" >&2
+        exit 1
+      fi
+    else
+      fail
+    fi
+    ;;
+  '# '*)
+    log "${line:2}"
+    ;;
+  'suite '*) ;;
+
+  esac
+done
+
+summary

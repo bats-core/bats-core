@@ -1,3 +1,13 @@
+emulate_bats_env() {
+  export BATS_CWD="$PWD"
+  export BATS_TEST_PATTERN="^[[:blank:]]*@test[[:blank:]]+(.*[^[:blank:]])[[:blank:]]+\{(.*)\$"
+  export BATS_TEST_FILTER=
+  export BATS_ROOT_PID=$$
+  export BATS_EMULATED_RUN_TMPDIR="$BATS_TMPDIR/bats-run-$BATS_ROOT_PID"
+  export BATS_RUN_TMPDIR="$BATS_EMULATED_RUN_TMPDIR"
+  mkdir -p "$BATS_RUN_TMPDIR"
+}
+
 fixtures() {
   FIXTURE_ROOT="$BATS_TEST_DIRNAME/fixtures/$1"
   RELATIVE_FIXTURE_ROOT="${FIXTURE_ROOT#$BATS_CWD/}"
@@ -26,5 +36,8 @@ emit_debug_output() {
 teardown() {
   if [[ -n "$BATS_TEST_SUITE_TMPDIR" ]]; then
     rm -rf "$BATS_TEST_SUITE_TMPDIR"
+  fi
+  if [[ -n "$BATS_EMULATED_RUN_TMPDIR" ]]; then
+    rm -rf "$BATS_EMULATED_RUN_TMPDIR"
   fi
 }

@@ -51,6 +51,7 @@ each line is an assertion of truth.
   * [Running Bats in Docker](#running-bats-in-docker)
     + [Building a Docker image](#building-a-docker-image)
 - [Usage](#usage)
+  * [Parallel Execution](#parallel-execution)
 - [Writing tests](#writing-tests)
   * [`run`: Test other commands](#run-test-other-commands)
   * [`load`: Share common code](#load-share-common-code)
@@ -60,6 +61,7 @@ each line is an assertion of truth.
   * [File descriptor 3 (read this if Bats hangs)](#file-descriptor-3-read-this-if-bats-hangs)
   * [Printing to the terminal](#printing-to-the-terminal)
   * [Special variables](#special-variables)
+  * [Libraries and Add-ons](#libraries-and-add-ons)
 - [Testing](#testing)
 - [Support](#support)
 - [Contributing](#contributing)
@@ -158,8 +160,8 @@ Check out a copy of the Bats repository, then build a container image:
     $ docker build --tag bats/bats:latest .
 
 This creates a local Docker image called `bats/bats:latest` based on [Alpine
-Linux](https://github.com/gliderlabs/docker-alpine/blob/master/docs/usage.md) 
-(to push to private registries, tag it with another organisation, e.g. 
+Linux](https://github.com/gliderlabs/docker-alpine/blob/master/docs/usage.md)
+(to push to private registries, tag it with another organisation, e.g.
 `my-org/bats:latest`).
 
 To run Bats' internal test suite (which is in the container image at
@@ -167,18 +169,23 @@ To run Bats' internal test suite (which is in the container image at
 
     $ docker run -it bats/bats:latest /opt/bats/test
 
-To run a test suite from your local machine, mount in a volume and direct Bats
-to its path inside the container:
+To run a test suite from a directory called `test` in the current directory of
+your local machine, mount in a volume and direct Bats to its path inside the
+container:
 
-    $ docker run -it -v "$(pwd):/code" bats/bats:latest /code/test
+    $ docker run -it -v "${PWD}:/code" bats/bats:latest test
 
-This is a minimal Docker image. If more tools are required this can be used as a 
-base image in a Dockerfile using `FROM <Docker image>`.  In the future there may 
+> `/code` is the working directory of the Docker image. "${PWD}/test" is the
+> location of the test directory on the local machine.
+
+This is a minimal Docker image. If more tools are required this can be used as a
+base image in a Dockerfile using `FROM <Docker image>`.  In the future there may
 be images based on Debian, and/or with more tools installed (`curl` and `openssl`,
 for example). If you require a specific configuration please search and +1 an
 issue or [raise a new issue](https://github.com/bats-core/bats-core/issues).
 
-Further usage examples are in [the wiki](https://github.com/bats-core/bats-core/wiki/Docker-Usage-Examples).
+Further usage examples are in
+[the wiki](https://github.com/bats-core/bats-core/wiki/Docker-Usage-Examples).
 
 ## Usage
 
@@ -190,19 +197,28 @@ supports:
 
 ```
 Bats x.y.z
-Usage: bats [-cr] [-f <regex>] [-p | -t] <test>...
+Usage: bats [OPTIONS] <tests>
        bats [-h | -v]
 
-  <test> is the path to a Bats test file, or the path to a directory
-  containing Bats test files (ending with ".bats").
+  <tests> is the path to a Bats test file, or the path to a directory
+  containing Bats test files (ending with ".bats")
 
-  -c, --count      Count the number of test cases without running any tests
-  -f, --filter     Filter test cases by names matching the regular expression
-  -h, --help       Display this help message
-  -p, --pretty     Show results in pretty format (default for terminals)
-  -r, --recursive  Include tests in subdirectories
-  -t, --tap        Show results in TAP format
-  -v, --version    Display the version number
+  -c, --count               Count test cases without running any tests
+  -f, --filter <regex>      Only run tests that match the regular expression
+  -F, --formatter <type>    Switch between formatters: pretty (default),
+                              tap (default w/o term), junit
+  -h, --help                Display this help message
+  -j, --jobs <jobs>         Number of parallel jobs (requires GNU parallel)
+  --parallel-preserve-environment
+                            Preserve the current environment for "--jobs"
+                              (run `parallel --record-env` before)
+  --no-tempdir-cleanup      Preserve test output temporary directory
+  -o, --output <dir>        Directory to write report files
+  -p, --pretty              Shorthand for "--formatter pretty"
+  -r, --recursive           Include tests in subdirectories
+  -t, --tap                 Shorthand for "--formatter tap"
+  -T, --timing              Add timing information to tests
+  -v, --version             Display the version number
 
   For more information, see https://github.com/bats-core/bats-core
 ```
@@ -229,13 +245,50 @@ If Bats is not connected to a terminal—in other words, if you run it from a
 continuous integration system, or redirect its output to a file—the results are
 displayed in human-readable, machine-parsable [TAP format][TAP].
 
-You can force TAP output from a terminal by invoking Bats with the `--tap`
+You can force TAP output from a terminal by invoking Bats with the `--formatter tap`
 option.
 
-    $ bats --tap addition.bats
+    $ bats --formatter tap addition.bats
     1..2
     ok 1 addition using bc
     ok 2 addition using dc
+
+By combining `-T` and `--formatter junit`, it is possible
+to output junit-compatible report files.
+
+    $ bats --formatter junit -T addition.bats
+    1..2
+    ok 1 addition using bc
+    ok 2 addition using dc
+
+Test reports will be output in the executing directory, but may be placed elsewhere
+by specifying the `--output` flag.
+
+    $ bats --formatter junit -T addition.bats --output /tmp
+    1..2
+    ok 1 addition using bc
+    ok 2 addition using dc
+
+### Parallel Execution
+
+By default, Bats will execute your tests serially. However, Bats supports
+parallel execution of tests (provided you have [GNU parallel][gnu-parallel] or
+a compatible replacement installed) using the `--jobs` parameter. This can
+result in your tests completing faster (depending on your tests and the testing
+hardware).
+
+Ordering of parallised tests is not guaranteed, so this mode may break suites
+with dependencies between tests (or tests that write to shared locations). When
+enabling `--jobs` for the first time be sure to re-run bats multiple times to
+identify any inter-test dependencies or non-deterministic test behaviour.
+
+If your code relies on variables from the environment, or from `setup_file()`,
+you need to specify `--parallel-preserve-environment` as well. Note that this
+requires running `parallel --record-env` first as a setup step as GNU Parallel
+will refuse to run without. Only environment variables that were **not** set
+during this setup step will be preserved!
+
+[gnu-parallel]: https://www.gnu.org/software/parallel/
 
 ## Writing tests
 
@@ -246,6 +299,8 @@ process.
 
 For more details about how Bats evaluates test files, see [Bats Evaluation
 Process][bats-eval] on the wiki.
+
+For sample test files, see [examples](/docs/examples).
 
 [bats-eval]: https://github.com/bats-core/bats-core/wiki/Bats-Evaluation-Process
 
@@ -353,6 +408,11 @@ You can define special `setup` and `teardown` functions, which run before and
 after each test case, respectively. Use these to load fixtures, set up your
 environment, and clean up when you're done.
 
+You can also define `setup_file` and `teardown_file`, which will run once per file,
+before the first and after the last test, respectively.
+__WARNING__ these will not be run in parallel mode!
+
+
 ### Code outside of test cases
 
 You can include code in your test file outside of `@test` functions.  For
@@ -420,7 +480,7 @@ some detailed guidelines to refer to:
 
   - Text printed in such a way, will disable pretty formatting. Also, it will
     make output non-compliant with the TAP spec. The reason for this is that
-    each test file is evaluated n+1 times (as metioned
+    each test file is evaluated n+1 times (as mentioned
     [earlier](#writing-tests)). The first run will cause such output to be
     produced before the [_plan line_][tap-plan] is printed, contrary to the spec
     that requires the _plan line_ to be either the first or the last line of the
@@ -444,6 +504,21 @@ There are several global variables you can use to introspect on Bats tests:
   test file.
 * `$BATS_TMPDIR` is the location to a directory that may be used to store
   temporary files.
+
+### Libraries and Add-ons
+
+Bats supports loading external assertion libraries and helpers. Those under `bats-core` are officially supported libraries (integration tests welcome!):
+
+- https://github.com/bats-core/bats-assert - common assertions for Bats
+- https://github.com/bats-core/bats-support - supporting library for Bats test helpers
+- https://github.com/bats-core/bats-file - common filesystem assertions for Bats
+- https://github.com/bats-core/bats-detik - e2e tests of applications in K8s environments
+
+and some external libraries, supported on a "best-effort" basis:
+
+- https://github.com/ztombol/bats-docs (still relevant? Requires review)
+- https://github.com/grayhemp/bats-mock (as per #147)
+- https://github.com/jasonkarns/bats-mock (how is this different from grayhemp/bats-mock?)
 
 ## Testing
 
@@ -502,7 +577,7 @@ There was an initial [call for maintainers][call-maintain] for the original Bats
 
 ## Copyright
 
-© 2017-2018 bats-core organization
+© 2017-2020 bats-core organization
 
 © 2011-2016 Sam Stephenson
 

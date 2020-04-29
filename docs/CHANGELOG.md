@@ -11,12 +11,33 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 ## [Unreleased]
 
 ### Added
+* JUnit output and extensible formatter rewrite (#246) 
+* `load` function now reads from absolute and relative paths, and $PATH (#282)
+* Beginner-friendly examples in /docs/examples (#243)
+* @peshay's `bats-file` fork contributed to `bats-core/bats-file` (#276) 
+
+### Changed
+* Duplicate test names now error (previous behaviour was to issue a warning) (#286)
+* Changed default formatter in Docker to pretty by adding `ncurses` to Dockerfile, override with `--tap` (#239)
+* Replace "readlink -f" dependency with Bash solution (#217)
+
+## [1.2.0] - 2020-04-25
+
+Support parallel suite execution and filtering by test name.
+
+### Added
 * docs/CHANGELOG.md and docs/releasing.md (#122)
-* The `-f, --filter` flag to run only the tests matching a regular expression
-  (#126)
+* The `-f, --filter` flag to run only the tests matching a regular expression  (#126)
+* Optimize stack trace capture (#138)
+* `--jobs n` flag to support parallel execution of tests with GNU parallel (#172)
 
 ### Changed
 * AppVeyor builds are now semver-compliant (#123)
+* Add Bash 5 as test target (#181)
+* Always use upper case signal names to avoid locale dependent err… (#215)
+* Fix for tests reading from stdin (#227)
+* Fix wrong line numbers of errors in bash < 4.4 (#229)
+* Remove preprocessed source after test run (#232)
 
 ## [1.1.0] - 2018-07-08
 
