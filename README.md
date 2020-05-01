@@ -451,9 +451,9 @@ consumption, but if Bats is called with the `-t` flag, then the TAP stream is
 directly printed to the console.
 
 This has implications if you try to print custom text to the terminal. As
-mentioned in [File descriptor 3](#file-descriptor-3), bats provides a special
-file descriptor, `&3`, that you should use to print your custom text. Here are
-some detailed guidelines to refer to:
+mentioned in [File descriptor 3](#file-descriptor-3-read-this-if-bats-hangs),
+bats provides a special file descriptor, `&3`, that you should use to print
+your custom text. Here are some detailed guidelines to refer to:
 
 - Printing **from within a test function**:
   - To have text printed from within a test function you need to redirect the
