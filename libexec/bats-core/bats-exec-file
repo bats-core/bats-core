@@ -167,7 +167,7 @@ bats_run_tests() {
         # use --results to gather output in separate files
         # use --fg mode to retrieve exit codes (all non zero exit codes seem to mapped to 1), but which requires us to suppress its output
         # shellcheck disable=SC2154 #bats_parallel_args is inherited from exec-suite
-        parallel --semaphore -j "$num_jobs" "${bats_parallel_args[@]}" --fg --results "$test_output_dir/{}/" -- bats-exec-test "${flags[@]}" "$filename" "$test_name" "$test_number" >>"$parallel_log_file" 2>&1 &
+        parallel --semaphore -j "$num_jobs" "${bats_parallel_args[@]}" --fg -- bats-exec-test "${flags[@]}" "$filename" "$test_name" "$test_number" >"$test_output_dir/stdout" 2>"$test_output_dir/stderr" &
         pid=$!
         test_pids_and_numbers+=("$pid,$test_number")
       fi
