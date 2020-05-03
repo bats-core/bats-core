@@ -562,7 +562,7 @@ See `docs/CHANGELOG.md`.
 
 **Tuesday, September 19, 2017:** This was forked from [Bats][bats-orig] at
 commit [0360811][].  It was created via `git clone --bare` and `git push
---mirror`. See the [Background](#background) section above for more information.
+--mirror`.
 
 [bats-orig]: https://github.com/sstephenson/bats
 [0360811]: https://github.com/sstephenson/bats/commit/03608115df2071fff4eaaff1605768c275e5f81f
