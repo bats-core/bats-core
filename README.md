@@ -374,6 +374,39 @@ will _not_ be made available to callers of `load`.
 > it looks for `test_helper`). This behaviour is deprecated and subject to
 > change, please use exact filenames instead.
 
+`load` also supports loading files from absolute paths as well as files and
+libraries from the PATH-like variable `BATS_LIB_PATH`.
+
+__Note:__ `BATS_LIB_PATH` defaults to `$HOME/.bats/lib:/usr/lib/bats` if
+it is empty. This default will _not_ be appended if `BATS_LIB_PATH` is
+not empty. This is done to allow full control over which files may get
+used in test suites.
+
+In each case `load` will try permutations of the argument in the following order:
+
+- `${argument}.bash`
+- `${argument}`
+- `${argument}/load.bash`
+- `${argument}/load`
+
+If `${argument}` is a directory without a `load.bash` or `load` file,
+`load` will source all files ending in `.bash` inside of that directory.
+
+And for each entry in `BATS_LIB_PATH`:
+
+- `${entry}/${argument}.bash`
+- `${entry}/${argument}`
+- `${entry}/${argument}/load.bash`
+- `${entry}/${argument}/load`
+
+If `${entry}/${argument}` is a directory without a `load.bash` or `load` file,
+`load` will source all files ending in `.bash` inside of that directory.
+
+__Note:__ As seen above `load.bash` is the entry point for libraries and
+meant to load more files from its libraries and should only be used when
+conditional setup is required - such as calling a different binary based
+on the architecture, OS or distribution.
+
 ### `skip`: Easily skip tests
 
 Tests can be skipped by using the `skip` command at the point in a test you wish

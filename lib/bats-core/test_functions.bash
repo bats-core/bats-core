@@ -3,30 +3,89 @@
 BATS_TEST_DIRNAME="${BATS_TEST_FILENAME%/*}"
 BATS_TEST_NAMES=()
 
-# Shorthand for source-ing files relative to the BATS_TEST_DIRNAME,
-# optionally with a .bash suffix appended. If the argument doesn't
-# resolve relative to BATS_TEST_DIRNAME it is sourced as-is.
+# _load expects an absolute path to a file or directory to source.
+# If the argument is a file the file will be sourced or the same path
+# with the added suffix `.bash` exists it will be sourced.
+# If the argument is a directory _load checks of the file `load` or
+# `load.bash` inside - if it exists this file is loaded. If it doesn't
+# exist all files with the `.bash` suffix are sourced.
+#
+# Order with `/path/to/example` as argument:
+#  - /path/to/example.bash
+#  - /path/to/example
+#  - /path/to/example/load.bash
+#  - /path/to/example/load
+#  - /path/to/example/*.bash
+_load() {
+    local file="${1:?}"
+
+    if [[ "${file:0:1}" != "/" ]]; then
+        printf "Received argument with a relative path, expected absolute: %s\n" "$file" >&2
+        return 1
+    fi
+
+    local -a opts=(
+        "$file.bash"
+        "$file"
+        "$file/load.bash"
+        "$file/load"
+    )
+
+    for opt in "${opts[@]}"; do
+        if [[ -f "$opt" ]]; then
+            if ! source "$opt"; then
+                printf 'Sourcing file "%s" failed' "$contained" >&2
+                return 1
+            fi
+            return
+        fi
+    done
+
+    if [[ -d "$file" ]]; then
+        for contained in "$file"/*.bash; do
+            if ! source "$contained"; then
+                printf 'Sourcing file "%s" failed' "$contained" >&2
+                return 1
+            fi
+        done
+        return
+    fi
+
+    return 1
+}
+
+# Shorthand to source files relative to the test file
+# (BATS_TEST_DIRNAME) and from BATS_LIB_PATH.
 load() {
   local file="${1:?}"
 
-  # For backwards-compatibility first look for a .bash-suffixed file.
-  # TODO consider flipping the order here; it would be more consistent
-  # and less surprising to look for an exact-match first.
-  if [[ -f "${BATS_TEST_DIRNAME}/${file}.bash" ]]; then
-    file="${BATS_TEST_DIRNAME}/${file}.bash"
-  elif [[ -f "${BATS_TEST_DIRNAME}/${file}" ]]; then
-    file="${BATS_TEST_DIRNAME}/${file}"
+  # Check if target is absolute
+  if [[ "${file:0:1}" == "/" ]]; then
+    if ! _load "$file"; then
+      printf "Failed to load file or library '%s'\n" "$file" >&2
+      return 1
+    fi
+    return
   fi
 
-  if [[ ! -f "$file" ]] && ! type -P "$file" >/dev/null; then
-    printf 'bats: %s does not exist\n' "$file" >&2
-    exit 1
+  local bats_lib_path="$BATS_LIB_PATH"
+  if [[ -z "$bats_lib_path" ]]; then
+    bats_lib_path="$HOME/.bats/lib:/usr/lib/bats"
   fi
+  bats_lib_path="$BATS_TEST_DIRNAME:$bats_lib_path"
 
-  # Dynamically loaded user file provided outside of Bats.
-  # Note: 'source "$file" || exit' doesn't work on bash3.2.
-  # shellcheck disable=SC1090
-  source "${file}"
+  local -a parts
+  IFS=: read -ra parts <<< "$bats_lib_path"
+
+  for part in "${parts[@]}"; do
+    if _load "$part/$file"; then
+      # _load finished without error, file/library was sourced, return
+      return
+    fi
+  done
+
+  printf "Failed to load file or library based on argument '%s'\n" "$file" >&2
+  return 1
 }
 
 run() {
