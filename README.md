@@ -1,3 +1,8 @@
+> # :warning: WARNING: documentation of unreleased features ahead
+>
+> This is the current development version. You can find the documentation for v1.2.0 [here](../v1.2.0/README.md).
+> Please refer to [this list](docs/versions.md) for older versions.
+
 # Bats-core: Bash Automated Testing System (2018)
 
 [![Latest release](https://img.shields.io/github/release/bats-core/bats-core.svg)](https://github.com/bats-core/bats-core/releases/latest)
