@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-export BATS_VERSION='1.2.0'
+export BATS_VERSION='1.2.1'
 
 version() {
   printf 'Bats %s\n' "$BATS_VERSION"

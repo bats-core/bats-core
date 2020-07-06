@@ -1,4 +1,4 @@
-version: 'v1.2.0+appveyor.{build}'
+version: 'v1.2.1+appveyor.{build}'
 
 build: off
 
