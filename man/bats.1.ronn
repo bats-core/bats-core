@@ -57,8 +57,6 @@ OPTIONS
     Display this help message
   * `-j`, `--jobs <jobs>`:
     Number of parallel jobs (requires GNU parallel)
-  * `--parallel-preserve-environment`:
-    Preserve the current environment for "--jobs" (run `parallel --record-env` before)
   * `--no-tempdir-cleanup`:
     Preserve test output temporary directory
   * `--no-parallelize-across-files`

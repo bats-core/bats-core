@@ -33,9 +33,6 @@ HELP_TEXT_HEADER
                               tap (default w/o term), junit
   -h, --help                Display this help message
   -j, --jobs <jobs>         Number of parallel jobs (requires GNU parallel)
-  --parallel-preserve-environment
-                            Preserve the current environment for "--jobs"
-                              (run `parallel --record-env` before)
   --no-tempdir-cleanup      Preserve test output temporary directory
   --no-parallelize-across-files
                             Serialize test file execution instead of running
@@ -162,12 +159,8 @@ while [[ "$#" -ne 0 ]]; do
     flags+=('-T')
     formatter_flags+=('-T')
     ;;
+  # this flag is now a no-op, as it is the parallel default
   --parallel-preserve-environment)
-    flags+=("--parallel-preserve-environment")
-    # check if parallel's env setup was run before
-    # will print on stderr and return 255 on failure
-    # suppress stdout (on success)
-    parallel --env _ echo ::: 1 >/dev/null || exit 1
     ;;
   --no-parallelize-across-files)
     flags+=("--no-parallelize-across-files")
