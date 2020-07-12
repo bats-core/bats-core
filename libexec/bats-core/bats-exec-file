@@ -138,8 +138,8 @@ bats_run_tests() {
   status=0
   tests_to_run=()
   local line_number=0
-  # the global test numb
-  local test_number_in_suite=''
+  # the global test number must be visible to traps -> not local
+  test_number_in_suite=''
   while read -r test_line; do
     test_file=${test_line%%$'\t'*}
     test_name=${test_line##*$'\t'}
