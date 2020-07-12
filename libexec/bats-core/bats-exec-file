@@ -192,6 +192,7 @@ bats_run_tests() {
       if [[ $test_name ]]; then
         ((++test_number_in_suite))
         ((++test_number_in_file))
+        # deal with emtpty flags to avoid spurious "unbound variable" errors on Bash 4.3 and lower
         if [[ "${#flags[@]}" -gt 0 ]]; then
           bats-exec-test "${flags[@]}" "$filename" "$test_name" "$test_number_in_suite" "$test_number_in_file" || status=1
         else
