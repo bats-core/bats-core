@@ -146,6 +146,8 @@ test case.
 case.
 * `$BATS_TEST_NUMBER` is the (1-based) index of the current test case
 in the test file.
+* `$BATS_GLOBAL_TEST_NUMBER` is the (1-based) index of the current test 
+  case in the test run (over all files).
 * `$BATS_TMPDIR` is the location to a directory that may be used to
 store temporary files.
 

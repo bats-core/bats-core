@@ -530,6 +530,8 @@ There are several global variables you can use to introspect on Bats tests:
 * `$BATS_TEST_DESCRIPTION` is the description of the current test case.
 * `$BATS_TEST_NUMBER` is the (1-based) index of the current test case in the
   test file.
+* `$BATS_GLOBAL_TEST_NUMBER` is the (1-based) index of the current test case in
+ the test run (over all files).
 * `$BATS_TMPDIR` is the location to a directory that may be used to store
   temporary files.
 

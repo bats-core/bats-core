@@ -80,7 +80,7 @@ skip() {
 bats_test_begin() {
   BATS_TEST_DESCRIPTION="$1"
   if [[ -n "$BATS_EXTENDED_SYNTAX" ]]; then
-    printf 'begin %d %s\n' "$BATS_TEST_NUMBER" "$BATS_TEST_DESCRIPTION" >&3
+    printf 'begin %d %s\n' "$BATS_GLOBAL_TEST_NUMBER" "$BATS_TEST_DESCRIPTION" >&3
   fi
   setup
 }
