@@ -158,7 +158,6 @@ bats_run_tests() {
   if [[ "$num_jobs" != 1 ]]; then
     test_pids_and_numbers=()
     output_folder="$BATS_RUN_TMPDIR/parallel_output"
-    parallel_log_file="$BATS_RUN_TMPDIR/parallel.log"
     for test_name in "${tests_to_run[@]}"; do
       # Only handle non-empty lines
       if [[ $test_name ]]; then

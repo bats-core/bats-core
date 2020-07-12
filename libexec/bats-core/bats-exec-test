@@ -121,9 +121,9 @@ bats_exit_trap() {
 }
 
 bats_perform_test() {
-  BATS_TEST_NAME="$1"
-  BATS_SUITE_TEST_NUMBER="$2"
-  BATS_TEST_NUMBER="$3"
+  export BATS_TEST_NAME="$1"
+  export BATS_SUITE_TEST_NUMBER="$2"
+  export BATS_TEST_NUMBER="$3"
 
   if ! declare -F "$BATS_TEST_NAME" &>/dev/null; then
     printf "bats: unknown test name \`%s'\n" "$BATS_TEST_NAME" >&2
@@ -153,7 +153,7 @@ bats_perform_test() {
 
   BATS_TEST_COMPLETED=1
   trap 'bats_exit_trap' EXIT
-  bats_teardown_trap
+  bats_teardown_trap "" # pass empty parameter to signify call outside trap
 }
 
 # shellcheck source=lib/bats-core/preprocessing.bash

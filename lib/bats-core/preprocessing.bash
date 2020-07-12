@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
 if [[ -z "$TMPDIR" ]]; then
-	BATS_TMPDIR='/tmp'
+	export BATS_TMPDIR='/tmp'
 else
-	BATS_TMPDIR="${TMPDIR%/}"
+	export BATS_TMPDIR="${TMPDIR%/}"
 fi
 
 BATS_TMPNAME="$BATS_RUN_TMPDIR/bats.$$"
