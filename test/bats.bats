@@ -244,6 +244,27 @@ fixtures bats
   rm "${helper}"
 }
 
+@test "load doesn't support _declare_d symbols" {
+  local -r helper="${BATS_TMPDIR}/load_helper_declared"
+  {
+    echo "declare declared_variable='value of declared variable'"
+    echo "declare -r a_constant='constant value'"
+    echo "declare -i an_integer=0x7e4"
+    echo "declare -a an_array=(test me hard)"
+    echo "declare -x exported_variable='value of exported variable'"
+  } > "${helper}"
+
+  load "${helper}"
+
+  ! [ "${declared_variable:-}" = 'value of declared variable' ]
+  ! [ "${a_constant:-}" = 'constant value' ]
+  ! (( "${an_integer:-2019}" == 2020 ))
+  ! [ "${an_array[2]:-}" = 'hard' ]
+  ! [ "${exported_variable:-}" = 'value of exported variable' ]
+
+  rm "${helper}"
+}
+
 @test "output is discarded for passing tests and printed for failing tests" {
   run bats "$FIXTURE_ROOT/output.bats"
   [ $status -eq 1 ]
