@@ -229,6 +229,21 @@ fixtures bats
   [ $status -eq 0 ]
 }
 
+@test "load supports plain symbols" {
+  local -r helper="${BATS_TMPDIR}/load_helper_plain"
+  {
+    echo "plain_variable='value of plain variable'"
+    echo "plain_array=(test me hard)"
+  } > "${helper}"
+
+  load "${helper}"
+
+  [ "${plain_variable}" = 'value of plain variable' ]
+  [ "${plain_array[2]}" = 'hard' ]
+
+  rm "${helper}"
+}
+
 @test "output is discarded for passing tests and printed for failing tests" {
   run bats "$FIXTURE_ROOT/output.bats"
   [ $status -eq 1 ]
