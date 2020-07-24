@@ -359,9 +359,15 @@ location of the current test file. For example, if you have a Bats test in
 load test_helper.bash
 ```
 
-will source the script `test/test_helper.bash` in your test file. This can be
-useful for sharing functions to set up your environment or load fixtures.
-`load` delegates to Bash's `source` command after resolving relative paths.
+will source the script `test/test_helper.bash` in your test file (limitations
+apply, see below). This can be useful for sharing functions to set up your
+environment or load fixtures. `load` delegates to Bash's `source` command after
+resolving relative paths.
+
+As pointed out by @iatrou in https://www.tldp.org/LDP/abs/html/declareref.html,
+using the `declare` builtin restricts scope of a variable. Thus, since actual
+`source`-ing is performed in context of the `load` function, `declare`d symbols
+will _not_ be made available to callers of `load`.
 
 > For backwards compatibility `load` first searches for a file ending in
 > `.bash` (e.g. `load test_helper` searches for `test_helper.bash` before
