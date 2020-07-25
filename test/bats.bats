@@ -338,9 +338,9 @@ teardown() {
   run bats -T "$FIXTURE_ROOT/failing_and_passing.bats"
   echo "$output"
   [ $status -eq 1 ]
-  regex='not ok 1 a failing test in [0-1]sec'
+  regex='not ok 1 a failing test in [0-9]+ms'
   [[ "${lines[1]}" =~ $regex ]]
-  regex='ok 2 a passing test in [0-1]sec'
+  regex='ok 2 a passing test in [0-9]+ms'
   [[ "${lines[4]}" =~ $regex ]]
 }
 
@@ -349,11 +349,11 @@ teardown() {
   run bats-exec-suite -x -T "$FIXTURE_ROOT/failing_and_passing.bats"
   echo "$output"
   [ $status -eq 1 ]
-  regex="not ok 1 a failing test in [0-1]sec"
+  regex="not ok 1 a failing test in [0-9]+ms"
   [ "${lines[2]}" = 'begin 1 a failing test' ]
   [[ "${lines[3]}" =~ $regex ]]
   [ "${lines[6]}" = 'begin 2 a passing test' ]
-  regex="ok 2 a passing test in [0-1]sec"
+  regex="ok 2 a passing test in [0-9]+ms"
   [[ "${lines[7]}" =~ $regex ]]
 }
 

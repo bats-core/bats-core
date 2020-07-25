@@ -194,7 +194,7 @@ finish() {
 
 trap finish EXIT
 
-timing_expr="in (([0-9]+sec))$"
+timing_expr="in (([0-9]+ms))$"
 
 while IFS= read -r line; do
   case "$line" in

@@ -80,9 +80,9 @@ bats_exit_trap() {
     fi
   fi
 
-  BATS_TEST_TIME=""
+  BATS_TEST_TIME=''
   if [[ -z "${skipped}" && -n "$BATS_ENABLE_TIMING" ]]; then
-    BATS_TEST_TIME=" in "$((SECONDS - BATS_TEST_START_TIME))"sec"
+    BATS_TEST_TIME=" in "$(( $(get_mills_since_epoch) - BATS_TEST_START_TIME ))"ms"
   fi
 
   if [[ -z "$BATS_TEST_COMPLETED" || -z "$BATS_TEARDOWN_COMPLETED" ]]; then
@@ -120,6 +120,17 @@ bats_exit_trap() {
   exit "$status"
 }
 
+get_mills_since_epoch() {
+  local ms_since_epoch=$(date +%s%N)
+  if [[ "$ms_since_epoch" == *N ]]; then
+        ms_since_epoch=$(( $(date +%s) * 1000 ))
+  else
+        ms_since_epoch=$(( ms_since_epoch / 1000000 ))
+  fi
+
+  printf "%d\n" "$ms_since_epoch"
+}
+
 bats_perform_test() {
   export BATS_TEST_NAME="$1"
   export BATS_SUITE_TEST_NUMBER="$2"
@@ -149,6 +160,7 @@ bats_perform_test() {
   # mark this call as trap call
   trap 'bats_teardown_trap as-exit-trap' EXIT
 
+  BATS_TEST_START_TIME=$(get_mills_since_epoch)
   "$BATS_TEST_NAME" >>"$BATS_OUT" 2>&1
 
   BATS_TEST_COMPLETED=1
