@@ -117,7 +117,6 @@ bats_exit_trap() {
   fi
 
   rm -f "$BATS_OUT"
-  bats_cleanup_preprocessed_source
   exit "$status"
 }
 
@@ -162,6 +161,5 @@ source "$BATS_ROOT/lib/bats-core/preprocessing.bash"
 exec 3<&1
 
 # Run the given test.
-bats_preprocess_source
 bats_evaluate_preprocessed_source
 bats_perform_test "$@"

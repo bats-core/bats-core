@@ -12,7 +12,9 @@ BATS_PARENT_TMPNAME="$BATS_RUN_TMPDIR/bats.$PPID"
 BATS_OUT="${BATS_TMPNAME}.out" # used in bats-exec-file
 
 bats_preprocess_source() {
-	BATS_TEST_SOURCE="${BATS_TMPNAME}.src"
+	# export to make it visible to bats_evaluate_preprocessed_source
+	# since the latter runs in bats-exec-test's bash while this runs in bats-exec-file's
+	export BATS_TEST_SOURCE="${BATS_TMPNAME}.src"
 	bats-preprocess "$BATS_TEST_FILENAME" >"$BATS_TEST_SOURCE"
 	trap 'bats_cleanup_preprocessed_source' ERR EXIT
 	trap 'bats_cleanup_preprocessed_source; exit 1' INT
