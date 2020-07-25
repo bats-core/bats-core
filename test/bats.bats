@@ -615,11 +615,12 @@ END_OF_ERR_MSG
 
 @test "test comment style" {
   run bats "$FIXTURE_ROOT/comment_style.bats"
-  echo -e "<<<${lines[*]}>>>"
   [ $status -eq 0 ]
-  [ "${lines[0]}" = '1..4' ]
+  [ "${lines[0]}" = '1..6' ]
   [ "${lines[1]}" = 'ok 1 should_be_found' ]
   [ "${lines[2]}" = 'ok 2 should_be_found_with_trailing_whitespace' ]
   [ "${lines[3]}" = 'ok 3 should_be_found_with_parens' ]
   [ "${lines[4]}" = 'ok 4 should_be_found_with_parens_and_whitespace' ]
+  [ "${lines[5]}" = 'ok 5 should_be_found_with_function_and_parens' ]
+  [ "${lines[6]}" = 'ok 6 should_be_found_with_function_parens_and_whitespace' ]
 }
