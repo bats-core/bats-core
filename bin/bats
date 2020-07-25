@@ -2,68 +2,58 @@
 
 set -euo pipefail
 
-BATS_READLINK='true'
-BATS_REALPATH=''
-if command -v 'greadlink' >/dev/null; then
-  BATS_READLINK='greadlink'
-elif command -v 'readlink' >/dev/null; then
-  BATS_READLINK='readlink'
+if command -v greadlink >/dev/null; then
+  bats_readlinkf() {
+    greadlink -f "$1"
+  }
+else
+  bats_readlinkf() {
+    readlink -f "$1"
+  }
 fi
 
-if ! "${BATS_READLINK}" -m "$0" &>/dev/null; then
-  BATS_REALPATH='realpath'
+fallback_to_readlinkf_posix() {
+  bats_readlinkf() {
+    [ "${1:-}" ] || return 1
+    max_symlinks=40
+    CDPATH='' # to avoid changing to an unexpected directory
+
+    target=$1
+    [ -e "${target%/}" ] || target=${1%"${1##*[!/]}"} # trim trailing slashes
+    [ -d "${target:-/}" ] && target="$target/"
+
+    cd -P . 2>/dev/null || return 1
+    while [ "$max_symlinks" -ge 0 ] && max_symlinks=$((max_symlinks - 1)); do
+      if [ ! "$target" = "${target%/*}" ]; then
+        case $target in
+          /*) cd -P "${target%/*}/" 2>/dev/null || break ;;
+          *) cd -P "./${target%/*}" 2>/dev/null || break ;;
+        esac
+        target=${target##*/}
+      fi
+
+      if [ ! -L "$target" ]; then
+        target="${PWD%/}${target:+/}${target}"
+        printf '%s\n' "${target:-/}"
+        return 0
+      fi
+
+      # `ls -dl` format: "%s %u %s %s %u %s %s -> %s\n",
+      #   <file mode>, <number of links>, <owner name>, <group name>,
+      #   <size>, <date and time>, <pathname of link>, <contents of link>
+      # https://pubs.opengroup.org/onlinepubs/9699919799/utilities/ls.html
+      link=$(ls -dl -- "$target" 2>/dev/null) || break
+      target=${link#*" $target -> "}
+    done
+    return 1
+  }
+}
+
+if ! BATS_PATH=$(bats_readlinkf "${BASH_SOURCE[0]}" 2>/dev/null); then
+  fallback_to_readlinkf_posix
+  BATS_PATH=$(bats_readlinkf "${BASH_SOURCE[0]}")
 fi
 
-resolve_path() {
-  local path_to_bats=$1
-  local target_path
-
-  if [[ -L "${path_to_bats}" ]]; then
-    # Busybox has no readlink from coreutils
-    if [[ -n "$BATS_REALPATH" ]]; then
-      target_path="$("$BATS_REALPATH" "$path_to_bats")"
-      # we need to traverse the paths
-      target_path="$(dirname "$target_path")" # strip bats
-      target_path="$(dirname "$target_path")" # strip bin
-    else
-      target_path="$("$BATS_READLINK" -m "$path_to_bats/../../")"
-    fi
-  elif [[ -f "${path_to_bats}" ]]; then
-    target_path=$(dirname "$path_to_bats")
-    if [[ -n "$BATS_REALPATH" ]]; then
-      target_path="$("$BATS_REALPATH" "$target_path")"
-    else
-      target_path="$("$BATS_READLINK" -m "$target_path")"
-    fi
-    target_path="$(dirname "$target_path")" # strip bin
-  elif [[ -d "${path_to_bats}" ]]; then
-    if [[ -n "$BATS_REALPATH" ]]; then
-      target_path="$("$BATS_REALPATH" "$path_to_bats")"
-      target_path="$(dirname "$target_path")"
-    else
-      target_path="$("$BATS_READLINK" -m "$path_to_bats/../")"
-    fi
-  fi
-
-  echo "$target_path"
-}
-
-bats_resolve_absolute_root_dir() {
-  local path_to_bats="$1"
-  local result="$2"
-  local target_path
-
-  if [[ "$path_to_bats" == "$(basename "${path_to_bats}")" ]]; then
-    path_to_bats=$(type -p "$path_to_bats")
-  fi
-
-  target_path=$(resolve_path "${path_to_bats}")
-  if [[ "$target_path" == '.' ]]; then
-    target_path="$(resolve_path "$target_path")"
-  fi
-  printf -v "$result" -- '%s' "$target_path"
-}
-
-export BATS_ROOT
-bats_resolve_absolute_root_dir "$0" 'BATS_ROOT'
+export BATS_ROOT=${BATS_PATH%/*/*}
+export -f bats_readlinkf
 exec env BATS_ROOT="$BATS_ROOT" "$BATS_ROOT/libexec/bats-core/bats" "$@"

@@ -1,3 +1,8 @@
+> # :warning: WARNING: documentation of unreleased features ahead
+>
+> This is the current development version. You can find the documentation for v1.2.0 [here](../v1.2.0/README.md).
+> Please refer to [this list](docs/versions.md) for older versions.
+
 # Bats-core: Bash Automated Testing System (2018)
 
 [![Latest release](https://img.shields.io/github/release/bats-core/bats-core.svg)](https://github.com/bats-core/bats-core/releases/latest)
@@ -351,18 +356,23 @@ location of the current test file. For example, if you have a Bats test in
 `test/foo.bats`, the command
 
 ```bash
-load test_helper
+load test_helper.bash
 ```
 
-will source the script `test/test_helper.bash` in your test file. This can be
-useful for sharing functions to set up your environment or load fixtures.
+will source the script `test/test_helper.bash` in your test file (limitations
+apply, see below). This can be useful for sharing functions to set up your
+environment or load fixtures. `load` delegates to Bash's `source` command after
+resolving relative paths.
 
-If you want to source a file using an absolute file path then the file extension
-must be included. For example
+As pointed out by @iatrou in https://www.tldp.org/LDP/abs/html/declareref.html,
+using the `declare` builtin restricts scope of a variable. Thus, since actual
+`source`-ing is performed in context of the `load` function, `declare`d symbols
+will _not_ be made available to callers of `load`.
 
-```bash
-load /test_helpers/test_helper.bash
-```
+> For backwards compatibility `load` first searches for a file ending in
+> `.bash` (e.g. `load test_helper` searches for `test_helper.bash` before
+> it looks for `test_helper`). This behaviour is deprecated and subject to
+> change, please use exact filenames instead.
 
 ### `skip`: Easily skip tests
 
@@ -408,10 +418,28 @@ You can define special `setup` and `teardown` functions, which run before and
 after each test case, respectively. Use these to load fixtures, set up your
 environment, and clean up when you're done.
 
-You can also define `setup_file` and `teardown_file`, which will run once per file,
-before the first and after the last test, respectively.
-__WARNING__ these will not be run in parallel mode!
+You can also define `setup_file` and `teardown_file`, which will run once before the first test's `setup` and after the last test's `teardown` for the containing file. Variables that are defined in `setup_file` will be visible to all following functions (`setup`, the test itself, `teardown`, `teardown_file`).
 
+<details>
+  <Summary>Example of setup/setup_file/teardown/teardown_file call order</summary>
+For example the following call order would result from two files (file 1 with tests 1 and 2, and file 2 with test3) beeing tested:
+
+```
+setup_file # from file 1, on entering file 1
+  setup
+    test1
+  teardown
+  setup
+    test2
+  teardown
+teardown_file # from file 1, on leaving file 1
+setup_file # from file 2,  on enter file 2
+  setup
+    test3
+  teardown
+teardown_file # from file 2,  on leaving file 2
+```
+</details>
 
 ### Code outside of test cases
 
@@ -451,9 +479,9 @@ consumption, but if Bats is called with the `-t` flag, then the TAP stream is
 directly printed to the console.
 
 This has implications if you try to print custom text to the terminal. As
-mentioned in [File descriptor 3](#file-descriptor-3), bats provides a special
-file descriptor, `&3`, that you should use to print your custom text. Here are
-some detailed guidelines to refer to:
+mentioned in [File descriptor 3](#file-descriptor-3-read-this-if-bats-hangs),
+bats provides a special file descriptor, `&3`, that you should use to print
+your custom text. Here are some detailed guidelines to refer to:
 
 - Printing **from within a test function**:
   - To have text printed from within a test function you need to redirect the
@@ -562,7 +590,7 @@ See `docs/CHANGELOG.md`.
 
 **Tuesday, September 19, 2017:** This was forked from [Bats][bats-orig] at
 commit [0360811][].  It was created via `git clone --bare` and `git push
---mirror`. See the [Background](#background) section above for more information.
+--mirror`.
 
 [bats-orig]: https://github.com/sstephenson/bats
 [0360811]: https://github.com/sstephenson/bats/commit/03608115df2071fff4eaaff1605768c275e5f81f
