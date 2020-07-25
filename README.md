@@ -1,7 +1,9 @@
-> # :warning: WARNING: documentation of unreleased features ahead
+<!-- markdownlint-disable MD041 -->
+> ## :warning: WARNING: documentation of unreleased features ahead
 >
 > This is the current development version. You can find the documentation for v1.2.0 [here](../v1.2.0/README.md).
 > Please refer to [this list](docs/versions.md) for older versions.
+<!-- markdownlint-enable MD041 -->
 
 # Bats-core: Bash Automated Testing System (2018)
 
@@ -13,7 +15,7 @@
 
 [![Join the chat in bats-core/bats-core on gitter](https://badges.gitter.im/bats-core/bats-core.svg)][gitter]
 
-Bats is a [TAP][]-compliant testing framework for Bash.  It provides a simple
+Bats is a [TAP](https://testanything.org/)-compliant testing framework for Bash.  It provides a simple
 way to verify that the UNIX programs you write behave as expected.
 
 [TAP]: https://testanything.org
@@ -48,33 +50,34 @@ each line is an assertion of truth.
 <!-- toc -->
 
 - [Installation](#installation)
-  * [Supported Bash versions](#supported-bash-versions)
-  * [Homebrew](#homebrew)
-  * [npm](#npm)
-  * [Installing Bats from source](#installing-bats-from-source)
-  * [Installing Bats from source onto Windows Git Bash](#installing-bats-from-source-onto-windows-git-bash)
-  * [Running Bats in Docker](#running-bats-in-docker)
-    + [Building a Docker image](#building-a-docker-image)
+  - [Supported Bash versions](#supported-bash-versions)
+  - [Homebrew](#homebrew)
+  - [npm](#npm)
+  - [Installing Bats from source](#installing-bats-from-source)
+  - [Installing Bats from source onto Windows Git Bash](#installing-bats-from-source-onto-windows-git-bash)
+  - [Running Bats in Docker](#running-bats-in-docker)
+    - [Building a Docker image](#building-a-docker-image)
 - [Usage](#usage)
-  * [Parallel Execution](#parallel-execution)
+  - [Parallel Execution](#parallel-execution)
 - [Writing tests](#writing-tests)
-  * [`run`: Test other commands](#run-test-other-commands)
-  * [`load`: Share common code](#load-share-common-code)
-  * [`skip`: Easily skip tests](#skip-easily-skip-tests)
-  * [`setup` and `teardown`: Pre- and post-test hooks](#setup-and-teardown-pre--and-post-test-hooks)
-  * [Code outside of test cases](#code-outside-of-test-cases)
-  * [File descriptor 3 (read this if Bats hangs)](#file-descriptor-3-read-this-if-bats-hangs)
-  * [Printing to the terminal](#printing-to-the-terminal)
-  * [Special variables](#special-variables)
-  * [Libraries and Add-ons](#libraries-and-add-ons)
+  - [`run`: Test other commands](#run-test-other-commands)
+    - [Comment syntax](#comment-syntax)
+  - [`load`: Share common code](#load-share-common-code)
+  - [`skip`: Easily skip tests](#skip-easily-skip-tests)
+  - [`setup` and `teardown`: Pre- and post-test hooks](#setup-and-teardown-pre--and-post-test-hooks)
+  - [Code outside of test cases](#code-outside-of-test-cases)
+  - [File descriptor 3 (read this if Bats hangs)](#file-descriptor-3-read-this-if-bats-hangs)
+  - [Printing to the terminal](#printing-to-the-terminal)
+  - [Special variables](#special-variables)
+  - [Libraries and Add-ons](#libraries-and-add-ons)
 - [Testing](#testing)
 - [Support](#support)
 - [Contributing](#contributing)
 - [Contact](#contact)
 - [Version history](#version-history)
 - [Background](#background)
-  * [What's the plan and why?](#whats-the-plan-and-why)
-  * [Why was this fork created?](#why-was-this-fork-created)
+  - [What's the plan and why?](#whats-the-plan-and-why)
+  - [Why was this fork created?](#why-was-this-fork-created)
 - [Copyright](#copyright)
 
 <!-- tocstop -->
@@ -110,20 +113,21 @@ On macOS, you can install [Homebrew](https://brew.sh/) if you haven't already,
 then run:
 
 ```bash
-$ brew install bats-core
+# To install with brew:
+brew install bats-core
 ```
 
 ### npm
 
 You can install the [Bats npm package](https://www.npmjs.com/package/bats) via:
 
-```
+```bash
 # To install globally:
-$ npm install -g bats
+npm install -g bats
 
 # To install into your project and save it as one of the "devDependencies" in
 # your package.json:
-$ npm install --save-dev bats
+npm install --save-dev bats
 ```
 
 ### Installing Bats from source
@@ -133,9 +137,11 @@ directory to your `$PATH`, or run the provided `install.sh` command with the
 location to the prefix in which you want to install Bats. For example, to
 install Bats into `/usr/local`,
 
-    $ git clone https://github.com/bats-core/bats-core.git
-    $ cd bats-core
-    $ ./install.sh /usr/local
+```bash
+git clone https://github.com/bats-core/bats-core.git
+cd bats-core
+./install.sh /usr/local
+```
 
 __Note:__ You may need to run `install.sh` with `sudo` if you do not have
 permission to write to the installation prefix.
@@ -146,23 +152,29 @@ Check out a copy of the Bats repository and install it to `$HOME`. This
 will place the `bats` executable in `$HOME/bin`, which should already be
 in `$PATH`.
 
-    $ git clone https://github.com/bats-core/bats-core.git
-    $ cd bats-core
-    $ ./install.sh $HOME
+```bash
+git clone https://github.com/bats-core/bats-core.git
+cd bats-core
+./install.sh $HOME
+```
 
 ### Running Bats in Docker
 
 There is an official image on the Docker Hub:
 
-    $ docker run -it bats/bats:latest --version
+```bash
+docker run -it bats/bats:latest --version
+```
 
 #### Building a Docker image
 
 Check out a copy of the Bats repository, then build a container image:
 
-    $ git clone https://github.com/bats-core/bats-core.git
-    $ cd bats-core
-    $ docker build --tag bats/bats:latest .
+```bash
+git clone https://github.com/bats-core/bats-core.git
+cd bats-core
+docker build --tag bats/bats:latest .
+```
 
 This creates a local Docker image called `bats/bats:latest` based on [Alpine
 Linux](https://github.com/gliderlabs/docker-alpine/blob/master/docs/usage.md)
@@ -172,15 +184,19 @@ Linux](https://github.com/gliderlabs/docker-alpine/blob/master/docs/usage.md)
 To run Bats' internal test suite (which is in the container image at
 `/opt/bats/test`):
 
-    $ docker run -it bats/bats:latest /opt/bats/test
+```bash
+docker run -it bats/bats:latest /opt/bats/test
+```
 
 To run a test suite from a directory called `test` in the current directory of
 your local machine, mount in a volume and direct Bats to its path inside the
 container:
 
-    $ docker run -it -v "${PWD}:/code" bats/bats:latest test
+```bash
+docker run -it -v "${PWD}:/code" bats/bats:latest test
+```
 
-> `/code` is the working directory of the Docker image. "${PWD}/test" is the
+> `/code` is the working directory of the Docker image. `${PWD}/test` is the
 > location of the test directory on the local machine.
 
 This is a minimal Docker image. If more tools are required this can be used as a
@@ -200,7 +216,7 @@ can view the available command line options that Bats supports by calling Bats
 with the `-h` or `--help` options. These are the options that Bats currently
 supports:
 
-```
+```text
 Bats x.y.z
 Usage: bats [OPTIONS] <tests>
        bats [-h | -v]
@@ -244,11 +260,13 @@ cases pass, `bats` exits with a `0` status code. If there are any failures,
 When you run Bats from a terminal, you'll see output as each test is performed,
 with a check-mark next to the test's name if it passes or an "X" if it fails.
 
-    $ bats addition.bats
-     ✓ addition using bc
-     ✓ addition using dc
+```text
+$ bats addition.bats
+ ✓ addition using bc
+ ✓ addition using dc
 
-    2 tests, 0 failures
+2 tests, 0 failures
+```
 
 If Bats is not connected to a terminal—in other words, if you run it from a
 continuous integration system, or redirect its output to a file—the results are
@@ -257,26 +275,32 @@ displayed in human-readable, machine-parsable [TAP format][TAP].
 You can force TAP output from a terminal by invoking Bats with the `--formatter tap`
 option.
 
-    $ bats --formatter tap addition.bats
-    1..2
-    ok 1 addition using bc
-    ok 2 addition using dc
+```text
+$ bats --formatter tap addition.bats
+1..2
+ok 1 addition using bc
+ok 2 addition using dc
+```
 
 With `--formatter junit`, it is possible
 to output junit-compatible report files.
 
-    $ bats --formatter junit addition.bats
-    1..2
-    ok 1 addition using bc
-    ok 2 addition using dc
+```text
+$ bats --formatter junit addition.bats
+1..2
+ok 1 addition using bc
+ok 2 addition using dc
+```
 
 Test reports will be output in the executing directory, but may be placed elsewhere
 by specifying the `--output` flag.
 
-    $ bats --formatter junit addition.bats --output /tmp
-    1..2
-    ok 1 addition using bc
-    ok 2 addition using dc
+```text
+$ bats --formatter junit addition.bats --output /tmp
+1..2
+ok 1 addition using bc
+ok 2 addition using dc
+```
 
 ### Parallel Execution
 
@@ -409,6 +433,22 @@ var=$(command args ...)
 ```
 
 
+#### Comment syntax
+
+External tools (like `shellcheck`, `shfmt`, and various IDE's) may not support
+the standard `.bats` syntax.  Because of this, we provide a valid `bash`
+alterntative:
+
+```bash
+function invoking_foo_without_arguments_prints_usage { #@test
+  run foo
+  [ "$status" -eq 1 ]
+  [ "${lines[0]}" = "usage: foo <filename>" ]
+}
+```
+
+When using this syntax, the function name will be the title in the result output
+and the value checked when using `--filter`.
 
 ### `load`: Share common code
 
@@ -426,7 +466,7 @@ apply, see below). This can be useful for sharing functions to set up your
 environment or load fixtures. `load` delegates to Bash's `source` command after
 resolving relative paths.
 
-As pointed out by @iatrou in https://www.tldp.org/LDP/abs/html/declareref.html,
+As pointed out by @iatrou in <https://www.tldp.org/LDP/abs/html/declareref.html>,
 using the `declare` builtin restricts scope of a variable. Thus, since actual
 `source`-ing is performed in context of the `load` function, `declare`d symbols
 will _not_ be made available to callers of `load`.
@@ -482,11 +522,12 @@ environment, and clean up when you're done.
 
 You can also define `setup_file` and `teardown_file`, which will run once before the first test's `setup` and after the last test's `teardown` for the containing file. Variables that are exported in `setup_file` will be visible to all following functions (`setup`, the test itself, `teardown`, `teardown_file`).
 
+<!-- markdownlint-disable MD033 -->
 <details>
-  <Summary>Example of setup/setup_file/teardown/teardown_file call order</summary>
+  <summary>Example of setup/setup_file/teardown/teardown_file call order</summary>
 For example the following call order would result from two files (file 1 with tests 1 and 2, and file 2 with test3) beeing tested:
 
-```
+```text
 setup_file # from file 1, on entering file 1
   setup
     test1
@@ -501,7 +542,9 @@ setup_file # from file 2,  on enter file 2
   teardown
 teardown_file # from file 2,  on leaving file 2
 ```
+
 </details>
+<!-- markdownlint-enable MD033 -->
 
 ### Code outside of test cases
 
@@ -584,39 +627,36 @@ your custom text. Here are some detailed guidelines to refer to:
 
 There are several global variables you can use to introspect on Bats tests:
 
-* `$BATS_TEST_FILENAME` is the fully expanded path to the Bats test file.
-* `$BATS_TEST_DIRNAME` is the directory in which the Bats test file is located.
-* `$BATS_TEST_NAMES` is an array of function names for each test case.
-* `$BATS_TEST_NAME` is the name of the function containing the current test
-  case.
-* `$BATS_TEST_DESCRIPTION` is the description of the current test case.
-* `$BATS_TEST_NUMBER` is the (1-based) index of the current test case in the
-  test file.
-* `$BATS_SUITE_TEST_NUMBER` is the (1-based) index of the current test case in
- the test suite (over all files).
-* `$BATS_TMPDIR` is the location to a directory that may be used to store
-  temporary files.
+- `$BATS_TEST_FILENAME` is the fully expanded path to the Bats test file.
+- `$BATS_TEST_DIRNAME` is the directory in which the Bats test file is located.
+- `$BATS_TEST_NAMES` is an array of function names for each test case.
+- `$BATS_TEST_NAME` is the name of the function containing the current test case.
+- `$BATS_TEST_DESCRIPTION` is the description of the current test case.
+- `$BATS_TEST_NUMBER` is the (1-based) index of the current test case in the test file.
+- `$BATS_SUITE_TEST_NUMBER` is the (1-based) index of the current test case in the test suite (over all files).
+- `$BATS_TMPDIR` is the location to a directory that may be used to store temporary files.
 
 ### Libraries and Add-ons
 
 Bats supports loading external assertion libraries and helpers. Those under `bats-core` are officially supported libraries (integration tests welcome!):
 
-- https://github.com/bats-core/bats-assert - common assertions for Bats
-- https://github.com/bats-core/bats-support - supporting library for Bats test helpers
-- https://github.com/bats-core/bats-file - common filesystem assertions for Bats
-- https://github.com/bats-core/bats-detik - e2e tests of applications in K8s environments
+- <https://github.com/bats-core/bats-assert> - common assertions for Bats
+- <https://github.com/bats-core/bats-support> - supporting library for Bats test helpers
+- <https://github.com/bats-core/bats-file> - common filesystem assertions for Bats
+- <https://github.com/bats-core/bats-detik> - e2e tests of applications in K8s environments
 
 and some external libraries, supported on a "best-effort" basis:
 
-- https://github.com/ztombol/bats-docs (still relevant? Requires review)
-- https://github.com/grayhemp/bats-mock (as per #147)
-- https://github.com/jasonkarns/bats-mock (how is this different from grayhemp/bats-mock?)
+- <https://github.com/ztombol/bats-docs> (still relevant? Requires review)
+- <https://github.com/grayhemp/bats-mock> (as per #147)
+- <https://github.com/jasonkarns/bats-mock> (how is this different from grayhemp/bats-mock?)
 
 ## Testing
 
 ```sh
 bin/bats --tap test
 ```
+
 See also the [CI](.travis.yml) settings for the current test environment and
 scripts.
 
@@ -636,7 +676,7 @@ on the wiki.
 
 ## Contributing
 
-For now see the ``docs`` folder for project guides, work with us on the wiki
+For now see the [`docs`](docs) folder for project guides, work with us on the wiki
 or look at the other communication channels.
 
 ## Contact
@@ -650,7 +690,9 @@ See `docs/CHANGELOG.md`.
 
 ## Background
 
+<!-- markdownlint-disable MD026 -->
 ### What's the plan and why?
+<!-- markdownlint-enable MD026 -->
 
 **Tuesday, September 19, 2017:** This was forked from [Bats][bats-orig] at
 commit [0360811][].  It was created via `git clone --bare` and `git push
@@ -661,7 +703,9 @@ commit [0360811][].  It was created via `git clone --bare` and `git push
 
 This [bats-core repo](https://github.com/bats-core/bats-core) is the community-maintained Bats project.
 
+<!-- markdownlint-disable MD026 -->
 ### Why was this fork created?
+<!-- markdownlint-enable MD026 -->
 
 There was an initial [call for maintainers][call-maintain] for the original Bats repository, but write access to it could not be obtained. With development activity stalled, this fork allowed ongoing maintenance and forward progress for Bats.
 
