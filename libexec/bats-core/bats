@@ -131,7 +131,7 @@ while [[ "$#" -ne 0 ]]; do
     ;;
   -F | --formatter)
     shift
-    if [[ $1 =~ ^(pretty|junit|tap)$ ]]; then
+    if [[ $1 =~ ^(pretty|junit|tap|tap13)$ ]]; then
       formatter="$1"
     else
       printf "Unknown formatter '%s', valid options are pretty, junit, tap\n" "$1"
