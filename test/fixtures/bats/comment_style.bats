@@ -14,6 +14,14 @@ should_be_found_with_parens_and_whitespace () { #@test
   true
 }
 
+function should_be_found_with_function_and_parens() { #@test
+  true
+}
+
+function should_be_found_with_function_parens_and_whitespace () { #@test
+  true
+}
+
 should_not_be_found() { 
   false                                          
   #@test                                        
