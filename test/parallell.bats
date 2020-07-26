@@ -71,3 +71,13 @@ setup() {
   # parallelization should at least get rid of 1/4th the total runtime
   [[ $duration -lt 9 ]]
 }
+
+@test "running the same file twice runs its tests twice without errors" {
+  run bats --jobs 2 "$FIXTURE_ROOT/../bats/passing.bats" "$FIXTURE_ROOT/../bats/passing.bats"
+  echo "$output"
+  [[ $status -eq 0 ]]
+  [[ "${lines[0]}" == "1..2" ]] # got 2x1 tests
+  [[ "${lines[1]}" == "ok 1 "* ]]
+  [[ "${lines[2]}" == "ok 2 "* ]]
+  [[ "${#lines[@]}" -eq 3 ]]
+}

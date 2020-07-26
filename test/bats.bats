@@ -612,3 +612,10 @@ END_OF_ERR_MSG
   run bash -c "echo $'1..1\nok 1' | bats_test_count_validator"
   [[ $status -eq 0 ]]
 }
+
+@test "running the same file twice runs its tests twice without errors" {
+  run bats "$FIXTURE_ROOT/passing.bats" "$FIXTURE_ROOT/passing.bats"
+  echo "$output"
+  [[ $status -eq 0 ]]
+  [[ "${lines[0]}" == "1..2" ]] # got 2x1 tests
+}
