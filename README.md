@@ -418,7 +418,7 @@ You can define special `setup` and `teardown` functions, which run before and
 after each test case, respectively. Use these to load fixtures, set up your
 environment, and clean up when you're done.
 
-You can also define `setup_file` and `teardown_file`, which will run once before the first test's `setup` and after the last test's `teardown` for the containing file. Variables that are defined in `setup_file` will be visible to all following functions (`setup`, the test itself, `teardown`, `teardown_file`).
+You can also define `setup_file` and `teardown_file`, which will run once before the first test's `setup` and after the last test's `teardown` for the containing file. Variables that are exported in `setup_file` will be visible to all following functions (`setup`, the test itself, `teardown`, `teardown_file`).
 
 <details>
   <Summary>Example of setup/setup_file/teardown/teardown_file call order</summary>
