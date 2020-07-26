@@ -258,10 +258,10 @@ option.
     ok 1 addition using bc
     ok 2 addition using dc
 
-By combining `-T` and `--formatter junit`, it is possible
+With `--formatter junit`, it is possible
 to output junit-compatible report files.
 
-    $ bats --formatter junit -T addition.bats
+    $ bats --formatter junit addition.bats
     1..2
     ok 1 addition using bc
     ok 2 addition using dc
@@ -269,7 +269,7 @@ to output junit-compatible report files.
 Test reports will be output in the executing directory, but may be placed elsewhere
 by specifying the `--output` flag.
 
-    $ bats --formatter junit -T addition.bats --output /tmp
+    $ bats --formatter junit addition.bats --output /tmp
     1..2
     ok 1 addition using bc
     ok 2 addition using dc
