@@ -105,7 +105,7 @@ fi
 # (see https://github.com/bats-core/bats-core/issues/329)
 # If a file was specified multiple times, we already got it repeatedly in our TESTS_LIST_FILE.
 # Thus, it suffices to bats-exec-file it once to run all repeated tests on it.
-IFS=$'\n' BATS_UNIQUE_TEST_FILENAMES=($( printf "%s\n" "$@"| nl | sort -k 2 | uniq -f 1 | sort -n | cut -f 2 ))
+IFS=$'\n' read -d '' -r -a  BATS_UNIQUE_TEST_FILENAMES < <(printf "%s\n" "$@"| nl | sort -k 2 | uniq -f 1 | sort -n | cut -f 2) || true
 
 if [[ "$num_jobs" -gt 1 ]]; then
   # run files in parallel to get the maximum pool of parallel tasks
