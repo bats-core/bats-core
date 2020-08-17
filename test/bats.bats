@@ -619,3 +619,16 @@ END_OF_ERR_MSG
   [[ $status -eq 0 ]]
   [[ "${lines[0]}" == "1..2" ]] # got 2x1 tests
 }
+
+@test "Don't use unbound variables inside bats (issue #340)" {
+  run bats "$FIXTURE_ROOT/set_-eu_in_setup_and_teardown.bats"
+  echo "$output"
+  [[ "${lines[0]}" == "1..4" ]]
+  [[ "${lines[1]}" == "ok 1 skipped test # skip" ]]
+  [[ "${lines[2]}" == "ok 2 skipped test with reason # skip reason" ]]
+  [[ "${lines[3]}" == "ok 3 passing test" ]]
+  [[ "${lines[4]}" == "not ok 4 failing test" ]]
+  [[ "${lines[5]}" == "# (in test file $RELATIVE_FIXTURE_ROOT/set_-eu_in_setup_and_teardown.bats, line 22)" ]] 
+  [[ "${lines[6]}" == "#   \`false' failed" ]]
+  [[ "${#lines[@]}" -eq 7 ]]
+}
