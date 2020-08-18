@@ -348,6 +348,60 @@ __Note:__ The `run` helper executes its argument(s) in a subshell, so if
 writing tests against environmental side-effects like a variable's value
 being changed, these changes will not persist after `run` completes.
 
+#### When not to use `run`
+
+In some cases, using `run` is redundant and results in a longer and less readable code.
+Here are a few examples.
+
+1. In case you only need to check the command succeeded, it is better to not use run, since
+
+```bash
+run command args ...
+echo "$output"
+[ "$status" -eq 0 ]
+```
+
+is equivalent to
+
+```bash
+command args ...
+```
+
+since bats sets `set -e` for all tests.
+
+2. In case you want to hide the command output (which `run` does), use output redirection instead.
+
+This
+
+```bash
+run command ...
+[ "$status" -eq 0 ]
+```
+
+is equivalent to
+
+```bash
+command ... >/dev/null
+```
+
+Note that the output is only shown if the test case fails.
+
+3. In case you need to assign command output to a variable (and maybe check
+   the command exit status), it is better to not use run, since
+
+```bash
+run command args ...
+[ "$status" -eq 0 ]
+var="$output"
+```
+
+is equivalent to
+```bash
+var=$(command args ...)
+```
+
+
+
 ### `load`: Share common code
 
 You may want to share common code across multiple test files. Bats includes a
