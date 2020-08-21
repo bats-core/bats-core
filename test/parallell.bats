@@ -88,7 +88,7 @@ setup() {
   # give it some time to start the tests
   sleep 2
   # find how many semaphores are started in parallel; don't count grep itself
-  run bash -c "ps -ef | grep bats-exec-test | grep parallel/parallel.bats | grep -v grep"
+  run bash -c "pstree --long --arguments --compact-not $$ | grep bats-exec-test | grep parallel/parallel.bats | grep -v grep"
   echo "$output"
   
   # This might fail spuriously if we got bad luck with the scheduler
