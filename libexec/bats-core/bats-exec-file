@@ -147,6 +147,7 @@ bats_forward_output_of_parallel_test() {
 # $1 == "blocking": wait for a test to finish before printing
 #    != "blocking": abort printing, when a test has not finished
 bats_forward_output_for_parallel_tests() {
+  local status=0
   # was the next test already started?
   while [[ $(( test_number_in_suite_of_last_finished_test + 1 )) -le $test_number_in_suite ]]; do
     # if we are okay with waiting or if the test has already been finished
@@ -155,13 +156,15 @@ bats_forward_output_for_parallel_tests() {
       bats_forward_output_of_parallel_test "$test_number_in_suite_of_last_finished_test" || status=1
     else
       # non-blocking and the process has not finished -> abort the printing
-      return 1
+      break
     fi
   done
+  return $status
 }
 
 bats_run_tests_in_parallel() {
   local output_folder="$BATS_RUN_TMPDIR/parallel_output"
+  local status=0
   mkdir -p "$output_folder"
   # shellcheck source=lib/bats-core/semaphore.bash
   # shellcheck disable=SC2153
@@ -179,9 +182,10 @@ bats_run_tests_in_parallel() {
                           > "$output_folder/$test_number_in_suite/pid"
     fi
     # print results early to get interactive feedback
-    bats_forward_output_for_parallel_tests non-blocking || true # ignore if we did not finish yet
+    bats_forward_output_for_parallel_tests non-blocking || status=1 # ignore if we did not finish yet
   done
-  bats_forward_output_for_parallel_tests blocking
+  bats_forward_output_for_parallel_tests blocking || status=1
+  return $status
 }
 
 bats_run_tests() {
