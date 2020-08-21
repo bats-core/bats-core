@@ -218,6 +218,8 @@ Usage: bats [OPTIONS] <tests>
                             Preserve the current environment for "--jobs"
                               (run `parallel --record-env` before)
   --no-tempdir-cleanup      Preserve test output temporary directory
+  --no-parallelize-across-files
+                            Only parallelize tests within files.
   -o, --output <dir>        Directory to write report files
   -p, --pretty              Shorthand for "--formatter pretty"
   -r, --recursive           Include tests in subdirectories
@@ -292,6 +294,12 @@ you need to specify `--parallel-preserve-environment` as well. Note that this
 requires running `parallel --record-env` first as a setup step as GNU Parallel
 will refuse to run without. Only environment variables that were **not** set
 during this setup step will be preserved!
+
+When parallelizing, the results of a file only become visible after it has been finished.
+You can use `--no-parallelize-across-files` to get immediate output at the cost of reduced
+overall parallelity, as parallelization will only happen within files and files will be run
+sequentially.
+                            
 
 [gnu-parallel]: https://www.gnu.org/software/parallel/
 
