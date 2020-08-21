@@ -9,7 +9,8 @@
 bats_semaphore_run() {
     local output_dir=$1
     shift
-    local semaphore_slot=$(bats_semaphore_acquire_slot)
+    local semaphore_slot
+    semaphore_slot=$(bats_semaphore_acquire_slot)
     bats_semaphore_release_wrapper "$output_dir" "$semaphore_slot" "$@" &
     printf "%d\n" "$!"
 }
@@ -24,6 +25,7 @@ bats_semaphore_release_wrapper() {
     local semaphore_name="$2"
     shift 2 # all other parameters will be use for the command to execute
 
+    # shellcheck disable=SC2064 # we want to expand the semaphore_name right now!
     trap "bats_semaphore_release_slot '$semaphore_name'" EXIT
 
     mkdir -p "$output_dir"
@@ -41,7 +43,7 @@ bats_semaphore_acquire_while_locked() {
             (( ++slot ))
         done
         if [[ $slot -lt $BATS_SEMAPHORE_NUMBER_OF_SLOTS ]]; then
-            touch "$BATS_SEMAPHORE_DIR/slot-$slot" && printf "$slot\n" && return 0
+            touch "$BATS_SEMAPHORE_DIR/slot-$slot" && printf "%d\n" "$slot" && return 0
         fi
     fi
     return 1
