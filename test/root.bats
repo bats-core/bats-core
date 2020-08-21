@@ -13,11 +13,12 @@
 
 load test_helper
 
-# This would make a good candidate for a one-time setup/teardown per #39.
 setup() {
-  make_bats_test_suite_tmpdir
+  # give each test their own tmpdir to allow for parallelization without interference
+  make_bats_test_suite_tmpdir "$BATS_TEST_NAME"
   cd "$BATS_TEST_SUITE_TMPDIR"
   mkdir -p {usr/bin,opt/bats-core}
+  ls -lR .
   "$BATS_ROOT/install.sh" "opt/bats-core"
 
   ln -s "usr/bin" "bin"
@@ -30,6 +31,12 @@ setup() {
   ln -s "$BATS_TEST_SUITE_TMPDIR/opt/bats-core/bin/bats" \
     "$BATS_TEST_SUITE_TMPDIR/usr/bin/bats"
   cd - >/dev/null
+}
+
+teardown() {
+  # don't cleanup_tmpdir on each test, this interferes with parallel tests
+  # do the cleanup once for this file
+  test_helper::cleanup_tmpdir "$BATS_TEST_NAME"
 }
 
 @test "#113: set BATS_ROOT when /bin is a symlink to /usr/bin" {
@@ -45,6 +52,7 @@ setup() {
 @test "set BATS_ROOT with extreme symlink resolution" {
   cd "$BATS_TEST_SUITE_TMPDIR"
   mkdir -p "opt/bats/bin2"
+  pwd
 
 # - /usr/bin/foo => /usr/bin/bar (relative executable)
   ln -s bar usr/bin/foo
@@ -63,6 +71,7 @@ setup() {
 
   cd - >/dev/null
   run "$BATS_TEST_SUITE_TMPDIR/bin/foo" -v
+  echo "$output"
   [ "$status" -eq 0 ]
   [ "${output%% *}" == 'Bats' ]
 }
