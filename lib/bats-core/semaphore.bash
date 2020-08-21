@@ -8,12 +8,11 @@
 # gather the output of the command in files in the given directory
 bats_semaphore_run() {
     bats_semaphore_acquire_slot
-    bats_semaphore_release_wrapper "$@" & >/dev/null 2>/dev/null
+    bats_semaphore_release_wrapper "$@" >/dev/null 2>/dev/null &
     printf "%d\n" "$!"
 }
 
 export BATS_SEMAPHORE_DIR="$BATS_RUN_TMPDIR/semaphores"
-export BATS_SEMAPHORE_NUMBER_OF_SLOTS="$num_jobs"
 
 # $1 - output directory for stdout/stderr
 # $@ - command to run

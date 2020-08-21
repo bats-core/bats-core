@@ -150,9 +150,9 @@ bats_forward_output_for_parallel_tests() {
   # was the next test already started?
   while [[ $(( test_number_in_suite_of_last_finished_test + 1 )) -le $test_number_in_suite ]]; do
     # if we are okay with waiting or if the test has already been finished
-    if [[ "$1" == "blocking" ]] || (! kill -0 $(cat "$output_folder/$(( test_number_in_suite_of_last_finished_test + 1 ))/pid") 2>/dev/null); then
+    if [[ "$1" == "blocking" ]] || (! kill -0 "$(cat "$output_folder/$(( test_number_in_suite_of_last_finished_test + 1 ))/pid")" 2>/dev/null); then
       (( ++test_number_in_suite_of_last_finished_test ))
-      bats_forward_output_of_parallel_test $test_number_in_suite_of_last_finished_test || status=1
+      bats_forward_output_of_parallel_test "$test_number_in_suite_of_last_finished_test" || status=1
     else
       # non-blocking and the process has not finished -> abort the printing
       return 1
@@ -207,6 +207,7 @@ bats_run_tests() {
   test_number_in_suite="$first_test_number_in_suite"
   test_number_in_file=0
   if [[ "$num_jobs" != 1 ]]; then
+    export BATS_SEMAPHORE_NUMBER_OF_SLOTS="$num_jobs"
     bats_run_tests_in_parallel "$BATS_RUN_TMPDIR/parallel_output"
   else
     for test_name in "${tests_to_run[@]}"; do
