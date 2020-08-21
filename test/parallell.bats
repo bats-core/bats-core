@@ -81,3 +81,18 @@ setup() {
   [[ "${lines[2]}" == "ok 2 "* ]]
   [[ "${#lines[@]}" -eq 3 ]]
 }
+
+@test "tests don't create fork bombs" {
+  parallelity=5 # run the 10 tests in 2 batches with 5 test each
+  bats --jobs $parallelity "$FIXTURE_ROOT/parallel.bats" & # run in background to avoid blocking
+  # give it some time to start the tests
+  sleep 2
+  # find how many semaphores are started in parallel; don't count grep itself
+  run bash -c "ps -ef | grep semaphore | grep parallel/parallel.bats | grep -v grep"
+  echo "$output"
+  
+  # This might fail spuriously if we got bad luck with the scheduler
+  # and hit the transition between the first and second batch of tests.
+  # Expect parallelity many running + one waiting semaphore which still has parent pid!=1
+  [[ "${#lines[@]}" -eq $(( parallelity + 1)) ]]
+}
