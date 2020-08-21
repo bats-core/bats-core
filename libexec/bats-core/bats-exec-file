@@ -166,7 +166,7 @@ bats_forward_output_of_test() {
     BATS_PARALLEL_WAIT_TIMEOUT=${BATS_PARALLEL_WAIT_TIMEOUT:-60}
     # GNU parallel semaphore's subprocess will not be our child, 
     # we cannot use `wait` but we can `tail --pid`!
-    timeout ${BATS_PARALLEL_WAIT_TIMEOUT} tail --pid="$test_pid" -f /dev/null 2>/dev/null
+    timeout "${BATS_PARALLEL_WAIT_TIMEOUT}" tail --pid="$test_pid" -f /dev/null 2>/dev/null
     if [[ $? -eq 1 ]] ; then # when tail exits with 1, it does not support --pid 
       # fall back to polling
       local waiting_start=$SECONDS
@@ -219,7 +219,6 @@ bats_run_tests() {
     # do in background to not block output further down
     bats_run_tests_in_parallel &
 
-    last_test_number_of_file_in_suite=$(( first_test_number_in_suite + ${#tests_to_run[@]} - 1))
     # forward the remaining test's outputs in their order
     # this will block per test until it is finished
     number_in_suite_of_test_to_end=$first_test_number_in_suite
