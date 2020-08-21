@@ -104,6 +104,7 @@ unset flags recursive formatter_flags
 flags=()
 formatter_flags=()
 formatter='tap'
+report_formatter=''
 recursive=
 tempdir_cleanup=1
 output=
@@ -135,6 +136,15 @@ while [[ "$#" -ne 0 ]]; do
       formatter="$1"
     else
       printf "Unknown formatter '%s', valid options are pretty, junit, tap\n" "$1"
+      exit 1
+    fi
+    ;;
+  --report)
+    shift
+    if [[ $1 =~ ^(pretty|junit|tap)$ ]]; then
+      report_formatter="$1"
+    else
+      printf "Unknown reporter '%s', valid options are pretty, junit, tap\n" "$1"
       exit 1
     fi
     ;;
@@ -203,6 +213,23 @@ if [[ "${#arguments[@]}" -eq 0 ]]; then
   abort 'Must specify at least one <test>'
 fi
 
+if [[ -n "$report_formatter" ]]; then
+  # default to the current directory for output
+  if [[ -z "$output" ]]; then
+    output=.
+  fi
+  case "$report_formatter" in
+    tap)
+      BATS_REPORT_FILE_NAME="report.tap"
+      ;;
+    junit)
+      BATS_REPORT_FILE_NAME="report.xml"
+      ;;
+    pretty)
+      BATS_REPORT_FILE_NAME="report.log"
+      ;;
+  esac
+fi
 
 if [[ -n "$output" ]]; then
   if [[ ! -w "${output}" ]]; then
@@ -236,4 +263,9 @@ done
 source "$BATS_ROOT/lib/bats-core/validator.bash"
 
 set -o pipefail execfail
-exec bats-exec-suite "${flags[@]}" "${filenames[@]}" | bats_test_count_validator | "bats-format-${formatter}" "${formatter_flags[@]}"
+
+if [[ -n "$report_formatter" ]]; then
+  exec bats-exec-suite "${flags[@]}" "${filenames[@]}" | tee >("bats-format-${report_formatter}" >"${BATS_REPORT_OUTPUT_PATH}/${BATS_REPORT_FILE_NAME}") | bats_test_count_validator | "bats-format-${formatter}" "${formatter_flags[@]}"
+else
+  exec bats-exec-suite "${flags[@]}" "${filenames[@]}" | bats_test_count_validator | "bats-format-${formatter}" "${formatter_flags[@]}"
+fi
