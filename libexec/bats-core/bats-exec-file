@@ -180,8 +180,15 @@ bats_forward_output_of_test() {
     # get the test's pid
     test_pid=$(cat "$test_output_dir/pid")
     # GNU parallel semaphore's subprocess will not be our child, 
-    # we cannot use `wait` but we can `tail`!
-    tail --pid="$test_pid" -f /dev/null
+    # we cannot use `wait` but we can `tail --pid`!
+    if ! tail --pid="$test_pid" -f /dev/null 2>/dev/null; then
+      # when tail exits with non null, it does not support --pid 
+      # so we have to fall back to polling
+      until [ -e "$test_output_dir/exitcode" ]
+      do
+        sleep 1
+      done
+    fi
   fi
   # wait for tests to finish in the order they were started and output their results as they come in
   cat "$test_output_dir/stdout"
