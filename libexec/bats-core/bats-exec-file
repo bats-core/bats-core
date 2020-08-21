@@ -134,23 +134,6 @@ function teardown_file() {
   return 0
 }
 
-bats_parallel_exec_test() { # $1 = test_output_dir, the rest is forwarded to bats-exec-test
-  test_output_dir="$1"
-  mkdir -p "$test_output_dir"
-  shift
-
-  # store the pid for waiting on finish
-  printf "%d" "$$" > "$test_output_dir/pid"
-
-  bats-exec-test "$@" 2>"$test_output_dir/stderr" >"$test_output_dir/stdout"
-
-  # store the result for marking end and retrieving errors
-  printf "%d" "$?" > "$test_output_dir/exitcode"
-}
-
-# make visible for GNU parallel
-export -f bats_parallel_exec_test
-
 bats_run_tests_in_parallel() {
   for test_name in "${tests_to_run[@]}"; do
     # Only handle non-empty lines
@@ -159,7 +142,7 @@ bats_run_tests_in_parallel() {
       ((++test_number_in_file))
       # parallelize across files using parallel's semaphore mode
       # shellcheck disable=SC2154 #bats_parallel_args is inherited from exec-suite
-      parallel --semaphore -j "$num_jobs" "${bats_parallel_args[@]}" -- bats_parallel_exec_test "$output_folder/$test_number_in_suite" "${flags[@]}" "$filename" "$test_name" "$test_number_in_suite" "$test_number_in_file"
+      parallel --semaphore -j "$num_jobs" "${bats_parallel_args[@]}" -- bats-parallel-exec-test "$output_folder/$test_number_in_suite" "${flags[@]}" "$filename" "$test_name" "$test_number_in_suite" "$test_number_in_file"
     fi
   done
 }
@@ -169,6 +152,7 @@ bats_run_tests_in_parallel() {
 # this will also return the test's exit code
 bats_forward_output_of_test() {
   test_number="$1"
+  test_name="$2"
   test_output_dir="$output_folder/$test_number"
   # wait for test to start
   until [ -e "$test_output_dir/pid" ]
@@ -179,13 +163,23 @@ bats_forward_output_of_test() {
   if [[ ! -e "$test_output_dir/exitcode" ]]; then
     # get the test's pid
     test_pid=$(cat "$test_output_dir/pid")
+    BATS_PARALLEL_WAIT_TIMEOUT=${BATS_PARALLEL_WAIT_TIMEOUT:-60}
     # GNU parallel semaphore's subprocess will not be our child, 
     # we cannot use `wait` but we can `tail --pid`!
-    if ! tail --pid="$test_pid" -f /dev/null 2>/dev/null; then
-      # when tail exits with non null, it does not support --pid 
-      # so we have to fall back to polling
+    timeout ${BATS_PARALLEL_WAIT_TIMEOUT} tail --pid="$test_pid" -f /dev/null 2>/dev/null
+    if [[ $? -eq 1 ]] ; then # when tail exits with 1, it does not support --pid 
+      # fall back to polling
+      local waiting_start=$SECONDS
       until [ -e "$test_output_dir/exitcode" ]
       do
+        local waiting_duration=$(( SECONDS - waiting_start ))
+        if [[ $waiting_duration -gt BATS_PARALLEL_WAIT_TIMEOUT ]]; then
+          # print test as failing and abort run, we don't have the true name of the test here, so we use the function name
+          printf "not ok %d %s # Waiting for test timed out after %d seconds increase BATS_PARALLEL_WAIT_TIMEOUT if this is intended\n" "$((test_number_in_suite + 1))" "$test_name" " ${waiting_duration}" >&3
+          cat "$test_output_dir/stdout"
+          cat "$test_output_dir/stderr" >&2
+          exit 1
+        fi
         sleep 1
       done
     fi
@@ -228,8 +222,12 @@ bats_run_tests() {
     last_test_number_of_file_in_suite=$(( first_test_number_in_suite + ${#tests_to_run[@]} - 1))
     # forward the remaining test's outputs in their order
     # this will block per test until it is finished
-    for number_in_suite_of_test_to_end in $(seq $first_test_number_in_suite $last_test_number_of_file_in_suite); do
-      bats_forward_output_of_test "$((number_in_suite_of_test_to_end+1))" || status=1
+    number_in_suite_of_test_to_end=$first_test_number_in_suite
+    for test_name in "${tests_to_run[@]}"; do
+      if [[ $test_name ]]; then
+        ((++number_in_suite_of_test_to_end))
+        bats_forward_output_of_test "$number_in_suite_of_test_to_end" "$test_name" || status=1
+      fi
     done
   else
     for test_name in "${tests_to_run[@]}"; do

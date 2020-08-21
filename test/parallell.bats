@@ -96,3 +96,10 @@ setup() {
   # Expect parallelity many running + one waiting semaphore which still has parent pid!=1
   [[ "${#lines[@]}" -eq $(( parallelity + 1)) ]]
 }
+
+@test "BATS_PARALLEL_WAIT_TIMEOUT is enforced" {
+    BATS_PARALLEL_WAIT_TIMEOUT=1 run bats --jobs 10 "$FIXTURE_ROOT/parallel.bats"
+    echo "$output"
+    [[ $status -ne 0 ]]
+    [[ "${lines[1]}" == "not ok 1 test_slow_test_1 # Waiting for test timed out"* ]]
+}

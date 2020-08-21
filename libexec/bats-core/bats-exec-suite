@@ -98,7 +98,7 @@ if [[ -n "$count_only_flag" ]]; then
 fi
 
 if [[ -n "$bats_no_parallelize_across_files" ]] && [[ ! "$num_jobs" -gt 1 ]]; then
-  printf "--no-parallelize-across-files requires at least --jobs 2"
+  printf "The flag --no-parallelize-across-files requires at least --jobs 2"
   exit 1
 fi
 
