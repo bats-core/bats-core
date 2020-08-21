@@ -6,6 +6,7 @@ filter=''
 num_jobs=1
 have_gnu_parallel=
 bats_parallel_args=()
+bats_dont_parallelize_across_files=
 flags=()
 
 abort() {
@@ -36,6 +37,9 @@ while [[ "$#" -ne 0 ]]; do
     ;;
   --parallel-preserve-environment)
     bats_parallel_args=("--env" "_")
+    ;;
+  --dont-parallelize-across-files)
+    bats_dont_parallelize_across_files=1
     ;;
   *)
     break
@@ -93,6 +97,11 @@ if [[ -n "$count_only_flag" ]]; then
   exit
 fi
 
+if [[ -n "$bats_dont_parallelize_across_files" ]] && [[ ! "$num_jobs" -gt 1 ]]; then
+  printf "--dont-parallelize-across-files requires at least --jobs 2"
+  exit 1
+fi
+
 status=0
 printf '1..%d\n' "${test_count}"
 
@@ -107,7 +116,7 @@ fi
 # Thus, it suffices to bats-exec-file it once to run all repeated tests on it.
 IFS=$'\n' read -d '' -r -a  BATS_UNIQUE_TEST_FILENAMES < <(printf "%s\n" "$@"| nl | sort -k 2 | uniq -f 1 | sort -n | cut -f 2) || true
 
-if [[ "$num_jobs" -gt 1 ]]; then
+if [[ "$num_jobs" -gt 1 ]] && [[ -z "$bats_dont_parallelize_across_files" ]]; then
   # run files in parallel to get the maximum pool of parallel tasks
   # shellcheck disable=SC2086,SC2068
   printf "%s\n" "${BATS_UNIQUE_TEST_FILENAMES[@]}" | parallel "${bats_parallel_args[@]}" --keep-order --jobs "$num_jobs" bats-exec-file "${flags[@]}" {} "$TESTS_LIST_FILE" || status=1

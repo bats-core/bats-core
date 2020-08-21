@@ -163,6 +163,9 @@ while [[ "$#" -ne 0 ]]; do
     # suppress stdout (on success)
     parallel --env _ echo ::: 1 >/dev/null || exit 1
     ;;
+  --dont-parallelize-across-files)
+    flags+=("--dont-parallelize-across-files")
+    ;;
   --no-tempdir-cleanup)
     tempdir_cleanup=''
     ;;
