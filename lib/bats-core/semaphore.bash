@@ -30,10 +30,12 @@ bats_semaphore_release_wrapper() {
 
     mkdir -p "$output_dir"
     "$@" 2>"$output_dir/stderr" >"$output_dir/stdout"
+    local status=$?
 
     # bash bug: the exit trap is not called for the background process
     bats_semaphore_release_slot "$semaphore_name"
     trap '' EXIT # avoid calling release twice
+    return $status
 }
 
 bats_semaphore_acquire_while_locked() {

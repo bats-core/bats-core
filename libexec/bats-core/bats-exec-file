@@ -211,7 +211,7 @@ bats_run_tests() {
   test_number_in_file=0
   if [[ "$num_jobs" != 1 ]]; then
     export BATS_SEMAPHORE_NUMBER_OF_SLOTS="$num_jobs"
-    bats_run_tests_in_parallel "$BATS_RUN_TMPDIR/parallel_output"
+    bats_run_tests_in_parallel "$BATS_RUN_TMPDIR/parallel_output" || status=1
   else
     for test_name in "${tests_to_run[@]}"; do
       # Only handle non-empty lines

@@ -95,3 +95,8 @@ setup() {
   # and hit the transition between the first and second batch of tests.
   [[ "${#lines[@]}" -eq $parallelity  ]]
 }
+
+@test "parallel mode correctly forwards failure return code" {
+  run bats --jobs 2 "$FIXTURE_ROOT/../bats/failing.bats"
+  [[ "$status" -eq 1 ]]
+}
