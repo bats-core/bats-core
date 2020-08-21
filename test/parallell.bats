@@ -69,7 +69,7 @@ setup() {
   # the serialization should lead to at least 6s runtime
   [[ $duration -ge 6 ]]
   # parallelization should at least get rid of 1/4th the total runtime
-  [[ $duration -lt 9 ]]
+  [[ $duration -le 9 ]]
 }
 
 @test "running the same file twice runs its tests twice without errors" {
