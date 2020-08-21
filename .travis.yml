@@ -16,6 +16,7 @@ env:
 matrix:
   include:
     - os: osx
+      env: ''
 
 services:
   - docker
