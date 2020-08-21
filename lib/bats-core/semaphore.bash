@@ -33,8 +33,9 @@ bats_semaphore_release_wrapper() {
     mkdir -p "$output_dir"
     "$@" 2>"$output_dir/stderr" >"$output_dir/stdout"
 
-    # TODO: why is this necessary? shouldn't the EXIT trap do this already? does it work with signals then?
+    # bash bug: the exit trap is not called for the background process
     bats_semaphore_release_slot
+    trap '' EXIT # avoid calling release twice
 }
 
 # block until a semaphore slot becomes free
