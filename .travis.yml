@@ -37,8 +37,8 @@ script:
     docker build --build-arg bashver="${BASHVER}" --tag "bats/bats:bash-${BASHVER}" . || exit $?
     docker run -it "bash:${BASHVER}" --version || exit $?
     time docker run -it "bats/bats:bash-${BASHVER}" --tap /opt/bats/test || exit $?
-    # also test running in parallel
-    time docker run -it "bats/bats:bash-${BASHVER}" --tap --jobs 2 /opt/bats/test || exit $?
+    # also test running (recursively!) in parallel
+    time docker run -it -e BATS_NUMBER_OF_PARALLEL_JOBS=2 "bats/bats:bash-${BASHVER}" --tap /opt/bats/test || exit $?
   else
     time bin/bats --formatter tap test
   fi
