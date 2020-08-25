@@ -52,6 +52,12 @@ fail() {
   printf "\n    <testcase classname=\"%s\" name=\"%s\" time=\"%s\">
         <failure type=\"failure\"><![CDATA[" "${class}" "${name}" "${test_exec_time}"
 
+  # escape ]]> in outputs
+  output="${1//]]>/]]]]><![CDATA[>}"
+  # escape control character in outputs
+  local CONTROL_CHAR=$'\033'
+  output="${output//$CONTROL_CHAR/&#27;}"
+
   echo -n "${1}"
 
   printf "]]></failure>
