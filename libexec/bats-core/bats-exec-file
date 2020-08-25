@@ -143,6 +143,18 @@ bats_forward_output_of_parallel_test() {
   return $status
 }
 
+bats_is_next_parallel_test_finished() {
+  local PID
+  # get the pid of the next potentially finished test
+  PID=$(cat "$output_folder/$(( test_number_in_suite_of_last_finished_test + 1 ))/pid")
+  # try to send a signal to this process
+  # if it fails, the process exited, 
+  # if it succeeds, the process is still running
+  if kill -0 "$PID" 2>/dev/null; then
+    return 1
+  fi
+}
+
 # prints output from all tests in the order they were started
 # $1 == "blocking": wait for a test to finish before printing
 #    != "blocking": abort printing, when a test has not finished
@@ -151,7 +163,7 @@ bats_forward_output_for_parallel_tests() {
   # was the next test already started?
   while [[ $(( test_number_in_suite_of_last_finished_test + 1 )) -le $test_number_in_suite ]]; do
     # if we are okay with waiting or if the test has already been finished
-    if [[ "$1" == "blocking" ]] || (! kill -0 "$(cat "$output_folder/$(( test_number_in_suite_of_last_finished_test + 1 ))/pid")" 2>/dev/null); then
+    if [[ "$1" == "blocking" ]] || bats_is_next_parallel_test_finished ; then
       (( ++test_number_in_suite_of_last_finished_test ))
       bats_forward_output_of_parallel_test "$test_number_in_suite_of_last_finished_test" || status=1
     else
