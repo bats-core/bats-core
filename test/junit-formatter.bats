@@ -48,6 +48,7 @@ TESTSUITES_REGEX="<testsuites time=\"$FLOAT_REGEX\">"
     ;;
   esac
   run bats --formatter junit "$FIXTURE_ROOT/$TEST_FILE_NAME"
+  rm "$FIXTURE_ROOT/$TEST_FILE_NAME" # clean up to avoid leaving local file
 
   echo "$output"
   TESTSUITE_REGEX="<testsuite name=\"$ESCAPED_TEST_FILE_NAME\" tests=\"3\" failures=\"1\" errors=\"0\" skipped=\"1\" time=\"$FLOAT_REGEX\" timestamp=\"$TIMESTAMP_REGEX\" hostname=\".*?\">"
