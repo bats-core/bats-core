@@ -4,16 +4,18 @@ set -euo pipefail
 index=0
 
 init_suite() {
-  count=0
-  failures=0
-  skipped=0
-  suitetest_exec_time=0
-  name=""
+  suite_test_exec_time=0
+  _suite_buffer=""
+}
+
+init_file() {
+  file_count=0
+  file_failures=0
+  file_skipped=0
+  file_exec_time=0
   _buffer=""
   _buffer_log=""
 }
-
-init_suite
 
 host() {
   local hostname="${HOST:-}"
@@ -24,43 +26,54 @@ host() {
   echo "$hostname"
 }
 
-header() {
-  timestamp=$(date -u +"%Y-%m-%dT%H:%M:%S")
-  printf "\
-<?xml version=\"1.0\" encoding=\"UTF-8\"?>
-<testsuite name=\"%s\" tests=\"%s\" failures=\"%s\" errors=\"0\" skipped=\"%s\" time=\"%s\" timestamp=\"%s\" hostname=\"%s\">
-  <properties>" "${class}" "${count}" "${failures}" "${skipped}" "${suitetest_exec_time}" "${timestamp}" "$(host)"
-  while IFS= read -r line; do
-    name="$(echo "$line" | cut -d'=' -f1)"
-    value="$(echo "$line" | cut -d'=' -f2-)"
-    printf "\n    <property name=\"%s\" value=\"%s\"/>" "${name}" "${value}"
-  done < <(env | grep "^BATS_")
-  printf "\n  </properties>"
+# convert $1 (time in milliseconds) to seconds
+milliseconds_to_seconds() {
+  # use printf to convert bc's .03 into 0.03
+  printf "%f" "$(bc <<< "scale=3; $1/1000")"
 }
 
-footer() {
-  printf "  <system-out></system-out>\n"
-  printf "  <system-err></system-err>\n"
+suite_header() {
+  printf "\
+<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+<testsuites time=\"%s\">\n" "$(milliseconds_to_seconds "${suite_test_exec_time}")"
+}
+
+file_header() {
+  timestamp=$(date -u +"%Y-%m-%dT%H:%M:%S")
+  printf "<testsuite name=\"%s\" tests=\"%s\" failures=\"%s\" errors=\"0\" skipped=\"%s\" time=\"%s\" timestamp=\"%s\" hostname=\"%s\">" \
+                     "$(xml_escape "${class}")" "${file_count}" "${file_failures}" "${file_skipped}" "$(milliseconds_to_seconds "${file_exec_time}")" "${timestamp}" "$(host)"
+}
+
+file_footer() {
   printf "</testsuite>\n"
 }
 
+suite_footer() {
+  printf "</testsuites>\n"
+}
+
 pass() {
-  printf "\n    <testcase classname=\"%s\" name=\"%s\" time=\"%s\"/>" "${class}" "${name}" "${test_exec_time}"
+  printf "\n    <testcase classname=\"%s\" name=\"%s\" time=\"%s\"/>" "$(xml_escape "${class}")" "$(xml_escape "${name}")" "$(milliseconds_to_seconds "${test_exec_time}")"
+}
+
+xml_escape() {
+  output=${1//&/&amp;}
+  output=${output//</&lt;}
+  output=${output//>/&gt;}
+  output=${output//'"'/&quot;}
+  output=${output//\'/&#39;}
+  local CONTROL_CHAR=$'\033'
+  output="${output//$CONTROL_CHAR/&#27;}"
+  printf "%s" "$output"
 }
 
 fail() {
   printf "\n    <testcase classname=\"%s\" name=\"%s\" time=\"%s\">
-        <failure type=\"failure\"><![CDATA[" "${class}" "${name}" "${test_exec_time}"
+        <failure type=\"failure\">" "$(xml_escape "${class}")" "$(xml_escape "${name}")" "$(milliseconds_to_seconds "${test_exec_time}")"
 
-  # escape ]]> in outputs
-  output="${1//]]>/]]]]><![CDATA[>}"
-  # escape control character in outputs
-  local CONTROL_CHAR=$'\033'
-  output="${output//$CONTROL_CHAR/&#27;}"
+  xml_escape "$1"
 
-  echo -n "${1}"
-
-  printf "]]></failure>
+  printf "</failure>
     </testcase>\n"
 }
 
@@ -68,7 +81,16 @@ skip() {
   # shellcheck disable=SC2183
   printf "\n    <testcase classname=\"%s\" name=\"%s\" time=\"%s\">
         <skipped>%s</skipped>
-    </testcase>\n" "${class}" "${name}" "${test_exec_time}" "$1"
+    </testcase>\n" "$(xml_escape "${class}")" "$(xml_escape "${name}")" "$(milliseconds_to_seconds "${test_exec_time}")" "$(xml_escape "$1")"
+}
+
+suite_buffer() {
+  _suite_buffer="${_suite_buffer}$("$@")"
+}
+
+suite_flush() {
+  echo "${_suite_buffer}"
+  _suite_buffer=""
 }
 
 buffer() {
@@ -86,39 +108,51 @@ $1"
 }
 
 flush_log() {
-  if [[ -n "${_buffer_log}" ]]; then
+  if [[ -v _buffer_log ]] && [[ -n "${_buffer_log}" ]]; then
     buffer fail "${_buffer_log}"
     _buffer_log=""
   fi
 }
 
+finish_file() {
+  file_header
+  flush
+  file_footer
+}
+
 finish_suite() {
-  [[ ${count} -gt 0 ]] && {
-    (
-      flush_log
-      header
-      flush
-      footer
-    ) >"$(output_path)"
-  }
-  init_suite
+  flush_log
+  suite_header
+  suite_flush
+  finish_file # must come after suite flush to not print the last file before the others
+  suite_footer
 }
 
-output_path() {
-  path="TestReport-${class}.xml"
-  if [[ -n "${BATS_REPORT_OUTPUT_PATH:-}" ]]; then
-    path="${BATS_REPORT_OUTPUT_PATH%/}/${path}"
-  fi
-  echo "$path"
-}
-
+init_suite
 trap finish_suite EXIT
+
+header_pattern='[0-9]+\.\.[0-9]+'
+IFS= read -r header
+
+if [[ ! "$header" =~ $header_pattern ]]; then
+  # If the first line isn't a TAP plan, print it and pass the rest through
+  printf "junit formatter: This is not the expected TAP format!" >&2
+  printf '%s\n' "$header"
+  exec cat
+  exit 1
+fi
 
 while IFS= read -r line; do
   case "$line" in
   "suite "*)
     flush_log
-    finish_suite
+    # finish the previous file if this is not the first one
+    if [[ -v not_first_file ]]; then
+      suite_buffer finish_file
+    else
+      not_first_file=1
+    fi
+    init_file
     suite_expr="suite (.*)"
     if [[ "$line" =~ $suite_expr ]]; then
       class="${BASH_REMATCH[1]}"
@@ -130,31 +164,34 @@ while IFS= read -r line; do
     name="${line#* $index }"
     ;;
   "ok "*)
-    echo "$line"
-    ((count += 1))
+    ((file_count += 1))
     expr_ok="ok $index .* in ([0-9]+)ms"
     expr_skip="ok $index .* # skip[ ]?(.*)"
     if [[ "$line" =~ $expr_skip ]]; then
-      ((skipped += 1))
+      ((file_skipped += 1))
       test_exec_time=0
       buffer skip "${BASH_REMATCH[1]}"
     elif [[ "$line" =~ $expr_ok ]]; then
-      test_exec_time="${BASH_REMATCH[1]}"
-      suitetest_exec_time=$((suitetest_exec_time + test_exec_time))
+      # TODO: remove "1000 *" once we measure in ms
+      test_exec_time="$(( 1000 * BASH_REMATCH[1] ))"
+      file_exec_time="$((file_exec_time + test_exec_time))"
+      suite_test_exec_time=$((suite_test_exec_time + test_exec_time))
       buffer pass
     else
       log "Wrong output format: ${line}"
-      ((failures += 1))
+      ((file_failures += 1))
     fi
     ;;
   "not ok "*)
-    echo "$line"
-    ((count += 1))
-    ((failures += 1))
+    ((file_count += 1))
+    ((file_failures += 1))
     expr_notok="not ok $index .* in ([0-9]+)ms"
     if [[ "$line" =~ $expr_notok ]]; then
-      test_exec_time="${BASH_REMATCH[1]}"
-      suitetest_exec_time=$((suitetest_exec_time + test_exec_time))
+    # TODO: remove "1000 *" once we measure in ms
+      test_exec_time="$(( 1000 * BASH_REMATCH[1] ))"
+      suite_test_exec_time=$((suite_test_exec_time + test_exec_time))
+    else
+      log "Wrong output format: ${line}"
     fi
     ;;
   "# "*)
