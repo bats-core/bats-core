@@ -12,7 +12,11 @@ while [[ "$#" -ne 0 ]]; do
       BASE_PATH="$1"
       # use the containing directory when --base-path is a file
       if [[ ! -d "$BASE_PATH" ]]; then
-        BASE_PATH=$(dirname "$BASE_PATH")
+        BASE_PATH="$(dirname "$BASE_PATH")"
+      fi
+      # ensure the path ends with / to strip that later on
+      if [[ "${BASE_PATH}" != *"/" ]]; then
+        BASE_PATH="$BASE_PATH/"
       fi
     ;;
   esac
@@ -166,6 +170,23 @@ if [[ ! "$header" =~ $header_pattern ]]; then
   exit 1
 fi
 
+# given a prefix and a path, remove the prefix if the path starts with it
+# e.g. 
+# remove_prefix /usr/bin /usr/bin/bash -> bash
+# remove_prefix /usr /usr/lib/bash -> lib/bash
+# remove_prefix /usr/bin /usr/local/bin/bash -> /usr/local/bin/bash
+remove_prefix() {
+  base_path="$1"
+  path="$2"
+  if [[ "$path" == "$base_path"* ]]; then
+    # cut off the common prefix
+    printf "%s" "${path:${#base_path}}"
+  else
+    printf "%s" "$path"
+    return 1
+  fi
+}
+
 while IFS= read -r line; do
   case "$line" in
   "suite "*)
@@ -179,7 +200,7 @@ while IFS= read -r line; do
     init_file
     suite_expr="suite (.*)"
     if [[ "$line" =~ $suite_expr ]]; then
-      class="$(realpath --relative-to "$BASE_PATH" "${BASH_REMATCH[1]}")"
+      class="$(remove_prefix "$BASE_PATH" "${BASH_REMATCH[1]}")"
     fi
     ;;
   "begin "*)
