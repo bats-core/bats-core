@@ -1,6 +1,24 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+BASE_PATH=.
+
+while [[ "$#" -ne 0 ]]; do
+  case "$1" in
+    --base-path)
+      shift
+      # the relative path root to use for reporting filenames
+      # this is mainly intended for suite mode, where this will be the suite root folder
+      BASE_PATH="$1"
+      # use the containing directory when --base-path is a file
+      if [[ ! -d "$BASE_PATH" ]]; then
+        BASE_PATH=$(dirname "$BASE_PATH")
+      fi
+    ;;
+  esac
+  shift
+done
+
 index=0
 
 init_suite() {
@@ -155,7 +173,7 @@ while IFS= read -r line; do
     init_file
     suite_expr="suite (.*)"
     if [[ "$line" =~ $suite_expr ]]; then
-      class="${BASH_REMATCH[1]}"
+      class="$(realpath --relative-to "$BASE_PATH" "${BASH_REMATCH[1]}")"
     fi
     ;;
   "begin "*)
