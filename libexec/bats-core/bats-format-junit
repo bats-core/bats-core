@@ -30,6 +30,7 @@ init_suite() {
   _suite_buffer=""
 }
 
+_buffer_log=
 init_file() {
   file_count=0
   file_failures=0
@@ -136,7 +137,7 @@ $1"
 }
 
 flush_log() {
-  if [[ -v _buffer_log ]] && [[ -n "${_buffer_log}" ]]; then
+  if [[ -n "${_buffer_log}" ]]; then
     buffer fail "${_buffer_log}"
     _buffer_log=""
   fi
@@ -192,7 +193,7 @@ while IFS= read -r line; do
   "suite "*)
     flush_log
     # finish the previous file if this is not the first one
-    if [[ -v not_first_file ]]; then
+    if [[ ${not_first_file-UNSET} != UNSET ]]; then
       suite_buffer finish_file
     else
       not_first_file=1
