@@ -46,8 +46,14 @@ host() {
 
 # convert $1 (time in milliseconds) to seconds
 milliseconds_to_seconds() {
-  # use printf to convert bc's .03 into 0.03
-  printf "%f" "$(bc <<< "scale=3; $1/1000")"
+  # we cannot rely on having bc for this calculation
+  full_seconds=$(($1 / 1000))
+  remaining_milliseconds=$(($1 % 1000))
+  if [[ $remaining_milliseconds -eq 0 ]]; then
+    printf "%d" "$full_seconds"
+  else
+    printf "%d.%03d" "$full_seconds" "$remaining_milliseconds"
+  fi
 }
 
 suite_header() {
