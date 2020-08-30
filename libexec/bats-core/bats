@@ -30,7 +30,7 @@ HELP_TEXT_HEADER
   -c, --count               Count test cases without running any tests
   -f, --filter <regex>      Only run tests that match the regular expression
   -F, --formatter <type>    Switch between formatters: pretty (default),
-                              tap (default w/o term), junit
+                              tap (default w/o term), tap13, junit
   -h, --help                Display this help message
   -j, --jobs <jobs>         Number of parallel jobs (requires GNU parallel)
   --no-tempdir-cleanup      Preserve test output temporary directory

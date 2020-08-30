@@ -52,7 +52,7 @@ OPTIONS
   * `-f`, `--filter <regex>`:
     Filter test cases by names matching the regular expression
   * `-F`, `--formatter <type>`:
-    Switch between formatters: pretty (default), tap (default w/o term), junit
+    Switch between formatters: pretty (default), tap (default w/o term), tap13, junit
   * `-h`, `--help`:
     Display this help message
   * `-j`, `--jobs <jobs>`:
