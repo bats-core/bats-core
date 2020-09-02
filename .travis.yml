@@ -4,7 +4,7 @@ os:
 - linux
 
 env:
-  - BASHVER=
+  - BASHVER= SHELLCHECK=true
   - BASHVER=3.2
   - BASHVER=4.0
   - BASHVER=4.1
@@ -16,20 +16,21 @@ env:
 matrix:
   include:
     - os: osx
+      env: ''
 
 services:
   - docker
 
 before_script:
  - |
-   if [[ "${TRAVIS_OS_NAME:-}" == 'linux' ]]; then
+   if [[ "${TRAVIS_OS_NAME:-}" == 'linux' && "$SHELLCHECK" == 'true' ]]; then
      sudo apt-get install shellcheck
    fi
 
 script:
 - |
-  if [[ "${TRAVIS_OS_NAME:-}" == 'linux' ]]; then
-    ./shellcheck.sh
+  if [[ "${TRAVIS_OS_NAME:-}" == 'linux' && "$SHELLCHECK" == 'true' ]]; then
+    ./shellcheck.sh || exit 1
   fi
 
   if [[ "${TRAVIS_OS_NAME:-}" == 'linux' && -n "${BASHVER}" ]]; then

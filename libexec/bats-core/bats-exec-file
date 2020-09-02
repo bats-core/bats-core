@@ -110,7 +110,7 @@ bats_file_exit_trap() {
     else
       FAILURE_REASON='teardown_file'
     fi
-    printf "not ok %d %s\n" "$((test_number + 1))" "$FAILURE_REASON failed" >&3
+    printf "not ok %d %s\n" "$((test_number_in_suite + 1))" "$FAILURE_REASON failed" >&3
     bats_print_stack_trace "${BATS_STACK_TRACE[@]}" >&3
     bats_print_failed_command >&3
     while IFS= read -r line; do
@@ -138,7 +138,8 @@ bats_run_tests() {
   status=0
   tests_to_run=()
   local line_number=0
-  test_number=''
+  # the global test number must be visible to traps -> not local
+  test_number_in_suite=''
   while read -r test_line; do
     test_file=${test_line%%$'\t'*}
     test_name=${test_line##*$'\t'}
@@ -146,36 +147,37 @@ bats_run_tests() {
       tests_to_run+=("$test_name")
       # save the first test's number for later iteration
       # this assumes that tests for a file are stored consecutive in the file!
-      if [[ -z $test_number ]]; then
-        test_number=$line_number
+      if [[ -z "$test_number_in_suite" ]]; then
+        test_number_in_suite=$line_number
       fi
     fi
     ((++line_number))
   done <"$TESTS_FILE"
 
+  local test_number_in_file=0
   if [[ "$num_jobs" != 1 ]]; then
     test_pids_and_numbers=()
     output_folder="$BATS_RUN_TMPDIR/parallel_output"
-    parallel_log_file="$BATS_RUN_TMPDIR/parallel.log"
     for test_name in "${tests_to_run[@]}"; do
       # Only handle non-empty lines
       if [[ $test_name ]]; then
-        ((++test_number))
-        test_output_dir="$output_folder/$test_number"
+        ((++test_number_in_suite))
+        ((++test_number_in_file))
+        test_output_dir="$output_folder/$test_number_in_suite"
         mkdir -p "$test_output_dir"
         # parallelize across files using parallel's semaphore mode
         # use --results to gather output in separate files
         # use --fg mode to retrieve exit codes (all non zero exit codes seem to mapped to 1), but which requires us to suppress its output
         # shellcheck disable=SC2154 #bats_parallel_args is inherited from exec-suite
-        parallel --semaphore -j "$num_jobs" "${bats_parallel_args[@]}" --fg -- bats-exec-test "${flags[@]}" "$filename" "$test_name" "$test_number" >"$test_output_dir/stdout" 2>"$test_output_dir/stderr" &
+        parallel --semaphore -j "$num_jobs" "${bats_parallel_args[@]}" --fg -- bats-exec-test "${flags[@]}" "$filename" "$test_name" "$test_number_in_suite" "$test_number_in_file" >"$test_output_dir/stdout" 2>"$test_output_dir/stderr" &
         pid=$!
-        test_pids_and_numbers+=("$pid,$test_number")
+        test_pids_and_numbers+=("$pid,$test_number_in_suite")
       fi
     done
     for test_pid_and_number in "${test_pids_and_numbers[@]}"; do
       test_pid=${test_pid_and_number%,*}
-      test_number=${test_pid_and_number##*,}
-      test_output_dir="$output_folder/$test_number"
+      test_number_in_suite=${test_pid_and_number##*,}
+      test_output_dir="$output_folder/$test_number_in_suite"
       # fetch the return code
       wait "$test_pid" || status=1
       # wait for tests to finish in the order they were started and output their results as they come in
@@ -187,11 +189,13 @@ bats_run_tests() {
     for test_name in "${tests_to_run[@]}"; do
       # Only handle non-empty lines
       if [[ $test_name ]]; then
-        ((++test_number))
+        ((++test_number_in_suite))
+        ((++test_number_in_file))
+        # deal with emtpty flags to avoid spurious "unbound variable" errors on Bash 4.3 and lower
         if [[ "${#flags[@]}" -gt 0 ]]; then
-          bats-exec-test "${flags[@]}" "$filename" "$test_name" "$test_number" || status=1
+          bats-exec-test "${flags[@]}" "$filename" "$test_name" "$test_number_in_suite" "$test_number_in_file" || status=1
         else
-          bats-exec-test "$filename" "$test_name" "$test_number" || status=1
+          bats-exec-test "$filename" "$test_name" "$test_number_in_suite" "$test_number_in_file" || status=1
         fi
       fi
     done

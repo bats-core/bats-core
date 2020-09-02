@@ -166,3 +166,9 @@ fixtures suite
 @test "skip is handled correctly in setup, test, and teardown" {
   bats "${FIXTURE_ROOT}/skip"
 }
+
+@test "BATS_TEST_NUMBER starts at 1 in each individual test file" {
+  run bats "${FIXTURE_ROOT}/test_number"
+  echo "$output"
+  [ "$status" -eq 0 ]
+}
