@@ -4,7 +4,7 @@ load test_helper
 fixtures junit-formatter
 
 FLOAT_REGEX='[0-9]+(\.[0-9]+){0,1}'
-TIMESTAMP_REGEX='[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}'
+TIMESTAMP_REGEX='[0-9]+-[0-1][0-9]-[0-3][0-9]T[0-2][0-9]:[0-5][0-9]:[0-5][0-9]'
 TESTSUITES_REGEX="<testsuites time=\"$FLOAT_REGEX\">"
 
 @test "junit formatter with skipped test does not fail" {
@@ -15,7 +15,8 @@ TESTSUITES_REGEX="<testsuites time=\"$FLOAT_REGEX\">"
   
   [[ "${lines[1]}" =~ $TESTSUITES_REGEX ]]
 
-  TESTSUITE_REGEX="<testsuite name=\"skipped.bats\" tests=\"2\" failures=\"0\" errors=\"0\" skipped=\"2\" time=\"$FLOAT_REGEX\" timestamp=\"$TIMESTAMP_REGEX\" hostname=\".*?\">"
+  TESTSUITE_REGEX="<testsuite name=\"skipped.bats\" tests=\"2\" failures=\"0\" errors=\"0\" skipped=\"2\" time=\"$FLOAT_REGEX\" timestamp=\"$TIMESTAMP_REGEX\" hostname=\".*\">"
+  echo "TESTSUITE_REGEX='$TESTSUITE_REGEX'"
   [[ "${lines[2]}" =~ $TESTSUITE_REGEX ]]
 
   TESTCASE_REGEX="<testcase classname=\"skipped.bats\" name=\"a skipped test\" time=\"$FLOAT_REGEX\">"
@@ -51,7 +52,7 @@ TESTSUITES_REGEX="<testsuites time=\"$FLOAT_REGEX\">"
   rm "$FIXTURE_ROOT/$TEST_FILE_NAME" # clean up to avoid leaving local file
 
   echo "$output"
-  TESTSUITE_REGEX="<testsuite name=\"$ESCAPED_TEST_FILE_NAME\" tests=\"3\" failures=\"1\" errors=\"0\" skipped=\"1\" time=\"$FLOAT_REGEX\" timestamp=\"$TIMESTAMP_REGEX\" hostname=\".*?\">"
+  TESTSUITE_REGEX="<testsuite name=\"$ESCAPED_TEST_FILE_NAME\" tests=\"3\" failures=\"1\" errors=\"0\" skipped=\"1\" time=\"$FLOAT_REGEX\" timestamp=\"$TIMESTAMP_REGEX\" hostname=\".*\">"
   [[ "${lines[2]}" =~ $TESTSUITE_REGEX ]]
   TESTCASE_REGEX="<testcase classname=\"$ESCAPED_TEST_FILE_NAME\" name=\"Successful test with escape characters: &quot;&#39;&lt;&gt;&amp;&#27;\(0x1b\)\" time=\"$FLOAT_REGEX\"/>"
   [[ "${lines[3]}" =~ $TESTCASE_REGEX ]]
