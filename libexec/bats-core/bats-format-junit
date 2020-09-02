@@ -62,14 +62,13 @@ milliseconds_to_seconds() {
 }
 
 suite_header() {
-  printf "\
-<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+  printf "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
 <testsuites time=\"%s\">\n" "$(milliseconds_to_seconds "${suite_test_exec_time}")"
 }
 
 file_header() {
   timestamp=$(date -u +"%Y-%m-%dT%H:%M:%S")
-  printf "<testsuite name=\"%s\" tests=\"%s\" failures=\"%s\" errors=\"0\" skipped=\"%s\" time=\"%s\" timestamp=\"%s\" hostname=\"%s\">" \
+  printf "<testsuite name=\"%s\" tests=\"%s\" failures=\"%s\" errors=\"0\" skipped=\"%s\" time=\"%s\" timestamp=\"%s\" hostname=\"%s\">\n" \
                      "$(xml_escape "${class}")" "${file_count}" "${file_failures}" "${file_skipped}" "$(milliseconds_to_seconds "${file_exec_time}")" "${timestamp}" "$(host)"
 }
 
@@ -82,7 +81,7 @@ suite_footer() {
 }
 
 pass() {
-  printf "\n    <testcase classname=\"%s\" name=\"%s\" time=\"%s\"/>" "$(xml_escape "${class}")" "$(xml_escape "${name}")" "$(milliseconds_to_seconds "${test_exec_time}")"
+  printf "    <testcase classname=\"%s\" name=\"%s\" time=\"%s\"/>\n" "$(xml_escape "${class}")" "$(xml_escape "${name}")" "$(milliseconds_to_seconds "${test_exec_time}")"
 }
 
 xml_escape() {
@@ -97,7 +96,7 @@ xml_escape() {
 }
 
 fail() {
-  printf "\n    <testcase classname=\"%s\" name=\"%s\" time=\"%s\">
+  printf "    <testcase classname=\"%s\" name=\"%s\" time=\"%s\">
         <failure type=\"failure\">" "$(xml_escape "${class}")" "$(xml_escape "${name}")" "$(milliseconds_to_seconds "${test_exec_time}")"
 
   xml_escape "$1"
@@ -108,26 +107,30 @@ fail() {
 
 skip() {
   # shellcheck disable=SC2183
-  printf "\n    <testcase classname=\"%s\" name=\"%s\" time=\"%s\">
+  printf "    <testcase classname=\"%s\" name=\"%s\" time=\"%s\">
         <skipped>%s</skipped>
     </testcase>\n" "$(xml_escape "${class}")" "$(xml_escape "${name}")" "$(milliseconds_to_seconds "${test_exec_time}")" "$(xml_escape "$1")"
 }
 
 suite_buffer() {
-  _suite_buffer="${_suite_buffer}$("$@")"
+  local output
+  output="$("$@"; printf "x")" # use x marker to avoid losing trailing newlines
+  _suite_buffer="${_suite_buffer}${output%x}"
 }
 
 suite_flush() {
-  echo "${_suite_buffer}"
+  echo -n "${_suite_buffer}"
   _suite_buffer=""
 }
 
 buffer() {
-  _buffer="${_buffer}$("$@")"
+  local output
+  output="$("$@"; printf "x")" # use x marker to avoid losing trailing newlines
+  _buffer="${_buffer}${output%x}"
 }
 
 flush() {
-  echo "${_buffer}"
+  echo -n "${_buffer}"
   _buffer=""
 }
 
