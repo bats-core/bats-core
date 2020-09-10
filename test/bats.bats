@@ -563,7 +563,7 @@ END_OF_ERR_MSG
 }
 
 @test "report correct line on unset variables" {
-  run bats "$FIXTURE_ROOT/unbound_variable.bats"
+  LANG=C run bats "$FIXTURE_ROOT/unbound_variable.bats"
   [ "$status" -eq 1 ]
   [ "${#lines[@]}" -eq 9 ]
   [ "${lines[1]}" = 'not ok 1 access unbound variable' ]
