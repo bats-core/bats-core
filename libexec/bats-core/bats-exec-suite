@@ -7,6 +7,7 @@ num_jobs=${BATS_NUMBER_OF_PARALLEL_JOBS-1}
 have_gnu_parallel=
 bats_parallel_args=()
 bats_no_parallelize_across_files=
+bats_no_parallelize_within_files=
 flags=()
 
 abort() {
@@ -40,6 +41,10 @@ while [[ "$#" -ne 0 ]]; do
     ;;
   --no-parallelize-across-files)
     bats_no_parallelize_across_files=1
+    ;;
+  --no-parallelize-within-files)
+    bats_no_parallelize_within_files=1
+    flags+=("--no-parallelize-within-files")
     ;;
   *)
     break
@@ -98,7 +103,12 @@ if [[ -n "$count_only_flag" ]]; then
 fi
 
 if [[ -n "$bats_no_parallelize_across_files" ]] && [[ ! "$num_jobs" -gt 1 ]]; then
-  printf "The flag --no-parallelize-across-files requires at least --jobs 2"
+  abort "The flag --no-parallelize-across-files requires at least --jobs 2"
+  exit 1
+fi
+
+if [[ -n "$bats_no_parallelize_within_files" ]] && [[ ! "$num_jobs" -gt 1 ]]; then
+  abort "The flag --no-parallelize-across-files requires at least --jobs 2"
   exit 1
 fi
 
