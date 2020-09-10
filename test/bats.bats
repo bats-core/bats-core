@@ -633,9 +633,13 @@ END_OF_ERR_MSG
   [[ "${lines[2]}" == "ok 2 skipped test with reason # skip reason" ]]
   [[ "${lines[3]}" == "ok 3 passing test" ]]
   [[ "${lines[4]}" == "not ok 4 failing test" ]]
-  [[ "${lines[5]}" == "# (in test file $RELATIVE_FIXTURE_ROOT/set_-eu_in_setup_and_teardown.bats, line 22)" ]] 
+  [[ "${lines[5]}" == "# (in test file $RELATIVE_FIXTURE_ROOT/set_-eu_in_setup_and_teardown.bats, line 22)" ]]
   [[ "${lines[6]}" == "#   \`false' failed" ]]
   [[ "${#lines[@]}" -eq 7 ]]
+}
+
+@test "filenames with tab can be used" {
+  bats "$FIXTURE_ROOT/tab	in filename.bats"
 }
 
 @test "Don't hang on CTRL-C (issue #353)" {
@@ -656,6 +660,6 @@ END_OF_ERR_MSG
   run kill -0 -- -$SUBPROCESS_PID
   [[ $status -ne 0 ]] \
     || (kill -9 -- -$SUBPROCESS_PID; false)
-    #   ^ kill the process for good when SIGINT failed, 
+    #   ^ kill the process for good when SIGINT failed,
     #     to avoid waiting endlessly for stuck children to finish
 }
