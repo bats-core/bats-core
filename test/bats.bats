@@ -642,6 +642,19 @@ END_OF_ERR_MSG
   bats "$FIXTURE_ROOT/tab	in filename.bats"
 }
 
+@test "each file is evaluated n+1 times" {
+  export TEMPFILE=$(mktemp -p "$BATS_TEST_SUITE_TMPDIR")
+  run bats "$FIXTURE_ROOT/evaluation_count/"
+
+  cat "$TEMPFILE"
+
+  run grep "file1" "$TEMPFILE"
+  [[ ${#lines[@]} -eq 2 ]]
+
+  run grep "file2" "$TEMPFILE"
+  [[ ${#lines[@]} -eq 3 ]]
+}
+
 @test "Don't hang on CTRL-C (issue #353)" {
   # guarantee that background processes get their own process group -> pid=pgid
   set -m
