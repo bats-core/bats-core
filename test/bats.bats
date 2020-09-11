@@ -639,7 +639,10 @@ END_OF_ERR_MSG
 }
 
 @test "filenames with tab can be used" {
-  bats "$FIXTURE_ROOT/tab	in filename.bats"
+  [[ "$OSTYPE" == "linux"* ]] || skip "FS cannot deal with tabs in filenames"
+
+  cp "$FIXTURE_ROOT/tab in filename.bats" "$FIXTURE_ROOT/tab"$'\t'"in filename.bats"
+  bats "$FIXTURE_ROOT/tab"$'\t'"in filename.bats"
 }
 
 @test "each file is evaluated n+1 times" {
