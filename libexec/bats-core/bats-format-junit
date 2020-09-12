@@ -185,7 +185,6 @@ remove_prefix() {
     printf "%s" "${path:${#base_path}}"
   else
     printf "%s" "$path"
-    return 1
   fi
 }
 
