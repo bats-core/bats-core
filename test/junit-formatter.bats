@@ -35,21 +35,25 @@ TESTSUITES_REGEX="<testsuites time=\"$FLOAT_REGEX\">"
 }
 
 @test "junit formatter: escapes xml special chars" {
+  make_bats_test_suite_tmpdir
   case $OSTYPE in
     linux*|darwin)
       # their CI can handle special chars on filename
       TEST_FILE_NAME="xml-escape-\"<>'&.bats"
       ESCAPED_TEST_FILE_NAME="xml-escape-&quot;&lt;&gt;&#39;&amp;.bats"
-      cp "$FIXTURE_ROOT/xml-escape.bats" "$FIXTURE_ROOT/$TEST_FILE_NAME"
+      TEST_FILE_PATH="$BATS_TEST_SUITE_TMPDIR/$TEST_FILE_NAME"
+      cp "$FIXTURE_ROOT/xml-escape.bats" "$TEST_FILE_PATH"
+      NEED_CLEANUP=1
     ;;
     *)
       # use the filename without special chars
       TEST_FILE_NAME="xml-escape.bats"
       ESCAPED_TEST_FILE_NAME="$TEST_FILE_NAME"
+      TEST_FILE_PATH="$FIXTURE_ROOT/$TEST_FILE_NAME"
     ;;
   esac
-  run bats --formatter junit "$FIXTURE_ROOT/$TEST_FILE_NAME"
-  rm "$FIXTURE_ROOT/$TEST_FILE_NAME" # clean up to avoid leaving local file
+  run bats --formatter junit "$TEST_FILE_PATH"
+  [[ ${NEED_CLEANUP-0} == 0 ]] || rm "$TEST_FILE_PATH" # clean up to avoid leaving local file
 
   echo "$output"
   TESTSUITE_REGEX="<testsuite name=\"$ESCAPED_TEST_FILE_NAME\" tests=\"3\" failures=\"1\" errors=\"0\" skipped=\"1\" time=\"$FLOAT_REGEX\" timestamp=\"$TIMESTAMP_REGEX\" hostname=\".*\">"
