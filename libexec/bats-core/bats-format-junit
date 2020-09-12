@@ -145,9 +145,11 @@ flush_log() {
 }
 
 finish_file() {
-  file_header
-  printf "%s\n" "${_buffer}"
-  file_footer
+  if [[ "${class-JUNIT_FORMATTER_NO_FILE_ENCOUNTERED}" != JUNIT_FORMATTER_NO_FILE_ENCOUNTERED ]]; then
+    file_header
+    printf "%s\n" "${_buffer}"
+    file_footer
+  fi
 }
 
 finish_suite() {
@@ -192,12 +194,7 @@ while IFS= read -r line; do
   case "$line" in
   "suite "*)
     flush_log
-    # finish the previous file if this is not the first one
-    if [[ ${not_first_file-UNSET} != UNSET ]]; then
-      suite_buffer finish_file
-    else
-      not_first_file=1
-    fi
+    suite_buffer finish_file
     init_file
     suite_expr="suite (.*)"
     if [[ "$line" =~ $suite_expr ]]; then
