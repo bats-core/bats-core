@@ -158,9 +158,6 @@ finish_suite() {
   suite_footer
 }
 
-init_suite
-trap finish_suite EXIT
-
 header_pattern='[0-9]+\.\.[0-9]+'
 IFS= read -r header
 
@@ -187,6 +184,9 @@ remove_prefix() {
     printf "%s" "$path"
   fi
 }
+
+init_suite
+trap finish_suite EXIT
 
 while IFS= read -r line; do
   case "$line" in
