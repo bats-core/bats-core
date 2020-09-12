@@ -646,7 +646,8 @@ END_OF_ERR_MSG
 }
 
 @test "each file is evaluated n+1 times" {
-  export TEMPFILE=$(mktemp -p "$BATS_TEST_SUITE_TMPDIR")
+  make_bats_test_suite_tmpdir
+  export TEMPFILE="$BATS_TEST_SUITE_TMPDIR/$BATS_TEST_NAME.log"
   run bats "$FIXTURE_ROOT/evaluation_count/"
 
   cat "$TEMPFILE"
