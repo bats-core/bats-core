@@ -83,3 +83,11 @@ TESTSUITES_REGEX="<testsuites time=\"$FLOAT_REGEX\">"
   [[ "${lines[7]}" == *"</testsuite>"* ]]
   [[ "${lines[8]}" == *"</testsuites>"* ]]
 }
+
+@test "junit formatter: files with the same name are distinguishable" {
+  run bats --formatter junit -r "$FIXTURE_ROOT/duplicate/"
+  echo "$output"
+
+  [[ "${lines[2]}" == *"<testsuite name=\"first/file1.bats\""* ]]
+  [[ "${lines[5]}" == *"<testsuite name=\"second/file1.bats\""* ]]
+}
