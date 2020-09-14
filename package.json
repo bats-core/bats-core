@@ -10,6 +10,7 @@
   "files": [
     "bin",
     "libexec",
+    "lib",
     "man"
   ],
   "directories": {
