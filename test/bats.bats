@@ -632,3 +632,25 @@ END_OF_ERR_MSG
   [[ "${lines[6]}" == "#   \`false' failed" ]]
   [[ "${#lines[@]}" -eq 7 ]]
 }
+
+@test "Don't hang on CTRL-C (issue #353)" {
+  # guarantee that background processes get their own process group -> pid=pgid
+  set -m
+  run bats "$FIXTURE_ROOT/run_long_command.bats" & # don't block execution, or we cannot send signals
+  echo "$output"
+  SUBPROCESS_PID=$!
+
+  sleep 1 # wait for the background process to start on slow systems
+
+  # emulate CTRL-C by sending SIGINT to the whole process group
+  kill -SIGINT -- -$SUBPROCESS_PID
+
+  sleep 1 # wait for the signal to be acted upon
+
+  # when the process is gone, we cannot deliver a signal anymore, getting non-zero from kill
+  run kill -0 -- -$SUBPROCESS_PID
+  [[ $status -ne 0 ]] \
+    || (kill -9 -- -$SUBPROCESS_PID; false)
+    #   ^ kill the process for good when SIGINT failed, 
+    #     to avoid waiting endlessly for stuck children to finish
+}
