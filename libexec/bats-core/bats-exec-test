@@ -104,7 +104,7 @@ bats_exit_trap() {
     bats_print_failed_command >&3
 
     while IFS= read -r line; do
-      printf '# %s\n' "$line"
+      printf '# %s\n' "$line" || break # avoid feedback loop when errors are redirected into BATS_OUT (see #353)
     done <"$BATS_OUT" >&3
     if [[ -n "$line" ]]; then
       printf '# %s\n' "$line"
