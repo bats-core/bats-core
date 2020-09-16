@@ -152,7 +152,7 @@ bats_is_next_parallel_test_finished() {
   # get the pid of the next potentially finished test
   PID=$(cat "$output_folder/$(( test_number_in_suite_of_last_finished_test + 1 ))/pid")
   # try to send a signal to this process
-  # if it fails, the process exited, 
+  # if it fails, the process exited,
   # if it succeeds, the process is still running
   if kill -0 "$PID" 2>/dev/null; then
     return 1
@@ -234,7 +234,7 @@ bats_run_tests() {
       if [[ $test_name ]]; then
         ((++test_number_in_suite))
         ((++test_number_in_file))
-        # deal with emtpty flags to avoid spurious "unbound variable" errors on Bash 4.3 and lower
+        # deal with empty flags to avoid spurious "unbound variable" errors on Bash 4.3 and lower
         if [[ "${#flags[@]}" -gt 0 ]]; then
           bats-exec-test "${flags[@]}" "$filename" "$test_name" "$test_number_in_suite" "$test_number_in_file" || status=1
         else

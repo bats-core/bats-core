@@ -22,15 +22,8 @@ setup() {
 }
 
 @test "parallel can preserve environment variables" {
-  if [[ ! -e ~/.parallel/ignored_vars ]]; then
-    parallel --record-env
-    PARALLEL_WAS_SETUP=1
-  fi
   export TEST_ENV_VARIABLE='test-value'
-  run bats --jobs 1 --parallel-preserve-environment "$FIXTURE_ROOT/parallel-preserve-environment.bats"
-  if [[ $PARALLEL_WAS_SETUP ]]; then
-    rm ~/.parallel/ignored_vars
-  fi
+  run bats --jobs 2 "$FIXTURE_ROOT/parallel-preserve-environment.bats"
   echo "$output"
   [[ "$status" -eq 0 ]]
 }

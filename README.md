@@ -214,9 +214,6 @@ Usage: bats [OPTIONS] <tests>
                               tap (default w/o term), junit
   -h, --help                Display this help message
   -j, --jobs <jobs>         Number of parallel jobs (requires GNU parallel)
-  --parallel-preserve-environment
-                            Preserve the current environment for "--jobs"
-                              (run `parallel --record-env` before)
   --no-tempdir-cleanup      Preserve test output temporary directory
   --no-parallelize-across-files
                             Serialize test file execution instead of running
@@ -292,12 +289,6 @@ Ordering of parallised tests is not guaranteed, so this mode may break suites
 with dependencies between tests (or tests that write to shared locations). When
 enabling `--jobs` for the first time be sure to re-run bats multiple times to
 identify any inter-test dependencies or non-deterministic test behaviour.
-
-If your code relies on variables from the environment, or from `setup_file()`,
-you need to specify `--parallel-preserve-environment` as well. Note that this
-requires running `parallel --record-env` first as a setup step as GNU Parallel
-will refuse to run without. Only environment variables that were **not** set
-during this setup step will be preserved!
 
 When parallelizing, the results of a file only become visible after it has been finished.
 You can use `--no-parallelize-across-files` to get immediate output at the cost of reduced
