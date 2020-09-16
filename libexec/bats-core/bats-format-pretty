@@ -66,10 +66,10 @@ begin() {
 
 pass() {
   go_to_column 0
+  buffer ' ✓ %s' "$name"
   if [[ -n "$BATS_ENABLE_TIMING" ]]; then
-    buffer ' ✓ %s [%s]' "$name" "$1"
-  else
-    buffer ' ✓ %s ' "$name"
+    set_color 2
+    buffer ' [%s]' "$1"
   fi
   advance
 }
@@ -87,10 +87,10 @@ skip() {
 fail() {
   go_to_column 0
   set_color 1 bold
+  buffer ' ✗ %s' "$name"
   if [[ -n "$BATS_ENABLE_TIMING" ]]; then
-    buffer ' ✗ %s [%s]' "$name" "$1"
-  else
-    buffer ' ✗ %s' "$name"
+    set_color 2
+    buffer ' [%s]' "$1"
   fi
   advance
 }
@@ -194,7 +194,7 @@ finish() {
 
 trap finish EXIT
 
-timing_expr="in (([0-9]+sec))$"
+timing_expr="in (([0-9]+ms))$"
 
 while IFS= read -r line; do
   case "$line" in

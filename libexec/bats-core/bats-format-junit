@@ -126,7 +126,7 @@ while IFS= read -r line; do
   "ok "*)
     echo "$line"
     ((count += 1))
-    expr_ok="ok $index .* in ([0-9]+)sec"
+    expr_ok="ok $index .* in ([0-9]+)ms"
     expr_skip="ok $index .* # skip[ ]?(.*)"
     if [[ "$line" =~ $expr_skip ]]; then
       ((skipped += 1))
@@ -145,7 +145,7 @@ while IFS= read -r line; do
     echo "$line"
     ((count += 1))
     ((failures += 1))
-    expr_notok="not ok $index .* in ([0-9]+)sec"
+    expr_notok="not ok $index .* in ([0-9]+)ms"
     if [[ "$line" =~ $expr_notok ]]; then
       test_exec_time="${BASH_REMATCH[1]}"
       suitetest_exec_time=$((suitetest_exec_time + test_exec_time))
