@@ -53,6 +53,23 @@ bats_semaphore_acquire_while_locked() {
 
 export -f bats_semaphore_acquire_while_locked
 
+if command -v flock; then
+    bats_run_under_lock() {
+        flock "$BATS_SEMAPHORE_DIR" "$@"
+    }
+elif command -v shlock; then
+    bats_run_under_lock() {
+        local lockfile="$BATS_SEMAPHORE_DIR/shlock.lock"
+        while ! shlock -p $$ -f "$lockfile"; do
+            sleep 1
+        done
+        # we got the lock now, execute the command
+        "$@"
+        # free the lock
+        rm -f "$lockfile"
+    }
+fi
+
 # block until a semaphore slot becomes free
 # prints the number of the slot that it received
 bats_semaphore_acquire_slot() {
@@ -62,7 +79,7 @@ bats_semaphore_acquire_slot() {
     while true; do
         # don't lock for reading, we are fine with spuriously getting no free slot
         if [[ $(bats_semaphore_get_free_slot_count) -gt 0 ]]; then
-            flock "$BATS_SEMAPHORE_DIR" bash -c bats_semaphore_acquire_while_locked && break
+            bats_run_under_lock bash -c bats_semaphore_acquire_while_locked && break
         fi
         sleep 1
     done
