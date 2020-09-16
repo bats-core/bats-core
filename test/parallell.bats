@@ -69,7 +69,7 @@ setup() {
   # the serialization should lead to at least 6s runtime
   [[ $duration -ge 6 ]]
   # parallelization should at least get rid of 1/4th the total runtime
-  [[ $duration -lt 9 ]]
+  [[ $duration -le 9 ]]
 }
 
 @test "running the same file twice runs its tests twice without errors" {
@@ -80,4 +80,66 @@ setup() {
   [[ "${lines[1]}" == "ok 1 "* ]]
   [[ "${lines[2]}" == "ok 2 "* ]]
   [[ "${#lines[@]}" -eq 3 ]]
+}
+
+@test "parallelity factor is met exactly" {
+  parallelity=5 # run the 10 tests in 2 batches with 5 test each
+  bats --jobs $parallelity "$FIXTURE_ROOT/parallel_factor.bats" & # run in background to avoid blocking
+  # give it some time to start the tests
+  sleep 2
+  # find how many semaphores are started in parallel; don't count grep itself
+  run bash -c "ps -ef | grep bats-exec-test | grep parallel/parallel_factor.bats | grep -v grep"
+  echo "$output"
+  
+  # This might fail spuriously if we got bad luck with the scheduler
+  # and hit the transition between the first and second batch of tests.
+  [[ "${#lines[@]}" -eq $parallelity  ]]
+}
+
+@test "parallel mode correctly forwards failure return code" {
+  run bats --jobs 2 "$FIXTURE_ROOT/../bats/failing.bats"
+  [[ "$status" -eq 1 ]]
+}
+
+@test "--no-parallelize-across-files test file detects parallel execution" {
+  export FILE_MARKER=$(mktemp)
+  ! bats --jobs 2 "$FIXTURE_ROOT/must_not_parallelize_across_files/"
+}
+
+@test "--no-parallelize-across-files prevents parallelization across files" {
+  export FILE_MARKER=$(mktemp)
+  bats --jobs 2 --no-parallelize-across-files "$FIXTURE_ROOT/must_not_parallelize_across_files/"
+}
+
+@test "--no-parallelize-across-files does not prevent parallelization within files" {
+  ! bats --jobs 2 --no-parallelize-across-files "$FIXTURE_ROOT/must_not_parallelize_within_file.bats"
+}
+
+@test "--no-parallelize-within-files test file detects parallel execution" {
+  ! bats --jobs 2 "$FIXTURE_ROOT/must_not_parallelize_within_file.bats"
+}
+
+@test "--no-parallelize-within-files prevents parallelization within files" {
+  bats --jobs 2 --no-parallelize-within-files "$FIXTURE_ROOT/must_not_parallelize_within_file.bats"
+}
+
+@test "--no-parallelize-within-files does not prevent parallelization across files" {
+  export FILE_MARKER=$(mktemp)
+  ! bats --jobs 2 --no-parallelize-within-files "$FIXTURE_ROOT/must_not_parallelize_across_files/"
+}
+
+@test "BATS_NO_PARALLELIZE_WITHIN_FILE works from inside setup_file()" {
+  DISABLE_IN_SETUP_FILE_FUNCTION=1 bats --jobs 2 "$FIXTURE_ROOT/must_not_parallelize_within_file.bats"
+}
+
+@test "BATS_NO_PARALLELIZE_WITHIN_FILE works from outside all functions" {
+  DISABLE_OUTSIDE_ALL_FUNCTIONS=1 bats --jobs 2 "$FIXTURE_ROOT/must_not_parallelize_within_file.bats"
+}
+
+@test "BATS_NO_PARALLELIZE_WITHIN_FILE does not work from inside setup()" {
+  ! DISABLE_IN_SETUP_FUNCTION=1 bats --jobs 2 "$FIXTURE_ROOT/must_not_parallelize_within_file.bats"
+}
+
+@test "BATS_NO_PARALLELIZE_WITHIN_FILE does not work from inside test function" {
+  ! DISABLE_IN_TEST_FUNCTION=1 bats --jobs 2 "$FIXTURE_ROOT/must_not_parallelize_within_file.bats"
 }

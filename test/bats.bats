@@ -3,6 +3,11 @@
 load test_helper
 fixtures bats
 
+teardown() {
+  # cleanup the test local tmpdir to avoid cleaning up all tests' at once
+  test_helper::cleanup_tmpdir "$BATS_TEST_NAME"
+}
+
 @test "no arguments prints message and usage instructions" {
   run bats
   [ $status -eq 1 ]
@@ -137,7 +142,7 @@ fixtures bats
 }
 
 @test "setup is run once before each test" {
-  make_bats_test_suite_tmpdir
+  make_bats_test_suite_tmpdir "$BATS_TEST_NAME"
   run bats "$FIXTURE_ROOT/setup.bats"
   [ $status -eq 0 ]
   run cat "$BATS_TEST_SUITE_TMPDIR/setup.log"
@@ -145,7 +150,7 @@ fixtures bats
 }
 
 @test "teardown is run once after each test, even if it fails" {
-  make_bats_test_suite_tmpdir
+  make_bats_test_suite_tmpdir "$BATS_TEST_NAME"
   run bats "$FIXTURE_ROOT/teardown.bats"
   [ $status -eq 1 ]
   run cat "$BATS_TEST_SUITE_TMPDIR/teardown.log"
@@ -184,7 +189,7 @@ fixtures bats
 }
 
 @test "failing test file outside of BATS_CWD" {
-  make_bats_test_suite_tmpdir
+  make_bats_test_suite_tmpdir "$BATS_TEST_NAME"
   cd "$BATS_TEST_SUITE_TMPDIR"
   run bats "$FIXTURE_ROOT/failing.bats"
   [ $status -eq 1 ]

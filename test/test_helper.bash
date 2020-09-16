@@ -14,7 +14,7 @@ fixtures() {
 }
 
 make_bats_test_suite_tmpdir() {
-  export BATS_TEST_SUITE_TMPDIR="$BATS_TMPDIR/bats-test-tmp"
+  export BATS_TEST_SUITE_TMPDIR="$BATS_RUN_TMPDIR/bats-test-tmp/$1"
   mkdir -p "$BATS_TEST_SUITE_TMPDIR"
 }
 
@@ -33,7 +33,10 @@ emit_debug_output() {
   printf '%s\n' 'output:' "$output" >&2
 }
 
-teardown() {
+test_helper::cleanup_tmpdir() {
+  if [[ -n "$1" && -z "$BATS_TEST_SUITE_TMPDIR" ]]; then
+    BATS_TEST_SUITE_TMPDIR="$BATS_RUN_TMPDIR/bats-test-tmp/$1"
+  fi
   if [[ -n "$BATS_TEST_SUITE_TMPDIR" ]]; then
     rm -rf "$BATS_TEST_SUITE_TMPDIR"
   fi

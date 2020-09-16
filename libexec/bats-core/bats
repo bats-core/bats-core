@@ -37,6 +37,12 @@ HELP_TEXT_HEADER
                             Preserve the current environment for "--jobs"
                               (run `parallel --record-env` before)
   --no-tempdir-cleanup      Preserve test output temporary directory
+  --no-parallelize-across-files
+                            Serialize test file execution instead of running
+                            them in parallel (requires --jobs >1)
+  --no-parallelize-within-files
+                            Serialize test execution within files instead of
+                            running them in parallel (requires --jobs >1)
   -o, --output <dir>        Directory to write report files
   -p, --pretty              Shorthand for "--formatter pretty"
   -r, --recursive           Include tests in subdirectories
@@ -162,6 +168,12 @@ while [[ "$#" -ne 0 ]]; do
     # will print on stderr and return 255 on failure
     # suppress stdout (on success)
     parallel --env _ echo ::: 1 >/dev/null || exit 1
+    ;;
+  --no-parallelize-across-files)
+    flags+=("--no-parallelize-across-files")
+    ;;
+  --no-parallelize-within-files)
+    flags+=("--no-parallelize-within-files")
     ;;
   --no-tempdir-cleanup)
     tempdir_cleanup=''
