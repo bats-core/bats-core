@@ -99,6 +99,7 @@ not ok 1 failing test
   STARTTIME=$SECONDS
   # guarantee that background processes get their own process group -> pid=pgid
   set -m
+  SECONDS=0
   # run testsubprocess in background to not avoid blocking this test
   bats "$FIXTURE_ROOT/teardown_file_after_long_test.bats"&
   SUBPROCESS_PID=$!
@@ -107,6 +108,8 @@ not ok 1 failing test
   # fake sending SIGINT (CTRL-C) to the process group of the background subprocess
   kill -SIGINT -- -$SUBPROCESS_PID
   wait # for the test to finish either way (SIGINT or normal execution)
+  echo "Waited: $SECONDS seconds"
+  [[ $SECONDS -lt 10 ]] # make sure we really cut it short with SIGINT
   # check that teardown_file ran and created the log file
   [[ -f "$LOG" ]]
   grep teardown_file_after_long_test.bats "$LOG"
