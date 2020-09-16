@@ -121,7 +121,8 @@ bats_exit_trap() {
 }
 
 get_mills_since_epoch() {
-  local ms_since_epoch=$(date +%s%N)
+  local ms_since_epoch
+  ms_since_epoch=$(date +%s%N)
   if [[ "$ms_since_epoch" == *N ]]; then
         ms_since_epoch=$(( $(date +%s) * 1000 ))
   else
