@@ -2,6 +2,7 @@
 set -e
 
 export BATS_VERSION='1.2.1'
+VALID_FORMATTERS="pretty, junit, tap, tap13"
 
 version() {
   printf 'Bats %s\n' "$BATS_VERSION"
@@ -40,6 +41,7 @@ HELP_TEXT_HEADER
   --no-parallelize-within-files
                             Serialize test execution within files instead of
                             running them in parallel (requires --jobs >1)
+  --report <type>           Switch between reporters (options as --formatter)
   -o, --output <dir>        Directory to write report files
   -p, --pretty              Shorthand for "--formatter pretty"
   -r, --recursive           Include tests in subdirectories
@@ -135,16 +137,16 @@ while [[ "$#" -ne 0 ]]; do
     if [[ $1 =~ ^(pretty|junit|tap|tap13)$ ]]; then
       formatter="$1"
     else
-      printf "Unknown formatter '%s', valid options are pretty, junit, tap\n" "$1"
+      printf "Unknown formatter '%s', valid options are %s\n" "$1" "${VALID_FORMATTERS}"
       exit 1
     fi
     ;;
   --report)
     shift
-    if [[ $1 =~ ^(pretty|junit|tap)$ ]]; then
+    if [[ $1 =~ ^(pretty|junit|tap|tap13)$ ]]; then
       report_formatter="$1"
     else
-      printf "Unknown reporter '%s', valid options are pretty, junit, tap\n" "$1"
+      printf "Unknown reporter '%s', valid options are %s\n" "$1" "${VALID_FORMATTERS}"
       exit 1
     fi
     ;;
@@ -223,7 +225,7 @@ if [[ -n "$report_formatter" ]]; then
     output=.
   fi
   case "$report_formatter" in
-    tap)
+    tap|tap13)
       BATS_REPORT_FILE_NAME="report.tap"
       ;;
     junit)
