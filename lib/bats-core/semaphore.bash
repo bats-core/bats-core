@@ -53,11 +53,11 @@ bats_semaphore_acquire_while_locked() {
 
 export -f bats_semaphore_acquire_while_locked
 
-if command -v flock; then
+if command -v flock >/dev/null; then
     bats_run_under_lock() {
         flock "$BATS_SEMAPHORE_DIR" "$@"
     }
-elif command -v shlock; then
+elif command -v shlock >/dev/null; then
     bats_run_under_lock() {
         local lockfile="$BATS_SEMAPHORE_DIR/shlock.lock"
         while ! shlock -p $$ -f "$lockfile"; do
