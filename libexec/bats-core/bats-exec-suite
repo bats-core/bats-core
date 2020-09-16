@@ -56,7 +56,7 @@ done
 if (type -p parallel &>/dev/null); then
   # shellcheck disable=SC2034
   have_gnu_parallel=1
-elif [[ "$num_jobs" != 1 ]]; then
+elif [[ "$num_jobs" != 1 && -z "$bats_no_parallelize_across_files" ]]; then
   abort "Cannot execute \"${num_jobs}\" jobs without GNU parallel"
   exit 1
 fi
