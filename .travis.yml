@@ -41,6 +41,8 @@ script:
     time docker run -it -e BATS_NUMBER_OF_PARALLEL_JOBS=2 "bats/bats:bash-${BASHVER}" --tap /opt/bats/test || exit $?
   else
     time bin/bats --formatter tap test
+    # allow for some parallelity without GNU parallel, e.g. on MacOS
+    time BATS_NO_PARALLELIZE_ACROSS_FILES=1 BATS_NUMBER_OF_PARALLEL_JOBS=2 bin/bats --tap test
   fi
 
 notifications:
