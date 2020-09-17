@@ -107,3 +107,15 @@ TESTSUITES_REGEX="<testsuites time=\"$FLOAT_REGEX\">"
   [[ "${lines[2]}" == *"<testsuite name=\"first/file1.bats\""* ]]
   [[ "${lines[5]}" == *"<testsuite name=\"second/file1.bats\""* ]]
 }
+
+@test "junit formatter as report formatter creates report.xml" {
+  make_bats_test_suite_tmpdir
+  cd "$BATS_TEST_SUITE_TMPDIR" # don't litter sources with output files
+  run bats --report-formatter junit "$FIXTURE_ROOT/suite/"
+  echo "$output"
+  [[ -e "report.xml" ]]
+  run cat "report.xml"
+  echo "$output"
+  [[ "${lines[2]}" == *"<testsuite name=\"file1.bats\" tests=\"1\" failures=\"0\" errors=\"0\" skipped=\"0\""* ]]
+  [[ "${lines[5]}" == *"<testsuite name=\"file2.bats\" tests=\"1\" failures=\"0\" errors=\"0\" skipped=\"0\""* ]]
+}

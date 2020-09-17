@@ -41,7 +41,7 @@ HELP_TEXT_HEADER
   --no-parallelize-within-files
                             Serialize test execution within files instead of
                             running them in parallel (requires --jobs >1)
-  --report <type>           Switch between reporters (options as --formatter)
+  --report-formatter <type> Switch between reporters (same options as --formatter)
   -o, --output <dir>        Directory to write report files
   -p, --pretty              Shorthand for "--formatter pretty"
   -r, --recursive           Include tests in subdirectories
@@ -141,12 +141,12 @@ while [[ "$#" -ne 0 ]]; do
       exit 1
     fi
     ;;
-  --report)
+  --report-formatter)
     shift
     if [[ $1 =~ ^(pretty|junit|tap|tap13)$ ]]; then
       report_formatter="$1"
     else
-      printf "Unknown reporter '%s', valid options are %s\n" "$1" "${VALID_FORMATTERS}"
+      printf "Unknown report formatter '%s', valid options are %s\n" "$1" "${VALID_FORMATTERS}"
       exit 1
     fi
     ;;
@@ -204,6 +204,14 @@ if [[ -n "$tempdir_cleanup" ]]; then
 fi
 
 if [[ "$formatter" != "tap" ]]; then
+  flags+=('-x')
+fi
+
+if [[ -n "$report_formatter" && "$report_formatter" != "tap" ]]; then
+  if [[ "$formatter" == "tap" ]]; then
+    abort 'You cannot use the tap formatter with a report formatter (!=tap)'
+  fi
+  # specifying extended syntrax  while using tap would print out the extended syntax
   flags+=('-x')
 fi
 if [[ "$formatter" == "junit" ]]; then
