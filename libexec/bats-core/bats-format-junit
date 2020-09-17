@@ -14,6 +14,8 @@ while [[ "$#" -ne 0 ]]; do
       if [[ ! -d "$BASE_PATH" ]]; then
         BASE_PATH="$(dirname "$BASE_PATH")"
       fi
+      # get the absolute path
+      BASE_PATH="$(cd "$BASE_PATH"; pwd)"
       # ensure the path ends with / to strip that later on
       if [[ "${BASE_PATH}" != *"/" ]]; then
         BASE_PATH="$BASE_PATH/"

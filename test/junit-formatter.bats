@@ -84,6 +84,22 @@ TESTSUITES_REGEX="<testsuites time=\"$FLOAT_REGEX\">"
   [[ "${lines[8]}" == *"</testsuites>"* ]]
 }
 
+@test "junit formatter: test suites relative path" {
+  cd "$FIXTURE_ROOT"
+  run bats --formatter junit "suite/"
+  echo "$output"
+
+  [[ "${lines[0]}" == '<?xml version="1.0" encoding="UTF-8"?>' ]]
+  [[ "${lines[1]}" == *"<testsuites "* ]]
+  [[ "${lines[2]}" == *"<testsuite name=\"file1.bats\""* ]]
+  [[ "${lines[3]}" == *"<testcase "* ]]
+  [[ "${lines[4]}" == *"</testsuite>"* ]]
+  [[ "${lines[5]}" == *"<testsuite name=\"file2.bats\""* ]]
+  [[ "${lines[6]}" == *"<testcase"* ]]
+  [[ "${lines[7]}" == *"</testsuite>"* ]]
+  [[ "${lines[8]}" == *"</testsuites>"* ]]
+}
+
 @test "junit formatter: files with the same name are distinguishable" {
   run bats --formatter junit -r "$FIXTURE_ROOT/duplicate/"
   echo "$output"
