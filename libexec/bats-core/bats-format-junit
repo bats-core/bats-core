@@ -215,8 +215,7 @@ while IFS= read -r line; do
       test_exec_time=0
       buffer skip "${BASH_REMATCH[1]}"
     elif [[ "$line" =~ $expr_ok ]]; then
-      # TODO: remove "1000 *" once we measure in ms
-      test_exec_time="$(( 1000 * BASH_REMATCH[1] ))"
+      test_exec_time="${BASH_REMATCH[1]}"
       file_exec_time="$((file_exec_time + test_exec_time))"
       suite_test_exec_time=$((suite_test_exec_time + test_exec_time))
       buffer pass
@@ -230,8 +229,7 @@ while IFS= read -r line; do
     ((file_failures += 1))
     expr_notok="not ok $index .* in ([0-9]+)ms"
     if [[ "$line" =~ $expr_notok ]]; then
-    # TODO: remove "1000 *" once we measure in ms
-      test_exec_time="$(( 1000 * BASH_REMATCH[1] ))"
+      test_exec_time="${BASH_REMATCH[1]}"
       suite_test_exec_time=$((suite_test_exec_time + test_exec_time))
     else
       log "Wrong output format: ${line}"
