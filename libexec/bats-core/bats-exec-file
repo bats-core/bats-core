@@ -37,7 +37,7 @@ while [[ "$#" -ne 0 ]]; do
   shift
 done
 
-filename=$1
+filename="$1"
 TESTS_FILE="$2"
 
 if [[ ! -f "$filename" ]]; then
@@ -210,9 +210,12 @@ bats_run_tests() {
   # the global test number must be visible to traps -> not local
   first_test_number_in_suite=''
   while read -r test_line; do
-    test_file=${test_line%%$'\t'*}
-    test_name=${test_line##*$'\t'}
-    if [[ "$test_file" == "$filename" ]]; then
+    # check if the line begins with filename
+    # filename might contain some hard to parse characters,
+    # use simple string operations to work around that issue
+    if [[ "$filename" == "${test_line::${#filename}}" ]]; then
+      # get the rest of the line without the separator \t
+      test_name=${test_line:$((1 + ${#filename} ))}
       tests_to_run+=("$test_name")
       # save the first test's number for later iteration
       # this assumes that tests for a file are stored consecutive in the file!

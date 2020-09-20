@@ -563,7 +563,7 @@ END_OF_ERR_MSG
 }
 
 @test "report correct line on unset variables" {
-  run bats "$FIXTURE_ROOT/unbound_variable.bats"
+  LANG=C run bats "$FIXTURE_ROOT/unbound_variable.bats"
   [ "$status" -eq 1 ]
   [ "${#lines[@]}" -eq 9 ]
   [ "${lines[1]}" = 'not ok 1 access unbound variable' ]
@@ -633,9 +633,30 @@ END_OF_ERR_MSG
   [[ "${lines[2]}" == "ok 2 skipped test with reason # skip reason" ]]
   [[ "${lines[3]}" == "ok 3 passing test" ]]
   [[ "${lines[4]}" == "not ok 4 failing test" ]]
-  [[ "${lines[5]}" == "# (in test file $RELATIVE_FIXTURE_ROOT/set_-eu_in_setup_and_teardown.bats, line 22)" ]] 
+  [[ "${lines[5]}" == "# (in test file $RELATIVE_FIXTURE_ROOT/set_-eu_in_setup_and_teardown.bats, line 22)" ]]
   [[ "${lines[6]}" == "#   \`false' failed" ]]
   [[ "${#lines[@]}" -eq 7 ]]
+}
+
+@test "filenames with tab can be used" {
+  [[ "$OSTYPE" == "linux"* ]] || skip "FS cannot deal with tabs in filenames"
+
+  cp "$FIXTURE_ROOT/tab in filename.bats" "$FIXTURE_ROOT/tab"$'\t'"in filename.bats"
+  bats "$FIXTURE_ROOT/tab"$'\t'"in filename.bats"
+}
+
+@test "each file is evaluated n+1 times" {
+  make_bats_test_suite_tmpdir
+  export TEMPFILE="$BATS_TEST_SUITE_TMPDIR/$BATS_TEST_NAME.log"
+  run bats "$FIXTURE_ROOT/evaluation_count/"
+
+  cat "$TEMPFILE"
+
+  run grep "file1" "$TEMPFILE"
+  [[ ${#lines[@]} -eq 2 ]]
+
+  run grep "file2" "$TEMPFILE"
+  [[ ${#lines[@]} -eq 3 ]]
 }
 
 @test "Don't hang on CTRL-C (issue #353)" {
@@ -656,6 +677,6 @@ END_OF_ERR_MSG
   run kill -0 -- -$SUBPROCESS_PID
   [[ $status -ne 0 ]] \
     || (kill -9 -- -$SUBPROCESS_PID; false)
-    #   ^ kill the process for good when SIGINT failed, 
+    #   ^ kill the process for good when SIGINT failed,
     #     to avoid waiting endlessly for stuck children to finish
 }
