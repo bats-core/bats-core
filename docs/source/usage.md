@@ -58,6 +58,9 @@ by specifying the `--output` flag.
     ok 2 addition using dc
 
 ### Parallel Execution
+``` eval_rst
+.. versionadded:: 1.0.0
+```
 
 By default, Bats will execute your tests serially. However, Bats supports
 parallel execution of tests (provided you have [GNU parallel][gnu-parallel] or
