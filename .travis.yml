@@ -1,5 +1,9 @@
 language: bash
 
+stages:
+  - test
+  - deploy
+
 os:
 - linux
 
@@ -17,6 +21,19 @@ matrix:
   include:
     - os: osx
       env: ''
+    - stage: deploy  
+      script:
+      - | 
+        mkdir html
+        sphinx-multiversion docs/source html
+      before_deploy:
+        - touch html/.nojekyll
+      deploy:
+      - provider: pages
+        cleanup: false
+        github_token: $GITHUB_TOKEN
+        keep_history: false
+        local_dir: html
 
 services:
   - docker
@@ -45,6 +62,7 @@ script:
     # allow for some parallelity without GNU parallel, e.g. on MacOS
     time BATS_NO_PARALLELIZE_ACROSS_FILES=1 BATS_NUMBER_OF_PARALLEL_JOBS=2 bin/bats --tap test
   fi
+      
 
 notifications:
   email:
