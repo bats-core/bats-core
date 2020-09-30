@@ -10,9 +10,6 @@ while [[ "$#" -ne 0 ]]; do
   shift
 done
 
-header_pattern='[0-9]+\.\.[0-9]+'
-IFS= read -r header
-
 update_count_column_width() {
   count_column_width=$((${#count} * 2 + 2))
   if [[ -n "$BATS_ENABLE_TIMING" ]]; then
@@ -32,20 +29,6 @@ update_screen_width() {
 update_count_column_left() {
   count_column_left=$((screen_width - count_column_width))
 }
-
-if [[ "$header" =~ $header_pattern ]]; then
-  count="${header:3}"
-  index=0
-  passed=0
-  failures=0
-  skipped=0
-  name=
-  update_count_column_width
-else
-  # If the first line isn't a TAP plan, print it and pass the rest through
-  printf '%s\n' "$header"
-  exec cat
-fi
 
 trap update_screen_width WINCH
 update_screen_width
@@ -193,54 +176,60 @@ finish() {
 
 trap finish EXIT
 
-timing_expr="in (([0-9]+ms))$"
+# shellcheck source=lib/bats-core/formatter.bash
+source "$BATS_ROOT/lib/bats-core/formatter.bash"
 
-while IFS= read -r line; do
-  case "$line" in
-  'begin '*)
-    ((++index))
-    name="${line#* $index }"
-    begin
-    flush
-    ;;
-  'ok '*)
-    skip_expr="ok $index (.*) # skip ?(([[:print:]]*))?"
-    if [[ "$line" =~ $skip_expr ]]; then
-      ((++skipped))
-      skip "${BASH_REMATCH[2]}"
-    else
-      ((++passed))
-      if [[ -n "$BATS_ENABLE_TIMING" ]]; then
-        if [[ "$line" =~ $timing_expr ]]; then
-          pass "${BASH_REMATCH[2]}"
-        else
-          echo "Could not match output line to timing regex: $line" >&2
-          exit 1
-        fi
-      else
-        pass
-      fi
-    fi
-    ;;
-  'not ok '*)
-    ((++failures))
-    if [[ -n "$BATS_ENABLE_TIMING" ]]; then
-      if [[ "$line" =~ $timing_expr ]]; then
-        fail "${BASH_REMATCH[2]}"
-      else
-        echo "Could not match failure line to timing regex: $line" >&2
-        exit 1
-      fi
-    else
-      fail
-    fi
-    ;;
-  '# '*)
-    log "${line:2}"
-    ;;
-  'suite '*) ;;
+bats_tap_stream_plan() {
+  count="$1"
+  index=0
+  passed=0
+  failures=0
+  skipped=0
+  name=
+  update_count_column_width
+}
 
-  esac
-done
+bats_tap_stream_begin() {
+  index="$1"
+  name="$2"
+  begin
+  flush
+}
+  
+bats_tap_stream_ok() {
+  index="$1"
+  ((++passed))
+  if [[ "$1" == "--duration" ]]; then
+    pass "$2"
+  else
+    pass
+  fi
+}
+
+bats_tap_stream_skipped() {
+  index="$1"
+  ((++skipped))
+  skip "$3"
+}
+
+bats_tap_stream_not_ok() {
+  index="$1"
+  ((++failures))
+  if [[ "$1" == "--duration" ]]; then
+    fail "$2"
+  else
+    fail
+  fi
+}
+
+bats_tap_stream_comment() {
+  log "$1"
+}
+
+bats_tap_stream_suite() {
+  : #test_file="$1"
+}
+
+bats_parse_internal_extended_tap
 
 summary

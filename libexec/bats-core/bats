@@ -208,12 +208,9 @@ if [[ "$formatter" != "tap" ]]; then
 fi
 
 if [[ -n "$report_formatter" && "$report_formatter" != "tap" ]]; then
-  if [[ "$formatter" == "tap" ]]; then
-    abort 'You cannot use the tap formatter with a report formatter (!=tap)'
-  fi
-  # specifying extended syntrax  while using tap would print out the extended syntax
   flags+=('-x')
 fi
+
 if [[ "$formatter" == "junit" ]]; then
   flags+=('-T')
   formatter_flags+=('--base-path' "${arguments[0]}")
@@ -221,6 +218,11 @@ fi
 if [[ "$report_formatter" == "junit" ]]; then
   flags+=('-T')
   report_formatter_flags+=('--base-path' "${arguments[0]}")
+fi
+
+# if we don't need to filter extended syntax, use the faster formatter
+if [[ "$formatter" == tap && -z "$report_formatter" ]]; then
+  formatter="cat"
 fi
 
 if [[ "${#arguments[@]}" -eq 0 ]]; then

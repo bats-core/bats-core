@@ -680,29 +680,3 @@ END_OF_ERR_MSG
     #   ^ kill the process for good when SIGINT failed,
     #     to avoid waiting endlessly for stuck children to finish
 }
-
-@test "Permitted formatter reporter combinations" {
-  make_bats_test_suite_tmpdir "$BATS_TEST_NAME"
-  
-  # no other formatters must be combined with tap
-
-  bats   --formatter tap    --report-formatter tap  --output "$BATS_TEST_SUITE_TMPDIR" "$FIXTURE_ROOT/empty.bats"
-  ! bats --formatter tap13  --report-formatter tap  --output "$BATS_TEST_SUITE_TMPDIR" "$FIXTURE_ROOT/empty.bats"
-  ! bats --formatter junit  --report-formatter tap  --output "$BATS_TEST_SUITE_TMPDIR" "$FIXTURE_ROOT/empty.bats"
-  ! bats --formatter pretty --report-formatter tap  --output "$BATS_TEST_SUITE_TMPDIR" "$FIXTURE_ROOT/empty.bats"
-
-  ! bats --formatter tap    --report-formatter tap13  --output "$BATS_TEST_SUITE_TMPDIR" "$FIXTURE_ROOT/empty.bats"
-  bats   --formatter tap13  --report-formatter tap13  --output "$BATS_TEST_SUITE_TMPDIR" "$FIXTURE_ROOT/empty.bats"
-  bats   --formatter junit  --report-formatter tap13  --output "$BATS_TEST_SUITE_TMPDIR" "$FIXTURE_ROOT/empty.bats"
-  bats   --formatter pretty --report-formatter tap13  --output "$BATS_TEST_SUITE_TMPDIR" "$FIXTURE_ROOT/empty.bats"
-  
-  ! bats --formatter tap    --report-formatter junit  --output "$BATS_TEST_SUITE_TMPDIR" "$FIXTURE_ROOT/empty.bats"
-  bats   --formatter tap13  --report-formatter junit  --output "$BATS_TEST_SUITE_TMPDIR" "$FIXTURE_ROOT/empty.bats"
-  bats   --formatter junit  --report-formatter junit  --output "$BATS_TEST_SUITE_TMPDIR" "$FIXTURE_ROOT/empty.bats"
-  bats   --formatter pretty --report-formatter junit  --output "$BATS_TEST_SUITE_TMPDIR" "$FIXTURE_ROOT/empty.bats"
-
-  ! bats --formatter tap    --report-formatter pretty --output "$BATS_TEST_SUITE_TMPDIR" "$FIXTURE_ROOT/empty.bats"
-  bats   --formatter tap13  --report-formatter pretty --output "$BATS_TEST_SUITE_TMPDIR" "$FIXTURE_ROOT/empty.bats"
-  bats   --formatter junit  --report-formatter pretty --output "$BATS_TEST_SUITE_TMPDIR" "$FIXTURE_ROOT/empty.bats"
-  bats   --formatter pretty --report-formatter pretty --output "$BATS_TEST_SUITE_TMPDIR" "$FIXTURE_ROOT/empty.bats"
-}
