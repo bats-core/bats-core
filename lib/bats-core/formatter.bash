@@ -48,7 +48,7 @@ function bats_parse_internal_extended_tap() {
                     bats_tap_stream_skipped "$ok_index" "$test_name" "$skip_reason"
                 else
                     if [[ "$line" =~ $timing_expr ]]; then
-                        bats_tap_stream_ok --duration "${BASH_REMATCH[2]}" "$ok_index" "$test_name"
+                        bats_tap_stream_ok --duration "${BASH_REMATCH[1]}" "$ok_index" "$test_name"
                     else
                         bats_tap_stream_ok "$ok_index" "$test_name"
                     fi
@@ -64,7 +64,7 @@ function bats_parse_internal_extended_tap() {
                 not_ok_index="${BASH_REMATCH[1]}"
                 test_name="${BASH_REMATCH[2]}"
                 if [[ "$line" =~ $timing_expr ]]; then
-                    bats_tap_stream_not_ok --duration "${BASH_REMATCH[2]}" "$not_ok_index" "$test_name"
+                    bats_tap_stream_not_ok --duration "${BASH_REMATCH[1]}" "$not_ok_index" "$test_name"
                 else
                     bats_tap_stream_not_ok "$not_ok_index" "$test_name"
                 fi
