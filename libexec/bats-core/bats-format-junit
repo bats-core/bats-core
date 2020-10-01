@@ -25,8 +25,6 @@ while [[ "$#" -ne 0 ]]; do
   shift
 done
 
-index=0
-
 init_suite() {
   suite_test_exec_time=0
   # since we have to print the suite header before its contents but we don't know the contents before the header, 
@@ -40,6 +38,7 @@ init_file() {
   file_failures=0
   file_skipped=0
   file_exec_time=0
+  test_exec_time=0
   _buffer=""
   _buffer_log=""
 }
@@ -85,7 +84,13 @@ suite_footer() {
 }
 
 pass() {
-  printf "    <testcase classname=\"%s\" name=\"%s\" time=\"%s\"/>\n" "$(xml_escape "${class}")" "$(xml_escape "${name}")" "$(milliseconds_to_seconds "${test_exec_time}")"
+  if [[ -n "${_buffer_log}" ]]; then
+    printf "    <testcase classname=\"%s\" name=\"%s\" time=\"%s\">
+      <system-out>%s</system-out>
+    </testcase>\n" "$(xml_escape "${class}")" "$(xml_escape "${name}")" "$(milliseconds_to_seconds "${test_exec_time}")" "$(xml_escape "${_buffer_log}")"
+  else
+    printf "    <testcase classname=\"%s\" name=\"%s\" time=\"%s\"/>\n" "$(xml_escape "${class}")" "$(xml_escape "${name}")" "$(milliseconds_to_seconds "${test_exec_time}")"
+  fi
 }
 
 xml_escape() {
@@ -135,8 +140,12 @@ flush() {
 }
 
 log() {
-  _buffer_log="${_buffer_log}
+  if [[ -n "$_buffer_log" ]]; then
+    _buffer_log="${_buffer_log}
 $1"
+  else
+    _buffer_log="$1"
+  fi
 }
 
 flush_log() {
@@ -162,86 +171,69 @@ finish_suite() {
   suite_footer
 }
 
-header_pattern='[0-9]+\.\.[0-9]+'
-IFS= read -r header
+# shellcheck source=lib/bats-core/formatter.bash
+source "$BATS_ROOT/lib/bats-core/formatter.bash"
 
-if [[ ! "$header" =~ $header_pattern ]]; then
-  # If the first line isn't a TAP plan, print it and pass the rest through
-  printf "junit formatter: This is not the expected TAP format!" >&2
-  printf '%s\n' "$header"
-  exec cat
-  exit 1
-fi
-
-# given a prefix and a path, remove the prefix if the path starts with it
-# e.g. 
-# remove_prefix /usr/bin /usr/bin/bash -> bash
-# remove_prefix /usr /usr/lib/bash -> lib/bash
-# remove_prefix /usr/bin /usr/local/bin/bash -> /usr/local/bin/bash
-remove_prefix() {
-  base_path="$1"
-  path="$2"
-  if [[ "$path" == "$base_path"* ]]; then
-    # cut off the common prefix
-    printf "%s" "${path:${#base_path}}"
-  else
-    printf "%s" "$path"
-  fi
+bats_tap_stream_plan() { #  <number of tests>
+  :
 }
 
 init_suite
 trap finish_suite EXIT
 
-while IFS= read -r line; do
-  case "$line" in
-  "suite "*)
-    flush_log
-    suite_buffer finish_file
-    init_file
-    suite_expr="suite (.*)"
-    if [[ "$line" =~ $suite_expr ]]; then
-      class="$(remove_prefix "$BASE_PATH" "${BASH_REMATCH[1]}")"
-    fi
-    ;;
-  "begin "*)
-    flush_log
-    ((index += 1))
-    name="${line#* $index }"
-    ;;
-  "ok "*)
-    ((file_count += 1))
-    expr_ok="ok $index .* in ([0-9]+)ms"
-    expr_skip="ok $index .* # skip[ ]?(.*)"
-    if [[ "$line" =~ $expr_skip ]]; then
-      ((file_skipped += 1))
-      test_exec_time=0
-      buffer skip "${BASH_REMATCH[1]}"
-    elif [[ "$line" =~ $expr_ok ]]; then
-      test_exec_time="${BASH_REMATCH[1]}"
-      file_exec_time="$((file_exec_time + test_exec_time))"
-      suite_test_exec_time=$((suite_test_exec_time + test_exec_time))
-      buffer pass
-    else
-      log "Wrong output format: ${line}"
-      ((file_failures += 1))
-    fi
-    ;;
-  "not ok "*)
-    ((file_count += 1))
-    ((file_failures += 1))
-    expr_notok="not ok $index .* in ([0-9]+)ms"
-    if [[ "$line" =~ $expr_notok ]]; then
-      test_exec_time="${BASH_REMATCH[1]}"
-      suite_test_exec_time=$((suite_test_exec_time + test_exec_time))
-    else
-      log "Wrong output format: ${line}"
-    fi
-    ;;
-  "# "*)
-    log "${line:2}"
-    ;;
-  *)
-    echo "$line"
-    ;;
-  esac
-done
+bats_tap_stream_begin() { # <test index> <test name>
+  flush_log
+  # set after flushing to avoid overriding name of test
+  name="$2"
+}
+
+bats_tap_stream_ok() { # [--duration <milliseconds] <test index> <test name>
+  if [[ "$1" == "--duration" ]]; then
+    test_exec_time="${BASH_REMATCH[1]}"
+  else
+    test_exec_time=0
+  fi
+  ((file_count += 1))
+  file_exec_time="$((file_exec_time + test_exec_time))"
+  suite_test_exec_time=$((suite_test_exec_time + test_exec_time))
+  buffer pass
+  # reset log for printouts from FD3 or we will see this again as failure (see #360)
+  # we cannot move this into pass because it is run inside buffer in an extra shell
+  _buffer_log=""
+}
+
+bats_tap_stream_skipped() { # <test index> <test name> <skip reason>
+  ((file_count += 1))
+  ((file_skipped += 1))
+  test_exec_time=0
+  buffer skip "$3"
+}
+
+bats_tap_stream_not_ok() { # [--duration <milliseconds>] <test index> <test name>
+  ((file_count += 1))
+  ((file_failures += 1))
+  if [[ "$1" == "--duration" ]]; then
+    test_exec_time="${BASH_REMATCH[1]}"
+  else
+    test_exec_time=0
+  fi
+  file_exec_time="$((file_exec_time + test_exec_time))"
+  suite_test_exec_time=$((suite_test_exec_time + test_exec_time))
+}
+
+bats_tap_stream_comment() { # <comment text without leading '# '>
+  log "$1"
+}
+
+bats_tap_stream_suite() { # <file name>
+  flush_log
+  suite_buffer finish_file
+  init_file
+  class="$(remove_prefix "$BASE_PATH" "$1")"
+}
+
+bats_tap_stream_unknown() { # <full line>
+  :
+}
+
+bats_parse_internal_extended_tap

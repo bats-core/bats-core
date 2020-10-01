@@ -41,6 +41,7 @@ TESTSUITES_REGEX="<testsuites time=\"$FLOAT_REGEX\">"
       # their CI can handle special chars on filename
       TEST_FILE_NAME="xml-escape-\"<>'&.bats"
       ESCAPED_TEST_FILE_NAME="xml-escape-&quot;&lt;&gt;&#39;&amp;.bats"
+      ESCAPED_TEST_FILE_PATH="$BATS_TEST_SUITE_TMPDIR$ESCAPED_TEST_FILE_NAME"
       TEST_FILE_PATH="$BATS_TEST_SUITE_TMPDIR/$TEST_FILE_NAME"
       cp "$FIXTURE_ROOT/xml-escape.bats" "$TEST_FILE_PATH"
       NEED_CLEANUP=1
@@ -50,6 +51,7 @@ TESTSUITES_REGEX="<testsuites time=\"$FLOAT_REGEX\">"
       TEST_FILE_NAME="xml-escape.bats"
       ESCAPED_TEST_FILE_NAME="$TEST_FILE_NAME"
       TEST_FILE_PATH="$FIXTURE_ROOT/$TEST_FILE_NAME"
+      ESCAPED_TEST_FILE_PATH="$TEST_FILE_PATH"
     ;;
   esac
   run bats --formatter junit "$TEST_FILE_PATH"
@@ -60,13 +62,13 @@ TESTSUITES_REGEX="<testsuites time=\"$FLOAT_REGEX\">"
   [[ "${lines[2]}" =~ $TESTSUITE_REGEX ]]
   TESTCASE_REGEX="<testcase classname=\"$ESCAPED_TEST_FILE_NAME\" name=\"Successful test with escape characters: &quot;&#39;&lt;&gt;&amp;&#27;[0m \(0x1b\)\" time=\"$FLOAT_REGEX\"/>"
   [[ "${lines[3]}" =~ $TESTCASE_REGEX ]]
-  [[ "${lines[7]}" == *'`echo &quot;&lt;&gt;&#39;&amp;&#27;[0m&quot; &amp;&amp; false&#39; failed'* ]]
+  [[ "${lines[4]}" == *"<testcase classname=\"$ESCAPED_TEST_FILE_NAME\" name=\"Failed test with escape characters: &quot;&#39;&lt;&gt;&amp;&#27;[0m (0x1b)\" "* ]]
+  [[ "${lines[5]}" == *'<failure type="failure">(in test file '"$ESCAPED_TEST_FILE_PATH, line 6)" ]]
+  [[ "${lines[6]}" == *'`echo &quot;&lt;&gt;&#39;&amp;&#27;[0m&quot; &amp;&amp; false&#39; failed'* ]]
 
   TESTCASE_REGEX="<testcase classname=\"$ESCAPED_TEST_FILE_NAME\" name=\"Skipped test with escape characters: &quot;&#39;&lt;&gt;&amp;&#27;[0m \(0x1b\)\" time=\"$FLOAT_REGEX\">"
-  [[ "${lines[10]}" =~ $TESTCASE_REGEX ]]
-
-  TESTCASE_REGEX="<skipped>&quot;&#39;&lt;&gt;&amp;&#27;[0m</skipped>"
-  [[ "${lines[11]}" =~ $TESTCASE_REGEX ]]
+  [[ "${lines[9]}" =~ $TESTCASE_REGEX ]]
+  [[ "${lines[10]}" == *"<skipped>&quot;&#39;&lt;&gt;&amp;&#27;[0m</skipped>"* ]]
 }
 
 @test "junit formatter: test suites" {
@@ -118,4 +120,31 @@ TESTSUITES_REGEX="<testsuites time=\"$FLOAT_REGEX\">"
   echo "$output"
   [[ "${lines[2]}" == *"<testsuite name=\"file1.bats\" tests=\"1\" failures=\"0\" errors=\"0\" skipped=\"0\""* ]]
   [[ "${lines[5]}" == *"<testsuite name=\"file2.bats\" tests=\"1\" failures=\"0\" errors=\"0\" skipped=\"0\""* ]]
+}
+
+@test "junit does not mark tests with FD 3 output as failed (issue #360)" {
+  run bats --formatter junit "$FIXTURE_ROOT/issue_360.bats"
+
+  echo "$output"
+
+  [[ "${lines[2]}" == *'<testsuite name="issue_360.bats" '*'>'* ]]
+  [[ "${lines[3]}" == *'<testcase classname="issue_360.bats" '*'>' ]]
+  # only the outputs on FD3 should be visible on a successful test
+  [[ "${lines[4]}" == *'<system-out>setup FD3' ]]
+  [[ "${lines[5]}" == 'hello Bilbo' ]]
+  [[ "${lines[6]}" == 'teardown FD3</system-out>'* ]]
+  [[ "${lines[7]}" == *'</testcase>' ]]
+  [[ "${lines[8]}" == *'<testcase classname="issue_360.bats" name="fail to say hello to Biblo"'* ]]
+  # a failed test should show FD3 output first ...
+  [[ "${lines[9]}" == *'<failure type="failure">setup FD3' ]]
+  [[ "${lines[10]}" == 'hello Bilbo' ]]
+  [[ "${lines[11]}" == 'teardown FD3' ]]
+  [[ "${lines[12]}" == '(in test file test/fixtures/junit-formatter/issue_360.bats, line 21)' ]]
+  [[ "${lines[13]}" == '  `false&#39; failed' ]]
+  # ... and then the stdout output
+  [[ "${lines[14]}" == '# setup stdout' ]]
+  [[ "${lines[15]}" == '# hello stdout' ]]
+  [[ "${lines[16]}" == '# teardown stdout</failure>'* ]]
+  [[ "${lines[17]}" == *'</testcase>'* ]]
+  [[ "${lines[18]}" == *'</testsuite>'* ]]
 }
