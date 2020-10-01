@@ -58,14 +58,14 @@ TESTSUITES_REGEX="<testsuites time=\"$FLOAT_REGEX\">"
   echo "$output"
   TESTSUITE_REGEX="<testsuite name=\"$ESCAPED_TEST_FILE_NAME\" tests=\"3\" failures=\"1\" errors=\"0\" skipped=\"1\" time=\"$FLOAT_REGEX\" timestamp=\"$TIMESTAMP_REGEX\" hostname=\".*\">"
   [[ "${lines[2]}" =~ $TESTSUITE_REGEX ]]
-  TESTCASE_REGEX="<testcase classname=\"$ESCAPED_TEST_FILE_NAME\" name=\"Successful test with escape characters: &quot;&#39;&lt;&gt;&amp;&#27;\(0x1b\)\" time=\"$FLOAT_REGEX\"/>"
+  TESTCASE_REGEX="<testcase classname=\"$ESCAPED_TEST_FILE_NAME\" name=\"Successful test with escape characters: &quot;&#39;&lt;&gt;&amp;&#27;[0m \(0x1b\)\" time=\"$FLOAT_REGEX\"/>"
   [[ "${lines[3]}" =~ $TESTCASE_REGEX ]]
-  [[ "${lines[7]}" == *'`echo &quot;&lt;&gt;&#39;&amp;&#27;&quot; &amp;&amp; false&#39; failed'* ]]
+  [[ "${lines[7]}" == *'`echo &quot;&lt;&gt;&#39;&amp;&#27;[0m&quot; &amp;&amp; false&#39; failed'* ]]
 
-  TESTCASE_REGEX="<testcase classname=\"$ESCAPED_TEST_FILE_NAME\" name=\"Skipped test with escape characters: &quot;&#39;&lt;&gt;&amp;&#27;\(0x1b\)\" time=\"$FLOAT_REGEX\">"
+  TESTCASE_REGEX="<testcase classname=\"$ESCAPED_TEST_FILE_NAME\" name=\"Skipped test with escape characters: &quot;&#39;&lt;&gt;&amp;&#27;[0m \(0x1b\)\" time=\"$FLOAT_REGEX\">"
   [[ "${lines[10]}" =~ $TESTCASE_REGEX ]]
 
-  TESTCASE_REGEX="<skipped>&quot;&#39;&lt;&gt;&amp;&#27;</skipped>"
+  TESTCASE_REGEX="<skipped>&quot;&#39;&lt;&gt;&amp;&#27;[0m</skipped>"
   [[ "${lines[11]}" =~ $TESTCASE_REGEX ]]
 }
 
