@@ -134,7 +134,8 @@ while [[ "$#" -ne 0 ]]; do
     ;;
   -F | --formatter)
     shift
-    if [[ $1 =~ ^(pretty|junit|tap|tap13)$ ]]; then
+    # allow cat formatter to see extended output but don't advertise to users
+    if [[ $1 =~ ^(pretty|junit|tap|tap13|cat)$ ]]; then
       formatter="$1"
     else
       printf "Unknown formatter '%s', valid options are %s\n" "$1" "${VALID_FORMATTERS}"
