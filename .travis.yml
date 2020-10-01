@@ -1,5 +1,7 @@
 language: bash
-
+arch : 
+- ppc64le
+- amd64
 os:
 - linux
 
