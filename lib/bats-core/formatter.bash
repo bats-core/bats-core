@@ -23,7 +23,7 @@ function bats_parse_internal_extended_tap() {
     fi
 
     ok_line_regexpr="ok ([0-9]+) (.*)"
-    skip_line_regexpr="ok ([0-9]+) (.*) # skip ?([[:print:]]*)?$"
+    skip_line_regexpr="ok ([0-9]+) (.*) # skip ?(.*)?$"
     not_ok_line_regexpr="not ok ([0-9]+) (.*)"
 
     timing_expr="in ([0-9]+)ms$"
