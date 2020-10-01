@@ -3,7 +3,7 @@
 load test_helper
 fixtures junit-formatter
 
-FLOAT_REGEX='[0-9]+(\.[0-9]+){0,1}'
+FLOAT_REGEX='[0-9]+(\.[0-9]+)?'
 TIMESTAMP_REGEX='[0-9]+-[0-1][0-9]-[0-3][0-9]T[0-2][0-9]:[0-5][0-9]:[0-5][0-9]'
 TESTSUITES_REGEX="<testsuites time=\"$FLOAT_REGEX\">"
 
@@ -66,7 +66,7 @@ TESTSUITES_REGEX="<testsuites time=\"$FLOAT_REGEX\">"
   [[ "${lines[5]}" == *'<failure type="failure">(in test file '"$ESCAPED_TEST_FILE_PATH, line 6)" ]]
   [[ "${lines[6]}" == *'`echo &quot;&lt;&gt;&#39;&amp;&#27;[0m&quot; &amp;&amp; false&#39; failed'* ]]
 
-  TESTCASE_REGEX="<testcase classname=\"$ESCAPED_TEST_FILE_NAME\" name=\"Skipped test with escape characters: &quot;&#39;&lt;&gt;&amp;&#27;[0m \(0x1b\)\" time=\"$FLOAT_REGEX\">"
+  TESTCASE_REGEX="<testcase classname=\"$ESCAPED_TEST_FILE_NAME\" name=\"Skipped test with escape characters: &quot;&#39;&lt;&gt;&amp;&#27;\[0m \(0x1b\)\" time=\"$FLOAT_REGEX\">"
   [[ "${lines[9]}" =~ $TESTCASE_REGEX ]]
   [[ "${lines[10]}" == *"<skipped>&quot;&#39;&lt;&gt;&amp;&#27;[0m</skipped>"* ]]
 }

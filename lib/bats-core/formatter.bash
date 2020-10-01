@@ -23,7 +23,7 @@ function bats_parse_internal_extended_tap() {
     fi
 
     ok_line_regexpr="ok ([0-9]+) (.*)"
-    skip_line_regexpr="ok ([0-9]+) (.*) # skip ?(.*)?$"
+    skip_line_regexpr="ok ([0-9]+) (.*) # skip( (.*))?$"
     not_ok_line_regexpr="not ok ([0-9]+) (.*)"
 
     timing_expr="in ([0-9]+)ms$"
@@ -44,7 +44,7 @@ function bats_parse_internal_extended_tap() {
                 test_name="${BASH_REMATCH[2]}"
                 if [[ "$line" =~ $skip_line_regexpr ]]; then
                     test_name="${BASH_REMATCH[2]}" # cut off name before "# skip"
-                    local skip_reason="${BASH_REMATCH[3]}"
+                    local skip_reason="${BASH_REMATCH[4]}"
                     bats_tap_stream_skipped "$ok_index" "$test_name" "$skip_reason"
                 else
                     if [[ "$line" =~ $timing_expr ]]; then
