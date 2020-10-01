@@ -41,7 +41,6 @@ TESTSUITES_REGEX="<testsuites time=\"$FLOAT_REGEX\">"
       # their CI can handle special chars on filename
       TEST_FILE_NAME="xml-escape-\"<>'&.bats"
       ESCAPED_TEST_FILE_NAME="xml-escape-&quot;&lt;&gt;&#39;&amp;.bats"
-      ESCAPED_TEST_FILE_PATH="$BATS_TEST_SUITE_TMPDIR$ESCAPED_TEST_FILE_NAME"
       TEST_FILE_PATH="$BATS_TEST_SUITE_TMPDIR/$TEST_FILE_NAME"
       cp "$FIXTURE_ROOT/xml-escape.bats" "$TEST_FILE_PATH"
       NEED_CLEANUP=1
@@ -51,7 +50,6 @@ TESTSUITES_REGEX="<testsuites time=\"$FLOAT_REGEX\">"
       TEST_FILE_NAME="xml-escape.bats"
       ESCAPED_TEST_FILE_NAME="$TEST_FILE_NAME"
       TEST_FILE_PATH="$FIXTURE_ROOT/$TEST_FILE_NAME"
-      ESCAPED_TEST_FILE_PATH="$TEST_FILE_PATH"
     ;;
   esac
   run bats --formatter junit "$TEST_FILE_PATH"
@@ -63,7 +61,7 @@ TESTSUITES_REGEX="<testsuites time=\"$FLOAT_REGEX\">"
   TESTCASE_REGEX="<testcase classname=\"$ESCAPED_TEST_FILE_NAME\" name=\"Successful test with escape characters: &quot;&#39;&lt;&gt;&amp;&#27;[0m \(0x1b\)\" time=\"$FLOAT_REGEX\"/>"
   [[ "${lines[3]}" =~ $TESTCASE_REGEX ]]
   [[ "${lines[4]}" == *"<testcase classname=\"$ESCAPED_TEST_FILE_NAME\" name=\"Failed test with escape characters: &quot;&#39;&lt;&gt;&amp;&#27;[0m (0x1b)\" "* ]]
-  [[ "${lines[5]}" == *'<failure type="failure">(in test file '"$ESCAPED_TEST_FILE_PATH, line 6)" ]]
+  [[ "${lines[5]}" == *'<failure type="failure">(in test file '*"$ESCAPED_TEST_FILE_NAME, line 6)" ]]
   [[ "${lines[6]}" == *'`echo &quot;&lt;&gt;&#39;&amp;&#27;[0m&quot; &amp;&amp; false&#39; failed'* ]]
 
   TESTCASE_REGEX="<testcase classname=\"$ESCAPED_TEST_FILE_NAME\" name=\"Skipped test with escape characters: &quot;&#39;&lt;&gt;&amp;&#27;\[0m \(0x1b\)\" time=\"$FLOAT_REGEX\">"
@@ -139,7 +137,7 @@ TESTSUITES_REGEX="<testsuites time=\"$FLOAT_REGEX\">"
   [[ "${lines[9]}" == *'<failure type="failure">setup FD3' ]]
   [[ "${lines[10]}" == 'hello Bilbo' ]]
   [[ "${lines[11]}" == 'teardown FD3' ]]
-  [[ "${lines[12]}" == '(in test file test/fixtures/junit-formatter/issue_360.bats, line 21)' ]]
+  [[ "${lines[12]}" == '(in test file '*'test/fixtures/junit-formatter/issue_360.bats, line 21)' ]]
   [[ "${lines[13]}" == '  `false&#39; failed' ]]
   # ... and then the stdout output
   [[ "${lines[14]}" == '# setup stdout' ]]
