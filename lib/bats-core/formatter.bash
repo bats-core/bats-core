@@ -6,9 +6,11 @@
 # bats_tap_stream_ok [--duration <milliseconds] <test index> <test name>      -> when a test was successful
 # bats_tap_stream_not_ok [--duration <milliseconds>] <test index> <test name> -> when a test has failed
 # bats_tap_stream_skipped <test index> <test name> <skip reason>              -> when a test was skipped
-# bats_tap_stream_comment <comment text without leading '# '>                 -> when a comment line was encountered
+# bats_tap_stream_comment <comment text without leading '# '> <scope>         -> when a comment line was encountered, 
+#                                                                                scope tells the last encountered of plan, begin, ok, not_ok, skipped, suite
 # bats_tap_stream_suite <file name>                                           -> when a new file is begun WARNING: extended only
-# bats_tap_stream_unknown <full line>                                         -> when a line is encountered that does not match the previous entries
+# bats_tap_stream_unknown <full line> <scope>                                 -> when a line is encountered that does not match the previous entries,
+#                                                                                scope @see bats_tap_stream_comment
 # forwards all input as is, when there is no TAP test plan header
 function bats_parse_internal_extended_tap() {
     local header_pattern='[0-9]+\.\.[0-9]+'
@@ -27,18 +29,21 @@ function bats_parse_internal_extended_tap() {
     not_ok_line_regexpr="not ok ([0-9]+) (.*)"
 
     timing_expr="in ([0-9]+)ms$"
-    local test_name begin_index ok_index not_ok_index index
+    local test_name begin_index ok_index not_ok_index index scope
     begin_index=0
     index=0
+    scope=plan
     while IFS= read -r line; do
         case "$line" in
         'begin '*) # this might only be called in extended tap output
             ((++begin_index))
+            scope=begin
             test_name="${line#* $begin_index }"
             bats_tap_stream_begin "$begin_index" "$test_name"
             ;;
         'ok '*)
             ((++index))
+            scope=ok
             if [[ "$line" =~ $ok_line_regexpr ]]; then
                 ok_index="${BASH_REMATCH[1]}"
                 test_name="${BASH_REMATCH[2]}"
@@ -60,6 +65,7 @@ function bats_parse_internal_extended_tap() {
             ;;
         'not ok '*)
             ((++index))
+            scope=not_ok
             if [[ "$line" =~ $not_ok_line_regexpr ]]; then
                 not_ok_index="${BASH_REMATCH[1]}"
                 test_name="${BASH_REMATCH[2]}"
@@ -74,14 +80,15 @@ function bats_parse_internal_extended_tap() {
             fi
             ;;
         '# '*)
-            bats_tap_stream_comment "${line:2}"
+            bats_tap_stream_comment "${line:2}" "$scope"
             ;;
         'suite '*) 
+            scope=suite
             # pass on the
             bats_tap_stream_suite "${line:6}"
         ;;
         *)
-            bats_tap_stream_unknown "$line"
+            bats_tap_stream_unknown "$line" "$scope"
         ;;
         esac
     done
