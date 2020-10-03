@@ -2,6 +2,7 @@
 set -e
 
 export BATS_VERSION='1.2.1'
+VALID_FORMATTERS="pretty, junit, tap, tap13"
 
 version() {
   printf 'Bats %s\n' "$BATS_VERSION"
@@ -40,6 +41,7 @@ HELP_TEXT_HEADER
   --no-parallelize-within-files
                             Serialize test execution within files instead of
                             running them in parallel (requires --jobs >1)
+  --report-formatter <type> Switch between reporters (same options as --formatter)
   -o, --output <dir>        Directory to write report files
   -p, --pretty              Shorthand for "--formatter pretty"
   -r, --recursive           Include tests in subdirectories
@@ -104,6 +106,7 @@ unset flags recursive formatter_flags
 flags=()
 formatter_flags=()
 formatter='tap'
+report_formatter=''
 recursive=
 tempdir_cleanup=1
 output=
@@ -131,10 +134,20 @@ while [[ "$#" -ne 0 ]]; do
     ;;
   -F | --formatter)
     shift
-    if [[ $1 =~ ^(pretty|junit|tap|tap13)$ ]]; then
+    # allow cat formatter to see extended output but don't advertise to users
+    if [[ $1 =~ ^(pretty|junit|tap|tap13|cat)$ ]]; then
       formatter="$1"
     else
-      printf "Unknown formatter '%s', valid options are pretty, junit, tap\n" "$1"
+      printf "Unknown formatter '%s', valid options are %s\n" "$1" "${VALID_FORMATTERS}"
+      exit 1
+    fi
+    ;;
+  --report-formatter)
+    shift
+    if [[ $1 =~ ^(pretty|junit|tap|tap13)$ ]]; then
+      report_formatter="$1"
+    else
+      printf "Unknown report formatter '%s', valid options are %s\n" "$1" "${VALID_FORMATTERS}"
       exit 1
     fi
     ;;
@@ -194,15 +207,46 @@ fi
 if [[ "$formatter" != "tap" ]]; then
   flags+=('-x')
 fi
+
+if [[ -n "$report_formatter" && "$report_formatter" != "tap" ]]; then
+  flags+=('-x')
+fi
+
 if [[ "$formatter" == "junit" ]]; then
   flags+=('-T')
-  formatter_flags+=('-T')
+  formatter_flags+=('--base-path' "${arguments[0]}")
+fi
+if [[ "$report_formatter" == "junit" ]]; then
+  flags+=('-T')
+  report_formatter_flags+=('--base-path' "${arguments[0]}")
+fi
+
+# if we don't need to filter extended syntax, use the faster formatter
+if [[ "$formatter" == tap && -z "$report_formatter" ]]; then
+  formatter="cat"
 fi
 
 if [[ "${#arguments[@]}" -eq 0 ]]; then
   abort 'Must specify at least one <test>'
 fi
 
+if [[ -n "$report_formatter" ]]; then
+  # default to the current directory for output
+  if [[ -z "$output" ]]; then
+    output=.
+  fi
+  case "$report_formatter" in
+    tap|tap13)
+      BATS_REPORT_FILE_NAME="report.tap"
+      ;;
+    junit)
+      BATS_REPORT_FILE_NAME="report.xml"
+      ;;
+    pretty)
+      BATS_REPORT_FILE_NAME="report.log"
+      ;;
+  esac
+fi
 
 if [[ -n "$output" ]]; then
   if [[ ! -w "${output}" ]]; then
@@ -236,4 +280,9 @@ done
 source "$BATS_ROOT/lib/bats-core/validator.bash"
 
 set -o pipefail execfail
-exec bats-exec-suite "${flags[@]}" "${filenames[@]}" | bats_test_count_validator | "bats-format-${formatter}" "${formatter_flags[@]}"
+
+if [[ -n "$report_formatter" ]]; then
+  exec bats-exec-suite "${flags[@]}" "${filenames[@]}" | tee >("bats-format-${report_formatter}" "${report_formatter_flags[@]}" >"${BATS_REPORT_OUTPUT_PATH}/${BATS_REPORT_FILE_NAME}") | bats_test_count_validator | "bats-format-${formatter}" "${formatter_flags[@]}"
+else
+  exec bats-exec-suite "${flags[@]}" "${filenames[@]}" | bats_test_count_validator | "bats-format-${formatter}" "${formatter_flags[@]}"
+fi

@@ -250,7 +250,7 @@ bats_run_tests() {
 }
 
 if [[ -n "$extended_syntax" ]]; then
-  printf "suite %s\n" "$(basename "$filename")"
+  printf "suite %s\n" "$filename"
 fi
 
 bats_preprocess_source "$filename"

@@ -221,6 +221,7 @@ Usage: bats [OPTIONS] <tests>
   --no-parallelize-within-files
                             Serialize test execution within files instead of
                             running them in parallel (requires --jobs >1)
+  --report-formatter <type> Switch between reporters (same options as --formatter)
   -o, --output <dir>        Directory to write report files
   -p, --pretty              Shorthand for "--formatter pretty"
   -r, --recursive           Include tests in subdirectories

@@ -57,10 +57,10 @@ fixtures suite
   echo "output: $output"
   [ $status -eq 1 ]
   [ "${lines[0]}" = "1..3" ]
-  [ "${lines[1]}" = "suite a.bats" ]
+  [ "${lines[1]}" = "suite $FIXTURE_ROOT/multiple/a.bats" ]
   [ "${lines[2]}" = "begin 1 truth" ]
   [ "${lines[3]}" = "ok 1 truth" ]
-  [ "${lines[4]}" = "suite b.bats" ]
+  [ "${lines[4]}" = "suite $FIXTURE_ROOT/multiple/b.bats" ]
   [ "${lines[5]}" = "begin 2 more truth" ]
   [ "${lines[6]}" = "ok 2 more truth" ]
   [ "${lines[7]}" = "begin 3 quasi-truth" ]
@@ -87,11 +87,11 @@ fixtures suite
   echo "$output"
   [ $status -eq 1 ]
   [ "${lines[0]}" = "1..3" ]
-  [ "${lines[1]}" = "suite a.bats" ]
+  [ "${lines[1]}" = "suite $FIXTURE_ROOT/multiple/a.bats" ]
   [ "${lines[2]}" = "begin 1 truth" ]
   regex="ok 1 truth in [0-9]+ms"
   [[ "${lines[3]}" =~ $regex ]]
-  [ "${lines[4]}" = "suite b.bats" ]
+  [ "${lines[4]}" = "suite $FIXTURE_ROOT/multiple/b.bats" ]
   [ "${lines[5]}" = "begin 2 more truth" ]
   regex="ok 2 more truth in [0-9]+ms"
   [[ "${lines[6]}" =~ $regex ]]

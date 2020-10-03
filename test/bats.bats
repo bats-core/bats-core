@@ -327,7 +327,7 @@ teardown() {
   run bats-exec-suite -x "$FIXTURE_ROOT/failing_and_passing.bats"
   echo "$output"
   [ $status -eq 1 ]
-  [ "${lines[1]}" = 'suite failing_and_passing.bats' ]
+  [ "${lines[1]}" = "suite $FIXTURE_ROOT/failing_and_passing.bats" ]
   [ "${lines[2]}" = 'begin 1 a failing test' ]
   [ "${lines[3]}" = 'not ok 1 a failing test' ]
   [ "${lines[6]}" = 'begin 2 a passing test' ]
