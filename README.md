@@ -594,8 +594,10 @@ There are several global variables you can use to introspect on Bats tests:
   test file.
 * `$BATS_SUITE_TEST_NUMBER` is the (1-based) index of the current test case in
  the test suite (over all files).
-* `$BATS_TMPDIR` is the location to a directory that may be used to store
-  temporary files.
+* `$BATS_RUN_TMPDIR` is the path to a directory that will be deleted after the run
+  unless `--no-tmpdir-cleanup` is specified (defaults to `$BATS_TMPDIR/bats-run-<PID>`)
+* `$BATS_TMPDIR` is the path to a directory that may be used to store
+  temporary files. (defaults to `/tmp`)
 
 ### Libraries and Add-ons
 
