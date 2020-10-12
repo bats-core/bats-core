@@ -175,6 +175,7 @@ finish() {
 }
 
 trap finish EXIT
+trap '' INT
 
 # shellcheck source=lib/bats-core/formatter.bash
 source "$BATS_ROOT/lib/bats-core/formatter.bash"

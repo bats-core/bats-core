@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 bats_test_count_validator() {
+  trap '' INT # continue forwarding
   header_pattern='[0-9]+\.\.[0-9]+'
   IFS= read -r header
   # repeat the header
