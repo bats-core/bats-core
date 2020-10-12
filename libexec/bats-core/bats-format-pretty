@@ -203,6 +203,7 @@ finish() {
 }
 
 trap finish EXIT
+trap '' INT
 
 bats_tap_stream_plan() {
   count="$1"

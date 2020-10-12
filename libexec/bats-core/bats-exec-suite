@@ -59,8 +59,6 @@ elif [[ "$num_jobs" != 1 && -z "$bats_no_parallelize_across_files" ]]; then
   exit 1
 fi
 
-trap 'kill 0; exit 1' INT
-
 # create a file that contains all (filtered) tests to run from all files
 TESTS_LIST_FILE="${BATS_RUN_TMPDIR}/test_list_file.txt"
 
@@ -111,6 +109,9 @@ if [[ -n "$bats_no_parallelize_within_files" ]] && [[ ! "$num_jobs" -gt 1 ]]; th
   exit 1
 fi
 
+# only abort on the lowest levels
+trap 'BATS_INTERRUPTED=true' INT
+
 status=0
 printf '1..%d\n' "${test_count}"
 
@@ -139,6 +140,10 @@ if [[ "$num_jobs" -gt 1 ]] && [[ -z "$bats_no_parallelize_across_files" ]]; then
   parallel --keep-order --jobs "$num_jobs" bats-exec-file "$(printf "%q " "${flags[@]}")" "{}" "$TESTS_LIST_FILE"  ::: "${BATS_UNIQUE_TEST_FILENAMES[@]}" 2>&1 || status=1
 else
   for filename in "${BATS_UNIQUE_TEST_FILENAMES[@]}"; do
+    if [[ "${BATS_INTERRUPTED-NOTSET}" != NOTSET ]]; then
+      status=130 # bash's code for SIGINT exits
+      break
+    fi
     bats-exec-file "${flags[@]}" "$filename" "${TESTS_LIST_FILE}" || status=1
   done
 fi
