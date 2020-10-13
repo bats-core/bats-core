@@ -681,15 +681,18 @@ END_OF_ERR_MSG
 }
 
 @test "CTRL-C aborts and fails the current test" {
+  if [[ "$BATS_NUMBER_OF_PARALLEL_JOBS" -gt 1 ]]; then
+    skip "Aborts don't work in parallel mode"
+  fi
+  
   make_bats_test_suite_tmpdir
   export TEMPFILE="$BATS_TEST_SUITE_TMPDIR/$BATS_TEST_NAME.log"
 
   # guarantee that background processes get their own process group -> pid=pgid
   set -m
   
-  # give read in prompt_user some input to attach to or it will fail on SIGINT
   # we cannot use run for a background task, so we have to store the output for later
-  (sleep 100; echo Input) | bats "$FIXTURE_ROOT/prompt_user.bats" --tap  >"$TEMPFILE" 2>&1 & # don't block execution, or we cannot send signals
+  bats "$FIXTURE_ROOT/hang_in_test.bats" --tap  >"$TEMPFILE" 2>&1 & # don't block execution, or we cannot send signals
 
   SUBPROCESS_PID=$!
   
@@ -704,22 +707,25 @@ END_OF_ERR_MSG
   run cat "$TEMPFILE"
   echo "$output"
 
-  [[ "${lines[1]}" == "not ok 1 prompt user" ]]
+  [[ "${lines[1]}" == "not ok 1 test" ]]
   [[ "${lines[2]}" == "# Interrupted (SIGINT/CTRL-C) at:" ]]
-  [[ "${lines[3]}" == "# (in test file test/fixtures/bats/prompt_user.bats, line 2)" ]]
-  [[ "${lines[4]}" == "#   \`read -p 'Give input!'' failed with status 130" ]]
+  [[ "${lines[3]}" == "# (in test file test/fixtures/bats/hang_in_test.bats, line 2)" ]]
+  [[ "${lines[4]}" == "#   \`sleep 10' failed with status 130" ]]
 }
 
 @test "CTRL-C aborts and fails the current teardown" {
+  if [[ "$BATS_NUMBER_OF_PARALLEL_JOBS" -gt 1 ]]; then
+    skip "Aborts don't work in parallel mode"
+  fi
+
   make_bats_test_suite_tmpdir
   export TEMPFILE="$BATS_TEST_SUITE_TMPDIR/$BATS_TEST_NAME.log"
 
   # guarantee that background processes get their own process group -> pid=pgid
   set -m
   
-  # give read in prompt_user some input to attach to or it will fail on SIGINT
   # we cannot use run for a background task, so we have to store the output for later
-  (sleep 100; echo Input) | bats "$FIXTURE_ROOT/prompt_user_in_teardown.bats" --tap  >"$TEMPFILE" 2>&1 & # don't block execution, or we cannot send signals
+  bats "$FIXTURE_ROOT/hang_in_teardown.bats" --tap  >"$TEMPFILE" 2>&1 & # don't block execution, or we cannot send signals
 
   SUBPROCESS_PID=$!
   
@@ -734,22 +740,25 @@ END_OF_ERR_MSG
   run cat "$TEMPFILE"
   echo "$output"
 
-  [[ "${lines[1]}" == "not ok 1 prompt user" ]]
+  [[ "${lines[1]}" == "not ok 1 empty" ]]
   [[ "${lines[2]}" == "# Interrupted (SIGINT/CTRL-C) at:" ]]
-  [[ "${lines[3]}" == "# (from function \`teardown' in test file test/fixtures/bats/prompt_user_in_teardown.bats, line 2)" ]]
-  [[ "${lines[4]}" == "#   \`read -p 'Give input!'' failed" ]]
+  [[ "${lines[3]}" == "# (from function \`teardown' in test file test/fixtures/bats/hang_in_teardown.bats, line 2)" ]]
+  [[ "${lines[4]}" == "#   \`sleep 10' failed" ]]
 }
 
 @test "CTRL-C aborts and fails the current setup_file" {
+  if [[ "$BATS_NUMBER_OF_PARALLEL_JOBS" -gt 1 ]]; then
+    skip "Aborts don't work in parallel mode"
+  fi
+
   make_bats_test_suite_tmpdir
   export TEMPFILE="$BATS_TEST_SUITE_TMPDIR/$BATS_TEST_NAME.log"
 
   # guarantee that background processes get their own process group -> pid=pgid
   set -m
   
-  # give read in prompt_user some input to attach to or it will fail on SIGINT
   # we cannot use run for a background task, so we have to store the output for later
-  (sleep 100; echo Input) | bats "$FIXTURE_ROOT/prompt_user_in_setup_file.bats" --tap  >"$TEMPFILE" 2>&1 & # don't block execution, or we cannot send signals
+  bats "$FIXTURE_ROOT/hang_in_setup_file.bats" --tap  >"$TEMPFILE" 2>&1 & # don't block execution, or we cannot send signals
 
   SUBPROCESS_PID=$!
   
@@ -766,20 +775,22 @@ END_OF_ERR_MSG
 
   [[ "${lines[1]}" == "not ok 1 setup_file failed" ]]
   [[ "${lines[2]}" == "# Interrupted (SIGINT/CTRL-C) at:" ]]
-  [[ "${lines[3]}" == "# (from function \`setup_file' in test file test/fixtures/bats/prompt_user_in_setup_file.bats, line 2)" ]]
-  [[ "${lines[4]}" == "#   \`read -p 'Give input!'' failed" ]]
+  [[ "${lines[3]}" == "# (from function \`setup_file' in test file test/fixtures/bats/hang_in_setup_file.bats, line 2)" ]]
+  [[ "${lines[4]}" == "#   \`sleep 10' failed with status 130" ]]
 }
 
 @test "CTRL-C aborts and fails the current teardown_file" {
+  if [[ "$BATS_NUMBER_OF_PARALLEL_JOBS" -gt 1 ]]; then
+    skip "Aborts don't work in parallel mode"
+  fi
   make_bats_test_suite_tmpdir
   export TEMPFILE="$BATS_TEST_SUITE_TMPDIR/$BATS_TEST_NAME.log"
 
   # guarantee that background processes get their own process group -> pid=pgid
   set -m
   
-  # give read in prompt_user some input to attach to or it will fail on SIGINT
   # we cannot use run for a background task, so we have to store the output for later
-  (sleep 100; echo Input) | bats "$FIXTURE_ROOT/prompt_user_in_teardown_file.bats" --tap  >"$TEMPFILE" 2>&1 & # don't block execution, or we cannot send signals
+  bats "$FIXTURE_ROOT/hang_in_teardown_file.bats" --tap  >"$TEMPFILE" 2>&1 & # don't block execution, or we cannot send signals
 
   SUBPROCESS_PID=$!
   
@@ -798,6 +809,6 @@ END_OF_ERR_MSG
   [[ "${lines[1]}" == "ok 1 empty" ]]
   [[ "${lines[2]}" == "not ok 2 teardown_file failed" ]]
   [[ "${lines[3]}" == "# Interrupted (SIGINT/CTRL-C) at:" ]]
-  [[ "${lines[4]}" == "# (from function \`teardown_file' in test file test/fixtures/bats/prompt_user_in_teardown_file.bats, line 2)" ]]
-  [[ "${lines[5]}" == "#   \`read -p 'Give input!'' failed" ]]
+  [[ "${lines[4]}" == "# (from function \`teardown_file' in test file test/fixtures/bats/hang_in_teardown_file.bats, line 2)" ]]
+  [[ "${lines[5]}" == "#   \`sleep 10' failed with status 130" ]]
 }

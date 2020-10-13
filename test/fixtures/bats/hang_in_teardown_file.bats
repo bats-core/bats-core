@@ -1,5 +1,5 @@
 teardown_file() {
-    read -p 'Give input!'
+    sleep 10
 }
 
 @test "empty" {
