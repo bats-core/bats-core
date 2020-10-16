@@ -840,6 +840,39 @@ EOF
   [[ "${lines[4]}" == "#   \`sleep 10' failed with status 130" ]]
 }
 
+@test "CTRL-C aborts and fails the current run" {
+  if [[ "$BATS_NUMBER_OF_PARALLEL_JOBS" -gt 1 ]]; then
+    skip "Aborts don't work in parallel mode"
+  fi
+
+  make_bats_test_suite_tmpdir
+  export TEMPFILE="$BATS_TEST_SUITE_TMPDIR/$BATS_TEST_NAME.log"
+
+  # guarantee that background processes get their own process group -> pid=pgid
+  set -m
+  
+  # we cannot use run for a background task, so we have to store the output for later
+  bats "$FIXTURE_ROOT/hang_in_run.bats" --tap  >"$TEMPFILE" 2>&1 & # don't block execution, or we cannot send signals
+
+  SUBPROCESS_PID=$!
+  
+  sleep 1 # wait for the background process to start on slow systems
+
+  # emulate CTRL-C by sending SIGINT to the whole process group
+  kill -SIGINT -- -$SUBPROCESS_PID
+
+  # the test suite must be marked as failed!
+  ! wait $SUBPROCESS_PID
+
+  run cat "$TEMPFILE"
+  echo "$output"
+
+  [[ "${lines[1]}" == "not ok 1 test" ]]
+  [[ "${lines[2]}" == "# Interrupted (SIGINT/CTRL-C) at:" ]]
+  [[ "${lines[3]}" == "# (in test file ${RELATIVE_FIXTURE_ROOT}/hang_in_run.bats, line 2)" ]]
+  [[ "${lines[4]}" == "#   \`run sleep 10' failed with status 130" ]]
+}
+
 @test "CTRL-C aborts and fails the current teardown" {
   if [[ "$BATS_NUMBER_OF_PARALLEL_JOBS" -gt 1 ]]; then
     skip "Aborts don't work in parallel mode"
