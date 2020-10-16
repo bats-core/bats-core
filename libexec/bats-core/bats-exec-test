@@ -178,8 +178,23 @@ bats_perform_test() {
   bats_teardown_trap "" # pass empty parameter to signify call outside trap
 }
 
-# mark the interruption, to handle during exit
-trap 'BATS_INTERRUPTED=true; exit 130' INT
+bats_interrupt_trap() {
+  # mark the interruption, to handle during exit
+  BATS_INTERRUPTED=true
+  exit 130
+}
+
+# keep in sync with bats_interrupt_trap
+# this is used inside run()
+bats_interrupt_trap_in_run() {
+  BATS_INTERRUPTED=true
+  # we don't get a second stack trace when interrupted in run, 
+  # so we have to use the first!
+  BATS_CURRENT_STACK_TRACE=("${BATS_STACK_TRACE[@]+"${BATS_STACK_TRACE[@]}"}")
+  exit 130
+}
+
+trap bats_interrupt_trap INT
 
 # shellcheck source=lib/bats-core/preprocessing.bash
 source "$BATS_ROOT/lib/bats-core/preprocessing.bash"
