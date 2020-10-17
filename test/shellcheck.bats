@@ -3,6 +3,12 @@
 load test_helper
 fixtures shellcheck
 
+setup() {
+    if ! command -v shellcheck; then
+        skip 'This test requires shellcheck to be installed'
+    fi
+}
+
 @test "shellcheck does not choke on custom syntax" {
     run bats --shellcheck "${FIXTURE_ROOT}/valid.bats"
     echo "$output"
