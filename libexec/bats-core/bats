@@ -45,6 +45,8 @@ HELP_TEXT_HEADER
   -o, --output <dir>        Directory to write report files
   -p, --pretty              Shorthand for "--formatter pretty"
   -r, --recursive           Include tests in subdirectories
+  --shellcheck              Run shellcheck on the *.bats files instead of 
+                            running the tests
   -t, --tap                 Shorthand for "--formatter tap"
   -T, --timing              Add timing information to tests
   -v, --version             Display the version number
@@ -110,6 +112,7 @@ report_formatter=''
 recursive=
 tempdir_cleanup=1
 output=
+run_shellcheck=
 if [[ -z "${CI:-}" && -t 0 && -t 1 ]] && command -v tput >/dev/null; then
   formatter='pretty'
 fi
@@ -183,6 +186,9 @@ while [[ "$#" -ne 0 ]]; do
     ;;
   --no-tempdir-cleanup)
     tempdir_cleanup=''
+    ;;
+  --shellcheck)
+    run_shellcheck=1
     ;;
   -*)
     abort "Bad command line option '$1'"
@@ -275,6 +281,36 @@ for filename in "${arguments[@]}"; do
     filenames+=("$filename")
   fi
 done
+
+if [[ -n $run_shellcheck ]]; then
+  index=0
+  status=0
+  for file in "${filenames[@]}"; do
+    (( ++index ))
+    preprocessed_file="${BATS_RUN_TMPDIR}/${index}_$(basename "$file")"
+    bats-preprocess "${file}" > "${preprocessed_file}"
+
+    if [[ ! -r "${file}" ]]; then
+      printf "Cannot read file '%s', does it exist?\n" "${file}"
+      exit 1
+    fi
+
+    replace_preprocessed_filepath_by_original_filepath() {
+      while read -r line; do 
+        printf "%s\n" "${line/${preprocessed_file}/${file#${PWD}/}}"; 
+      done
+    }
+
+    BATS_SHELLCHECK_OPTIONS+=(--shell=bash) # override shellcheck's shell detection
+    # since we pipe shellcheck's output through the function above, shellcheck 
+    # can't detect if it should colorize or not -> let us decide
+    if [[ -t 0 && -t 1 ]]; then
+      BATS_SHELLCHECK_OPTIONS+=(--color=always)
+    fi
+    (set -o pipefail; "${BATS_SHELLCHECK_EXE-shellcheck}" "${BATS_SHELLCHECK_OPTIONS[@]}" "${preprocessed_file}" | replace_preprocessed_filepath_by_original_filepath) || status=1
+  done
+  exit $status
+fi
 
 # shellcheck source=lib/bats-core/validator.bash
 source "$BATS_ROOT/lib/bats-core/validator.bash"

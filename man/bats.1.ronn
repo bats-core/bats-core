@@ -71,6 +71,8 @@ OPTIONS
     Shorthand for "--formatter pretty"
   * `-r`, `--recursive`:
     Include tests in subdirectories
+  * `--shellcheck`:
+    Run shellcheck on the *.bats files instead of running the tests
   * `-t`, `--tap`:
     Shorthand for "--formatter tap"
   * `-T`, `--timing`:

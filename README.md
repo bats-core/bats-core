@@ -225,6 +225,8 @@ Usage: bats [OPTIONS] <tests>
   -o, --output <dir>        Directory to write report files
   -p, --pretty              Shorthand for "--formatter pretty"
   -r, --recursive           Include tests in subdirectories
+  --shellcheck              Run shellcheck on the *.bats files instead of 
+                            running the tests
   -t, --tap                 Shorthand for "--formatter tap"
   -T, --timing              Add timing information to tests
   -v, --version             Display the version number
