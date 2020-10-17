@@ -301,11 +301,11 @@ if [[ -n $run_shellcheck ]]; then
       done
     }
 
-    BATS_SHELLCHECK_OPTIONS+=(--shell=bash) # override shellcheck's shell detection
+    BATS_SHELLCHECK_OPTIONS+=("--shell=bash") # override shellcheck's shell detection
     # since we pipe shellcheck's output through the function above, shellcheck 
     # can't detect if it should colorize or not -> let us decide
     if [[ -t 0 && -t 1 ]]; then
-      BATS_SHELLCHECK_OPTIONS+=(--color=always)
+      BATS_SHELLCHECK_OPTIONS+=("--color=always")
     fi
     (set -o pipefail; "${BATS_SHELLCHECK_EXE-shellcheck}" "${BATS_SHELLCHECK_OPTIONS[@]}" "${preprocessed_file}" | replace_preprocessed_filepath_by_original_filepath) || status=1
   done
