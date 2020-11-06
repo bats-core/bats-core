@@ -116,6 +116,18 @@ fixtures suite
   [ "${lines[2]}" = "ok 2 a passing test" ]
 }
 
+@test "recursive support with symlinks" {
+  if [[ ! -L "${FIXTURE_ROOT}/recursive_with_symlinks/test.bats" ]]; then
+    skip "symbolic links aren't functional on OSTYPE=$OSTYPE"
+  fi
+
+  run bats -r "${FIXTURE_ROOT}/recursive_with_symlinks"
+  [ $status -eq 0 ]
+  [ "${lines[0]}" = "1..2" ]
+  [ "${lines[1]}" = "ok 1 another passing test" ]
+  [ "${lines[2]}" = "ok 2 a passing test" ]
+}
+
 @test "run entire suite when --filter isn't set" {
   run bats "${FIXTURE_ROOT}/filter"
   [ "$status" -eq 0 ]
