@@ -357,6 +357,15 @@ teardown() {
   [[ "${lines[7]}" =~ $regex ]]
 }
 
+@test "time is greater than 0ms for long test" {
+  emulate_bats_env
+  run bats-exec-suite -x -T "$FIXTURE_ROOT/run_long_command.bats"
+  echo "$output"
+  [ $status -eq 0 ]
+  regex="ok 1 run long command in [1-9][0-9]*ms"
+  [[ "${lines[3]}" =~ $regex ]]
+}
+
 @test "pretty and tap formats" {
   run bats --formatter tap "$FIXTURE_ROOT/passing.bats"
   tap_output="$output"

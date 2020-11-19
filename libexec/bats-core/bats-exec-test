@@ -123,7 +123,7 @@ bats_exit_trap() {
 get_mills_since_epoch() {
   local ms_since_epoch
   ms_since_epoch=$(date +%s%N)
-  if [[ "$ms_since_epoch" == *N ]]; then
+  if [[ "$ms_since_epoch" == *N || "${#ms_since_epoch}" -lt 19 ]]; then
         ms_since_epoch=$(( $(date +%s) * 1000 ))
   else
         ms_since_epoch=$(( ms_since_epoch / 1000000 ))
