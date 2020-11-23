@@ -1,10 +1,7 @@
-.. bats-core documentation master file, created by
-   sphinx-quickstart on Wed Sep  2 23:33:57 2020.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
 Welcome to bats-core's documentation!
 =====================================
+
+Versions before v1.2.1 are documented over `there <https://github.com/bats-core/bats-core/blob/master/docs/versions.md>`_.
 
 .. toctree::
    :maxdepth: 2
