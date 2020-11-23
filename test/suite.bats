@@ -184,3 +184,21 @@ fixtures suite
   echo "$output"
   [ "$status" -eq 0 ]
 }
+
+@test "Override BATS_FILE_EXTENSION with suite" {
+  BATS_FILE_EXTENSION=test run bats "${FIXTURE_ROOT}/override_BATS_FILE_EXTENSION"
+  echo "$output"
+  [ "$status" -eq 0 ]
+  [ "${#lines[@]}" -eq 2 ]
+  [ "${lines[0]}" = "1..1" ]
+  [ "${lines[1]}" = "ok 1 test.test" ]
+}
+
+@test "Override BATS_FILE_EXTENSION with suite recursive" {
+  BATS_FILE_EXTENSION=other_extension run bats -r "${FIXTURE_ROOT}/override_BATS_FILE_EXTENSION"
+  echo "$output"
+  [ "$status" -eq 0 ]
+  [ "${#lines[@]}" -eq 2 ]
+  [ "${lines[0]}" = "1..1" ]
+  [ "${lines[1]}" = "ok 1 test.other_extension" ]
+}

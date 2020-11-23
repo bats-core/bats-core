@@ -265,9 +265,9 @@ for filename in "${arguments[@]}"; do
     if [[ "$recursive" -eq 1 ]]; then
       while IFS= read -r -d $'\0' file; do
         filenames+=("$file")
-      done < <(find -L "$filename" -type f -name '*.bats' -print0 | sort -z)
+      done < <(find -L "$filename" -type f -name "*.${BATS_FILE_EXTENSION:-bats}" -print0 | sort -z)
     else
-      for suite_filename in "$filename"/*.bats; do
+      for suite_filename in "$filename"/*."${BATS_FILE_EXTENSION:-bats}"; do
         filenames+=("$suite_filename")
       done
     fi
