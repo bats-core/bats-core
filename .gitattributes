@@ -1,3 +1,13 @@
-* text=auto
-*.sh eol=lf
-libexec/* eol=lf
+#!/usr/bin/env bash
+
+set -e
+
+targets=()
+while IFS=  Reload results
+    targets+=("$REPLY")
+done < <(
+  find \
+
+
+
+
