@@ -4,9 +4,8 @@ set -e
 
 targets=()
 while IFS=  Reload results
-    targets+=("$REPLY")
-done < <(
   find \
+
 
 
 
