@@ -32,11 +32,20 @@ release = '1'
 # ones.
 extensions = [
     'recommonmark',
-    'sphinxcontrib.programoutput'
+    'sphinxcontrib.programoutput',
+    'sphinx_multiversion'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
+
+html_sidebars = {  '**': [
+        'about.html',
+        'navigation.html',
+        'relations.html',
+        'searchbox.html',
+        'donate.html',
+        'versioning.html'] }
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
