@@ -2,7 +2,6 @@ language: bash
 
 stages:
   - test
-  - deploy
 
 os:
 - linux
@@ -21,23 +20,6 @@ matrix:
   include:
     - os: osx
       env: ''
-    - stage: deploy  
-      env: ''
-      before_script:
-      - sudo apt-get install python3-pip
-      - sudo pip3 install sphinx-multiversion sphinxcontrib-programoutput recommonmark
-      script:
-      - | 
-        mkdir html
-        sphinx-multiversion docs/source html
-      before_deploy:
-        - touch html/.nojekyll
-      deploy:
-      - provider: pages
-        skip_cleanup: true
-        github_token: $GITHUB_TOKEN
-        keep_history: false
-        local_dir: html
 
 services:
   - docker

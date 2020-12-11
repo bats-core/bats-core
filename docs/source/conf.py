@@ -32,8 +32,7 @@ release = '1'
 # ones.
 extensions = [
     'recommonmark',
-    'sphinxcontrib.programoutput',
-    'sphinx_multiversion'
+    'sphinxcontrib.programoutput'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -44,8 +43,7 @@ html_sidebars = {  '**': [
         'navigation.html',
         'relations.html',
         'searchbox.html',
-        'donate.html',
-        'versioning.html'] }
+        'donate.html'] }
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -58,7 +56,7 @@ exclude_patterns = []
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'alabaster'
+#html_theme = 'alabaster'
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
