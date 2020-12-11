@@ -34,7 +34,7 @@ matrix:
         - touch html/.nojekyll
       deploy:
       - provider: pages
-        cleanup: false
+        skip_cleanup: true
         github_token: $GITHUB_TOKEN
         keep_history: false
         local_dir: html
