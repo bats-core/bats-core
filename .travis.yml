@@ -1,8 +1,5 @@
 language: bash
 
-stages:
-  - test
-
 os:
 - linux
 
