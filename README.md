@@ -5,6 +5,7 @@
 [![License](https://img.shields.io/github/license/bats-core/bats-core.svg)](https://github.com/bats-core/bats-core/blob/master/LICENSE.md)
 [![Continuous integration status for Linux and macOS](https://img.shields.io/travis/bats-core/bats-core/master.svg?label=travis%20build)](https://travis-ci.org/bats-core/bats-core)
 [![Continuous integration status for Windows](https://img.shields.io/appveyor/ci/bats-core/bats-core/master.svg?label=appveyor%20build)](https://ci.appveyor.com/project/bats-core/bats-core)
+[![Read the docs status](https://readthedocs.org/projects/bats-core/badge/?version=latest&style=plastic)](https://bats-core.readthedocs.io)
 
 [![Join the chat in bats-core/bats-core on gitter](https://badges.gitter.im/bats-core/bats-core.svg)][gitter]
 
@@ -39,6 +40,8 @@ test case exits with a `0` status code (success), the test passes. In this way,
 each line is an assertion of truth.
 
 ## Table of contents
+
+**NOTE** The documentation has moved to <https://bats-core.readthedocs.io>
 
 <!-- toc -->
 
