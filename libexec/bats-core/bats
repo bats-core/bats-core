@@ -76,7 +76,7 @@ export BATS_TEST_PATTERN_COMMENT="[[:blank:]]*([^[:blank:]()]+)[[:blank:]]*\(?\)
 export BATS_TEST_FILTER=
 export PATH="$BATS_LIBEXEC:$PATH"
 export BATS_ROOT_PID=$$
-if [[ -z "$TMPDIR" ]]; then
+if [[ -z "${TMPDIR-}" ]]; then
   export BATS_TMPDIR="/tmp"
 else
   export BATS_TMPDIR="${TMPDIR%/}"
