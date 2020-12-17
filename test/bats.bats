@@ -707,3 +707,13 @@ END_OF_ERR_MSG
   [ "$status" -eq 1 ]
   [ "${lines[4]}" = "# /usr/local/bin:/usr/bin:/bin" ]
 }
+
+@test "Test nounset does not trip up bats' internals (see #385)" {
+  # don't export nounset within this file or we might trip up the testsuite itself,
+  # getting bad diagnostics
+  run bash -c "set -o nounset; export SHELLOPTS; bats --tap '$FIXTURE_ROOT/passing.bats'"
+  echo "$output"
+  [ "${lines[0]}" = "1..1" ]
+  [ "${lines[1]}" = "ok 1 a passing test" ]
+  [ ${#lines[@]} = 2 ]
+}
