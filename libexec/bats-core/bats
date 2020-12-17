@@ -280,6 +280,8 @@ done
 # shellcheck source=lib/bats-core/validator.bash
 source "$BATS_ROOT/lib/bats-core/validator.bash"
 
+trap 'BATS_INTERRUPTED=true' INT # let the lower levels handle the interruption
+
 set -o pipefail execfail
 
 if [[ -n "$report_formatter" ]]; then
