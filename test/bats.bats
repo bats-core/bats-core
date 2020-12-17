@@ -705,5 +705,5 @@ END_OF_ERR_MSG
 @test "test works even if PATH is reset" {
   run bats "$FIXTURE_ROOT/update_path_env.bats"
   [ "$status" -eq 1 ]
-  [ "${lines[4]}" = "# /usr/bin:/bin" ]
+  [ "${lines[4]}" = "# /usr/local/bin:/usr/bin:/bin" ]
 }
