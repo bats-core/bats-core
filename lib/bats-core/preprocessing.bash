@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-if [[ -z "$TMPDIR" ]]; then
+if [[ -z "${TMPDIR:-}" ]]; then
 	export BATS_TMPDIR='/tmp'
 else
 	export BATS_TMPDIR="${TMPDIR%/}"
@@ -24,7 +24,7 @@ bats_cleanup_preprocessed_source() {
 }
 
 bats_evaluate_preprocessed_source() {
-	if [[ -z "$BATS_TEST_SOURCE" ]]; then
+	if [[ -z "${BATS_TEST_SOURCE:-}" ]]; then
 		BATS_TEST_SOURCE="${BATS_PARENT_TMPNAME}.src"
 	fi
 	# Dynamically loaded user files provided outside of Bats.
