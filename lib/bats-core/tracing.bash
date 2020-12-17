@@ -119,7 +119,8 @@ bats_trim_filename() {
 
 bats_debug_trap() {
 	# don't update the trace within library functions or we get backtraces from inside traps
-	if [[ "$1" != $BATS_ROOT/lib/* && "$1" != $BATS_ROOT/libexec/* ]]; then
+	# also don't record new stack traces while handling interruptions, to avoid overriding the interrupted command
+	if [[ "$1" != $BATS_ROOT/lib/* && "$1" != $BATS_ROOT/libexec/* && "${BATS_INTERRUPTED-NOTSET}" == NOTSET ]]; then
 		# The last entry in the stack trace is not useful when en error occured:
 		# It is either duplicated (kinda correct) or has wrong line number (Bash < 4.4)
 		# Therefore we capture the stacktrace but use it only after the next debug
