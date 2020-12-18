@@ -8,7 +8,7 @@ have_gnu_parallel=
 bats_parallel_args=()
 bats_no_parallelize_across_files=${BATS_NO_PARALLELIZE_ACROSS_FILES-}
 bats_no_parallelize_within_files=
-flags=()
+flags=('--dummy-flag') # add a dummy flag to prevent unset varialeb errors on empty array expansion in old bash versions
 
 abort() {
   printf 'Error: %s\n' "$1" >&2
@@ -42,6 +42,8 @@ while [[ "$#" -ne 0 ]]; do
   --no-parallelize-within-files)
     bats_no_parallelize_within_files=1
     flags+=("--no-parallelize-within-files")
+    ;;
+  --dummy-flag)
     ;;
   *)
     break
@@ -80,7 +82,8 @@ for filename in "$@"; do
     test_line=$(printf "%s\t%s" "$filename" "$line")
     all_tests+=("$test_line")
     printf "%s\n" "$test_line" >>"$TESTS_LIST_FILE"
-    if [[ " ${test_names[*]} " == *" $line "* ]]; then
+    # avoid unbound variable errors on empty array expansion with old bash versions
+    if [[ ${#test_names[@]} -gt 0 && " ${test_names[*]} " == *" $line "* ]]; then
       test_dupes+=("$line")
       continue
     fi

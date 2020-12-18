@@ -30,6 +30,8 @@ while [[ "$#" -ne 0 ]]; do
     # use singular to allow for users to override in file
     BATS_NO_PARALLELIZE_WITHIN_FILE=1
     ;;
+  --dummy-flag)
+    ;;
   *)
     break
     ;;
