@@ -701,3 +701,9 @@ END_OF_ERR_MSG
   [ "${lines[5]}" = 'ok 5 should_be_found_with_function_and_parens' ]
   [ "${lines[6]}" = 'ok 6 should_be_found_with_function_parens_and_whitespace' ]
 }
+
+@test "test works even if PATH is reset" {
+  run bats "$FIXTURE_ROOT/update_path_env.bats"
+  [ "$status" -eq 1 ]
+  [ "${lines[4]}" = "# /usr/local/bin:/usr/bin:/bin" ]
+}

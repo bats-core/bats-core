@@ -193,7 +193,7 @@ bats_run_tests_in_parallel() {
       ((++test_number_in_file))
       mkdir -p "$output_folder/$test_number_in_suite"
       bats_semaphore_run "$output_folder/$test_number_in_suite" \
-                          bats-exec-test "${flags[@]}" "$filename" "$test_name" "$test_number_in_suite" "$test_number_in_file" \
+                          "$BATS_LIBEXEC/bats-exec-test" "${flags[@]}" "$filename" "$test_name" "$test_number_in_suite" "$test_number_in_file" \
                           > "$output_folder/$test_number_in_suite/pid"
     fi
     # print results early to get interactive feedback
@@ -239,9 +239,9 @@ bats_run_tests() {
         ((++test_number_in_file))
         # deal with empty flags to avoid spurious "unbound variable" errors on Bash 4.3 and lower
         if [[ "${#flags[@]}" -gt 0 ]]; then
-          bats-exec-test "${flags[@]}" "$filename" "$test_name" "$test_number_in_suite" "$test_number_in_file" || status=1
+          "$BATS_LIBEXEC/bats-exec-test" "${flags[@]}" "$filename" "$test_name" "$test_number_in_suite" "$test_number_in_file" || status=1
         else
-          bats-exec-test "$filename" "$test_name" "$test_number_in_suite" "$test_number_in_file" || status=1
+          "$BATS_LIBEXEC/bats-exec-test" "$filename" "$test_name" "$test_number_in_suite" "$test_number_in_file" || status=1
         fi
       fi
     done
