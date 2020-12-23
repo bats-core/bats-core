@@ -81,7 +81,7 @@ if [[ -z "${TMPDIR-}" ]]; then
 else
   export BATS_TMPDIR="${TMPDIR%/}"
 fi
-export BATS_RUN_TMPDIR="$BATS_TMPDIR/bats-run-$BATS_ROOT_PID"
+export BATS_RUN_TMPDIR="${BATS_RUN_TMPDIR:-$BATS_TMPDIR/bats-run-$BATS_ROOT_PID}"
 
 arguments=()
 
