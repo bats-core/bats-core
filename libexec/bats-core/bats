@@ -81,7 +81,7 @@ if [[ -z "${TMPDIR-}" ]]; then
 else
   export BATS_TMPDIR="${TMPDIR%/}"
 fi
-export BATS_RUN_TMPDIR="${BATS_RUN_TMPDIR:-$BATS_TMPDIR/bats-run-$BATS_ROOT_PID}"
+export BATS_RUN_TMPDIR="$BATS_TMPDIR/bats-run-$BATS_ROOT_PID"
 
 arguments=()
 
@@ -110,7 +110,7 @@ formatter_flags=('--dummy-flag') # add a dummy flag to prevent unset varialeb er
 formatter='tap'
 report_formatter=''
 recursive=
-tempdir_cleanup=1
+export BATS_TEMPDIR_CLEANUP=1
 output=
 if [[ -z "${CI:-}" && -t 0 && -t 1 ]] && command -v tput >/dev/null; then
   formatter='pretty'
@@ -184,7 +184,11 @@ while [[ "$#" -ne 0 ]]; do
     flags+=("--no-parallelize-within-files")
     ;;
   --no-tempdir-cleanup)
-    tempdir_cleanup=''
+    BATS_TEMPDIR_CLEANUP=''
+    ;;
+  --tempdir) # for internal test consumption only!
+    BATS_RUN_TMPDIR="$2"
+    shift
     ;;
   -*)
     abort "Bad command line option '$1'"
@@ -202,7 +206,7 @@ if [[ -d "$BATS_RUN_TMPDIR" ]]; then
   exit 1
 fi
 mkdir -p "$BATS_RUN_TMPDIR"
-if [[ -n "$tempdir_cleanup" ]]; then
+if [[ -n "$BATS_TEMPDIR_CLEANUP" ]]; then
   trap 'rm -rf "$BATS_RUN_TMPDIR"' ERR EXIT
 fi
 

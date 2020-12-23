@@ -720,14 +720,14 @@ END_OF_ERR_MSG
 
 @test "run tmpdir is cleaned up by default" {
   TEST_TMPDIR="${BATS_RUN_TMPDIR}/$BATS_TEST_NAME"
-  BATS_RUN_TMPDIR="$TEST_TMPDIR" bats "$FIXTURE_ROOT/passing.bats"
+  bats --tempdir "$TEST_TMPDIR" "$FIXTURE_ROOT/passing.bats"
 
   [ ! -d "$TEST_TMPDIR" ]
 }
 
 @test "run tmpdir is not cleanup up with --no-cleanup-tempdir" {
   TEST_TMPDIR="${BATS_RUN_TMPDIR}/$BATS_TEST_NAME"
-  BATS_RUN_TMPDIR="$TEST_TMPDIR" bats --no-tempdir-cleanup "$FIXTURE_ROOT/passing.bats"
+  bats --tempdir "$TEST_TMPDIR" --no-tempdir-cleanup "$FIXTURE_ROOT/passing.bats"
 
   [ -d "$TEST_TMPDIR" ]
 
