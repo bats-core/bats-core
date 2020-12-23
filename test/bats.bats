@@ -717,3 +717,20 @@ END_OF_ERR_MSG
   [ "${lines[1]}" = "ok 1 a passing test" ]
   [ ${#lines[@]} = 2 ]
 }
+
+@test "run tmpdir is cleaned up by default" {
+  TEST_TMPDIR="${BATS_RUN_TMPDIR}/$BATS_TEST_NAME"
+  BATS_RUN_TMPDIR="$TEST_TMPDIR" bats "$FIXTURE_ROOT/passing.bats"
+
+  [ ! -d "$TEST_TMPDIR" ]
+}
+
+@test "run tmpdir is not cleanup up with --no-cleanup-tempdir" {
+  TEST_TMPDIR="${BATS_RUN_TMPDIR}/$BATS_TEST_NAME"
+  BATS_RUN_TMPDIR="$TEST_TMPDIR" bats --no-tempdir-cleanup "$FIXTURE_ROOT/passing.bats"
+
+  [ -d "$TEST_TMPDIR" ]
+
+  # should also find preprocessed files!
+  [ $(find "$TEST_TMPDIR" -name '*.src' | wc -l) -eq 1 ]
+}
