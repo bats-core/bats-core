@@ -16,12 +16,6 @@ bats_preprocess_source() {
 	# since the latter runs in bats-exec-test's bash while this runs in bats-exec-file's
 	export BATS_TEST_SOURCE="${BATS_TMPNAME}.src"
 	bats-preprocess "$BATS_TEST_FILENAME" >"$BATS_TEST_SOURCE"
-	trap 'bats_cleanup_preprocessed_source' ERR EXIT
-	trap 'bats_cleanup_preprocessed_source; exit 1' INT
-}
-
-bats_cleanup_preprocessed_source() {
-	rm -f "$BATS_TEST_SOURCE"
 }
 
 bats_evaluate_preprocessed_source() {
