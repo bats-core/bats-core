@@ -8,7 +8,7 @@ process.
 For more details about how Bats evaluates test files, see [Bats Evaluation
 Process][bats-eval] on the wiki.
 
-For sample test files, see [examples](/docs/examples).
+For sample test files, see [examples](https://github.com/bats-core/bats-core/tree/master/docs/examples).
 
 [bats-eval]: https://github.com/bats-core/bats-core/wiki/Bats-Evaluation-Process
 

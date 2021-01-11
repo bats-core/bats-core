@@ -12,11 +12,3 @@ Versions before v1.2.1 are documented over `there <https://github.com/bats-core/
    docker-usage
    writing-tests
 
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
