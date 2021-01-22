@@ -128,7 +128,6 @@ bats_file_exit_trap() {
     rm -rf "$BATS_OUT"
     status=1
   fi
-  bats_cleanup_preprocessed_source
   exit $status
 }
 
