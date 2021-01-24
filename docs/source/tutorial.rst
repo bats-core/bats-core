@@ -451,9 +451,9 @@ Setting up a multifile test suite
 With a growing project, putting all tests into one file becomes unwieldy.
 For our example project, we will extract functionality into the additional file `src/helper.sh`:
 
-,, code-block:: bash
+.. code-block:: bash
 
-#!/usr/bin/env bash
+    #!/usr/bin/env bash
 
     _is_first_run() {
         local FIRST_RUN_FILE=/tmp/bats-tutorial-project-ran
@@ -522,9 +522,9 @@ Please note, that we gave our helper the extension `.bash`, which is automatical
 
 .. important:: 
 
-    `load` automatically appends `.bash` to its argument. Thus, only `.bash` (not `.sh`!) files can be loaded.
+    `load` automatically tries to append `.bash` to its argument.
 
-In our new `test/helper.bats` we can see, that loading `.sh` is simly done via `source`.
+In our new `test/helper.bats` we can see, that loading `.sh` is simply done via `source`.
 
 .. tip::
 
@@ -547,7 +547,113 @@ In this mode, bats will pick up all `.bats` files in the directory it was given.
 However, in our project layout this would pick up the test files of bats itself from `test/bats/test`. We don't have test subfolders anyways, so we can do without `-r`.
 
 
+Avoiding costly repeated setups
+-------------------------------
+
+We already have seen the `setup` function in use, which is called before each test.
+Sometimes our setup is very costly, such as booting up a service just for testing. 
+If we can reuse the same setup across multiple tests, we might want to do only one setup before all these tests.
+
+This usecase is exactly what the `setup_file` function was created for.
+It can be defined per file and will run before all tests of the respective file.
+Similarly, we have `teardown_file`, which will run after all tests of the file, even when you abort a test run or a test failed.
+
+As an example, we want to add an echo server capability to our project. First, we add the following `server.bats` to our suite:
+
+.. code-block:: bash
+
+    setup_file() {
+        load 'test_helper/common-setup'
+        _common_setup
+        PORT=$(project.sh start-echo-server >/dev/null 2>&1)
+        export PORT
+    }
+
+    @test "server is reachable" {
+        nc -z localhost "$PORT"
+    }
+
+Which will obviously fail:
+
+Note that `export PORT` to make it visible to the test!
+Running this gives us:
+
 ..
-    TODO
-    - setup_file/teardown_file
-    - testing functions that return via variables
+    TODO: Update this example with fixed test name reporting from setup_file? (instead of "✗ ")
+
+.. code-block:: console
+
+   $ ./test/bats/bin/bats test/server.bats 
+     ✗ 
+       (from function `setup_file' in test file test/server.bats, line 4)
+         `PORT=$(project.sh start-echo-server >/dev/null 2>&1)' failed
+
+    1 test, 1 failure 
+
+Now that we got our red test, we need to get it green again.
+Our new `project.sh` now ends with:
+
+.. code-block:: bash
+
+    case $1 in
+        start-echo-server)
+            echo "Starting echo server"
+            PORT=2000
+            ncat -l $PORT -k -c 'xargs -n1 echo' 2>/dev/null & # don't keep open this script's stderr
+            echo $! > /tmp/project-echo-server.pid
+            echo "$PORT" >&2
+        ;;
+        *)
+            echo "NOT IMPLEMENTED!" >&2
+            exit 1
+        ;;
+    esac
+
+and the tests now say
+
+.. code-block:: console
+
+    $ LANG=C ./test/bats/bin/bats test/server.bats 
+     ✓ server is reachable
+
+    1 test, 0 failures
+
+However, running this a second time gives:
+
+.. code-block:: console
+
+    $ ./test/bats/bin/bats test/server.bats
+     ✗ server is reachable
+       (in test file test/server.bats, line 14)
+         `nc -z -w 2 localhost "$PORT"' failed
+       2000
+       Ncat: bind to :::2000: Address already in use. QUITTING.
+       nc: port number invalid: 2000
+       Ncat: bind to :::2000: Address already in use. QUITTING.
+
+    1 test, 1 failure
+
+Obviously, we did not turn off our server after testing.
+This is a task for `teardown_file` in `server.bats`:
+
+.. code-block:: bash
+
+    teardown_file() {
+        project.sh stop-echo-server
+    }
+
+Our `project.sh` should also get the new command:
+
+.. code-block:: bash
+
+    stop-echo-server)
+        kill "$(< "/tmp/project-echo-server.pid")"
+        rm /tmp/project-echo-server.pid
+    ;;
+
+Now starting our tests again will overwrite the .pid file with the new instance's, so we have to do manual cleanup once.
+From now on, our test should clean up after itself.
+
+.. note:: 
+
+    `teardown_file` will run regardless of tests failing or succeeding.
