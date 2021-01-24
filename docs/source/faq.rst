@@ -151,8 +151,11 @@ How can I lint/shell-format my bats tests?
 ------------------------------------------
 
 Due to their custom syntax (`@test`), `.bats` files are not standard bash. This prevents most tools from working with bats.
-However, shellcheck supports `.bats` files since version 0.7 and there is an alternative syntax `function_name { # @test` to declare tests in a bash compliant manner.
-There is currently no known formatter that supports formatting custom `.bats` syntax files directly.
+However, there is an alternative syntax `function_name { # @test` to declare tests in a bash compliant manner.
+
+- shellcheck support since version 0.7
+- shfmt support since version 3.2.0 (using `-ln bats`)
+
 
 How can I check if a test failed/succeeded during teardown?
 -----------------------------------------------------------
