@@ -8,7 +8,6 @@ For this tutorial we are assuming you already have a project in a git repository
 Ultimately they should run in the CI environment but will also be started locally during development.
 
 ..
-    
     TODO: link to example repository?
 
 Quick installation
@@ -66,8 +65,7 @@ and run it by
 
     1 test, 1 failure
 
-Okay, our test is red. Obviously, the project.sh doesn't exist.
-Let us fix both problems. First, we create the file `src/project.sh`:
+Okay, our test is red. Obviously, the project.sh doesn't exist, so we create the file `src/project.sh`:
 
 .. code-block:: console
 
@@ -142,6 +140,12 @@ still giving us:
 What happened? The newly added `setup` function put the absolute path to `src/` onto `$PATH`.
 This setup function is automatically called before each test.
 Therefore, our test could execute `project.sh` directly, without using a (relative) path.
+
+.. important::
+
+    The `setup` function will be called before each individual test in the file. 
+    Each file can only define one setup function for all tests in the file.
+    However, the setup functions can differ between different files.
 
 Dealing with output
 -------------------
@@ -287,10 +291,263 @@ Skimming the documentation of `bats-assert <https://github.com/bats-core/bats-as
 You should also have a look at the other helper libraries `here <https://github.com/bats-core>`_ like `bats-file <https://github.com/bats-core/bats-file>`_, 
 to avoid reinventing the wheel.
 
-..
 
+Cleaning up your mess
+---------------------
+
+Often our setup or tests leave behind some artifacts that clutter our test environment.
+You can define a `teardown` function which will be called after each test, regardless whether it failed or not.
+
+For example, we now want our project.sh to only show the welcome message on the first invocation.
+So we change our test to this:
+
+.. code-block:: bash
+
+    @test "Show welcome message on first invocation" {
+        run project.sh
+        assert_output --partial 'Welcome to our project!'
+
+        run project.sh
+        refute_output --partial 'Welcome to our project!'
+    }
+
+This test fails as expected:
+
+.. code-block:: console
+
+    $ ./test/bats/bin/bats test/test.bats 
+     ✗ Show welcome message on first invocation
+       (from function `refute_output' in file test/test_helper/bats-assert/src/refute_output.bash, line 189,
+        in test file test/test.bats, line 17)
+         `refute_output --partial 'Welcome to our project!'' failed
+    
+       -- output should not contain substring --
+       substring (1 lines):
+         Welcome to our project!
+       output (2 lines):
+         Welcome to our project!
+         NOT IMPLEMENTED!
+       --
+    
+
+    1 test, 1 failure
+
+Now, to get the test green again, we want to store the information that we already ran in the file `/tmp/bats-tutorial-project-ran`,
+so our `src/project.sh` becomes:
+
+.. code-block:: bash
+
+    #!/usr/bin/env bash
+
+    FIRST_RUN_FILE=/tmp/bats-tutorial-project-ran
+
+    if [[ ! -e "$FIRST_RUN_FILE" ]]; then
+        echo "Welcome to our project!"
+        touch "$FIRST_RUN_FILE"
+    fi
+
+    echo "NOT IMPLEMENTED!" >&2
+    exit 1
+
+And our test says:
+
+.. code-block:: console
+
+    $ ./test/bats/bin/bats test/test.bats 
+     ✓ Show welcome message on first invocation
+
+    1 test, 0 failures
+
+Nice, we're done, or are we? Running the test again now gives:
+
+.. code-block:: console
+
+    $ ./test/bats/bin/bats test/test.bats 
+     ✗ Show welcome message on first invocation
+       (from function `assert_output' in file test/test_helper/bats-assert/src/assert_output.bash, line 186,
+        in test file test/test.bats, line 14)
+         `assert_output --partial 'Welcome to our project!'' failed
+    
+       -- output does not contain substring --
+       substring : Welcome to our project!
+       output    : NOT IMPLEMENTED!
+       --
+    
+
+    1 test, 1 failure
+
+Now the first assert failed, because of the leftover `$FIRST_RUN_FILE` from the last test run.
+
+Luckily, bats offers the `teardown` function, which can take care of that, we add the following code to `test/test.bats`:
+
+.. code-block:: bash
+
+    teardown() {
+        rm -f /tmp/bats-tutorial-project-ran
+    }
+
+Now running the test again first give us the same error, as the teardown has not run yet. 
+On the second try we get a clean `/tmp` folder again and our test passes consistently now.
+
+It is worth noting that we could do this `rm` in the test code itself but it would get skipped on failures.
+
+.. important::
+
+    A test ends at its first failure. Non of the following commands in this test will be executed.
+    The `teardown` function runs after each individual test in a file, regardless of test success or failure.
+    Similarly to `setup`, each `.bats` file can have its own `teardown` function which will be the same for all tests in the file.
+
+Test what you can
+-----------------
+
+Sometimes tests rely on the environment to provide infrastructure that is needed for the test.
+If not all test environments provide this infrastructure but we still want to test on them,
+it would be unhelpful to get errors on parts that are not testable.
+
+Bats provides you with the `skip` command which can be used in `setup` and `test`.
+
+.. tip::    
+    
+    You should `skip` as early as you know it does not make sense to continue.
+
+In our example project we rewrite the welcome message test to `skip` instead of doing cleanup:
+
+.. code-block:: bash
+
+    teardown() {
+        : # Look Ma! No cleanup!
+    } 
+
+    @test "Show welcome message on first invocation" {
+        if [[ -e /tmp/bats-tutorial-project-ran ]]; then
+            skip 'The FIRST_RUN_FILE already exists'
+        fi
+        
+        run project.sh
+        assert_output --partial 'Welcome to our project!'
+
+        run project.sh
+        refute_output --partial 'Welcome to our project!'
+    }
+
+The first test run still works due to the cleanup from the last round. However, our second run gives us:
+
+.. code-block:: console
+
+    $ ./test/bats/bin/bats test/test.bats 
+     - Show welcome message on first invocation (skipped: The FIRST_RUN_FILE already exists)
+
+    1 test, 0 failures, 1 skipped
+
+.. important::
+
+    Skipped tests won't fail a test suite and are counted separately.
+    No test command after `skip` will be executed. If an error occurs before `skip`, the test will fail.
+    An optional reason can be passed to `skip` and will be printed in the test output.
+
+Setting up a multifile test suite
+---------------------------------
+
+With a growing project, putting all tests into one file becomes unwieldy.
+For our example project, we will extract functionality into the additional file `src/helper.sh`:
+
+,, code-block:: bash
+
+#!/usr/bin/env bash
+
+    _is_first_run() {
+        local FIRST_RUN_FILE=/tmp/bats-tutorial-project-ran
+        if [[ ! -e "$FIRST_RUN_FILE" ]]; then
+            touch "$FIRST_RUN_FILE"
+            return 0
+        fi
+        return 1
+    }
+
+This allows for testing it separately in a new file `test/helper.bats`:
+
+.. code-block:: bash
+
+    setup() {
+        load 'test_helper/common-setup`
+        _common_setup
+
+        source "$PROJECT_ROOT/src/helper.sh"
+    }
+
+    teardown() {
+        rm -f "$NON_EXISTANT_FIRST_RUN_FILE"
+        rm -f "$EXISTING_FIRST_RUN_FILE"
+    }
+
+    @test "Check first run" {
+        NON_EXISTANT_FIRST_RUN_FILE=$(mktemp -u) # only create the name, not the file itself
+
+        assert _is_first_run
+        refute _is_first_run
+        refute _is_first_run
+
+        EXISTING_FIRST_RUN_FILE=$(mktemp)
+        refute _is_first_run
+        refute _is_first_run
+    }
+
+Since the setup function would have duplicated much of the other files', we split that out into the file `test/test_helper/common-setup.bash`:
+
+.. code-block:: bash
+
+    #!/usr/bin/env bash
+
+    _common_setup() {
+        load 'test_helper/bats-support/load'
+        load 'test_helper/bats-assert/load'
+        # get the containing directory of this file
+        # use $BATS_TEST_FILENAME instead of ${BASH_SOURCE[0]} or $0,
+        # as those will point to the bats executable's location or the preprocessed file respectively
+        PROJECT_ROOT="$( cd "$( dirname "$BATS_TEST_FILENAME" )/.." >/dev/null 2>&1 && pwd )"
+        # make executables in src/ visible to PATH
+        PATH="$PROJECT_ROOT/src:$PATH"
+    }
+
+with the following `setup` in `test/test.bats`:
+
+.. code-block:: bash
+
+    setup() {
+        load 'test_helper/common-setup'
+        _common_setup
+    }
+
+Please note, that we gave our helper the extension `.bash`, which is automatically appended by `load`.
+
+.. important:: 
+
+    `load` automatically appends `.bash` to its argument. Thus, only `.bash` (not `.sh`!) files can be loaded.
+
+In our new `test/helper.bats` we can see, that loading `.sh` is simly done via `source`.
+
+.. tip::
+
+    Avoid using `load` and `source` outside of any functions.
+    If there is an error in the test file's "free code", the diagnostics are much worse than for code in `setup` or `@test`.
+
+With the new changes in place, we can run our tests again. However, our previous run command does not include the new file.
+You could add the new file to the parameter list, e.g. by running `./test/bats/bin/bats test/*.bats`.
+However, bats also can handle directories:
+
+.. code-block:: console
+
+    $ ./test/bats/bin/bats test/
+     ✓ Check first run
+     - Show welcome message on first invocation (skipped: The FIRST_RUN_FILE already exists)
+
+    2 tests, 0 failures, 1 skipped
+
+In this mode, bats will pick up all `.bats` files in the directory it was given. There is an additional `-r` switch that will recursively search for more `.bats` files.
+However, in our project layout this would pick up the test files of bats itself from `test/bats/test`. We don't have test subfolders anyways, so we can do without `-r`.
+
+
+..
     TODO
-    - teardown
     - setup_file/teardown_file
-    - sourcing your own .sh files
     - testing functions that return via variables
