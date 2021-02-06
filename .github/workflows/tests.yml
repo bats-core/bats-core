@@ -22,7 +22,7 @@ jobs:
           ./shellcheck.sh
   
   # This workflow contains a single job called "build"
-  test-on-os:
+  test-on-linux:
     strategy:
       matrix:
         os: ['ubuntu-20.04', 'ubuntu-18.04', 'ubuntu-16.04', 'macos-10.15', 'windows-2019']
@@ -30,6 +30,35 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Run test on OS ${{ matrix.os }}
+        run: |
+          bash --version
+          bash -c "time bin/bats --formatter tap test"
+          # allow for some parallelity without GNU parallel, e.g. on MacOS
+          bash -c "time BATS_NO_PARALLELIZE_ACROSS_FILES=1 BATS_NUMBER_OF_PARALLEL_JOBS=2 bin/bats --tap test"
+          
+  test-on-windows:
+    strategy:
+      matrix:
+        os: ['windows-2019']
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run test on OS ${{ matrix.os }}
+        run: |
+          bash --version
+          bash -c "time bin/bats --formatter tap test"
+          # allow for some parallelity without GNU parallel, e.g. on MacOS
+          bash -c "time BATS_NO_PARALLELIZE_ACROSS_FILES=1 BATS_NUMBER_OF_PARALLEL_JOBS=2 bin/bats --tap test"
+          
+  test-on-macos:
+    strategy:
+      matrix:
+        os: ['macos-10.15']
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run test on OS ${{ matrix.os }}
+        shell: 'unbuffer bash'
         run: |
           bash --version
           bash -c "time bin/bats --formatter tap test"
