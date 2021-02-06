@@ -25,11 +25,12 @@ jobs:
   test-on-linux:
     strategy:
       matrix:
-        os: ['ubuntu-20.04', 'ubuntu-18.04', 'ubuntu-16.04', 'macos-10.15', 'windows-2019']
+        os: ['ubuntu-20.04', 'ubuntu-18.04', 'ubuntu-16.04']
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
       - name: Run test on OS ${{ matrix.os }}
+        shell: 'script -q -e -c "bash {0}"' # work around tty issues
         run: |
           bash --version
           bash -c "time bin/bats --formatter tap test"
@@ -57,8 +58,10 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
+      - name: Install unbuffer via expect
+        run: brew install expect
       - name: Run test on OS ${{ matrix.os }}
-        shell: 'unbuffer bash'
+        shell: 'unbuffer bash' # work around tty issues
         run: |
           bash --version
           bash -c "time bin/bats --formatter tap test"
@@ -73,7 +76,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Run test on bash version ${{ matrix.version }}
-        shell: 'script -q -e -c "bash {0}"' # try to work around tty issues
+        shell: 'script -q -e -c "bash {0}"' # work around tty issues
         run: |
           set -e
           docker build --build-arg bashver="${{ matrix.version }}" --tag "bats/bats:bash-${{ matrix.version }}" .
