@@ -1,0 +1,60 @@
+# This is a basic workflow to help you get started with Actions
+
+name: CI
+
+# Controls when the action will run. 
+on:
+  # Triggers the workflow on push or pull request events but only for the master branch
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  shellcheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run shellcheck
+        run: |
+          sudo apt-get install shellcheck
+          ./shellcheck.sh
+        
+  # This workflow contains a single job called "build"
+  test-all-os-without-docker:
+    strategy:
+      matrix:
+        os: ['ubuntu-20.04', 'buntu-18.04', 'ubuntu-16.04', 'macos-11.0', 'macos-10.15', 'windows-2019', 'windows-2016']
+    # The type of runner that the job will run on
+    runs-on: ${{ matrix.os }}
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run test on OS ${{ matrix.os }}
+        run: |
+          bash --version
+          bash -c "time bin/bats --formatter tap test"
+          # allow for some parallelity without GNU parallel, e.g. on MacOS
+          bash -c "time BATS_NO_PARALLELIZE_ACROSS_FILES=1 BATS_NUMBER_OF_PARALLEL_JOBS=2 bin/bats --tap test"
+
+  test-all-bash-versions-with-docker:
+    strategy:
+      matrix:
+        version: ['3.2', '4.0', '4.1', '4.2', '4.3', '4.4', '4', '5.0', '5.1', '5', 'latest']
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run test on bash version ${{ matrix.version }}
+        run: |
+          set -e
+          docker build --build-arg bashver="${{ matrix.version }}" --tag "bats/bats:bash-${{ matrix.version }}" .
+          docker run -it "bash:${BASHVER}" --version
+          time docker run -it "bats/bats:bash-${BASHVER}" --tap /opt/bats/test
+          # also test running (recursively!) in parallel
+          time docker run -it -e BATS_NUMBER_OF_PARALLEL_JOBS=2 "bats/bats:bash-${BASHVER}" --tap /opt/bats/test
+    
