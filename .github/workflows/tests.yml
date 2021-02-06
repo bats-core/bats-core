@@ -61,7 +61,7 @@ jobs:
       - name: Install unbuffer via expect
         run: brew install expect
       - name: Run test on OS ${{ matrix.os }}
-        shell: 'unbuffer bash' # work around tty issues
+        shell: 'unbuffer bash {0}' # work around tty issues
         run: |
           bash --version
           bash -c "time bin/bats --formatter tap test"
