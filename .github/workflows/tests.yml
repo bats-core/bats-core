@@ -36,7 +36,7 @@ jobs:
           # allow for some parallelity without GNU parallel, e.g. on MacOS
           bash -c "time BATS_NO_PARALLELIZE_ACROSS_FILES=1 BATS_NUMBER_OF_PARALLEL_JOBS=2 bin/bats --tap test"
 
-  test-all-bash-versions-with-docker:
+  test-bash-version:
     strategy:
       matrix:
         version: ['3.2', '4.0', '4.1', '4.2', '4.3', '4.4', '4', '5.0', '5.1', '5', 'latest']
