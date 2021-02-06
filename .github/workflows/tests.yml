@@ -47,8 +47,8 @@ jobs:
         run: |
           set -e
           docker build --build-arg bashver="${{ matrix.version }}" --tag "bats/bats:bash-${{ matrix.version }}" .
-          docker run "bash:${BASHVER}" --version
-          time docker run "bats/bats:bash-${BASHVER}" --tap /opt/bats/test
+          docker run "bash:${{ matrix.version }}" --version
+          time docker run "bats/bats:bash-${{ matrix.version }}" --tap /opt/bats/test
           # also test running (recursively!) in parallel
-          time docker run -e BATS_NUMBER_OF_PARALLEL_JOBS=2 "bats/bats:bash-${BASHVER}" --tap /opt/bats/test
+          time docker run -e BATS_NUMBER_OF_PARALLEL_JOBS=2 "bats/bats:bash-${{ matrix.version }}" --tap /opt/bats/test
     
