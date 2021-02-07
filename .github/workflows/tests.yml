@@ -32,6 +32,8 @@ jobs:
       - uses: actions/checkout@v2
       - name: Run test on OS ${{ matrix.os }}
         shell: 'script -q -e -c "bash {0}"' # work around tty issues
+        env:
+          TERM: linux # fix tput for tty issue work around
         run: |
           bash --version
           bash -c "time bin/bats --formatter tap test"
@@ -63,6 +65,8 @@ jobs:
         run: brew install expect
       - name: Run test on OS ${{ matrix.os }}
         shell: 'unbuffer bash {0}' # work around tty issues
+        env:
+          TERM: linux # fix tput for tty issue work around
         run: |
           bash --version
           bash -c "time bin/bats --formatter tap test"
