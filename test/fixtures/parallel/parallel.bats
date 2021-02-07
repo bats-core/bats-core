@@ -1,3 +1,11 @@
+setup() {
+  echo "setup $BATS_TEST_NAME $BATS_TEST_FILENAME" >> "$FILE_MARKER"
+}
+
+teardown() {
+  echo "teardown $BATS_TEST_NAME $BATS_TEST_FILENAME" >> "$FILE_MARKER"
+}
+
 @test "slow test 1" {
   sleep 3s
 }

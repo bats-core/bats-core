@@ -3,29 +3,44 @@
 load test_helper
 fixtures parallel
 
-
-setup_file() {
-  # running these tests in parallel will make them interfere with each other ...
-  export BATS_NO_PARALLELIZE_WITHIN_FILE=true
-}
-
 setup() {
-  unset BATS_NO_PARALLELIZE_WITHIN_FILE # ... but don't turn off parallelization within the tests!
   type -p parallel &>/dev/null || skip "--jobs requires GNU parallel"
 }
 
 @test "parallel test execution with --jobs" {
-  SECONDS=0
+  export FILE_MARKER=$(mktemp)
+  
   run bats --jobs 10 "$FIXTURE_ROOT/parallel.bats"
-  duration="$SECONDS"
+  
   [ "$status" -eq 0 ]
   # Make sure the lines are in-order.
   [[ "${lines[0]}" == "1..10" ]]
   for t in {1..10}; do
     [[ "${lines[$t]}" == "ok $t slow test $t" ]]
   done
-  # In theory it should take 3s, but let's give it bit of extra time instead.
-  [[ "$duration" -lt 20 ]]
+
+  max_parallel_tests=0
+  started_tests=0
+  read_lines=0
+  while IFS= read -r line; do
+    (( ++read_lines ))
+    case "$line" in
+      setup*)
+        if (( ++started_tests > max_parallel_tests )); then
+          max_parallel_tests="$started_tests"
+        fi
+      ;;
+      teardown*)
+        (( started_tests-- ))
+      ;;
+    esac
+  done <"$FILE_MARKER"
+
+  echo "max_parallel_tests: $max_parallel_tests"
+  [[ $max_parallel_tests -eq 10 ]]
+
+  echo "read_lines: $read_lines"
+  [[ $read_lines -eq 20 ]]
 }
 
 @test "parallel can preserve environment variables" {
@@ -36,13 +51,11 @@ setup() {
 }
 
 @test "parallel suite execution with --jobs" {
-  SECONDS=0
+  export FILE_MARKER=$(mktemp)
   run bash -c "bats --jobs 40 \"${FIXTURE_ROOT}/suite/\" 2> >(grep -v '^parallel: Warning: ')"
 
-  duration="$SECONDS"
-  echo "$output"
-  echo "Duration: $duration"
   [ "$status" -eq 0 ]
+
   # Make sure the lines are in-order.
   [[ "${lines[0]}" == "1..40" ]]
   i=0
@@ -52,24 +65,63 @@ setup() {
       [[ "${lines[$i]}" == "ok $i slow test $t" ]]
     done
   done
-  # In theory it should take 3s, but let's give it bit of extra time for load tolerance.
-  # (Since there is no limit to load, we cannot totally avoid erroneous failures by limited tolerance.)
-  # Also check that parallelization happens across all files instead of
-  # linearizing between files, which requires at least 12s
-  [[ "$duration" -lt 12 ]] || (echo "If this fails on Travis, make sure the failure is repeatable and not due to heavy load."; false)
+
+  max_parallel_tests=0
+  started_tests=0
+  read_lines=0
+  while IFS= read -r line; do
+    (( ++read_lines ))
+    case "$line" in
+      setup*)
+        if (( ++started_tests > max_parallel_tests )); then
+          max_parallel_tests="$started_tests"
+        fi
+      ;;
+      teardown*)
+        (( started_tests-- ))
+      ;;
+    esac
+  done <"$FILE_MARKER"
+
+  echo "max_parallel_tests: $max_parallel_tests"
+  [[ $max_parallel_tests -eq 40 ]]
+
+  echo "read_lines: $read_lines"
+  [[ $read_lines -eq 80 ]]
 }
 
 @test "setup_file is not over parallelized" {
-  SECONDS=0
+  export FILE_MARKER=$(mktemp)
   # run 4 files with 3s sleeps in setup_file with parallelity of 2 -> serialize 2
   run bats --jobs 2 "$FIXTURE_ROOT/setup_file"
-  duration="$SECONDS"
-  echo "Took $duration seconds"
-  [ "$status" -eq 0 ]
-  # the serialization should lead to at least 6s runtime
-  [[ $duration -ge 6 ]]
-  # parallelization should at least get rid of 1/4th the total runtime
-  [[ $duration -le 9 ]]
+
+  cat "$FILE_MARKER"
+
+  [[ $(grep -c "setup_file " "$FILE_MARKER") -eq 4 ]] # beware of grepping the filename as well!
+  [[ $(grep -c teardown_file "$FILE_MARKER") -eq 4 ]]
+
+  max_parallel_files=0
+  started_files=0
+  read_lines=0
+  while IFS= read -r line; do
+    (( ++read_lines ))
+    case "$line" in
+      setup_file*)
+        if (( ++started_files > max_parallel_files )); then
+          max_parallel_files="$started_files"
+        fi
+      ;;
+      teardown_file*)
+        (( started_files-- ))
+      ;;
+    esac
+  done <"$FILE_MARKER"
+
+  echo "max_parallel_files: $max_parallel_files"
+  [[ $max_parallel_files -eq 2 ]]
+
+  echo "read_lines: $read_lines"
+  [[ $read_lines -eq 8 ]]
 }
 
 @test "running the same file twice runs its tests twice without errors" {
