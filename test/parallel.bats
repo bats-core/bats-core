@@ -3,8 +3,15 @@
 load test_helper
 fixtures parallel
 
+
+setup_file() {
+  # running these tests in parallel will make them interfere with each other ...
+  export BATS_NO_PARALLELIZE_WITHIN_FILE=true
+}
+
 setup() {
-    type -p parallel &>/dev/null || skip "--jobs requires GNU parallel"
+  unset BATS_NO_PARALLELIZE_WITHIN_FILE # ... but don't turn off parallelization within the tests!
+  type -p parallel &>/dev/null || skip "--jobs requires GNU parallel"
 }
 
 @test "parallel test execution with --jobs" {
