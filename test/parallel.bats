@@ -61,6 +61,10 @@ check_parallel_tests() { # <expected maximum parallelity>
 @test "parallel suite execution with --jobs" {
   export FILE_MARKER=$(mktemp)
   export PARALLELITY=12
+
+  # file parallelization is needed for maximum parallelity!
+  # If we got over the skip (if no GNU parallel) in setup() we can reenable it safely!
+  unset BATS_NO_PARALLELIZE_ACROSS_FILES 
   run bash -c "bats --jobs $PARALLELITY \"${FIXTURE_ROOT}/suite/\" 2> >(grep -v '^parallel: Warning: ')"
 
   echo "$output"
@@ -83,6 +87,9 @@ check_parallel_tests() { # <expected maximum parallelity>
   export FILE_MARKER=$(mktemp)
   export PARALLELITY=2
 
+  # file parallelization is needed for this test!
+  # If we got over the skip (if no GNU parallel) in setup() we can reenable it safely!
+  unset BATS_NO_PARALLELIZE_ACROSS_FILES 
   # run 4 files with parallelity of 2 -> serialize 2
   run bats --jobs $PARALLELITY "$FIXTURE_ROOT/setup_file"
 
