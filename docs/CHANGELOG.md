@@ -8,6 +8,60 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 [kac]: https://keepachangelog.com/en/1.0.0/
 [semver]: https://semver.org/
 
+## Unreleased
+
+### Added
+
+* custom test-file extension via `BATS_FILE_EXTENSION` when searching for test
+  files in a directory (#376)
+* TAP13 formatter, including millisecond timing (#337)
+
+#### Documentation
+
+* added documentation about overusing `run` (#343)
+* improved documentation of `load` (#332)
+
+### Changed
+
+* recursive suite mode will follow symlinks now (#370)
+* split options for (file-) `--report-formatter` and (stdout) `--formatter` (#345)
+  * **WARNING**: This changes the meaning of `--formatter junit`.
+    stdout will now show unified xml instead of TAP. From now on, please use
+    `--report-formatter junit` to obtain the `.xml` report file!
+* removed `--parallel-preserve-environment` flag, as this is the default
+  behavior (#324)
+* moved CI from Travis/Appveyor to Github Actions (#405)
+* preprocessed files are no longer removed if `--no-tempdir-cleanup` is
+  specified (#395)
+
+#### Documentation
+
+* moved documentation to [readthedocs](https://bats-core.readthedocs.io/en/latest/)
+
+### Fixed
+
+#### Correctness
+
+* fix internal failures due to unbound variables when test files use `set -u` (#392)
+* fix internal failures due to changes to `$PATH` in test files (#387)
+* fix test duration always being 0 on busybox installs (#363)
+* fix hangs on CTRL+C (#354)
+* make `BATS_TEST_NUMBER` count per file again (#326)
+* include `lib/` in npm package (#352)
+
+#### Performance
+
+* don't fork bomb in parallel mode (#339)
+* preprocess each file only once (#335)
+* avoid running duplicate files n^2 times (#338)
+
+#### Documentation
+
+* fix documentation for `--formatter junit` (#334)
+* fix documentation for `setup_file` variables (#333)
+* fix link to examples page (#331)
+* fix link to "File Descriptor 3" section (#301)
+
 ## [1.2.1] - 2020-07-06
 
 ### Added
