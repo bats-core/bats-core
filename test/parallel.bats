@@ -4,21 +4,51 @@ load test_helper
 fixtures parallel
 
 setup() {
-    type -p parallel &>/dev/null || skip "--jobs requires GNU parallel"
+  type -p parallel &>/dev/null || skip "--jobs requires GNU parallel"
+}
+
+check_parallel_tests() { # <expected maximum parallelity>
+  local expected_maximum_parallelity="$1"
+  local expected_number_of_lines="${2:-$((2 * expected_maximum_parallelity))}"
+
+  max_parallel_tests=0
+  started_tests=0
+  read_lines=0
+  while IFS= read -r line; do
+    (( ++read_lines ))
+    case "$line" in
+      "start "*)
+        if (( ++started_tests > max_parallel_tests )); then
+          max_parallel_tests="$started_tests"
+        fi
+      ;;
+      "stop "*)
+        (( started_tests-- ))
+      ;;
+    esac
+  done <"$FILE_MARKER"
+
+  echo "max_parallel_tests: $max_parallel_tests"
+  [[ $max_parallel_tests -eq $expected_maximum_parallelity ]]
+
+  echo "read_lines: $read_lines"
+  [[ $read_lines -eq $expected_number_of_lines ]]
 }
 
 @test "parallel test execution with --jobs" {
-  SECONDS=0
-  run bats --jobs 10 "$FIXTURE_ROOT/parallel.bats"
-  duration="$SECONDS"
+  export FILE_MARKER=$(mktemp)
+  
+  export PARALLELITY=3
+  run bats --jobs $PARALLELITY "$FIXTURE_ROOT/parallel.bats"
+  
   [ "$status" -eq 0 ]
   # Make sure the lines are in-order.
-  [[ "${lines[0]}" == "1..10" ]]
-  for t in {1..10}; do
+  [[ "${lines[0]}" == "1..3" ]]
+  for t in {1..3}; do
     [[ "${lines[$t]}" == "ok $t slow test $t" ]]
   done
-  # In theory it should take 3s, but let's give it bit of extra time instead.
-  [[ "$duration" -lt 20 ]]
+
+  check_parallel_tests $PARALLELITY
 }
 
 @test "parallel can preserve environment variables" {
@@ -29,40 +59,48 @@ setup() {
 }
 
 @test "parallel suite execution with --jobs" {
-  SECONDS=0
-  run bash -c "bats --jobs 40 \"${FIXTURE_ROOT}/suite/\" 2> >(grep -v '^parallel: Warning: ')"
+  export FILE_MARKER=$(mktemp)
+  export PARALLELITY=12
 
-  duration="$SECONDS"
+  # file parallelization is needed for maximum parallelity!
+  # If we got over the skip (if no GNU parallel) in setup() we can reenable it safely!
+  unset BATS_NO_PARALLELIZE_ACROSS_FILES 
+  run bash -c "bats --jobs $PARALLELITY \"${FIXTURE_ROOT}/suite/\" 2> >(grep -v '^parallel: Warning: ')"
+
   echo "$output"
-  echo "Duration: $duration"
   [ "$status" -eq 0 ]
+
   # Make sure the lines are in-order.
-  [[ "${lines[0]}" == "1..40" ]]
+  [[ "${lines[0]}" == "1..$PARALLELITY" ]]
   i=0
   for s in {1..4}; do
-    for t in {1..10}; do
+    for t in {1..3}; do
       ((++i))
       [[ "${lines[$i]}" == "ok $i slow test $t" ]]
     done
   done
-  # In theory it should take 3s, but let's give it bit of extra time for load tolerance.
-  # (Since there is no limit to load, we cannot totally avoid erroneous failures by limited tolerance.)
-  # Also check that parallelization happens across all files instead of
-  # linearizing between files, which requires at least 12s
-  [[ "$duration" -lt 12 ]] || (echo "If this fails on Travis, make sure the failure is repeatable and not due to heavy load."; false)
+
+  check_parallel_tests $PARALLELITY
 }
 
 @test "setup_file is not over parallelized" {
-  SECONDS=0
-  # run 4 files with 3s sleeps in setup_file with parallelity of 2 -> serialize 2
-  run bats --jobs 2 "$FIXTURE_ROOT/setup_file"
-  duration="$SECONDS"
-  echo "Took $duration seconds"
-  [ "$status" -eq 0 ]
-  # the serialization should lead to at least 6s runtime
-  [[ $duration -ge 6 ]]
-  # parallelization should at least get rid of 1/4th the total runtime
-  [[ $duration -le 9 ]]
+  export FILE_MARKER=$(mktemp)
+  export PARALLELITY=2
+
+  # file parallelization is needed for this test!
+  # If we got over the skip (if no GNU parallel) in setup() we can reenable it safely!
+  unset BATS_NO_PARALLELIZE_ACROSS_FILES 
+  # run 4 files with parallelity of 2 -> serialize 2
+  run bats --jobs $PARALLELITY "$FIXTURE_ROOT/setup_file"
+
+  [[ $status -eq 0 ]] || (echo "$output"; false)
+
+  cat "$FILE_MARKER"
+
+  [[ $(grep -c "start " "$FILE_MARKER") -eq 4 ]] # beware of grepping the filename as well!
+  [[ $(grep -c "stop " "$FILE_MARKER") -eq 4 ]]
+
+  check_parallel_tests $PARALLELITY 8
 }
 
 @test "running the same file twice runs its tests twice without errors" {
@@ -95,6 +133,9 @@ setup() {
 }
 
 @test "--no-parallelize-across-files test file detects parallel execution" {
+  # ensure that we really run parallelization across files!
+  # (setup should have skipped already, if there was no GNU parallel)
+  unset BATS_NO_PARALLELIZE_ACROSS_FILES
   export FILE_MARKER=$(mktemp)
   ! bats --jobs 2 "$FIXTURE_ROOT/must_not_parallelize_across_files/"
 }
@@ -117,6 +158,9 @@ setup() {
 }
 
 @test "--no-parallelize-within-files does not prevent parallelization across files" {
+  # ensure that we really run parallelization across files!
+  # (setup should have skipped already, if there was no GNU parallel)
+  unset BATS_NO_PARALLELIZE_ACROSS_FILES
   export FILE_MARKER=$(mktemp)
   ! bats --jobs 2 --no-parallelize-within-files "$FIXTURE_ROOT/must_not_parallelize_across_files/"
 }

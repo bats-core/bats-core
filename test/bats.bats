@@ -55,6 +55,7 @@ teardown() {
 
 @test "summary passing tests" {
   run filter_control_sequences bats -p "$FIXTURE_ROOT/passing.bats"
+  echo "$output"
   [ $status -eq 0 ]
   [ "${lines[1]}" = "1 test, 0 failures" ]
 }

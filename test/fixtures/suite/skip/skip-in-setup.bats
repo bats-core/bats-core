@@ -5,7 +5,7 @@ setup() {
 }
 
 @test "skip in setup" {
-  true
+  false
 }
 
 @test "skip in setup and test" {
