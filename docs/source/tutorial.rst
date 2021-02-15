@@ -85,7 +85,7 @@ A new test run gives us
 
     1 test, 1 failure
 
-Oh, we still use the wrong path. No problem, we just need to use the correct path to `project.sh`.
+Oh, we still used the wrong path. No problem, we just need to use the correct path to `project.sh`.
 Since we're still in the same directory as when we started `bats`, we can simply do:
 
 .. code-block:: bash
@@ -125,7 +125,9 @@ Our new `test/test.bats` now looks like this:
     }
 
     @test "can run our script" {
-        project.sh # notice the missing ./
+        # notice the missing ./ 
+        # As we added src/ to $PATH, we can omit the relative path to `src/project.sh`.
+        project.sh
     }
 
 still giving us:
@@ -137,7 +139,7 @@ still giving us:
 
     1 test, 0 failures
 
-What happened? The newly added `setup` function put the absolute path to `src/` onto `$PATH`.
+It still works as expected. This is because the newly added `setup` function put the absolute path to `src/` onto `$PATH`.
 This setup function is automatically called before each test.
 Therefore, our test could execute `project.sh` directly, without using a (relative) path.
 
@@ -175,7 +177,7 @@ And gives is this test output:
 
     1 test, 1 failure
 
-Okay, our test failed again, because we now exit with 1 instead of 0.
+Okay, our test failed, because we now exit with 1 instead of 0.
 Additionally, we see the stdout and stderr of the failing program.
 
 Our goal now is to retarget our test and check that we get the welcome message.
@@ -224,11 +226,11 @@ which gives us the following test output:
     1 test, 1 failure
 
 The first change in this output is the failure description. We now fail on assert_output instead of the call itself.
-We prefixed our call to `project.sh` with `run`, which is an internal bats function that executes the command it gets passed as parameters.
+We prefixed our call to `project.sh` with `run`, which is a function provided by bats that executes the command it gets passed as parameters.
 Then, `run` sucks up the stdout and stderr of the command it ran and stores it in `$output`, stores the exit code in `$status` and returns 0.
 This means `run` never fails the test and won't generate any context/output in the log of a failed test on its own.
 
-Failing the test is and printing context information is up to the consumers of `$status` and `$output`. 
+Marking the test as failed and printing context information is up to the consumers of `$status` and `$output`. 
 `assert_output` is such a consumer, it compares `$output` to the the parameter it got and tells us quite succinctly that it did not match in this case.
 
 For our current test we don't care about any other output or the error message, so we want it gone.
@@ -268,7 +270,7 @@ Unfortunately, the latter is no valid bash syntax, so we have to work around it,
         assert_output 'Welcome to our project!'
     }
 
-Now our test passes again but having to write a function each time we want only a partial match does not accomodate our lazyness.
+Now our test passes again but having to write a function each time we want only a partial match does not accommodate our laziness.
 Isn't there an app for that? Maybe we should look at the documentation?
 
     Partial matching can be enabled with the --partial option (-p for short). When used, the assertion fails if the expected substring is not found in $output.
@@ -393,7 +395,7 @@ It is worth noting that we could do this `rm` in the test code itself but it wou
 
 .. important::
 
-    A test ends at its first failure. Non of the following commands in this test will be executed.
+    A test ends at its first failure. None of the subsequent commands in this test will be executed.
     The `teardown` function runs after each individual test in a file, regardless of test success or failure.
     Similarly to `setup`, each `.bats` file can have its own `teardown` function which will be the same for all tests in the file.
 
@@ -469,7 +471,7 @@ This allows for testing it separately in a new file `test/helper.bats`:
 .. code-block:: bash
 
     setup() {
-        load 'test_helper/common-setup`
+        load 'test_helper/common-setup'
         _common_setup
 
         source "$PROJECT_ROOT/src/helper.sh"

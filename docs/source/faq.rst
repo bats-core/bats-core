@@ -24,7 +24,7 @@ The filename won't be part of the strings that are tested, so you cannot filter 
 How can I exclude a single test from a test run?
 ------------------------------------------------
 
-If you wan't to exclude only few tests from a run, you can either `skip` them:
+If you want to exclude only few tests from a run, you can either `skip` them:
 
 .. code-block:: bash
 
@@ -78,7 +78,7 @@ It is also possible to `skip` in `setup_file`/`setup` which will skip all tests 
 How can I include my own `.sh` files for testing?
 -------------------------------------------------
 
-You can simply `source <your>.sh`files. However, be aware that `source`ing files with errors outside of any function (or inside `setup_file`) will trip up bats
+You can simply `source <your>.sh` files. However, be aware that `source`ing files with errors outside of any function (or inside `setup_file`) will trip up bats
 and lead to hard to diagnose errors.
 Therefore, it is safest to only `source` inside `setup` or the test functions themselves.
 
@@ -97,7 +97,7 @@ Short of using a bash debugger you should make sure to use appropriate asserts f
     }
 
 Because the former will print the output when the test fails while the latter won't.
-Similarly, you should use `assert_success`/`assert_failure` instead of `[ "$status" -eq 0]` for return code checks.
+Similarly, you should use `assert_success`/`assert_failure` instead of `[ "$status" -eq 0 ]` for return code checks.
 
 Is there a mechanism to add file/test specific functionality to a common setup function?
 ----------------------------------------------------------------------------------------
