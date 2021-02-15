@@ -11,14 +11,17 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 ## [1.2.1] - 2020-07-06
 
 ### Added
-* JUnit output and extensible formatter rewrite (#246) 
+
+* JUnit output and extensible formatter rewrite (#246)
 * `load` function now reads from absolute and relative paths, and $PATH (#282)
 * Beginner-friendly examples in /docs/examples (#243)
-* @peshay's `bats-file` fork contributed to `bats-core/bats-file` (#276) 
+* @peshay's `bats-file` fork contributed to `bats-core/bats-file` (#276)
 
 ### Changed
+
 * Duplicate test names now error (previous behaviour was to issue a warning) (#286)
-* Changed default formatter in Docker to pretty by adding `ncurses` to Dockerfile, override with `--tap` (#239)
+* Changed default formatter in Docker to pretty by adding `ncurses` to
+  Dockerfile, override with `--tap` (#239)
 * Replace "readlink -f" dependency with Bash solution (#217)
 
 ## [1.2.0] - 2020-04-25
@@ -26,12 +29,14 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 Support parallel suite execution and filtering by test name.
 
 ### Added
+
 * docs/CHANGELOG.md and docs/releasing.md (#122)
 * The `-f, --filter` flag to run only the tests matching a regular expression  (#126)
 * Optimize stack trace capture (#138)
 * `--jobs n` flag to support parallel execution of tests with GNU parallel (#172)
 
 ### Changed
+
 * AppVeyor builds are now semver-compliant (#123)
 * Add Bash 5 as test target (#181)
 * Always use upper case signal names to avoid locale dependent err… (#215)
@@ -44,16 +49,19 @@ Support parallel suite execution and filtering by test name.
 This is the first release with new features relative to the original Bats 0.4.0.
 
 ### Added
+
 * The `-r, --recursive` flag to scan directory arguments recursively for
   `*.bats` files (#109)
 * The `contrib/rpm/bats.spec` file to build RPMs (#111)
 
 ### Changed
+
 * Travis exercises latest versions of Bash from 3.2 through 4.4 (#116, #117)
 * Error output highlights invalid command line options (#45, #46, #118)
 * Replaced `echo` with `printf` (#120)
 
 ### Fixed
+
 * Fixed `BATS_ERROR_STATUS` getting lost when `bats_error_trap` fired multiple
   times under Bash 4.2.x (#110)
 * Updated `bin/bats` symlink resolution, handling the case on CentOS where
@@ -85,8 +93,8 @@ This is the first release with new features relative to the original Bats 0.4.0.
 `1.0.0` generally preserves compatibility with `0.4.0`, but with some Bash
 compatibility improvements and a massive performance boost. In other words:
 
-- all existing tests should remain compatible
-- tests that might've failed or exhibited unexpected behavior on earlier
+* all existing tests should remain compatible
+* tests that might've failed or exhibited unexpected behavior on earlier
   versions of Bash should now also pass or behave as expected
 
 Changes:
