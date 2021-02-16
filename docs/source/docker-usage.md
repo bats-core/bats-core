@@ -18,21 +18,21 @@ Receiving objects: 100% (1222/1222), 327.28 KiB | 1.70 MiB/s, done.
 Resolving deltas: 100% (661/661), done.
 
 $ cd bats-core/
-$ docker build --tag bats:latest .
+$ docker build --tag bats/bats:latest .
 ...
-$ docker run -it bats:latest --formatter tap /opt/bats/test
+$ docker run -it bats/bats:latest --formatter tap /opt/bats/test
 ```
 
 To mount your tests into the container, first build the image as above. Then, for example with `bats`:
 ```bash
-$ docker run -it -v "$PWD:/opt/bats" bats:latest /opt/bats/test
+$ docker run -it -v "$PWD:/opt/bats" bats/bats:latest /opt/bats/test
 ```
 This runs the `test/` directory from the bats-core repository inside the bats Docker container.
 
 For test suites that are intended to run in isolation from the project (i.e. the tests do not depend on project files outside of the test directory), you can mount the test directory by itself and execute the tests like so:
 
 ```bash
-$ docker run -it -v "$PWD/test:/test" bats:latest /test
+$ docker run -it -v "$PWD/test:/test" bats/bats:latest /test
 ```
 
 ## Docker Gotchas
@@ -46,7 +46,7 @@ Relying on functionality provided by your environment (ssh keys or agent, instal
 Docker operates on a principle of isolation, and bundles all dependencies required into the Docker image. These can be mounted in at runtime (for test files, configuration, etc). For binary dependencies it may be better to extend the base Docker image with further tools and files.
 
 ```dockerfile
-FROM bats
+FROM bats/bats
 
 RUN \ 
   apk \
