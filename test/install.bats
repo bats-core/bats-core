@@ -55,7 +55,7 @@ setup() {
   # by creating a wrapper script that executes bin/bats via a relative path.
   #
   # root.bats contains tests that use real symlinks on platforms that support
-  # them, as does the .travis.yml script that exercises the Dockerfile.
+  # them.
   local bats_symlink="$INSTALL_DIR/bin/bats-link"
   printf '%s\n' '#! /usr/bin/env bash' \
     "cd '$INSTALL_DIR/bin'" \

@@ -13,7 +13,6 @@ significant updates to the new version.
 
 Bump the version numbers in the following files:
 
-- .appveyor.yml
 - contrib/rpm/bats.spec
 - libexec/bats-core/bats
 - package.json
