@@ -157,6 +157,8 @@ in the test file.
 * `$BATS_FILE_EXTENSION` (default: `bats`) specifies the extension of 
 test files that should be found when running a suite (via 
 `bats [-r] suite_folder/`)
+* `$BATS_SUITE_TMPDIR` is a temporary directory common to all tests of a suite.
+  Could be used to create files required by multiple tests.
 
 
 SEE ALSO
