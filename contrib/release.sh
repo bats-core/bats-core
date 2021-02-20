@@ -96,7 +96,6 @@ EOF
 
 replace_in_files() {
   declare -a FILE_REPLACEMENTS=(
-    ".appveyor.yml,^version:"
     "contrib/rpm/bats.spec,^Version:"
     "libexec/bats-core/bats,^export BATS_VERSION="
     "package.json,^  \"version\":"
