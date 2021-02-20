@@ -43,6 +43,12 @@ elif [[ ! -f "$BATS_TEST_FILENAME" ]]; then
   exit 1
 fi
 
+if ! BATS_TEST_TMPDIR=$(mktemp -d "${BATS_FILE_TMPDIR}/test-tmpdir-${BATS_TEST_NAME}-XXXXXX");then
+  printf '%s\n' "Failed to create BATS_TEST_TMPDIR with mktemp" >&2
+  exit 1
+fi
+export BATS_TEST_TMPDIR
+
 # load the test helper functions like `load` or `run` that are needed to run a (preprocessed) .bats file without bash errors
 # shellcheck source=lib/bats-core/test_functions.bash disable=SC2153
 source "$BATS_ROOT/lib/bats-core/test_functions.bash"
