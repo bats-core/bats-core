@@ -187,6 +187,9 @@ There are several global variables you can use to introspect on Bats tests:
 .IP "\(bu" 4
 \fB$BATS_FILE_TMPDIR\fR is a temporary directory common to all tests of a test file\. Could be used to create files required by multiple tests in the same test file\.
 .
+.IP "\(bu" 4
+\fB$BATS_TEST_TMPDIR\fR is a temporary directory unique for each test\. Could be used to create files required only for specific tests\.
+.
 .IP "" 0
 .
 .SH "SEE ALSO"
