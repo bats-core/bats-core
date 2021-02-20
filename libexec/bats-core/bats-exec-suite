@@ -120,6 +120,12 @@ if [[ "${test_count}" == 0 ]]; then
   exit
 fi
 
+if ! BATS_SUITE_TMPDIR=$(mktemp -d "${BATS_RUN_TMPDIR}/suite-tmpdir-XXXXXX");then
+  printf '%s\n' "Failed to create BATS_SUITE_TMPDIR with mktemp" >&2
+  exit 1
+fi
+export BATS_SUITE_TMPDIR
+
 # Deduplicate filenames (without reordering) to avoid running duplicate tests n by n times.
 # (see https://github.com/bats-core/bats-core/issues/329)
 # If a file was specified multiple times, we already got it repeatedly in our TESTS_LIST_FILE.
