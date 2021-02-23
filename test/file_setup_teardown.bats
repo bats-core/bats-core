@@ -5,22 +5,13 @@ setup_file() {
   export SETUP_FILE_EXPORT_TEST=true
 }
 
-setup() {
-  # give each test their own tmpdir to allow for parallelization without interference
-  make_bats_test_suite_tmpdir "$BATS_TEST_NAME"
-}
-
-teardown() {
-  test_helper::cleanup_tmpdir "$BATS_TEST_NAME"
-}
-
 @test "setup_file is run once per file" {
-    export LOG="$BATS_TEST_SUITE_TMPDIR/setup_file_once.log"
+    export LOG="$BATS_TEST_TMPDIR/setup_file_once.log"
     bats "$FIXTURE_ROOT/setup_file.bats"
 }
 
 @test "teardown_file is run once per file" {
-  export LOG="$BATS_TEST_SUITE_TMPDIR/teardown_file_once.log"
+  export LOG="$BATS_TEST_TMPDIR/teardown_file_once.log"
   run bats "$FIXTURE_ROOT/teardown_file.bats"
   [[ $status -eq 0 ]]
   # output the log for faster debugging
@@ -33,7 +24,7 @@ teardown() {
 }
 
 @test "setup_file is called correctly in multi file suite" {
-    export LOG="$BATS_TEST_SUITE_TMPDIR/setup_file_multi_file_suite.log"
+    export LOG="$BATS_TEST_TMPDIR/setup_file_multi_file_suite.log"
     run bats "$FIXTURE_ROOT/setup_file.bats" "$FIXTURE_ROOT/no_setup_file.bats" "$FIXTURE_ROOT/setup_file2.bats"
     [[ $status -eq 0 ]]
     run wc -l < "$LOG"
@@ -44,7 +35,7 @@ teardown() {
 }
 
 @test "teardown_file is called correctly in multi file suite" {
-  export LOG="$BATS_TEST_SUITE_TMPDIR/teardown_file_multi_file_suite.log"
+  export LOG="$BATS_TEST_TMPDIR/teardown_file_multi_file_suite.log"
   run bats "$FIXTURE_ROOT/teardown_file.bats" "$FIXTURE_ROOT/no_teardown_file.bats" "$FIXTURE_ROOT/teardown_file2.bats"
   [[ $status -eq 0 ]]
   run wc -l < "$LOG"
@@ -86,7 +77,7 @@ teardown() {
 }
 
 @test "teardown_file runs even if any test in the file failed" {
-  export LOG="$BATS_TEST_SUITE_TMPDIR/teardown_file_failed.log"
+  export LOG="$BATS_TEST_TMPDIR/teardown_file_failed.log"
   run bats "$FIXTURE_ROOT/teardown_file_after_failing_test.bats"
   [[ $status -ne 0 ]]
   grep teardown_file_after_failing_test.bats "$LOG"
@@ -98,7 +89,7 @@ not ok 1 failing test
 }
 
 @test "teardown_file should run even after user abort via CTRL-C" {
-  export LOG="$BATS_TEST_SUITE_TMPDIR/teardown_file_abort.log"
+  export LOG="$BATS_TEST_TMPDIR/teardown_file_abort.log"
   STARTTIME=$SECONDS
   # guarantee that background processes get their own process group -> pid=pgid
   set -m
@@ -121,14 +112,14 @@ not ok 1 failing test
 }
 
 @test "setup_file runs even if all tests in the file are skipped" {
-  export LOG="$BATS_TEST_SUITE_TMPDIR/setup_file_skipped.log" 
+  export LOG="$BATS_TEST_TMPDIR/setup_file_skipped.log" 
   run bats "$FIXTURE_ROOT/setup_file_even_if_all_tests_are_skipped.bats"
   [[ -f "$LOG" ]]
   grep setup_file_even_if_all_tests_are_skipped.bats "$LOG"
 }
 
 @test "teardown_file runs even if all tests in the file are skipped" {
-  export LOG="$BATS_TEST_SUITE_TMPDIR/teardown_file_skipped.log" 
+  export LOG="$BATS_TEST_TMPDIR/teardown_file_skipped.log" 
   run bats "$FIXTURE_ROOT/teardown_file_even_if_all_tests_are_skipped.bats"
   [[ $status -eq 0 ]]
   [[ -f "$LOG" ]]

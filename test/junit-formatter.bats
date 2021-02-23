@@ -35,13 +35,12 @@ TESTSUITES_REGEX="<testsuites time=\"$FLOAT_REGEX\">"
 }
 
 @test "junit formatter: escapes xml special chars" {
-  make_bats_test_suite_tmpdir
   case $OSTYPE in
     linux*|darwin)
       # their CI can handle special chars on filename
       TEST_FILE_NAME="xml-escape-\"<>'&.bats"
       ESCAPED_TEST_FILE_NAME="xml-escape-&quot;&lt;&gt;&#39;&amp;.bats"
-      TEST_FILE_PATH="$BATS_TEST_SUITE_TMPDIR/$TEST_FILE_NAME"
+      TEST_FILE_PATH="$BATS_TEST_TMPDIR/$TEST_FILE_NAME"
       cp "$FIXTURE_ROOT/xml-escape.bats" "$TEST_FILE_PATH"
     ;;
     *)
@@ -103,8 +102,7 @@ TESTSUITES_REGEX="<testsuites time=\"$FLOAT_REGEX\">"
 }
 
 @test "junit formatter as report formatter creates report.xml" {
-  make_bats_test_suite_tmpdir
-  cd "$BATS_TEST_SUITE_TMPDIR" # don't litter sources with output files
+  cd "$BATS_TEST_TMPDIR" # don't litter sources with output files
   run bats --report-formatter junit "$FIXTURE_ROOT/suite/"
   echo "$output"
   [[ -e "report.xml" ]]

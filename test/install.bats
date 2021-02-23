@@ -7,8 +7,7 @@ PATH_TO_INSTALL_SHELL=
 PATH_TO_UNINSTALL_SHELL=
 
 setup() {
-  make_bats_test_suite_tmpdir
-  INSTALL_DIR="$BATS_TEST_SUITE_TMPDIR/bats-core"
+  INSTALL_DIR="$BATS_TEST_TMPDIR/bats-core"
   PATH_TO_INSTALL_SHELL="${BATS_TEST_DIRNAME%/*}/install.sh"
   PATH_TO_UNINSTALL_SHELL="${BATS_TEST_DIRNAME%/*}/uninstall.sh"
 }
@@ -46,7 +45,7 @@ setup() {
 }
 
 @test "uninstall.sh works even if nothing is installed" {
-  mkdir "$INSTALL_DIR"/tmp
+  mkdir -p "$INSTALL_DIR"/tmp
   run "$PATH_TO_UNINSTALL_SHELL" "$INSTALL_DIR"
   [ "$status" -eq 0 ]
   rmdir "$INSTALL_DIR"/tmp

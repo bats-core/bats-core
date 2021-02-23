@@ -12,11 +12,6 @@ fixtures() {
   RELATIVE_FIXTURE_ROOT="${FIXTURE_ROOT#$BATS_CWD/}"
 }
 
-make_bats_test_suite_tmpdir() {
-  export BATS_TEST_SUITE_TMPDIR="$BATS_RUN_TMPDIR/bats-test-tmp/$1"
-  mkdir -p "$BATS_TEST_SUITE_TMPDIR"
-}
-
 filter_control_sequences() {
   "$@" | sed $'s,\x1b\\[[0-9;]*[a-zA-Z],,g'
 }
@@ -30,16 +25,4 @@ fi
 
 emit_debug_output() {
   printf '%s\n' 'output:' "$output" >&2
-}
-
-test_helper::cleanup_tmpdir() {
-  if [[ -n "$1" && -z "$BATS_TEST_SUITE_TMPDIR" ]]; then
-    BATS_TEST_SUITE_TMPDIR="$BATS_RUN_TMPDIR/bats-test-tmp/$1"
-  fi
-  if [[ -n "$BATS_TEST_SUITE_TMPDIR" ]]; then
-    rm -rf "$BATS_TEST_SUITE_TMPDIR"
-  fi
-  if [[ -n "$BATS_EMULATED_RUN_TMPDIR" ]]; then
-    rm -rf "$BATS_EMULATED_RUN_TMPDIR"
-  fi
 }

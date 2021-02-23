@@ -3,11 +3,6 @@
 load test_helper
 fixtures bats
 
-teardown() {
-  # cleanup the test local tmpdir to avoid cleaning up all tests' at once
-  test_helper::cleanup_tmpdir "$BATS_TEST_NAME"
-}
-
 @test "no arguments prints message and usage instructions" {
   run bats
   [ $status -eq 1 ]
@@ -143,7 +138,7 @@ teardown() {
 }
 
 @test "setup is run once before each test" {
-  make_bats_test_suite_tmpdir "$BATS_TEST_NAME"
+  export BATS_TEST_SUITE_TMPDIR="${BATS_TEST_TMPDIR}"
   run bats "$FIXTURE_ROOT/setup.bats"
   [ $status -eq 0 ]
   run cat "$BATS_TEST_SUITE_TMPDIR/setup.log"
@@ -151,7 +146,7 @@ teardown() {
 }
 
 @test "teardown is run once after each test, even if it fails" {
-  make_bats_test_suite_tmpdir "$BATS_TEST_NAME"
+  export BATS_TEST_SUITE_TMPDIR="${BATS_TEST_TMPDIR}"
   run bats "$FIXTURE_ROOT/teardown.bats"
   [ $status -eq 1 ]
   run cat "$BATS_TEST_SUITE_TMPDIR/teardown.log"
@@ -190,8 +185,7 @@ teardown() {
 }
 
 @test "failing test file outside of BATS_CWD" {
-  make_bats_test_suite_tmpdir "$BATS_TEST_NAME"
-  cd "$BATS_TEST_SUITE_TMPDIR"
+  cd "${BATS_TEST_TMPDIR}"
   run bats "$FIXTURE_ROOT/failing.bats"
   [ $status -eq 1 ]
   [ "${lines[2]}" = "# (in test file $FIXTURE_ROOT/failing.bats, line 4)" ]
@@ -236,7 +230,7 @@ teardown() {
 }
 
 @test "load supports plain symbols" {
-  local -r helper="${BATS_TMPDIR}/load_helper_plain"
+  local -r helper="${BATS_TEST_TMPDIR}/load_helper_plain"
   {
     echo "plain_variable='value of plain variable'"
     echo "plain_array=(test me hard)"
@@ -251,7 +245,7 @@ teardown() {
 }
 
 @test "load doesn't support _declare_d symbols" {
-  local -r helper="${BATS_TMPDIR}/load_helper_declared"
+  local -r helper="${BATS_TEST_TMPDIR}/load_helper_declared"
   {
     echo "declare declared_variable='value of declared variable'"
     echo "declare -r a_constant='constant value'"
@@ -651,13 +645,12 @@ END_OF_ERR_MSG
 @test "filenames with tab can be used" {
   [[ "$OSTYPE" == "linux"* ]] || skip "FS cannot deal with tabs in filenames"
 
-  cp "$FIXTURE_ROOT/tab in filename.bats" "$FIXTURE_ROOT/tab"$'\t'"in filename.bats"
-  bats "$FIXTURE_ROOT/tab"$'\t'"in filename.bats"
+  cp "${FIXTURE_ROOT}/tab in filename.bats" "${BATS_TEST_TMPDIR}/tab"$'\t'"in filename.bats"
+  bats "${BATS_TEST_TMPDIR}/tab"$'\t'"in filename.bats"
 }
 
 @test "each file is evaluated n+1 times" {
-  make_bats_test_suite_tmpdir
-  export TEMPFILE="$BATS_TEST_SUITE_TMPDIR/$BATS_TEST_NAME.log"
+  export TEMPFILE="$BATS_TEST_TMPDIR/$BATS_TEST_NAME.log"
   run bats "$FIXTURE_ROOT/evaluation_count/"
 
   cat "$TEMPFILE"
@@ -720,14 +713,14 @@ END_OF_ERR_MSG
 }
 
 @test "run tmpdir is cleaned up by default" {
-  TEST_TMPDIR="${BATS_RUN_TMPDIR}/$BATS_TEST_NAME"
+  TEST_TMPDIR="${BATS_TEST_TMPDIR}/$BATS_TEST_NAME"
   bats --tempdir "$TEST_TMPDIR" "$FIXTURE_ROOT/passing.bats"
 
   [ ! -d "$TEST_TMPDIR" ]
 }
 
 @test "run tmpdir is not cleanup up with --no-cleanup-tempdir" {
-  TEST_TMPDIR="${BATS_RUN_TMPDIR}/$BATS_TEST_NAME"
+  TEST_TMPDIR="${BATS_TEST_TMPDIR}/$BATS_TEST_NAME"
   bats --tempdir "$TEST_TMPDIR" --no-tempdir-cleanup "$FIXTURE_ROOT/passing.bats"
 
   [ -d "$TEST_TMPDIR" ]
