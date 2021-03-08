@@ -15,6 +15,7 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 * custom test-file extension via `BATS_FILE_EXTENSION` when searching for test
   files in a directory (#376)
 * TAP13 formatter, including millisecond timing (#337)
+* automatic release to NPM via Github Actions (#406)
 
 #### Documentation
 
