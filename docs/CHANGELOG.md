@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 
 ## [Unreleased]
 
+## [1.3.0] - 2021-03-08
+
 ### Added
 
 * custom test-file extension via `BATS_FILE_EXTENSION` when searching for test
