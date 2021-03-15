@@ -14,6 +14,8 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 
 * fix `bats_tap_stream_unknown: command not found` with pretty formatter, when
   writing non compliant extended output (#412)
+* avoid collisions on `$BATS_RUN_TMPDIR` with `--no-tempdir-cleanup` and docker
+  by using `mktemp` additionally to PID (#409)
 
 ## [1.3.0] - 2021-03-08
 

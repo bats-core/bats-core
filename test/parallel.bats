@@ -136,12 +136,12 @@ check_parallel_tests() { # <expected maximum parallelity>
   # ensure that we really run parallelization across files!
   # (setup should have skipped already, if there was no GNU parallel)
   unset BATS_NO_PARALLELIZE_ACROSS_FILES
-  export FILE_MARKER=$(mktemp)
+  export FILE_MARKER=$(mktemp "${BATS_RUN_TMPDIR}/file_marker.XXXXXX")
   ! bats --jobs 2 "$FIXTURE_ROOT/must_not_parallelize_across_files/"
 }
 
 @test "--no-parallelize-across-files prevents parallelization across files" {
-  export FILE_MARKER=$(mktemp)
+  export FILE_MARKER=$(mktemp "${BATS_RUN_TMPDIR}/file_marker.XXXXXX")
   bats --jobs 2 --no-parallelize-across-files "$FIXTURE_ROOT/must_not_parallelize_across_files/"
 }
 
@@ -161,7 +161,7 @@ check_parallel_tests() { # <expected maximum parallelity>
   # ensure that we really run parallelization across files!
   # (setup should have skipped already, if there was no GNU parallel)
   unset BATS_NO_PARALLELIZE_ACROSS_FILES
-  export FILE_MARKER=$(mktemp)
+  export FILE_MARKER=$(mktemp "${BATS_RUN_TMPDIR}/file_marker.XXXXXX")
   ! bats --jobs 2 --no-parallelize-within-files "$FIXTURE_ROOT/must_not_parallelize_across_files/"
 }
 
