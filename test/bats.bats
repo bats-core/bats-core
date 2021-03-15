@@ -735,3 +735,29 @@ END_OF_ERR_MSG
   # should also find preprocessed files!
   [ $(find "$TEST_TMPDIR" -name '*.src' | wc -l) -eq 1 ]
 }
+
+@test "All formatters (except cat) implement the callback interface" {
+  cd "$BATS_ROOT/libexec/bats-core/"
+  for formatter in bats-format-*; do
+    # the cat formatter is not expected to implement this interface
+    if [[ "$formatter" == *"bats-format-cat" ]]; then
+      continue
+    fi
+    tested_at_least_one_formatter=1
+    echo "Formatter: ${formatter}"
+    # the replay should be possible without errors
+    "$formatter" >/dev/null <<EOF
+1..1
+suite "$BATS_FIXTURE_ROOT/failing.bats"
+begin 1 test_a_failing_test
+not ok 1 a failing test
+# (in test file test/fixtures/bats/failing.bats, line 4)
+#   \`eval "( exit ${STATUS:-1} )"' failed
+begin 2 test_a_successful_test
+ok 2 a succesful test
+unknown line
+EOF
+  done
+
+  [[ -n "$tested_at_least_one_formatter" ]]
+}

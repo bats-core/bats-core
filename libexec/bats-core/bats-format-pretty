@@ -195,7 +195,7 @@ bats_tap_stream_begin() {
   begin
   flush
 }
-  
+
 bats_tap_stream_ok() {
   index="$1"
   ((++passed))
@@ -228,6 +228,10 @@ bats_tap_stream_comment() {
 
 bats_tap_stream_suite() {
   : #test_file="$1"
+}
+
+bats_tap_stream_unknown() { # <full line>
+    printf "%s\n" "$1"
 }
 
 bats_parse_internal_extended_tap
