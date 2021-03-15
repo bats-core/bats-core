@@ -1,5 +1,5 @@
 setup_file() {
-    export FILE_MARKER=$(mktemp)
+    export FILE_MARKER=$(mktemp "${BATS_RUN_TMPDIR}/file_marker.XXXXXX")
     if [[ -n "${DISABLE_IN_SETUP_FILE_FUNCTION}" ]]; then
         export BATS_NO_PARALLELIZE_WITHIN_FILE=true
         echo "setup_file() sets BATS_NO_PARALLELIZE_WITHIN_FILE=true" >&2
