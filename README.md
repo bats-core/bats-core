@@ -3,8 +3,7 @@
 [![Latest release](https://img.shields.io/github/release/bats-core/bats-core.svg)](https://github.com/bats-core/bats-core/releases/latest)
 [![npm package](https://img.shields.io/npm/v/bats.svg)](https://www.npmjs.com/package/bats)
 [![License](https://img.shields.io/github/license/bats-core/bats-core.svg)](https://github.com/bats-core/bats-core/blob/master/LICENSE.md)
-[![Continuous integration status for Linux and macOS](https://img.shields.io/travis/bats-core/bats-core/master.svg?label=travis%20build)](https://travis-ci.org/bats-core/bats-core)
-[![Continuous integration status for Windows](https://img.shields.io/appveyor/ci/bats-core/bats-core/master.svg?label=appveyor%20build)](https://ci.appveyor.com/project/bats-core/bats-core)
+[[![Continuous integration status](https://github.com/bats-core/bats-core/workflows/Tests/badge.svg)](https://github.com/bats-core/bats-core/actions?query=workflow%3ATests)](https://github.com/bats-core/bats-core/actions?query=workflow%3ATests)
 [![Read the docs status](https://readthedocs.org/projects/bats-core/badge/?version=latest&style=plastic)](https://bats-core.readthedocs.io)
 
 [![Join the chat in bats-core/bats-core on gitter](https://badges.gitter.im/bats-core/bats-core.svg)][gitter]
@@ -63,7 +62,7 @@ each line is an assertion of truth.
 bin/bats --tap test
 ```
 
-See also the [CI](.travis.yml) settings for the current test environment and
+See also the [CI](./.github/workflows/tests.yml) settings for the current test environment and
 scripts.
 
 ## Support

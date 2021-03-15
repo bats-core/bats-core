@@ -193,8 +193,7 @@ your own fork of the repository and issuing pull requests to the original.
 
 ## Testing
 
-- Continuous integration status for Linux and macOS: [![Build Status on Travis](https://travis-ci.org/bats-core/bats-core.svg?branch=ci-configs)](https://travis-ci.org/bats-core/bats-core)
-- Continuous integration status for Windows: [![Build status on AppVeyor](https://ci.appveyor.com/api/projects/status/tokwm9t9jp5fe7af?svg=true)](https://ci.appveyor.com/project/bats-core/bats-core)
+- Continuous integration status: [![Tests](https://github.com/bats-core/bats-core/workflows/Tests/badge.svg)](https://github.com/bats-core/bats-core/actions?query=workflow%3ATests)
 
 ## Coding conventions
 
