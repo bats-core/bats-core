@@ -10,6 +10,11 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 
 ## [Unreleased]
 
+### Fixed
+
+* fix `bats_tap_stream_unknown: command not found` with pretty formatter, when
+  writing non compliant extended output (#412)
+
 ## [1.3.0] - 2021-03-08
 
 ### Added
