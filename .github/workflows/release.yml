@@ -52,18 +52,3 @@ jobs:
       - run: npm publish --ignore-scripts
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  dockerhub:
-    runs-on: ubuntu-latest
-    needs: version-check
-    steps:
-      - uses: actions/checkout@v2
-      - id: version
-        run: echo ::set-output name=version::${GITHUB_REF/refs\/tags\//}
-      - uses: docker/build-push-action@v1
-        with:
-          file: ./Dockerfile
-          platforms: linux/amd64
-          username: bats
-          password: ${{ secrets.DOCKER_PASSWORD }}
-          tags: bats/bats:${{ steps.version.outputs.version }}

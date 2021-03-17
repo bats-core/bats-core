@@ -1,0 +1,28 @@
+name: Release to docker hub
+
+on:
+  release: { types: [published] }
+  workflow_dispatch:
+    inputs:
+        version:
+          description: 'Version to simulate for deploy'
+          required: true
+
+jobs:
+    dockerhub:
+        runs-on: ubuntu-latest
+        needs: version-check
+        steps:
+        - uses: actions/checkout@v2
+        - id: version
+          run: |
+            EXPECTED_VERSION=${{ github.event.inputs.version }}
+            TAG_VERSION=${GITHUB_REF#refs/tags/v} # refs/tags/v1.2.3 -> 1.2.3
+            echo ::set-output name=version::${EXPECTED_VERSION:-TAG_VERSION}
+        - uses: docker/build-push-action@v1
+          with:
+            file: ./Dockerfile
+            platforms: linux/amd64
+            username: bats
+            password: ${{ secrets.DOCKER_PASSWORD }}
+            tags: bats/bats:${{ steps.version.outputs.version }}
