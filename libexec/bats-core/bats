@@ -205,14 +205,15 @@ if [[ -n "${BATS_RUN_TMPDIR:-}" ]];then
     printf "Error: BATS_RUN_TMPDIR (%s) already exists\n" "$BATS_RUN_TMPDIR" >&2
     printf "Reusing old run directories can lead to unexpected results ... aborting!\n" >&2
     exit 1
-  fi
-  if ! mkdir -p "$BATS_RUN_TMPDIR" ;then
+  elif ! mkdir -p "$BATS_RUN_TMPDIR" ;then
     printf "Error: Failed to create BATS_RUN_TMPDIR (%s)\n" "$BATS_RUN_TMPDIR" >&2
     exit 1
   fi
-else
-  BATS_RUN_TMPDIR=$(mktemp -d "${BATS_TMPDIR}/bats-run-$BATS_ROOT_PID-XXXXXX")
+elif ! BATS_RUN_TMPDIR=$(mktemp -d "${BATS_TMPDIR}/bats-run-$BATS_ROOT_PID-XXXXXX");then
+  printf "Error: Failed to create BATS_RUN_TMPDIR (%s) with mktemp\n" "${BATS_TMPDIR}/bats-run-$BATS_ROOT_PID-XXXXXX" >&2
+  exit 1
 fi
+
 if [[ -n "$BATS_TEMPDIR_CLEANUP" ]]; then
   trap 'rm -rf "$BATS_RUN_TMPDIR"' ERR EXIT
 fi
