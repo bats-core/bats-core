@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 
 ## [Unreleased]
 
+### Changed
+
+* added checks and improved documentation for `$BATS_TMPDIR` (#410)
+
 ### Fixed
 
 * fix `bats_tap_stream_unknown: command not found` with pretty formatter, when

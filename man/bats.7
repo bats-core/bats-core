@@ -1,7 +1,7 @@
 .\" generated with Ronn/v0.7.3
 .\" http://github.com/rtomayko/ronn/tree/0.7.3
 .
-.TH "BATS" "7" "February 2021" "bats-core" "Bash Automated Testing System"
+.TH "BATS" "7" "March 2021" "bats-core" "Bash Automated Testing System"
 .
 .SH "NAME"
 \fBbats\fR \- Bats test file format
@@ -173,7 +173,7 @@ There are several global variables you can use to introspect on Bats tests:
 \fB$BATS_SUITE_TEST_NUMBER\fR is the (1\-based) index of the current test case in the test suite (over all files)\.
 .
 .IP "\(bu" 4
-\fB$BATS_TMPDIR\fR is the location to a directory that may be used to store temporary files\.
+\fB$BATS_TMPDIR\fR is the base temporary directory used by bats to create its temporary files / directories\. (default: \fB$TMPDIR\fR\. If \fB$TMPDIR\fR is not set, \fB/tmp\fR is used\.)
 .
 .IP "\(bu" 4
 \fB$BATS_RUN_TMPDIR\fR is the location to the temporary directory used by bats to store all its internal temporary files during the tests\. (default: \fB$BATS_TMPDIR/bats\-run\-$BATS_ROOT_PID\-XXXXXX\fR)

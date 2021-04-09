@@ -1,11 +1,5 @@
 #!/usr/bin/env bash
 
-if [[ -z "${TMPDIR:-}" ]]; then
-	export BATS_TMPDIR='/tmp'
-else
-	export BATS_TMPDIR="${TMPDIR%/}"
-fi
-
 BATS_TMPNAME="$BATS_RUN_TMPDIR/bats.$$"
 BATS_PARENT_TMPNAME="$BATS_RUN_TMPDIR/bats.$PPID"
 # shellcheck disable=SC2034

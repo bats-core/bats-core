@@ -771,10 +771,27 @@ EOF
   [ "${lines[1]}" == "Reusing old run directories can lead to unexpected results ... aborting!" ]
 }
 
-@test "run should exit if tmpdir can't be created" {
+@test "run should exit if TMPDIR can't be created" {
   local dir
   dir=$(mktemp "${BATS_RUN_TMPDIR}/BATS_RUN_TMPDIR_TEST.XXXXXX")
   run bats --tempdir "${dir}" "$FIXTURE_ROOT/passing.bats"
   [ "$status" -eq 1 ]
   [ "${lines[1]}" == "Error: Failed to create BATS_RUN_TMPDIR (${dir})" ]
+}
+
+@test "Fail if BATS_TMPDIR does not exist or is not writable" {
+  export TMPDIR=$(mktemp -u "${BATS_RUN_TMPDIR}/donotexist.XXXXXX")
+  run bats "$FIXTURE_ROOT/BATS_TMPDIR.bats"
+  echo "$output"
+  [ "$status" -eq 1 ]
+  [ "${lines[0]}" = "Error: BATS_TMPDIR (${TMPDIR}) does not exist or is not a directory" ]
+}
+
+@test "Setting BATS_TMPDIR is ignored" {
+  unset TMPDIR # ensure we don't have a predefined value
+  expected="/tmp" run bats "$FIXTURE_ROOT/BATS_TMPDIR.bats"
+  echo "$output"
+  [ "$status" -eq 0 ]
+  BATS_TMPDIR="${BATS_RUN_TMPDIR}" expected="/tmp" run bats "$FIXTURE_ROOT/BATS_TMPDIR.bats"
+  [ "$status" -eq 0 ]
 }
