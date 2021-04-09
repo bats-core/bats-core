@@ -148,8 +148,9 @@ case.
 in the test file.
 * `$BATS_SUITE_TEST_NUMBER` is the (1-based) index of the current test 
   case in the test suite (over all files).
-* `$BATS_TMPDIR` is the location to a directory that may be used to
-store temporary files.
+* `$BATS_TMPDIR` is the base temporary directory used by bats to create its
+  temporary files / directories.
+  (default: `$TMPDIR`. If `$TMPDIR` is not set, `/tmp` is used.)
 * `$BATS_RUN_TMPDIR` is the location to the temporary directory used by
   bats to store all its internal temporary files during the tests.
   (default: `$BATS_TMPDIR/bats-run-$BATS_ROOT_PID-XXXXXX`)
