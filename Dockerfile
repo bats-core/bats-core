@@ -1,6 +1,10 @@
 ARG bashver=latest
 
 FROM bash:${bashver}
+ARG TINI_VERSION=v0.19.0
+
+RUN wget https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini-static-amd64 -O /tini && \
+    chmod +x /tini
 
 # Install parallel and accept the citation notice (we aren't using this in a
 # context where it make sense to cite GNU Parallel).
@@ -12,4 +16,4 @@ COPY . /opt/bats/
 
 WORKDIR /code/
 
-ENTRYPOINT ["bash", "bats"]
+ENTRYPOINT ["/tini", "--", "bash", "bats"]
