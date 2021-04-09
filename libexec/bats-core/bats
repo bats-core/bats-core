@@ -80,7 +80,7 @@ export BATS_TMPDIR="${TMPDIR:-/tmp}"
 export BATS_RUN_TMPDIR=
 
 if [[ ! -d "${BATS_TMPDIR}" ]];then
-  printf "Error: BATS_TMPDIR (%s) do not exist or is not a directory" "${BATS_TMPDIR}" >&2
+  printf "Error: BATS_TMPDIR (%s) does not exist or is not a directory" "${BATS_TMPDIR}" >&2
   exit 1
 elif [[ ! -w "${BATS_TMPDIR}" ]];then
   printf "Error: BATS_TMPDIR (%s) is not writable" "${BATS_TMPDIR}" >&2
