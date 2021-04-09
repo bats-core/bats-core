@@ -34,6 +34,7 @@ trap update_screen_width WINCH
 update_screen_width
 
 begin() {
+  line_backoff_count=0
   go_to_column 0
   update_count_column_width
   buffer_with_truncation $((count_column_left - 1)) '   %s' "$name"
@@ -48,6 +49,7 @@ begin() {
 }
 
 pass() {
+  move_up $line_backoff_count
   go_to_column 0
   buffer ' ✓ %s' "$name"
   if [[ -n "$BATS_ENABLE_TIMING" ]]; then
@@ -55,6 +57,7 @@ pass() {
     buffer ' [%s]' "$1"
   fi
   advance
+  move_down $line_backoff_count
 }
 
 skip() {
@@ -62,12 +65,15 @@ skip() {
   if [[ -n "$reason" ]]; then
     reason=": $reason"
   fi
+  move_up $line_backoff_count
   go_to_column 0
   buffer ' - %s (skipped%s)' "$name" "$reason"
   advance
+  move_down $line_backoff_count
 }
 
 fail() {
+  move_up $line_backoff_count
   go_to_column 0
   set_color 1 bold
   buffer ' ✗ %s' "$name"
@@ -76,6 +82,7 @@ fail() {
     buffer ' [%s]' "$1"
   fi
   advance
+  move_down $line_backoff_count
 }
 
 log() {
@@ -123,6 +130,18 @@ buffer_with_truncation() {
     buffer '%s...' "${string:0:$((width - 4))}"
   else
     buffer '%s' "$string"
+  fi
+}
+
+move_up() {
+  if [[ $1 -gt 0 ]]; then # avoid moving if we got 0
+    buffer '\x1B[%dA' "$1"
+  fi
+}
+
+move_down() {
+  if [[ $1 -gt 0 ]]; then # avoid moving if we got 0
+    buffer '\x1B[%dB' "$1"
   fi
 }
 
@@ -223,6 +242,15 @@ bats_tap_stream_not_ok() {
 }
 
 bats_tap_stream_comment() {
+  # count the lines we printed after the begin text,
+  if (( line_backoff_count == 0 )); then
+    # if this is the first line after begin, go down one line
+    buffer "\n"
+    (( ++line_backoff_count )) # prefix-increment to avoid "error" due to returning 0
+  fi
+
+  (( ++line_backoff_count ))
+  (( line_backoff_count += ${#1} / screen_width)) # account for linebreaks due to length
   log "$1"
 }
 
@@ -230,8 +258,19 @@ bats_tap_stream_suite() {
   : #test_file="$1"
 }
 
+line_backoff_count=0
 bats_tap_stream_unknown() { # <full line>
-    printf "%s\n" "$1"
+    # count the lines we printed after the begin text,
+    if (( line_backoff_count == 0 )); then
+      # if this is the first line after begin, go down one line
+      buffer "\n"
+      (( ++line_backoff_count )) # prefix-increment to avoid "error" due to returning 0
+    fi
+
+    (( ++line_backoff_count ))
+    (( line_backoff_count += ${#1} / screen_width)) # account for linebreaks due to length
+    buffer "%s\n" "$1"
+    flush
 }
 
 bats_parse_internal_extended_tap
