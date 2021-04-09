@@ -76,12 +76,16 @@ export BATS_TEST_PATTERN_COMMENT="[[:blank:]]*([^[:blank:]()]+)[[:blank:]]*\(?\)
 export BATS_TEST_FILTER=
 export PATH="$BATS_LIBEXEC:$PATH"
 export BATS_ROOT_PID=$$
-if [[ -z "${TMPDIR-}" ]]; then
-  export BATS_TMPDIR="/tmp"
-else
-  export BATS_TMPDIR="${TMPDIR%/}"
-fi
+export BATS_TMPDIR="${TMPDIR:-/tmp}"
 export BATS_RUN_TMPDIR=
+
+if [[ ! -d "${BATS_TMPDIR}" ]];then
+  printf "Error: BATS_TMPDIR (%s) do not exist or is not a directory" "${BATS_TMPDIR}" >&2
+  exit 1
+elif [[ ! -w "${BATS_TMPDIR}" ]];then
+  printf "Error: BATS_TMPDIR (%s) is not writable" "${BATS_TMPDIR}" >&2
+  exit 1
+fi
 
 arguments=()
 

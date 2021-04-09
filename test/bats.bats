@@ -778,3 +778,19 @@ EOF
   [ "$status" -eq 1 ]
   [ "${lines[1]}" == "Error: Failed to create BATS_RUN_TMPDIR (${dir})" ]
 }
+
+@test "Fail if BATS_TMPDIR do not exist or is not writable" {
+  local BATS_TMPDIR
+  BATS_TMPDIR=$(mktemp -u "${BATS_RUN_TMPDIR}/donotexist.XXXXXX")
+  run bats "$FIXTURE_ROOT/BATS_TMPDIR.bats"
+  [ "$status" -eq 1 ]
+  [ "${lines[0]}" = "Error: BATS_TMPDIR (${BATS_TMPDIR}) do not exist or is not a directory" ]
+}
+
+@test "Setting TMPDIR is ignored" {
+  expected="/tmp" run bats "$FIXTURE_ROOT/BATS_TMPDIR.bats"
+  [ "$status" -eq 0 ]
+  BATS_TMPDIR="${BATS_RUN_TMPDIR}"
+  expected="/tmp" run bats "$FIXTURE_ROOT/BATS_TMPDIR.bats"
+  [ "$status" -eq 0 ]
+}
