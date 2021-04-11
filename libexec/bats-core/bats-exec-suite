@@ -134,15 +134,10 @@ IFS=$'\n' read -d '' -r -a  BATS_UNIQUE_TEST_FILENAMES < <(printf "%s\n" "$@"| n
 
 if [[ "$num_jobs" -gt 1 ]] && [[ -z "$bats_no_parallelize_across_files" ]]; then
   # run files in parallel to get the maximum pool of parallel tasks
-  if [[ ${#flags[@]} -eq 0 ]]; then
-    # if there are no flags, our quoting below would keep an empty arg, which is wrong
-    parallel "${bats_parallel_args[@]}" --keep-order --jobs "$num_jobs" bats-exec-file "{}" "$TESTS_LIST_FILE"  ::: "${BATS_UNIQUE_TEST_FILENAMES[@]}" 2>&1 || status=1
-  else
-    # shellcheck disable=SC2086,SC2068
-    # we need to handle the quoting of ${flags[@]} ourselves,
-    # because parallel can only quote it as one
-    parallel --keep-order --jobs "$num_jobs" bats-exec-file "$(printf "%q " "${flags[@]}")" "{}" "$TESTS_LIST_FILE"  ::: "${BATS_UNIQUE_TEST_FILENAMES[@]}" 2>&1 || status=1
-  fi
+  # shellcheck disable=SC2086,SC2068
+  # we need to handle the quoting of ${flags[@]} ourselves,
+  # because parallel can only quote it as one
+  parallel --keep-order --jobs "$num_jobs" bats-exec-file "$(printf "%q " "${flags[@]}")" "{}" "$TESTS_LIST_FILE"  ::: "${BATS_UNIQUE_TEST_FILENAMES[@]}" 2>&1 || status=1
 else
   for filename in "${BATS_UNIQUE_TEST_FILENAMES[@]}"; do
     bats-exec-file "${flags[@]}" "$filename" "${TESTS_LIST_FILE}" || status=1
