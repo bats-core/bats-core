@@ -84,16 +84,32 @@ bats_run_setup_file() {
   # shellcheck disable=2034
   BATS_ERROR_STATUS= # used in tracing.bash
   trap 'bats_debug_trap "$BASH_SOURCE"' DEBUG
+
+  touch "$BATS_OUT"
+
+  trap 'exit 1' ERR
+
+  local status=0
+  # get the setup_file/teardown_file functions for this file (if it has them)
+  # shellcheck disable=SC1090
+  source "$BATS_TEST_SOURCE"  >  >(bats_replace_filename) 2>&1
+
   trap 'bats_error_trap' ERR
   trap 'bats_file_teardown_trap' EXIT
 
-  touch "$BATS_OUT"
-  # get the setup_file/teardown_file functions for this file (if it has them)
-  # shellcheck disable=SC1090
-  source "$BATS_TEST_SOURCE"
-  setup_file >>"$BATS_OUT" 2>&1
+  setup_file > >(bats_replace_filename >>"$BATS_OUT") 2>&1
 
   BATS_SETUP_FILE_COMPLETED=1
+}
+
+function bats_replace_filename() {
+  local line
+  while read -r line; do
+    printf "%s\n" "${line//$BATS_TEST_SOURCE/$filename}"
+  done
+  if [[ -n "$line" ]]; then
+    printf "%s\n" "${line//$BATS_TEST_SOURCE/$filename}"
+  fi
 }
 
 bats_run_teardown_file() {
