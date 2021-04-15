@@ -79,6 +79,7 @@ bats_run_setup_file() {
   # shellcheck disable=2034
   BATS_TEST_COMPLETED= # used in tracing.bash
 
+  BATS_SOURCE_FILE_COMPLETED=
   BATS_SETUP_FILE_COMPLETED=
   BATS_TEARDOWN_FILE_COMPLETED=
   # shellcheck disable=2034
@@ -87,15 +88,15 @@ bats_run_setup_file() {
 
   touch "$BATS_OUT"
 
-  trap 'exit 1' ERR
+  trap 'bats_error_trap' ERR
+  trap 'bats_file_teardown_trap' EXIT
 
   local status=0
   # get the setup_file/teardown_file functions for this file (if it has them)
   # shellcheck disable=SC1090
   source "$BATS_TEST_SOURCE"  >  >(bats_replace_filename) 2>&1
 
-  trap 'bats_error_trap' ERR
-  trap 'bats_file_teardown_trap' EXIT
+  BATS_SOURCE_FILE_COMPLETED=1
 
   setup_file > >(bats_replace_filename >>"$BATS_OUT") 2>&1
 
@@ -135,8 +136,12 @@ bats_file_exit_trap() {
   if [[ -z "$BATS_SETUP_FILE_COMPLETED" || -z "$BATS_TEARDOWN_FILE_COMPLETED" ]]; then
     if [[ -z "$BATS_SETUP_FILE_COMPLETED" ]]; then
       FAILURE_REASON='setup_file'
-    else
+    elif [[ -z "$BATS_TEARDOWN_FILE_COMPLETED" ]]; then
       FAILURE_REASON='teardown_file'
+    elif [[ -z "$BATS_SOURCE_FILE_COMPLETED" ]]; then
+      FAILURE_REASON='source'
+    else
+      FAILURE_REASON='unknown internal'
     fi
     printf "not ok %d %s\n" "$((test_number_in_suite + 1))" "$FAILURE_REASON failed" >&3
     bats_print_stack_trace "${BATS_STACK_TRACE[@]}" >&3
