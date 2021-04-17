@@ -241,9 +241,10 @@ bats_tap_stream_not_ok() {
   fi
 }
 
-bats_tap_stream_comment() {
+bats_tap_stream_comment() { # <comment> <scope>
+  local scope=$2
   # count the lines we printed after the begin text,
-  if (( line_backoff_count == 0 )); then
+  if [[ $line_backoff_count -eq 0 && $scope == begin ]]; then
     # if this is the first line after begin, go down one line
     buffer "\n"
     (( ++line_backoff_count )) # prefix-increment to avoid "error" due to returning 0
@@ -259,9 +260,10 @@ bats_tap_stream_suite() {
 }
 
 line_backoff_count=0
-bats_tap_stream_unknown() { # <full line>
+bats_tap_stream_unknown() { # <full line> <scope>
+    local scope=$2
     # count the lines we printed after the begin text,
-    if (( line_backoff_count == 0 )); then
+    if [[ $line_backoff_count -eq 0 && $scope == begin ]]; then
       # if this is the first line after begin, go down one line
       buffer "\n"
       (( ++line_backoff_count )) # prefix-increment to avoid "error" due to returning 0
