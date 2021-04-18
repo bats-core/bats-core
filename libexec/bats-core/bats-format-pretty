@@ -256,7 +256,8 @@ bats_tap_stream_comment() { # <comment> <scope>
 }
 
 bats_tap_stream_suite() {
-  : #test_file="$1"
+  #test_file="$1"
+  line_backoff_count=0
 }
 
 line_backoff_count=0
