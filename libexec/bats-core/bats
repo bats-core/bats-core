@@ -239,6 +239,10 @@ if [[ "$report_formatter" == "junit" ]]; then
   report_formatter_flags+=('--base-path' "${arguments[0]}")
 fi
 
+if [[ "$formatter" == "pretty" ]]; then
+  formatter_flags+=('--base-path' "${arguments[0]}")
+fi
+
 # if we don't need to filter extended syntax, use the faster formatter
 if [[ "$formatter" == tap && -z "$report_formatter" ]]; then
   formatter="cat"
