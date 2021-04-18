@@ -112,6 +112,15 @@ fi
 # only abort on the lowest levels
 trap 'BATS_INTERRUPTED=true' INT
 
+trap bats_exit_trap EXIT
+
+bats_exit_trap() {
+  if [[ ${BATS_INTERRUPTED-NOTSET} != NOTSET ]]; then
+    printf "\n# Received SIGINT, aborting ...\n\n"
+  fi
+  exit $status
+}
+
 status=0
 printf '1..%d\n' "${test_count}"
 
