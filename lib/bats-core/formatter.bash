@@ -119,7 +119,7 @@ normalize_base_path() { # <target variable> <base path>
         base_path="$(dirname "$base_path")"
     fi
     # get the absolute path
-    base_path="$(cd "$base_path"; pwd)"
+    base_path="$(cd "$base_path" && pwd)"
     # ensure the path ends with / to strip that later on
     if [[ "${base_path}" != *"/" ]]; then
         base_path="$base_path/"
