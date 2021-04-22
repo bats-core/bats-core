@@ -797,6 +797,7 @@ EOF
 }
 
 @test "Parallel mode works on MacOS with over subscription (issue #433)" {
+  type -p parallel &>/dev/null || skip "--jobs requires GNU parallel"
   run bats -j 2 "$FIXTURE_ROOT/issue-433"
 
   [ "$status" -eq 0 ]
