@@ -27,6 +27,8 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 * avoid collisions on `$BATS_RUN_TMPDIR` with `--no-tempdir-cleanup` and docker
   by using `mktemp` additionally to PID (#409)
 * pretty printer now puts text that is printed to FD 3 below the test name (#426)
+* `rm semaphores/slot-: No such file or directory` in parallel mode on MacOS
+  (#434, #433)
 
 ## [1.3.0] - 2021-03-08
 
