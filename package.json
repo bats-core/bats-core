@@ -7,6 +7,7 @@
   "author": "Sam Stephenson <sstephenson@gmail.com> (http://sstephenson.us/)",
   "repository": "github:bats-core/bats-core",
   "bugs": "https://github.com/bats-core/bats-core/issues",
+  "bin": "bin/bats",
   "files": [
     "bin",
     "libexec",
