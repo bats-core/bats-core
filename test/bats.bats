@@ -795,3 +795,11 @@ EOF
   BATS_TMPDIR="${BATS_RUN_TMPDIR}" expected="/tmp" run bats "$FIXTURE_ROOT/BATS_TMPDIR.bats"
   [ "$status" -eq 0 ]
 }
+
+@test "Parallel mode works on MacOS with over subscription (issue #433)" {
+  type -p parallel &>/dev/null || skip "--jobs requires GNU parallel"
+  run bats -j 2 "$FIXTURE_ROOT/issue-433"
+
+  [ "$status" -eq 0 ]
+  [[ "$output" != *"No such file or directory"* ]] || exit 1 # ensure failures are detected with old bash
+}

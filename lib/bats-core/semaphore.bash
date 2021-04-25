@@ -65,8 +65,10 @@ elif command -v shlock >/dev/null; then
         done
         # we got the lock now, execute the command
         "$@"
+        local status=$?
         # free the lock
         rm -f "$lockfile"
+        return $status
     }
 fi
 
