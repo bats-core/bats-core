@@ -272,8 +272,8 @@ bats_tap_stream_suite() {
 line_backoff_count=0
 bats_tap_stream_unknown() { # <full line> <scope>
     local scope=$2
-    # count the lines we printed after the begin text,
-    if [[ $line_backoff_count -eq 0 && $scope == begin ]]; then
+    # count the lines we printed after the begin text, (or after suite, in case of syntax errors)
+    if [[ $line_backoff_count -eq 0 && ( $scope == begin ||  $scope == suite )]]; then
       # if this is the first line after begin, go down one line
       buffer "\n"
       (( ++line_backoff_count )) # prefix-increment to avoid "error" due to returning 0
