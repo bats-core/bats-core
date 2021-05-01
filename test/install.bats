@@ -4,14 +4,16 @@ load test_helper
 
 INSTALL_DIR=
 PATH_TO_INSTALL_SHELL=
+PATH_TO_UNINSTALL_SHELL=
 
 setup() {
   make_bats_test_suite_tmpdir
   INSTALL_DIR="$BATS_TEST_SUITE_TMPDIR/bats-core"
   PATH_TO_INSTALL_SHELL="${BATS_TEST_DIRNAME%/*}/install.sh"
+  PATH_TO_UNINSTALL_SHELL="${BATS_TEST_DIRNAME%/*}/uninstall.sh"
 }
 
-@test "install.sh creates a valid installation" {
+@test "install.sh creates a valid installation, and uninstall.sh undos it" {
   run "$PATH_TO_INSTALL_SHELL" "$INSTALL_DIR"
   [ "$status" -eq 0 ]
   [ "$output" == "Installed Bats to $INSTALL_DIR/bin/bats" ]
@@ -28,6 +30,26 @@ setup() {
   run "$INSTALL_DIR/bin/bats" -v
   [ "$status" -eq 0 ]
   [ "${output%% *}" == 'Bats' ]
+
+  run "$PATH_TO_UNINSTALL_SHELL" "$INSTALL_DIR"
+  [ "$status" -eq 0 ]
+  [ ! -x "$INSTALL_DIR/bin/bats" ]
+  [ ! -x "$INSTALL_DIR/libexec/bats-core/bats" ]
+  [ ! -x "$INSTALL_DIR/libexec/bats-core/bats-exec-suite" ]
+  [ ! -x "$INSTALL_DIR/libexec/bats-core/bats-exec-test" ]
+  [ ! -x "$INSTALL_DIR/libexec/bats-core/bats-format-junit" ]
+  [ ! -x "$INSTALL_DIR/libexec/bats-core/bats-format-pretty" ]
+  [ ! -x "$INSTALL_DIR/libexec/bats-core/bats-preprocess" ]
+  [ ! -x "$INSTALL_DIR/libexec/bats-core" ]
+  [ ! -x "$INSTALL_DIR/share/man/man1/bats.1" ]
+  [ ! -x "$INSTALL_DIR/share/man/man7/bats.7" ]
+}
+
+@test "uninstall.sh works even if nothing is installed" {
+  mkdir "$INSTALL_DIR"/tmp
+  run "$PATH_TO_UNINSTALL_SHELL" "$INSTALL_DIR"
+  [ "$status" -eq 0 ]
+  rmdir "$INSTALL_DIR"/tmp
 }
 
 @test "install.sh only updates permissions for Bats files" {
