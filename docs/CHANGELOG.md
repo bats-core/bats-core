@@ -13,8 +13,9 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 ### Added
 
 * added checks and improved documentation for `$BATS_TMPDIR` (#410)
-* the docker container now uses [tini](https://github.com/krallin/tini) as the container entrypoint to
-  improve signal forwarding (#407)
+* the docker container now uses [tini](https://github.com/krallin/tini) as the
+  container entrypoint to improve signal forwarding (#407)
+* script to uninstall bats from a given prefix (#400)
 
 #### Documentation
 
