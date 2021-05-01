@@ -16,6 +16,7 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 * the docker container now uses [tini](https://github.com/krallin/tini) as the
   container entrypoint to improve signal forwarding (#407)
 * script to uninstall bats from a given prefix (#400)
+* Docker image architectures amd64, 386, arm64, arm/v7, arm/v6, ppc64le, s390x (#438)
 
 #### Documentation
 
@@ -30,6 +31,7 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 * pretty printer now puts text that is printed to FD 3 below the test name (#426)
 * `rm semaphores/slot-: No such file or directory` in parallel mode on MacOS
   (#434, #433)
+* automatic push to Dockerhub (#438)
 
 ## [1.3.0] - 2021-03-08
 
