@@ -5,7 +5,8 @@ ARG TINI_VERSION=v0.19.0
 ARG TARGETPLATFORM
 
 COPY ./docker /tmp/docker
-RUN /tmp/docker/install_tini.sh "$TARGETPLATFORM"
+# default to amd64 when not running in buildx environment that provides target platform
+RUN /tmp/docker/install_tini.sh "${TARGETPLATFORM-linux/amd64}"
     
 
 # Install parallel and accept the citation notice (we aren't using this in a
