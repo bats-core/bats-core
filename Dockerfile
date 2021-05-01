@@ -2,9 +2,11 @@ ARG bashver=latest
 
 FROM bash:${bashver}
 ARG TINI_VERSION=v0.19.0
+ARG TARGETPLATFORM
 
-RUN wget https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini-static-${TARGETPLATFORM} -O /tini && \
-    chmod +x /tini
+COPY ./docker /tmp/docker
+RUN /tmp/docker/install_tini.sh "$TARGETPLATFORM"
+    
 
 # Install parallel and accept the citation notice (we aren't using this in a
 # context where it make sense to cite GNU Parallel).
