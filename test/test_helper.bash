@@ -3,8 +3,7 @@ emulate_bats_env() {
   export BATS_TEST_PATTERN="^[[:blank:]]*@test[[:blank:]]+(.*[^[:blank:]])[[:blank:]]+\{(.*)\$"
   export BATS_TEST_FILTER=
   export BATS_ROOT_PID=$$
-  export BATS_EMULATED_RUN_TMPDIR=$(mktemp -d "${BATS_TMPDIR}/bats-run-test-tmpdir-${BATS_ROOT_PID}-XXXXXX")
-  export BATS_RUN_TMPDIR="$BATS_EMULATED_RUN_TMPDIR"
+  export BATS_RUN_TMPDIR=$(mktemp -d "${BATS_RUN_TMPDIR}/emulated-tmpdir-${BATS_ROOT_PID}-XXXXXX")
 }
 
 fixtures() {
