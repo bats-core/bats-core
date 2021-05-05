@@ -49,6 +49,12 @@ fi
 
 BATS_TEST_FILENAME="$filename"
 
+if ! BATS_FILE_TMPDIR=$(mktemp -d "${BATS_SUITE_TMPDIR}/file-tmpdir-$(basename "${BATS_TEST_FILENAME}")-XXXXXX");then
+  printf '%s\n' "Failed to create BATS_FILE_TMPDIR with mktemp" >&2
+  exit 1
+fi
+export BATS_FILE_TMPDIR
+
 # shellcheck source=lib/bats-core/preprocessing.bash
 # shellcheck disable=SC2153
 source "$BATS_ROOT/lib/bats-core/preprocessing.bash"

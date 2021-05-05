@@ -9,7 +9,7 @@ single-use-barrier() { # <barrier-name> <barrier-size> [<timeout-in-seconds> [<s
     # use name and size to distinguish between invocations
     # this will block inconsistent sizes on the same name!
     local BARRIER_SUFFIX=${barrier_name//\//_}-$barrier_size
-    local BARRIER_FILE="$BATS_RUN_TMPDIR/barrier-$BARRIER_SUFFIX"
+    local BARRIER_FILE="$BATS_SUITE_TMPDIR/barrier-$BARRIER_SUFFIX"
     # mark our entry for all others
     echo "in-$$" >> "$BARRIER_FILE"
     local start="$SECONDS"
