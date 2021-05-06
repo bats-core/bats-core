@@ -30,6 +30,8 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 * pretty printer now puts text that is printed to FD 3 below the test name (#426)
 * `rm semaphores/slot-: No such file or directory` in parallel mode on MacOS
   (#434, #433)
+* fix YAML blocks in TAP13 formatter using `...` instead of `---` to start
+  a block (#442)
 
 ## [1.3.0] - 2021-03-08
 
