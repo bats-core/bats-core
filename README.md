@@ -118,7 +118,7 @@ There was an initial [call for maintainers][call-maintain] for the original Bats
 
 ## Copyright
 
-© 2017-2020 bats-core organization
+© 2017-2021 bats-core organization
 
 © 2011-2016 Sam Stephenson
 
