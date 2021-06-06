@@ -32,7 +32,7 @@ This runs the `test/` directory from the bats-core repository inside the bats Do
 For test suites that are intended to run in isolation from the project (i.e. the tests do not depend on project files outside of the test directory), you can mount the test directory by itself and execute the tests like so:
 
 ```bash
-$ docker run -it -v "$PWD/test:/test" bats/bats:latest /test
+$ docker run -it -v "$PWD:/code" bats/bats:latest /code/test
 ```
 
 ## Docker Gotchas

@@ -20,6 +20,8 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 #### Documentation
 
 * added tutorial for new users (#397)
+* updated copyright year (#445)
+* fixed example invocation of docker container (#440)
 
 ### Fixed
 
@@ -32,6 +34,8 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
   (#434, #433)
 * fix YAML blocks in TAP13 formatter using `...` instead of `---` to start
   a block (#442)
+* fixed some typos in comments (#447)
+* ensure `/code` exists in docker container, to make examples work again  (#440)
 
 ## [1.3.0] - 2021-03-08
 

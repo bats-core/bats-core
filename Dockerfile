@@ -14,6 +14,7 @@ RUN apk add --no-cache parallel ncurses && \
 RUN ln -s /opt/bats/bin/bats /usr/local/bin/bats
 COPY . /opt/bats/
 
+RUN mkdir -p /code
 WORKDIR /code/
 
 ENTRYPOINT ["/tini", "--", "bash", "bats"]
