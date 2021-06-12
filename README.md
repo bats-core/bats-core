@@ -4,7 +4,7 @@
 [![npm package](https://img.shields.io/npm/v/bats.svg)](https://www.npmjs.com/package/bats)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/bats-core/bats-core/blob/master/LICENSE.md)
 [![Continuous integration status](https://github.com/bats-core/bats-core/workflows/Tests/badge.svg)](https://github.com/bats-core/bats-core/actions?query=workflow%3ATests)
-[![Read the docs status](https://readthedocs.org/projects/bats-core/badge/?version=latest)](https://bats-core.readthedocs.io)
+[![Read the docs status](https://readthedocs.org/projects/bats-core/badge/)](https://bats-core.readthedocs.io)
 
 [![Join the chat in bats-core/bats-core on gitter](https://badges.gitter.im/bats-core/bats-core.svg)][gitter]
 
