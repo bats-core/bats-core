@@ -18,6 +18,7 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 * script to uninstall bats from a given prefix (#400)
 * replace preprocessed file path (e.g. `/tmp/bats-run-22908-NP0f9h/bats.23102.src`)
   with original filename in stdout/err (but not FD3!) (#429)
+* print aborted command on SIGINT/CTRL+C (#368)
 
 #### Documentation
 

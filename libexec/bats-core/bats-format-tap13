@@ -38,6 +38,8 @@ close_previous_yaml_block() {
   fi
 }
 
+trap '' INT
+
 while IFS= read -r line; do
   case "$line" in
   'begin '*) ;;

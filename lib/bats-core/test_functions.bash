@@ -30,6 +30,7 @@ load() {
 }
 
 run() {
+  trap bats_interrupt_trap_in_run INT
   local origFlags="$-"
   set +eET
   local origIFS="$IFS"

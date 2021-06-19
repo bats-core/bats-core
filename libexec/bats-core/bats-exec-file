@@ -265,6 +265,10 @@ bats_run_tests() {
     bats_run_tests_in_parallel "$BATS_RUN_TMPDIR/parallel_output" || status=1
   else
     for test_name in "${tests_to_run[@]}"; do
+      if [[ "${BATS_INTERRUPTED-NOTSET}" != NOTSET ]]; then
+        status=130 # bash's code for SIGINT exits
+        break
+      fi
       # Only handle non-empty lines
       if [[ $test_name ]]; then
         ((++test_number_in_suite))
@@ -280,6 +284,8 @@ bats_run_tests() {
   fi
   export status
 }
+
+trap 'BATS_INTERRUPTED=true' INT
 
 if [[ -n "$extended_syntax" ]]; then
   printf "suite %s\n" "$filename"

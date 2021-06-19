@@ -178,6 +178,7 @@ bats_tap_stream_plan() { #  <number of tests>
 
 init_suite
 trap finish_suite EXIT
+trap '' INT
 
 bats_tap_stream_begin() { # <test index> <test name>
   flush_log
