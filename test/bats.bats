@@ -796,3 +796,14 @@ EOF
   [ "$status" -eq 0 ]
   [[ "$output" != *"No such file or directory"* ]] || exit 1 # ensure failures are detected with old bash
 }
+
+@test "Failure in free code (see #399)" {
+  run bats --tap "$FIXTURE_ROOT/failure_in_free_code.bats"
+  echo "$output"
+  [ "$status" -ne 0 ]
+  [ "${lines[0]}" == 1..1 ]
+  [ "${lines[1]}" == 'not ok 1 setup_file failed' ]
+  [ "${lines[2]}" == "# (from function \`helper' in file $RELATIVE_FIXTURE_ROOT/failure_in_free_code.bats, line 4," ]
+  [ "${lines[3]}" == "#  in test file $RELATIVE_FIXTURE_ROOT/failure_in_free_code.bats, line 7)" ]
+  [ "${lines[4]}" == "#   \`helper' failed" ]
+}

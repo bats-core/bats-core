@@ -1,10 +1,19 @@
 #!/usr/bin/env bash
 set -e
 
+# shellcheck source=lib/bats-core/formatter.bash
+source "$BATS_ROOT/lib/bats-core/formatter.bash"
+
+BASE_PATH=.
+
 while [[ "$#" -ne 0 ]]; do
   case "$1" in
   -T)
     BATS_ENABLE_TIMING="-T"
+    ;;
+  --base-path)
+    shift
+    normalize_base_path BASE_PATH "$1"
     ;;
   esac
   shift
@@ -195,9 +204,6 @@ finish() {
 
 trap finish EXIT
 
-# shellcheck source=lib/bats-core/formatter.bash
-source "$BATS_ROOT/lib/bats-core/formatter.bash"
-
 bats_tap_stream_plan() {
   count="$1"
   index=0
@@ -241,9 +247,10 @@ bats_tap_stream_not_ok() {
   fi
 }
 
-bats_tap_stream_comment() {
+bats_tap_stream_comment() { # <comment> <scope>
+  local scope=$2
   # count the lines we printed after the begin text,
-  if (( line_backoff_count == 0 )); then
+  if [[ $line_backoff_count -eq 0 && $scope == begin ]]; then
     # if this is the first line after begin, go down one line
     buffer "\n"
     (( ++line_backoff_count )) # prefix-increment to avoid "error" due to returning 0
@@ -255,13 +262,18 @@ bats_tap_stream_comment() {
 }
 
 bats_tap_stream_suite() {
-  : #test_file="$1"
+  #test_file="$1"
+  line_backoff_count=0
+  index=
+  # indicate filename for failures
+  name="File $(remove_prefix "$BASE_PATH" "$1")"
 }
 
 line_backoff_count=0
-bats_tap_stream_unknown() { # <full line>
-    # count the lines we printed after the begin text,
-    if (( line_backoff_count == 0 )); then
+bats_tap_stream_unknown() { # <full line> <scope>
+    local scope=$2
+    # count the lines we printed after the begin text, (or after suite, in case of syntax errors)
+    if [[ $line_backoff_count -eq 0 && ( $scope == begin ||  $scope == suite )]]; then
       # if this is the first line after begin, go down one line
       buffer "\n"
       (( ++line_backoff_count )) # prefix-increment to avoid "error" due to returning 0

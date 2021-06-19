@@ -16,6 +16,8 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 * the docker container now uses [tini](https://github.com/krallin/tini) as the
   container entrypoint to improve signal forwarding (#407)
 * script to uninstall bats from a given prefix (#400)
+* replace preprocessed file path (e.g. `/tmp/bats-run-22908-NP0f9h/bats.23102.src`)
+  with original filename in stdout/err (but not FD3!) (#429)
 
 #### Documentation
 
@@ -36,6 +38,7 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
   a block (#442)
 * fixed some typos in comments (#447)
 * ensure `/code` exists in docker container, to make examples work again  (#440)
+* also display error messages from free code (#429)
 
 ## [1.3.0] - 2021-03-08
 

@@ -20,6 +20,9 @@ bats_capture_stack_trace() {
 				;;
 			esac
 		fi
+		if [[ "${BASH_SOURCE[$i + 1]}" == *"bats-exec-file" ]] && [[ "$funcname" == 'source' ]]; then
+			break
+		fi
 	done
 }
 
@@ -43,7 +46,10 @@ bats_print_stack_trace() {
 
 		local fn
 		bats_frame_function "$frame" 'fn'
-		if [[ "$fn" != "$BATS_TEST_NAME" ]]; then
+		if [[ "$fn" != "$BATS_TEST_NAME" ]] && 
+			# don't print "from function `source'"",
+			# when failing in free code during `source $test_file` from bats-exec-file
+			! [[ "$fn" == 'source' &&  $index -eq $count ]]; then 
 			printf "from function \`%s' " "$fn"
 		fi
 
@@ -58,6 +64,9 @@ bats_print_stack_trace() {
 }
 
 bats_print_failed_command() {
+	if [[ ${#BATS_STACK_TRACE[@]} -eq 0 ]]; then
+		return 
+	fi
 	local frame="${BATS_STACK_TRACE[${#BATS_STACK_TRACE[@]} - 1]}"
 	local filename
 	local lineno
