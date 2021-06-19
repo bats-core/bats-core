@@ -812,7 +812,7 @@ EOF
     skip "Aborts don't work in parallel mode"
   fi
   
-  make_bats_test_suite_tmpdir
+  export BATS_TEST_SUITE_TMPDIR="${BATS_TEST_TMPDIR}"
   export TEMPFILE="$BATS_TEST_SUITE_TMPDIR/$BATS_TEST_NAME.log"
 
   # guarantee that background processes get their own process group -> pid=pgid
@@ -845,7 +845,7 @@ EOF
     skip "Aborts don't work in parallel mode"
   fi
 
-  make_bats_test_suite_tmpdir
+  export BATS_TEST_SUITE_TMPDIR="${BATS_TEST_TMPDIR}"
   export TEMPFILE="$BATS_TEST_SUITE_TMPDIR/$BATS_TEST_NAME.log"
 
   # guarantee that background processes get their own process group -> pid=pgid
@@ -878,7 +878,7 @@ EOF
     skip "Aborts don't work in parallel mode"
   fi
 
-  make_bats_test_suite_tmpdir
+  export BATS_TEST_SUITE_TMPDIR="${BATS_TEST_TMPDIR}"
   export TEMPFILE="$BATS_TEST_SUITE_TMPDIR/$BATS_TEST_NAME.log"
 
   # guarantee that background processes get their own process group -> pid=pgid
@@ -911,7 +911,7 @@ EOF
     skip "Aborts don't work in parallel mode"
   fi
 
-  make_bats_test_suite_tmpdir
+  export BATS_TEST_SUITE_TMPDIR="${BATS_TEST_TMPDIR}"
   export TEMPFILE="$BATS_TEST_SUITE_TMPDIR/$BATS_TEST_NAME.log"
 
   # guarantee that background processes get their own process group -> pid=pgid
@@ -943,7 +943,7 @@ EOF
   if [[ "$BATS_NUMBER_OF_PARALLEL_JOBS" -gt 1 ]]; then
     skip "Aborts don't work in parallel mode"
   fi
-  make_bats_test_suite_tmpdir
+  export BATS_TEST_SUITE_TMPDIR="${BATS_TEST_TMPDIR}"
   export TEMPFILE="$BATS_TEST_SUITE_TMPDIR/$BATS_TEST_NAME.log"
 
   # guarantee that background processes get their own process group -> pid=pgid
