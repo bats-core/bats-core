@@ -36,8 +36,8 @@ If you need such a feature, please let us know about your usecase.
 
 As a workaround you can use environment variables to pass parameters.
 
-Testing functions that return their results via a variable.
------------------------------------------------------------
+Why can't my function return results via a variable when using `run`?
+---------------------------------------------------------------------
 
 The `run` function executes its command in a subshell which means the changes to variables won't be available in the calling shell.
 
