@@ -663,12 +663,15 @@ END_OF_ERR_MSG
 }
 
 @test "Don't hang on CTRL-C (issue #353)" {
+  load 'concurrent-coordination'
+  export SINGLE_USE_LATCH_DIR="${BATS_TEST_TMPDIR}"
+
   # guarantee that background processes get their own process group -> pid=pgid
   set -m
-  bats "$FIXTURE_ROOT/run_long_command.bats" & # don't block execution, or we cannot send signals
+  bats "$FIXTURE_ROOT/hang_in_test.bats" & # don't block execution, or we cannot send signals
   SUBPROCESS_PID=$!
 
-  sleep 1 # wait for the background process to start on slow systems
+  single-use-latch::wait hang_in_test 1
 
   # emulate CTRL-C by sending SIGINT to the whole process group
   kill -SIGINT -- -$SUBPROCESS_PID
@@ -818,12 +821,14 @@ EOF
   # guarantee that background processes get their own process group -> pid=pgid
   set -m
   
+  load 'concurrent-coordination'
+  export SINGLE_USE_LATCH_DIR="${BATS_SUITE_TMPDIR}"
   # we cannot use run for a background task, so we have to store the output for later
   bats "$FIXTURE_ROOT/hang_in_test.bats" --tap  >"$TEMPFILE" 2>&1 & # don't block execution, or we cannot send signals
 
   SUBPROCESS_PID=$!
-  
-  sleep 1 # wait for the background process to start on slow systems
+
+  single-use-latch::wait hang_in_test 1 10 || (cat "$TEMPFILE"; false) # still forward output on timeout
 
   # emulate CTRL-C by sending SIGINT to the whole process group
   kill -SIGINT -- -$SUBPROCESS_PID
@@ -835,7 +840,7 @@ EOF
   echo "$output"
 
   [[ "${lines[1]}" == "not ok 1 test" ]]
-  [[ "${lines[2]}" == "# (in test file ${RELATIVE_FIXTURE_ROOT}/hang_in_test.bats, line 2)" ]]
+  [[ "${lines[2]}" == "# (in test file ${RELATIVE_FIXTURE_ROOT}/hang_in_test.bats, line 7)" ]]
   [[ "${lines[3]}" == "#   \`sleep 10' failed with status 130" ]]
   [[ "${lines[4]}" == "# Received SIGINT, aborting ..." ]]
 }
@@ -851,12 +856,14 @@ EOF
   # guarantee that background processes get their own process group -> pid=pgid
   set -m
   
+  load 'concurrent-coordination'
+  export SINGLE_USE_LATCH_DIR="${BATS_SUITE_TMPDIR}"
   # we cannot use run for a background task, so we have to store the output for later
   bats "$FIXTURE_ROOT/hang_in_run.bats" --tap  >"$TEMPFILE" 2>&1 & # don't block execution, or we cannot send signals
 
   SUBPROCESS_PID=$!
   
-  sleep 1 # wait for the background process to start on slow systems
+  single-use-latch::wait hang_in_run 1 10
 
   # emulate CTRL-C by sending SIGINT to the whole process group
   kill -SIGINT -- -$SUBPROCESS_PID
@@ -868,7 +875,7 @@ EOF
   echo "$output"
 
   [[ "${lines[1]}" == "not ok 1 test" ]]
-  [[ "${lines[2]}" == "# (in test file ${RELATIVE_FIXTURE_ROOT}/hang_in_run.bats, line 2)" ]]
+  [[ "${lines[2]}" == "# (in test file ${RELATIVE_FIXTURE_ROOT}/hang_in_run.bats, line 7)" ]]
   [[ "${lines[3]}" == "#   \`run sleep 10' failed with status 130" ]]
   [[ "${lines[4]}" == "# Received SIGINT, aborting ..." ]]
 }
@@ -884,12 +891,14 @@ EOF
   # guarantee that background processes get their own process group -> pid=pgid
   set -m
   
+  load 'concurrent-coordination'
+  export SINGLE_USE_LATCH_DIR="${BATS_SUITE_TMPDIR}"
   # we cannot use run for a background task, so we have to store the output for later
   bats "$FIXTURE_ROOT/hang_in_teardown.bats" --tap  >"$TEMPFILE" 2>&1 & # don't block execution, or we cannot send signals
 
   SUBPROCESS_PID=$!
   
-  sleep 1 # wait for the background process to start on slow systems
+  single-use-latch::wait hang_in_teardown 1 10
 
   # emulate CTRL-C by sending SIGINT to the whole process group
   kill -SIGINT -- -$SUBPROCESS_PID
@@ -901,7 +910,7 @@ EOF
   echo "$output"
 
   [[ "${lines[1]}" == "not ok 1 empty" ]]
-  [[ "${lines[2]}" == "# (from function \`teardown' in test file ${RELATIVE_FIXTURE_ROOT}/hang_in_teardown.bats, line 2)" ]]
+  [[ "${lines[2]}" == "# (from function \`teardown' in test file ${RELATIVE_FIXTURE_ROOT}/hang_in_teardown.bats, line 4)" ]]
   [[ "${lines[3]}" == "#   \`sleep 10' failed" ]]
   [[ "${lines[4]}" == "# Received SIGINT, aborting ..." ]]
 }
@@ -917,12 +926,14 @@ EOF
   # guarantee that background processes get their own process group -> pid=pgid
   set -m
   
+  load 'concurrent-coordination'
+  export SINGLE_USE_LATCH_DIR="${BATS_SUITE_TMPDIR}"
   # we cannot use run for a background task, so we have to store the output for later
   bats "$FIXTURE_ROOT/hang_in_setup_file.bats" --tap  >"$TEMPFILE" 2>&1 & # don't block execution, or we cannot send signals
 
   SUBPROCESS_PID=$!
   
-  sleep 1 # wait for the background process to start on slow systems
+  single-use-latch::wait hang_in_setup_file 1 10
 
   # emulate CTRL-C by sending SIGINT to the whole process group
   kill -SIGINT -- -$SUBPROCESS_PID
@@ -934,7 +945,7 @@ EOF
   echo "$output"
 
   [[ "${lines[1]}" == "not ok 1 setup_file failed" ]]
-  [[ "${lines[2]}" == "# (from function \`setup_file' in test file ${RELATIVE_FIXTURE_ROOT}/hang_in_setup_file.bats, line 2)" ]]
+  [[ "${lines[2]}" == "# (from function \`setup_file' in test file ${RELATIVE_FIXTURE_ROOT}/hang_in_setup_file.bats, line 4)" ]]
   [[ "${lines[3]}" == "#   \`sleep 10' failed with status 130" ]]
   [[ "${lines[4]}" == "# Received SIGINT, aborting ..." ]]
 }
@@ -949,12 +960,14 @@ EOF
   # guarantee that background processes get their own process group -> pid=pgid
   set -m
   
+  load 'concurrent-coordination'
+  export SINGLE_USE_LATCH_DIR="${BATS_SUITE_TMPDIR}"
   # we cannot use run for a background task, so we have to store the output for later
   bats "$FIXTURE_ROOT/hang_in_teardown_file.bats" --tap  >"$TEMPFILE" 2>&1 & # don't block execution, or we cannot send signals
 
   SUBPROCESS_PID=$!
   
-  sleep 1 # wait for the background process to start on slow systems
+  single-use-latch::wait hang_in_teardown_file 1 10
 
   # emulate CTRL-C by sending SIGINT to the whole process group
   kill -SIGINT -- -$SUBPROCESS_PID
@@ -968,7 +981,7 @@ EOF
   [[ "${lines[0]}" == "1..1" ]]
   [[ "${lines[1]}" == "ok 1 empty" ]]
   [[ "${lines[2]}" == "not ok 2 teardown_file failed" ]]
-  [[ "${lines[3]}" == "# (from function \`teardown_file' in test file ${RELATIVE_FIXTURE_ROOT}/hang_in_teardown_file.bats, line 2)" ]]
+  [[ "${lines[3]}" == "# (from function \`teardown_file' in test file ${RELATIVE_FIXTURE_ROOT}/hang_in_teardown_file.bats, line 4)" ]]
   [[ "${lines[4]}" == "#   \`sleep 10' failed with status 130" ]]
   [[ "${lines[5]}" == "# Received SIGINT, aborting ..." ]]
   [[ "${lines[6]}" == "# bats warning: Executed 2 instead of expected 1 tests" ]]

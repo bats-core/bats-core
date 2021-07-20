@@ -126,10 +126,31 @@ bats_trim_filename() {
 	printf -v "$2" '%s' "${1#$BATS_CWD/}"
 }
 
+# normalize a windows path from e.g. C:/directory to /c/directory
+# The path must point to an existing/accessable directory, not a file!
+bats_normalize_windows_dir_path() { # <output-var> <path>
+	local output_var="$1"
+	local path="$2"
+	if [[ $path == ?:* ]]; then
+		NORMALIZED_INPUT="$(cd "$path" || exit 1; pwd)"
+	else
+		NORMALIZED_INPUT="$path"
+	fi
+	printf -v "$output_var" "%s" "$NORMALIZED_INPUT"
+}
+
 bats_debug_trap() {
+	# on windows we sometimes get a mix of paths (when install via nmp install -g)
+	# which have C:/... or /c/... comparing them is going to be problematic.
+	# We need to normalize them to a common format!
+	bats_normalize_windows_dir_path NORMALIZED_BATS_ROOT "$BATS_ROOT"
+	bats_normalize_windows_dir_path NORMALIZED_INPUT "${1%/*}"
+	
 	# don't update the trace within library functions or we get backtraces from inside traps
 	# also don't record new stack traces while handling interruptions, to avoid overriding the interrupted command
-	if [[ "$1" != $BATS_ROOT/lib/* && "$1" != $BATS_ROOT/libexec/* && "${BATS_INTERRUPTED-NOTSET}" == NOTSET ]]; then
+	if [[ "$NORMALIZED_INPUT" != $NORMALIZED_BATS_ROOT/lib/* && 
+		  "$NORMALIZED_INPUT" != $NORMALIZED_BATS_ROOT/libexec/* &&
+		  "${BATS_INTERRUPTED-NOTSET}" == NOTSET ]]; then
 		# The last entry in the stack trace is not useful when en error occured:
 		# It is either duplicated (kinda correct) or has wrong line number (Bash < 4.4)
 		# Therefore we capture the stacktrace but use it only after the next debug

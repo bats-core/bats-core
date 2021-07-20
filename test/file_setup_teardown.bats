@@ -145,12 +145,12 @@ ok 2 must not see variable from first run" ]]
 
 @test "halfway setup_file errors are caught and reported" {
   run bats "$FIXTURE_ROOT/setup_file_halfway_error.bats"
-  [[ $status -ne 0 ]]
+  [ $status -ne 0 ]
   echo "$output"
-  [[ "$output" == "1..1
-not ok 1 setup_file failed
-# (from function \`setup_file' in test file $RELATIVE_FIXTURE_ROOT/setup_file_halfway_error.bats, line 3)
-#   \`false' failed" ]]
+  [ "${lines[0]}" == "1..1" ]
+  [ "${lines[1]}" == "not ok 1 setup_file failed" ]
+  [ "${lines[2]}" == "# (from function \`setup_file' in test file $RELATIVE_FIXTURE_ROOT/setup_file_halfway_error.bats, line 3)" ]
+  [ "${lines[3]}" == "#   \`false' failed" ]
 }
 
 @test "halfway teardown_file errors are caught and reported" {
