@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 
 ### Added
 
+* added BATS_TEST_TMPDIR, BATS_FILE_TMPDIR, BATS_SUITE_TMPDIR (#413)
 * added checks and improved documentation for `$BATS_TMPDIR` (#410)
 * the docker container now uses [tini](https://github.com/krallin/tini) as the
   container entrypoint to improve signal forwarding (#407)
@@ -19,12 +20,13 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 * replace preprocessed file path (e.g. `/tmp/bats-run-22908-NP0f9h/bats.23102.src`)
   with original filename in stdout/err (but not FD3!) (#429)
 * print aborted command on SIGINT/CTRL+C (#368)
+* print error message when BATS_RUN_TMPDIR could not be created (#422)
 
 #### Documentation
 
 * added tutorial for new users (#397)
-* updated copyright year (#445)
 * fixed example invocation of docker container (#440)
+* minor edits (#431, #439, #445, #463, #464, #465)
 
 ### Fixed
 
@@ -37,9 +39,10 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
   (#434, #433)
 * fix YAML blocks in TAP13 formatter using `...` instead of `---` to start
   a block (#442)
-* fixed some typos in comments (#447)
+* fixed some typos in comments (#441, #447)
 * ensure `/code` exists in docker container, to make examples work again  (#440)
 * also display error messages from free code (#429)
+* npm installed version on Windows: fix broken internal LIBEXEC paths (#459)
 
 ## [1.3.0] - 2021-03-08
 
