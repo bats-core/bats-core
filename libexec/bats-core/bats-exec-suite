@@ -5,7 +5,6 @@ count_only_flag=''
 filter=''
 num_jobs=${BATS_NUMBER_OF_PARALLEL_JOBS-1}
 have_gnu_parallel=
-bats_parallel_args=()
 bats_no_parallelize_across_files=${BATS_NO_PARALLELIZE_ACROSS_FILES-}
 bats_no_parallelize_within_files=
 flags=('--dummy-flag') # add a dummy flag to prevent unset varialeb errors on empty array expansion in old bash versions
@@ -60,8 +59,6 @@ elif [[ "$num_jobs" != 1 && -z "$bats_no_parallelize_across_files" ]]; then
   exit 1
 fi
 
-trap 'kill 0; exit 1' INT
-
 # create a file that contains all (filtered) tests to run from all files
 TESTS_LIST_FILE="${BATS_RUN_TMPDIR}/test_list_file.txt"
 
@@ -112,6 +109,18 @@ if [[ -n "$bats_no_parallelize_within_files" ]] && [[ ! "$num_jobs" -gt 1 ]]; th
   exit 1
 fi
 
+# only abort on the lowest levels
+trap 'BATS_INTERRUPTED=true' INT
+
+trap bats_exit_trap EXIT
+
+bats_exit_trap() {
+  if [[ ${BATS_INTERRUPTED-NOTSET} != NOTSET ]]; then
+    printf "\n# Received SIGINT, aborting ...\n\n"
+  fi
+  exit "$status"
+}
+
 status=0
 printf '1..%d\n' "${test_count}"
 
@@ -119,6 +128,12 @@ printf '1..%d\n' "${test_count}"
 if [[ "${test_count}" == 0 ]]; then
   exit
 fi
+
+if ! BATS_SUITE_TMPDIR=$(mktemp -d "${BATS_RUN_TMPDIR}/suite-tmpdir-XXXXXX");then
+  printf '%s\n' "Failed to create BATS_SUITE_TMPDIR with mktemp" >&2
+  exit 1
+fi
+export BATS_SUITE_TMPDIR
 
 # Deduplicate filenames (without reordering) to avoid running duplicate tests n by n times.
 # (see https://github.com/bats-core/bats-core/issues/329)
@@ -128,17 +143,16 @@ IFS=$'\n' read -d '' -r -a  BATS_UNIQUE_TEST_FILENAMES < <(printf "%s\n" "$@"| n
 
 if [[ "$num_jobs" -gt 1 ]] && [[ -z "$bats_no_parallelize_across_files" ]]; then
   # run files in parallel to get the maximum pool of parallel tasks
-  if [[ ${#flags[@]} -eq 0 ]]; then
-    # if there are no flags, our quoting below would keep an empty arg, which is wrong
-    parallel "${bats_parallel_args[@]}" --keep-order --jobs "$num_jobs" bats-exec-file "{}" "$TESTS_LIST_FILE"  ::: "${BATS_UNIQUE_TEST_FILENAMES[@]}" 2>&1 || status=1
-  else
-    # shellcheck disable=SC2086,SC2068
-    # we need to handle the quoting of ${flags[@]} ourselves,
-    # because parallel can only quote it as one
-    parallel --keep-order --jobs "$num_jobs" bats-exec-file "$(printf "%q " "${flags[@]}")" "{}" "$TESTS_LIST_FILE"  ::: "${BATS_UNIQUE_TEST_FILENAMES[@]}" 2>&1 || status=1
-  fi
+  # shellcheck disable=SC2086,SC2068
+  # we need to handle the quoting of ${flags[@]} ourselves,
+  # because parallel can only quote it as one
+  parallel --keep-order --jobs "$num_jobs" bats-exec-file "$(printf "%q " "${flags[@]}")" "{}" "$TESTS_LIST_FILE"  ::: "${BATS_UNIQUE_TEST_FILENAMES[@]}" 2>&1 || status=1
 else
   for filename in "${BATS_UNIQUE_TEST_FILENAMES[@]}"; do
+    if [[ "${BATS_INTERRUPTED-NOTSET}" != NOTSET ]]; then
+      status=130 # bash's code for SIGINT exits
+      break
+    fi
     bats-exec-file "${flags[@]}" "$filename" "${TESTS_LIST_FILE}" || status=1
   done
 fi

@@ -3,11 +3,6 @@
 load test_helper
 fixtures bats
 
-teardown() {
-  # cleanup the test local tmpdir to avoid cleaning up all tests' at once
-  test_helper::cleanup_tmpdir "$BATS_TEST_NAME"
-}
-
 @test "no arguments prints message and usage instructions" {
   run bats
   [ $status -eq 1 ]
@@ -143,7 +138,7 @@ teardown() {
 }
 
 @test "setup is run once before each test" {
-  make_bats_test_suite_tmpdir "$BATS_TEST_NAME"
+  export BATS_TEST_SUITE_TMPDIR="${BATS_TEST_TMPDIR}"
   run bats "$FIXTURE_ROOT/setup.bats"
   [ $status -eq 0 ]
   run cat "$BATS_TEST_SUITE_TMPDIR/setup.log"
@@ -151,7 +146,7 @@ teardown() {
 }
 
 @test "teardown is run once after each test, even if it fails" {
-  make_bats_test_suite_tmpdir "$BATS_TEST_NAME"
+  export BATS_TEST_SUITE_TMPDIR="${BATS_TEST_TMPDIR}"
   run bats "$FIXTURE_ROOT/teardown.bats"
   [ $status -eq 1 ]
   run cat "$BATS_TEST_SUITE_TMPDIR/teardown.log"
@@ -190,8 +185,7 @@ teardown() {
 }
 
 @test "failing test file outside of BATS_CWD" {
-  make_bats_test_suite_tmpdir "$BATS_TEST_NAME"
-  cd "$BATS_TEST_SUITE_TMPDIR"
+  cd "${BATS_TEST_TMPDIR}"
   run bats "$FIXTURE_ROOT/failing.bats"
   [ $status -eq 1 ]
   [ "${lines[2]}" = "# (in test file $FIXTURE_ROOT/failing.bats, line 4)" ]
@@ -236,7 +230,7 @@ teardown() {
 }
 
 @test "load supports plain symbols" {
-  local -r helper="${BATS_TMPDIR}/load_helper_plain"
+  local -r helper="${BATS_TEST_TMPDIR}/load_helper_plain"
   {
     echo "plain_variable='value of plain variable'"
     echo "plain_array=(test me hard)"
@@ -251,7 +245,7 @@ teardown() {
 }
 
 @test "load doesn't support _declare_d symbols" {
-  local -r helper="${BATS_TMPDIR}/load_helper_declared"
+  local -r helper="${BATS_TEST_TMPDIR}/load_helper_declared"
   {
     echo "declare declared_variable='value of declared variable'"
     echo "declare -r a_constant='constant value'"
@@ -651,13 +645,12 @@ END_OF_ERR_MSG
 @test "filenames with tab can be used" {
   [[ "$OSTYPE" == "linux"* ]] || skip "FS cannot deal with tabs in filenames"
 
-  cp "$FIXTURE_ROOT/tab in filename.bats" "$FIXTURE_ROOT/tab"$'\t'"in filename.bats"
-  bats "$FIXTURE_ROOT/tab"$'\t'"in filename.bats"
+  cp "${FIXTURE_ROOT}/tab in filename.bats" "${BATS_TEST_TMPDIR}/tab"$'\t'"in filename.bats"
+  bats "${BATS_TEST_TMPDIR}/tab"$'\t'"in filename.bats"
 }
 
 @test "each file is evaluated n+1 times" {
-  make_bats_test_suite_tmpdir
-  export TEMPFILE="$BATS_TEST_SUITE_TMPDIR/$BATS_TEST_NAME.log"
+  export TEMPFILE="$BATS_TEST_TMPDIR/$BATS_TEST_NAME.log"
   run bats "$FIXTURE_ROOT/evaluation_count/"
 
   cat "$TEMPFILE"
@@ -670,13 +663,15 @@ END_OF_ERR_MSG
 }
 
 @test "Don't hang on CTRL-C (issue #353)" {
+  load 'concurrent-coordination'
+  export SINGLE_USE_LATCH_DIR="${BATS_TEST_TMPDIR}"
+
   # guarantee that background processes get their own process group -> pid=pgid
   set -m
-  run bats "$FIXTURE_ROOT/run_long_command.bats" & # don't block execution, or we cannot send signals
-  echo "$output"
+  bats "$FIXTURE_ROOT/hang_in_test.bats" & # don't block execution, or we cannot send signals
   SUBPROCESS_PID=$!
 
-  sleep 1 # wait for the background process to start on slow systems
+  single-use-latch::wait hang_in_test 1
 
   # emulate CTRL-C by sending SIGINT to the whole process group
   kill -SIGINT -- -$SUBPROCESS_PID
@@ -720,14 +715,14 @@ END_OF_ERR_MSG
 }
 
 @test "run tmpdir is cleaned up by default" {
-  TEST_TMPDIR="${BATS_RUN_TMPDIR}/$BATS_TEST_NAME"
+  TEST_TMPDIR="${BATS_TEST_TMPDIR}/$BATS_TEST_NAME"
   bats --tempdir "$TEST_TMPDIR" "$FIXTURE_ROOT/passing.bats"
 
   [ ! -d "$TEST_TMPDIR" ]
 }
 
 @test "run tmpdir is not cleanup up with --no-cleanup-tempdir" {
-  TEST_TMPDIR="${BATS_RUN_TMPDIR}/$BATS_TEST_NAME"
+  TEST_TMPDIR="${BATS_TEST_TMPDIR}/$BATS_TEST_NAME"
   bats --tempdir "$TEST_TMPDIR" --no-tempdir-cleanup "$FIXTURE_ROOT/passing.bats"
 
   [ -d "$TEST_TMPDIR" ]
@@ -802,4 +797,192 @@ EOF
 
   [ "$status" -eq 0 ]
   [[ "$output" != *"No such file or directory"* ]] || exit 1 # ensure failures are detected with old bash
+}
+
+@test "Failure in free code (see #399)" {
+  run bats --tap "$FIXTURE_ROOT/failure_in_free_code.bats"
+  echo "$output"
+  [ "$status" -ne 0 ]
+  [ "${lines[0]}" == 1..1 ]
+  [ "${lines[1]}" == 'not ok 1 setup_file failed' ]
+  [ "${lines[2]}" == "# (from function \`helper' in file $RELATIVE_FIXTURE_ROOT/failure_in_free_code.bats, line 4," ]
+  [ "${lines[3]}" == "#  in test file $RELATIVE_FIXTURE_ROOT/failure_in_free_code.bats, line 7)" ]
+  [ "${lines[4]}" == "#   \`helper' failed" ]
+}
+
+@test "CTRL-C aborts and fails the current test" {
+  if [[ "$BATS_NUMBER_OF_PARALLEL_JOBS" -gt 1 ]]; then
+    skip "Aborts don't work in parallel mode"
+  fi
+  
+  export BATS_TEST_SUITE_TMPDIR="${BATS_TEST_TMPDIR}"
+  export TEMPFILE="$BATS_TEST_SUITE_TMPDIR/$BATS_TEST_NAME.log"
+
+  # guarantee that background processes get their own process group -> pid=pgid
+  set -m
+  
+  load 'concurrent-coordination'
+  export SINGLE_USE_LATCH_DIR="${BATS_SUITE_TMPDIR}"
+  # we cannot use run for a background task, so we have to store the output for later
+  bats "$FIXTURE_ROOT/hang_in_test.bats" --tap  >"$TEMPFILE" 2>&1 & # don't block execution, or we cannot send signals
+
+  SUBPROCESS_PID=$!
+
+  single-use-latch::wait hang_in_test 1 10 || (cat "$TEMPFILE"; false) # still forward output on timeout
+
+  # emulate CTRL-C by sending SIGINT to the whole process group
+  kill -SIGINT -- -$SUBPROCESS_PID
+
+  # the test suite must be marked as failed!
+  ! wait $SUBPROCESS_PID
+
+  run cat "$TEMPFILE"
+  echo "$output"
+
+  [[ "${lines[1]}" == "not ok 1 test" ]]
+  [[ "${lines[2]}" == "# (in test file ${RELATIVE_FIXTURE_ROOT}/hang_in_test.bats, line 7)" ]]
+  [[ "${lines[3]}" == "#   \`sleep 10' failed with status 130" ]]
+  [[ "${lines[4]}" == "# Received SIGINT, aborting ..." ]]
+}
+
+@test "CTRL-C aborts and fails the current run" {
+  if [[ "$BATS_NUMBER_OF_PARALLEL_JOBS" -gt 1 ]]; then
+    skip "Aborts don't work in parallel mode"
+  fi
+
+  export BATS_TEST_SUITE_TMPDIR="${BATS_TEST_TMPDIR}"
+  export TEMPFILE="$BATS_TEST_SUITE_TMPDIR/$BATS_TEST_NAME.log"
+
+  # guarantee that background processes get their own process group -> pid=pgid
+  set -m
+  
+  load 'concurrent-coordination'
+  export SINGLE_USE_LATCH_DIR="${BATS_SUITE_TMPDIR}"
+  # we cannot use run for a background task, so we have to store the output for later
+  bats "$FIXTURE_ROOT/hang_in_run.bats" --tap  >"$TEMPFILE" 2>&1 & # don't block execution, or we cannot send signals
+
+  SUBPROCESS_PID=$!
+  
+  single-use-latch::wait hang_in_run 1 10
+
+  # emulate CTRL-C by sending SIGINT to the whole process group
+  kill -SIGINT -- -$SUBPROCESS_PID
+
+  # the test suite must be marked as failed!
+  ! wait $SUBPROCESS_PID
+
+  run cat "$TEMPFILE"
+  echo "$output"
+
+  [[ "${lines[1]}" == "not ok 1 test" ]]
+  [[ "${lines[2]}" == "# (in test file ${RELATIVE_FIXTURE_ROOT}/hang_in_run.bats, line 7)" ]]
+  [[ "${lines[3]}" == "#   \`run sleep 10' failed with status 130" ]]
+  [[ "${lines[4]}" == "# Received SIGINT, aborting ..." ]]
+}
+
+@test "CTRL-C aborts and fails the current teardown" {
+  if [[ "$BATS_NUMBER_OF_PARALLEL_JOBS" -gt 1 ]]; then
+    skip "Aborts don't work in parallel mode"
+  fi
+
+  export BATS_TEST_SUITE_TMPDIR="${BATS_TEST_TMPDIR}"
+  export TEMPFILE="$BATS_TEST_SUITE_TMPDIR/$BATS_TEST_NAME.log"
+
+  # guarantee that background processes get their own process group -> pid=pgid
+  set -m
+  
+  load 'concurrent-coordination'
+  export SINGLE_USE_LATCH_DIR="${BATS_SUITE_TMPDIR}"
+  # we cannot use run for a background task, so we have to store the output for later
+  bats "$FIXTURE_ROOT/hang_in_teardown.bats" --tap  >"$TEMPFILE" 2>&1 & # don't block execution, or we cannot send signals
+
+  SUBPROCESS_PID=$!
+  
+  single-use-latch::wait hang_in_teardown 1 10
+
+  # emulate CTRL-C by sending SIGINT to the whole process group
+  kill -SIGINT -- -$SUBPROCESS_PID
+
+  # the test suite must be marked as failed!
+  ! wait $SUBPROCESS_PID
+
+  run cat "$TEMPFILE"
+  echo "$output"
+
+  [[ "${lines[1]}" == "not ok 1 empty" ]]
+  [[ "${lines[2]}" == "# (from function \`teardown' in test file ${RELATIVE_FIXTURE_ROOT}/hang_in_teardown.bats, line 4)" ]]
+  [[ "${lines[3]}" == "#   \`sleep 10' failed" ]]
+  [[ "${lines[4]}" == "# Received SIGINT, aborting ..." ]]
+}
+
+@test "CTRL-C aborts and fails the current setup_file" {
+  if [[ "$BATS_NUMBER_OF_PARALLEL_JOBS" -gt 1 ]]; then
+    skip "Aborts don't work in parallel mode"
+  fi
+
+  export BATS_TEST_SUITE_TMPDIR="${BATS_TEST_TMPDIR}"
+  export TEMPFILE="$BATS_TEST_SUITE_TMPDIR/$BATS_TEST_NAME.log"
+
+  # guarantee that background processes get their own process group -> pid=pgid
+  set -m
+  
+  load 'concurrent-coordination'
+  export SINGLE_USE_LATCH_DIR="${BATS_SUITE_TMPDIR}"
+  # we cannot use run for a background task, so we have to store the output for later
+  bats "$FIXTURE_ROOT/hang_in_setup_file.bats" --tap  >"$TEMPFILE" 2>&1 & # don't block execution, or we cannot send signals
+
+  SUBPROCESS_PID=$!
+  
+  single-use-latch::wait hang_in_setup_file 1 10
+
+  # emulate CTRL-C by sending SIGINT to the whole process group
+  kill -SIGINT -- -$SUBPROCESS_PID
+
+  # the test suite must be marked as failed!
+  ! wait $SUBPROCESS_PID
+
+  run cat "$TEMPFILE"
+  echo "$output"
+
+  [[ "${lines[1]}" == "not ok 1 setup_file failed" ]]
+  [[ "${lines[2]}" == "# (from function \`setup_file' in test file ${RELATIVE_FIXTURE_ROOT}/hang_in_setup_file.bats, line 4)" ]]
+  [[ "${lines[3]}" == "#   \`sleep 10' failed with status 130" ]]
+  [[ "${lines[4]}" == "# Received SIGINT, aborting ..." ]]
+}
+
+@test "CTRL-C aborts and fails the current teardown_file" {
+  if [[ "$BATS_NUMBER_OF_PARALLEL_JOBS" -gt 1 ]]; then
+    skip "Aborts don't work in parallel mode"
+  fi
+  export BATS_TEST_SUITE_TMPDIR="${BATS_TEST_TMPDIR}"
+  export TEMPFILE="$BATS_TEST_SUITE_TMPDIR/$BATS_TEST_NAME.log"
+
+  # guarantee that background processes get their own process group -> pid=pgid
+  set -m
+  
+  load 'concurrent-coordination'
+  export SINGLE_USE_LATCH_DIR="${BATS_SUITE_TMPDIR}"
+  # we cannot use run for a background task, so we have to store the output for later
+  bats "$FIXTURE_ROOT/hang_in_teardown_file.bats" --tap  >"$TEMPFILE" 2>&1 & # don't block execution, or we cannot send signals
+
+  SUBPROCESS_PID=$!
+  
+  single-use-latch::wait hang_in_teardown_file 1 10
+
+  # emulate CTRL-C by sending SIGINT to the whole process group
+  kill -SIGINT -- -$SUBPROCESS_PID
+
+  # the test suite must be marked as failed!
+  ! wait $SUBPROCESS_PID
+
+  run cat "$TEMPFILE"
+  echo "$output"
+
+  [[ "${lines[0]}" == "1..1" ]]
+  [[ "${lines[1]}" == "ok 1 empty" ]]
+  [[ "${lines[2]}" == "not ok 2 teardown_file failed" ]]
+  [[ "${lines[3]}" == "# (from function \`teardown_file' in test file ${RELATIVE_FIXTURE_ROOT}/hang_in_teardown_file.bats, line 4)" ]]
+  [[ "${lines[4]}" == "#   \`sleep 10' failed with status 130" ]]
+  [[ "${lines[5]}" == "# Received SIGINT, aborting ..." ]]
+  [[ "${lines[6]}" == "# bats warning: Executed 2 instead of expected 1 tests" ]]
 }

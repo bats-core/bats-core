@@ -308,6 +308,12 @@ There are several global variables you can use to introspect on Bats tests:
    store all its internal temporary files during the tests.
    (default: `$BATS_TMPDIR/bats-run-$BATS_ROOT_PID-XXXXXX`)
 - `$BATS_FILE_EXTENSION` (default: `bats`) specifies the extension of test files that should be found when running a suite (via `bats [-r] suite_folder/`)
+- `$BATS_SUITE_TMPDIR` is a temporary directory common to all tests of a suite.
+  Could be used to create files required by multiple tests.
+- `$BATS_FILE_TMPDIR` is a temporary directory common to all tests of a test file.
+  Could be used to create files required by multiple tests in the same test file.
+- `$BATS_TEST_TMPDIR` is a temporary directory unique for each test.
+  Could be used to create files required only for specific tests.
 
 ## Libraries and Add-ons
 

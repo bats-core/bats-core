@@ -36,7 +36,7 @@ check_parallel_tests() { # <expected maximum parallelity>
 }
 
 @test "parallel test execution with --jobs" {
-  export FILE_MARKER=$(mktemp)
+  export FILE_MARKER=$(mktemp "${BATS_RUN_TMPDIR}/file_marker.XXXXXX")
   
   export PARALLELITY=3
   run bats --jobs $PARALLELITY "$FIXTURE_ROOT/parallel.bats"
@@ -59,7 +59,7 @@ check_parallel_tests() { # <expected maximum parallelity>
 }
 
 @test "parallel suite execution with --jobs" {
-  export FILE_MARKER=$(mktemp)
+  export FILE_MARKER=$(mktemp "${BATS_RUN_TMPDIR}/file_marker.XXXXXX")
   export PARALLELITY=12
 
   # file parallelization is needed for maximum parallelity!
@@ -84,7 +84,7 @@ check_parallel_tests() { # <expected maximum parallelity>
 }
 
 @test "setup_file is not over parallelized" {
-  export FILE_MARKER=$(mktemp)
+  export FILE_MARKER=$(mktemp "${BATS_RUN_TMPDIR}/file_marker.XXXXXX")
   export PARALLELITY=2
 
   # file parallelization is needed for this test!

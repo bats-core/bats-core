@@ -9,6 +9,14 @@ convention of using return code 0 to signify success and everything non-zero to 
 
 Please adhere to this idiom while using bats, or you will constantly work against your environment.
 
+My negated statement (e.g. ! true) does not fail the test, even when it should.
+-------------------------------------------------------------------------------
+
+Bash deliberately excludes negated return values from causing a pipeline to exit (see bash's `-e` option). You'll need to use the form `! x || false` or (recommended) use `run` and check for `[ $status != 0 ]`.
+
+If the negated command is the final statement in a test, that final statement's (negated) exit status will propagate through to the test's return code as usual.
+Negated statements of the form `! x || false` will explicitly fail the test when the pipeline returns true, regardless of where they occur in the test.
+
 I cannot register a test multiple times via for loop.
 -----------------------------------------------------
 
@@ -36,8 +44,8 @@ If you need such a feature, please let us know about your usecase.
 
 As a workaround you can use environment variables to pass parameters.
 
-Testing functions that return their results via a variable.
------------------------------------------------------------
+Why can't my function return results via a variable when using `run`?
+---------------------------------------------------------------------
 
 The `run` function executes its command in a subshell which means the changes to variables won't be available in the calling shell.
 

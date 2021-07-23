@@ -109,3 +109,20 @@ remove_prefix() {
     printf "%s" "$path"
   fi
 }
+
+normalize_base_path() { # <target variable> <base path>
+    # the relative path root to use for reporting filenames
+    # this is mainly intended for suite mode, where this will be the suite root folder
+    local base_path="$2"
+    # use the containing directory when --base-path is a file
+    if [[ ! -d "$base_path" ]]; then
+        base_path="$(dirname "$base_path")"
+    fi
+    # get the absolute path
+    base_path="$(cd "$base_path" && pwd)"
+    # ensure the path ends with / to strip that later on
+    if [[ "${base_path}" != *"/" ]]; then
+        base_path="$base_path/"
+    fi
+    printf -v "$1" "%s" "$base_path"
+}

@@ -49,6 +49,12 @@ fi
 
 BATS_TEST_FILENAME="$filename"
 
+if ! BATS_FILE_TMPDIR=$(mktemp -d "${BATS_SUITE_TMPDIR}/file-tmpdir-$(basename "${BATS_TEST_FILENAME}")-XXXXXX");then
+  printf '%s\n' "Failed to create BATS_FILE_TMPDIR with mktemp" >&2
+  exit 1
+fi
+export BATS_FILE_TMPDIR
+
 # shellcheck source=lib/bats-core/preprocessing.bash
 # shellcheck disable=SC2153
 source "$BATS_ROOT/lib/bats-core/preprocessing.bash"
@@ -73,21 +79,38 @@ bats_run_setup_file() {
   # shellcheck disable=2034
   BATS_TEST_COMPLETED= # used in tracing.bash
 
+  BATS_SOURCE_FILE_COMPLETED=
   BATS_SETUP_FILE_COMPLETED=
   BATS_TEARDOWN_FILE_COMPLETED=
   # shellcheck disable=2034
   BATS_ERROR_STATUS= # used in tracing.bash
   trap 'bats_debug_trap "$BASH_SOURCE"' DEBUG
+
+  touch "$BATS_OUT"
+
   trap 'bats_error_trap' ERR
   trap 'bats_file_teardown_trap' EXIT
 
-  touch "$BATS_OUT"
+  local status=0
   # get the setup_file/teardown_file functions for this file (if it has them)
   # shellcheck disable=SC1090
-  source "$BATS_TEST_SOURCE"
-  setup_file >>"$BATS_OUT" 2>&1
+  source "$BATS_TEST_SOURCE"  >  >(bats_replace_filename) 2>&1
+
+  BATS_SOURCE_FILE_COMPLETED=1
+
+  setup_file > >(bats_replace_filename >>"$BATS_OUT") 2>&1
 
   BATS_SETUP_FILE_COMPLETED=1
+}
+
+function bats_replace_filename() {
+  local line
+  while read -r line; do
+    printf "%s\n" "${line//$BATS_TEST_SOURCE/$filename}"
+  done
+  if [[ -n "$line" ]]; then
+    printf "%s\n" "${line//$BATS_TEST_SOURCE/$filename}"
+  fi
 }
 
 bats_run_teardown_file() {
@@ -113,8 +136,12 @@ bats_file_exit_trap() {
   if [[ -z "$BATS_SETUP_FILE_COMPLETED" || -z "$BATS_TEARDOWN_FILE_COMPLETED" ]]; then
     if [[ -z "$BATS_SETUP_FILE_COMPLETED" ]]; then
       FAILURE_REASON='setup_file'
-    else
+    elif [[ -z "$BATS_TEARDOWN_FILE_COMPLETED" ]]; then
       FAILURE_REASON='teardown_file'
+    elif [[ -z "$BATS_SOURCE_FILE_COMPLETED" ]]; then
+      FAILURE_REASON='source'
+    else
+      FAILURE_REASON='unknown internal'
     fi
     printf "not ok %d %s\n" "$((test_number_in_suite + 1))" "$FAILURE_REASON failed" >&3
     bats_print_stack_trace "${BATS_STACK_TRACE[@]}" >&3
@@ -204,10 +231,9 @@ bats_run_tests_in_parallel() {
   return $status
 }
 
-bats_run_tests() {
-  status=0
-  tests_to_run=()
+bats_read_tests_list_file() {
   local line_number=0
+  tests_to_run=()
   # the global test number must be visible to traps -> not local
   first_test_number_in_suite=''
   while read -r test_line; do
@@ -229,11 +255,20 @@ bats_run_tests() {
 
   test_number_in_suite="$first_test_number_in_suite"
   test_number_in_file=0
+}
+
+bats_run_tests() {
+  status=0
+
   if [[ "$num_jobs" != 1 && "${BATS_NO_PARALLELIZE_WITHIN_FILE-False}" == False ]]; then
     export BATS_SEMAPHORE_NUMBER_OF_SLOTS="$num_jobs"
     bats_run_tests_in_parallel "$BATS_RUN_TMPDIR/parallel_output" || status=1
   else
     for test_name in "${tests_to_run[@]}"; do
+      if [[ "${BATS_INTERRUPTED-NOTSET}" != NOTSET ]]; then
+        status=130 # bash's code for SIGINT exits
+        break
+      fi
       # Only handle non-empty lines
       if [[ $test_name ]]; then
         ((++test_number_in_suite))
@@ -250,11 +285,14 @@ bats_run_tests() {
   export status
 }
 
+trap 'BATS_INTERRUPTED=true' INT
+
 if [[ -n "$extended_syntax" ]]; then
   printf "suite %s\n" "$filename"
 fi
 
 bats_preprocess_source "$filename"
+bats_read_tests_list_file
 bats_run_setup_file
 bats_run_tests
 bats_run_teardown_file

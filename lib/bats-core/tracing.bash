@@ -20,6 +20,9 @@ bats_capture_stack_trace() {
 				;;
 			esac
 		fi
+		if [[ "${BASH_SOURCE[$i + 1]}" == *"bats-exec-file" ]] && [[ "$funcname" == 'source' ]]; then
+			break
+		fi
 	done
 }
 
@@ -43,7 +46,10 @@ bats_print_stack_trace() {
 
 		local fn
 		bats_frame_function "$frame" 'fn'
-		if [[ "$fn" != "$BATS_TEST_NAME" ]]; then
+		if [[ "$fn" != "$BATS_TEST_NAME" ]] && 
+			# don't print "from function `source'"",
+			# when failing in free code during `source $test_file` from bats-exec-file
+			! [[ "$fn" == 'source' &&  $index -eq $count ]]; then 
 			printf "from function \`%s' " "$fn"
 		fi
 
@@ -58,6 +64,9 @@ bats_print_stack_trace() {
 }
 
 bats_print_failed_command() {
+	if [[ ${#BATS_STACK_TRACE[@]} -eq 0 ]]; then
+		return 
+	fi
 	local frame="${BATS_STACK_TRACE[${#BATS_STACK_TRACE[@]} - 1]}"
 	local filename
 	local lineno
@@ -117,9 +126,31 @@ bats_trim_filename() {
 	printf -v "$2" '%s' "${1#$BATS_CWD/}"
 }
 
+# normalize a windows path from e.g. C:/directory to /c/directory
+# The path must point to an existing/accessable directory, not a file!
+bats_normalize_windows_dir_path() { # <output-var> <path>
+	local output_var="$1"
+	local path="$2"
+	if [[ $path == ?:* ]]; then
+		NORMALIZED_INPUT="$(cd "$path" || exit 1; pwd)"
+	else
+		NORMALIZED_INPUT="$path"
+	fi
+	printf -v "$output_var" "%s" "$NORMALIZED_INPUT"
+}
+
 bats_debug_trap() {
+	# on windows we sometimes get a mix of paths (when install via nmp install -g)
+	# which have C:/... or /c/... comparing them is going to be problematic.
+	# We need to normalize them to a common format!
+	bats_normalize_windows_dir_path NORMALIZED_BATS_ROOT "$BATS_ROOT"
+	bats_normalize_windows_dir_path NORMALIZED_INPUT "${1%/*}"
+	
 	# don't update the trace within library functions or we get backtraces from inside traps
-	if [[ "$1" != $BATS_ROOT/lib/* && "$1" != $BATS_ROOT/libexec/* ]]; then
+	# also don't record new stack traces while handling interruptions, to avoid overriding the interrupted command
+	if [[ "$NORMALIZED_INPUT" != $NORMALIZED_BATS_ROOT/lib/* && 
+		  "$NORMALIZED_INPUT" != $NORMALIZED_BATS_ROOT/libexec/* &&
+		  "${BATS_INTERRUPTED-NOTSET}" == NOTSET ]]; then
 		# The last entry in the stack trace is not useful when en error occured:
 		# It is either duplicated (kinda correct) or has wrong line number (Bash < 4.4)
 		# Therefore we capture the stacktrace but use it only after the next debug

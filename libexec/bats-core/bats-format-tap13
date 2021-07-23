@@ -25,7 +25,7 @@ fi
 yaml_block_open=''
 add_yaml_entry() {
   if [[ -z "$yaml_block_open" ]]; then
-    printf "  ...\n"
+    printf "  ---\n"
   fi
   printf "  %s: %s\n" "$1" "$2"
   yaml_block_open=1
@@ -37,6 +37,8 @@ close_previous_yaml_block() {
     yaml_block_open=''
   fi
 }
+
+trap '' INT
 
 while IFS= read -r line; do
   case "$line" in

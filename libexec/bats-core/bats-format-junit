@@ -1,25 +1,17 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# shellcheck source=lib/bats-core/formatter.bash
+source "$BATS_ROOT/lib/bats-core/formatter.bash"
+
 BASE_PATH=.
+
 
 while [[ "$#" -ne 0 ]]; do
   case "$1" in
     --base-path)
       shift
-      # the relative path root to use for reporting filenames
-      # this is mainly intended for suite mode, where this will be the suite root folder
-      BASE_PATH="$1"
-      # use the containing directory when --base-path is a file
-      if [[ ! -d "$BASE_PATH" ]]; then
-        BASE_PATH="$(dirname "$BASE_PATH")"
-      fi
-      # get the absolute path
-      BASE_PATH="$(cd "$BASE_PATH"; pwd)"
-      # ensure the path ends with / to strip that later on
-      if [[ "${BASE_PATH}" != *"/" ]]; then
-        BASE_PATH="$BASE_PATH/"
-      fi
+      normalize_base_path BASE_PATH "$1"
     ;;
   esac
   shift
@@ -180,15 +172,13 @@ finish_suite() {
   suite_footer
 }
 
-# shellcheck source=lib/bats-core/formatter.bash
-source "$BATS_ROOT/lib/bats-core/formatter.bash"
-
 bats_tap_stream_plan() { #  <number of tests>
   :
 }
 
 init_suite
 trap finish_suite EXIT
+trap '' INT
 
 bats_tap_stream_begin() { # <test index> <test name>
   flush_log
