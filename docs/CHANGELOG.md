@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 
 ## [Unreleased]
 
+## [1.4.1] - 2021-07-24
+
 ### Added
 
 * Docker image architectures amd64, 386, arm64, arm/v7, arm/v6, ppc64le, s390x (#438)
