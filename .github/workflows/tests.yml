@@ -47,7 +47,7 @@ jobs:
           TERM: linux # fix tput for tty issue work around
         run: |
           npm pack ./
-          sudo npm install -g ./bats-$(npm view ./package.json version).tgz
+          sudo npm install -g ./bats-*.tgz
           bats test  
 
   windows:
@@ -74,10 +74,9 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
-      - run: |
-          npm pack ./
-          npm install -g ./bats-$(npm view ./package.json version).tgz
-          bats test        
+      - run: npm pack ./
+      - run: npm install -g (get-item .\bats-*.tgz).FullName
+      - run: bats test        
 
   macos:
     strategy:
@@ -117,7 +116,7 @@ jobs:
         run: |
           npm pack ./
           # somehow there is already an intalled bats version around
-          npm install --force -g ./bats-$(npm view ./package.json version).tgz
+          npm install --force -g ./bats-*.tgz
           bats test  
 
   bash-version:
