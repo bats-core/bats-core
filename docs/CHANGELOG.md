@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 
 ## [Unreleased]
 
+## [1.4.0] - 2021-07-23
+
 ### Added
 
 * added BATS_TEST_TMPDIR, BATS_FILE_TMPDIR, BATS_SUITE_TMPDIR (#413)
