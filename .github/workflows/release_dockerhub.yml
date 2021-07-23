@@ -17,7 +17,7 @@ jobs:
           run: |
             EXPECTED_VERSION=${{ github.event.inputs.version }}
             TAG_VERSION=${GITHUB_REF#refs/tags/v} # refs/tags/v1.2.3 -> 1.2.3
-            echo ::set-output name=version::${EXPECTED_VERSION:-TAG_VERSION}
+            echo ::set-output name=version::${EXPECTED_VERSION:-$TAG_VERSION}
         -
           name: Set up QEMU
           uses: docker/setup-qemu-action@v1
