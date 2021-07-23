@@ -2,9 +2,12 @@ ARG bashver=latest
 
 FROM bash:${bashver}
 ARG TINI_VERSION=v0.19.0
+ARG TARGETPLATFORM
 
-RUN wget https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini-static-amd64 -O /tini && \
-    chmod +x /tini
+COPY ./docker /tmp/docker
+# default to amd64 when not running in buildx environment that provides target platform
+RUN /tmp/docker/install_tini.sh "${TARGETPLATFORM-linux/amd64}"
+    
 
 # Install parallel and accept the citation notice (we aren't using this in a
 # context where it make sense to cite GNU Parallel).

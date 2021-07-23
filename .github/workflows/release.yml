@@ -3,30 +3,8 @@ name: Release
 on:
   release: { types: [published] }
   workflow_dispatch:
-    inputs:
-        version:
-          description: 'Version to simulate for deploy'
-          required: true
 
 jobs:
-  version-check:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - run: |
-          EXPECTED_VERSION=${{ github.event.inputs.version }}
-          TAG_VERSION=${GITHUB_REF/refs\/tags\//}
-          TAG_VERSION=${TAG_VERSION#v} # v1.2.3 -> 1.2.3
-          EXPECTED_VERSION=${EXPECTED_VERSION:-TAG_VERSION}
-          echo "EXPECTED_VERSION=$EXPECTED_VERSION" >> $GITHUB_ENV
-      - name: Check tag version matches artifact versions
-        run: |
-          echo "Expected version: $EXPECTED_VERSION"
-          # use double negation to see the result unless we get a match
-          (./bin/bats --version | grep -F "$EXPECTED_VERSION") || (echo "Bats version check failed: "; ./bin/bats --version; exit -1)
-          (npm view . version | grep -F "$EXPECTED_VERSION")  || (echo "npm version check failed: "; npm view . version; exit -1)
-          (grep '^Version:' 'contrib/rpm/bats.spec' | grep -F "$EXPECTED_VERSION") || (echo "debian package version check failed: "; grep '^Version:' 'contrib/rpm/bats.spec'; exit -1)
-
   npmjs:
     runs-on: ubuntu-latest
     needs: version-check
@@ -52,18 +30,3 @@ jobs:
       - run: npm publish --ignore-scripts
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  dockerhub:
-    runs-on: ubuntu-latest
-    needs: version-check
-    steps:
-      - uses: actions/checkout@v2
-      - id: version
-        run: echo ::set-output name=version::${GITHUB_REF/refs\/tags\//}
-      - uses: docker/build-push-action@v1
-        with:
-          file: ./Dockerfile
-          platforms: linux/amd64
-          username: bats
-          password: ${{ secrets.DOCKER_PASSWORD }}
-          tags: bats/bats:${{ steps.version.outputs.version }}
