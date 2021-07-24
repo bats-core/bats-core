@@ -29,14 +29,51 @@ load() {
   source "${file}"
 }
 
-run() { # [--keep-empty-lines] [--] <command to run...>
+bats_suppress_stderr() {
+  "$@" 2>/dev/null
+}
+
+bats_suppress_stdout() {
+  "$@" 2>&1 >/dev/null 
+}
+
+bats_redirect_stderr_into_file() {
+  "$@" 2>>"$bats_run_separate_stderr_file" # use >> to see collisions' content
+}
+
+bats_merge_stdout_and_stderr() {
+  "$@" 2>&1
+}
+
+# write separate lines from <input-var> into <output-array>
+bats_separate_lines() { # <output-array> <input-var>
+  output_array_name="$1"
+  input_var_name="$2"
+  if [[ $keep_empty_lines ]]; then
+    local bats_separate_lines_lines=()
+    while IFS= read -r line; do
+      bats_separate_lines_lines+=("$line")
+    done <<<"${!input_var_name}"
+    eval "${output_array_name}=(\"\${bats_separate_lines_lines[@]}\")"
+  else
+    # shellcheck disable=SC2034,SC2206
+    IFS=$'\n' read -d '' -r -a $output_array_name <<<"${!input_var_name}"
+  fi
+}
+
+run() { # [--keep-empty-lines] [--output merged|separate|stderr|stdout] [--] <command to run...>
   trap bats_interrupt_trap_in_run INT
   local keep_empty_lines=
+  local output_case=merged
   # parse options starting with -
   while [[ $# -gt 0 && $1 == -* ]]; do
     case "$1" in
       --keep-empty-lines)
         keep_empty_lines=1
+      ;;
+      --output)
+        output_case="$2"
+        shift 2 # consume the value too!
       ;;
       --)
         shift # eat the -- before breaking away
@@ -45,6 +82,30 @@ run() { # [--keep-empty-lines] [--] <command to run...>
     esac
     shift
   done
+
+  local pre_command=
+
+  case "$output_case" in
+    merged) # redirects stderr into stdout and fills only $output/$lines
+      pre_command=bats_merge_stdout_and_stderr
+    ;;
+    separate) # splits stderr into own file and fills $stderr/$stderr_lines too
+      local bats_run_separate_stderr_file
+      bats_run_separate_stderr_file="$(mktemp ${BATS_TEST_TMPDIR}/separate-stderr-XXX)"
+      pre_command=bats_redirect_stderr_into_file
+    ;;
+    stderr) # suppresses stdout and fills $stderr/$stderr_lines
+      pre_command=bats_suppress_stdout
+    ;;
+    stdout) # suppresses stderr and fills $output/$lines
+      pre_command=bats_suppress_stderr
+    ;;
+    *)
+      printf "ERROR: Unknown --output value %s" "$output_case"
+      return 1
+    ;;
+  esac
+
   local origFlags="$-"
   set -f +eET
   local origIFS="$IFS"
@@ -52,24 +113,33 @@ run() { # [--keep-empty-lines] [--] <command to run...>
     # 'output', 'status', 'lines' are global variables available to tests.
     # preserve trailing newlines by appending . and removing it later
     # shellcheck disable=SC2034
-    output="$("$@"; status=$?; printf .; exit $status 2>&1)"
+    output="$($pre_command "$@"; status=$?; printf .; exit $status)"
+    # shellcheck disable=SC2034
+    status="$?"
     output="${output%.}"
-    lines=()
-    while IFS= read -r line; do
-      lines+=("$line")
-    done <<<"$output"
-    if [[ -n "$line" ]]; then  # if there's any content after the last newline
-      lines+=("$line")
-    fi
   else
     # 'output', 'status', 'lines' are global variables available to tests.
     # shellcheck disable=SC2034
-    output="$("$@" 2>&1)"
+    output="$($pre_command "$@")"
     # shellcheck disable=SC2034
     status="$?"
-    # shellcheck disable=SC2034,SC2206
-    IFS=$'\n' lines=($output)
   fi
+
+  bats_separate_lines lines output
+
+  case "$output_case" in
+    stderr)
+      stderr="$output"
+      stderr_lines=("${lines[@]}")
+      unset output
+      unset lines
+    ;;
+    separate)
+      read -d '' -r stderr < "$bats_run_separate_stderr_file"
+      bats_separate_lines stderr_lines stderr
+    ;;
+  esac
+
   IFS="$origIFS"
   set "-$origFlags"
 }
