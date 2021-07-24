@@ -986,3 +986,18 @@ EOF
   [[ "${lines[5]}" == "# Received SIGINT, aborting ..." ]]
   [[ "${lines[6]}" == "# bats warning: Executed 2 instead of expected 1 tests" ]]
 }
+
+
+@test "single star in output is not treated as a glob" {
+  star(){ echo '*'; }
+  
+  run star
+  [ "${lines[0]}" = '*' ]
+}
+
+@test "multiple stars in output are not treated as a glob" {
+  stars(){ echo '**'; }
+  
+  run stars
+  [ "${lines[0]}" = '**' ]
+}
