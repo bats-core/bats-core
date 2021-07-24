@@ -34,6 +34,8 @@ bats_suppress_stderr() {
 }
 
 bats_suppress_stdout() {
+  # throw away stdout and redirect stderr into stdout
+  # shellcheck disable=SC2069
   "$@" 2>&1 >/dev/null 
 }
 
@@ -57,7 +59,7 @@ bats_separate_lines() { # <output-array> <input-var>
     eval "${output_array_name}=(\"\${bats_separate_lines_lines[@]}\")"
   else
     # shellcheck disable=SC2034,SC2206
-    IFS=$'\n' read -d '' -r -a $output_array_name <<<"${!input_var_name}"
+    IFS=$'\n' read -d '' -r -a "$output_array_name" <<<"${!input_var_name}"
   fi
 }
 
@@ -91,7 +93,7 @@ run() { # [--keep-empty-lines] [--output merged|separate|stderr|stdout] [--] <co
     ;;
     separate) # splits stderr into own file and fills $stderr/$stderr_lines too
       local bats_run_separate_stderr_file
-      bats_run_separate_stderr_file="$(mktemp ${BATS_TEST_TMPDIR}/separate-stderr-XXX)"
+      bats_run_separate_stderr_file="$(mktemp "${BATS_TEST_TMPDIR}/separate-stderr-XXX")"
       pre_command=bats_redirect_stderr_into_file
     ;;
     stderr) # suppresses stdout and fills $stderr/$stderr_lines
@@ -130,11 +132,13 @@ run() { # [--keep-empty-lines] [--output merged|separate|stderr|stdout] [--] <co
   case "$output_case" in
     stderr)
       stderr="$output"
+      # shellcheck disable=SC2034
       stderr_lines=("${lines[@]}")
       unset output
       unset lines
     ;;
     separate)
+      # shellcheck disable=SC2034
       read -d '' -r stderr < "$bats_run_separate_stderr_file"
       bats_separate_lines stderr_lines stderr
     ;;
