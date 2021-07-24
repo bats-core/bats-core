@@ -93,7 +93,7 @@ run() { # [--keep-empty-lines] [--output merged|separate|stderr|stdout] [--] <co
     ;;
     separate) # splits stderr into own file and fills $stderr/$stderr_lines too
       local bats_run_separate_stderr_file
-      bats_run_separate_stderr_file="$(mktemp "${BATS_TEST_TMPDIR}/separate-stderr-XXX")"
+      bats_run_separate_stderr_file="$(mktemp "${BATS_TEST_TMPDIR}/separate-stderr-XXXXXX")"
       pre_command=bats_redirect_stderr_into_file
     ;;
     stderr) # suppresses stdout and fills $stderr/$stderr_lines
