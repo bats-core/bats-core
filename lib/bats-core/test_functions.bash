@@ -29,18 +29,47 @@ load() {
   source "${file}"
 }
 
-run() {
+run() { # [--keep-empty-lines] [--] <command to run...>
   trap bats_interrupt_trap_in_run INT
+  local keep_empty_lines=
+  # parse options starting with -
+  while [[ $# -gt 0 && $1 == -* ]]; do
+    case "$1" in
+      --keep-empty-lines)
+        keep_empty_lines=1
+      ;;
+      --)
+        shift # eat the -- before breaking away
+        break
+      ;;
+    esac
+    shift
+  done
   local origFlags="$-"
   set -f +eET
   local origIFS="$IFS"
-  # 'output', 'status', 'lines' are global variables available to tests.
-  # shellcheck disable=SC2034
-  output="$("$@" 2>&1)"
-  # shellcheck disable=SC2034
-  status="$?"
-  # shellcheck disable=SC2034,SC2206
-  IFS=$'\n' lines=($output)
+  if [[ $keep_empty_lines ]]; then
+    # 'output', 'status', 'lines' are global variables available to tests.
+    # preserve trailing newlines by appending . and removing it later
+    # shellcheck disable=SC2034
+    output="$("$@"; status=$?; printf .; exit $status 2>&1)"
+    output="${output%.}"
+    lines=()
+    while IFS= read -r line; do
+      lines+=("$line")
+    done <<<"$output"
+    if [[ -n "$line" ]]; then  # if there's any content after the last newline
+      lines+=("$line")
+    fi
+  else
+    # 'output', 'status', 'lines' are global variables available to tests.
+    # shellcheck disable=SC2034
+    output="$("$@" 2>&1)"
+    # shellcheck disable=SC2034
+    status="$?"
+    # shellcheck disable=SC2034,SC2206
+    IFS=$'\n' lines=($output)
+  fi
   IFS="$origIFS"
   set "-$origFlags"
 }
