@@ -109,7 +109,7 @@ run() { # [--keep-empty-lines] [--output merged|separate|stderr|stdout] [--] <co
   esac
 
   local origFlags="$-"
-  set -f +eET
+  set +eET
   local origIFS="$IFS"
   if [[ $keep_empty_lines ]]; then
     # 'output', 'status', 'lines' are global variables available to tests.

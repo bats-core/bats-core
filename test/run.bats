@@ -74,3 +74,10 @@ print-stderr-stdout() {
     [ "$stderr" = stderr ]
     [ ${#stderr_lines[@]} -eq 1 ]
 }
+
+@test "run does not change set flags" {
+    old_flags="$-"
+    run true
+    echo -- "$-" == "$old_flags"
+    [ "$-" == "$old_flags" ]
+}
