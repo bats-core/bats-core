@@ -144,7 +144,7 @@ bats_perform_test() {
   export BATS_TEST_NUMBER="$3"
 
   if ! declare -F "$BATS_TEST_NAME" &>/dev/null; then
-    printf "bats: unknown test name \`%s'\n" "$BATS_TEST_NAME" >&2
+    printf "bats: unknown test name \`%s\`\n" "$BATS_TEST_NAME" >&2
     exit 1
   fi
 

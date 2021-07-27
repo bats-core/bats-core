@@ -104,7 +104,7 @@ fixtures bats
   [ "${lines[0]}" = '1..1' ]
   [ "${lines[1]}" = 'not ok 1 a failing test' ]
   [ "${lines[2]}" = "# (in test file $RELATIVE_FIXTURE_ROOT/failing.bats, line 4)" ]
-  [ "${lines[3]}" = "#   \`eval \"( exit \${STATUS:-1} )\"' failed" ]
+  [ "${lines[3]}" = "#   \`eval \"( exit \${STATUS:-1} )\"\` failed" ]
 }
 
 @test "one failing and one passing test" {
@@ -113,23 +113,23 @@ fixtures bats
   [ "${lines[0]}" = '1..2' ]
   [ "${lines[1]}" = 'not ok 1 a failing test' ]
   [ "${lines[2]}" = "# (in test file $RELATIVE_FIXTURE_ROOT/failing_and_passing.bats, line 2)" ]
-  [ "${lines[3]}" = "#   \`false' failed" ]
+  [ "${lines[3]}" = "#   \`false\` failed" ]
   [ "${lines[4]}" = 'ok 2 a passing test' ]
 }
 
 @test "failing test with significant status" {
   STATUS=2 run bats "$FIXTURE_ROOT/failing.bats"
   [ $status -eq 1 ]
-  [ "${lines[3]}" = "#   \`eval \"( exit \${STATUS:-1} )\"' failed with status 2" ]
+  [ "${lines[3]}" = "#   \`eval \"( exit \${STATUS:-1} )\"\` failed with status 2" ]
 }
 
 @test "failing helper function logs the test case's line number" {
   run bats "$FIXTURE_ROOT/failing_helper.bats"
   [ $status -eq 1 ]
   [ "${lines[1]}" = 'not ok 1 failing helper function' ]
-  [ "${lines[2]}" = "# (from function \`failing_helper' in file $RELATIVE_FIXTURE_ROOT/test_helper.bash, line 6," ]
+  [ "${lines[2]}" = "# (from function \`failing_helper\` in file $RELATIVE_FIXTURE_ROOT/test_helper.bash, line 6," ]
   [ "${lines[3]}" = "#  in test file $RELATIVE_FIXTURE_ROOT/failing_helper.bats, line 5)" ]
-  [ "${lines[4]}" = "#   \`failing_helper' failed" ]
+  [ "${lines[4]}" = "#   \`failing_helper\` failed" ]
 }
 
 @test "test environments are isolated" {
@@ -157,8 +157,8 @@ fixtures bats
   run bats "$FIXTURE_ROOT/failing_setup.bats"
   [ $status -eq 1 ]
   [ "${lines[1]}" = 'not ok 1 truth' ]
-  [ "${lines[2]}" = "# (from function \`setup' in test file $RELATIVE_FIXTURE_ROOT/failing_setup.bats, line 2)" ]
-  [ "${lines[3]}" = "#   \`false' failed" ]
+  [ "${lines[2]}" = "# (from function \`setup\` in test file $RELATIVE_FIXTURE_ROOT/failing_setup.bats, line 2)" ]
+  [ "${lines[3]}" = "#   \`false\` failed" ]
 }
 
 @test "passing test with teardown failure" {
@@ -166,8 +166,8 @@ fixtures bats
   [ $status -eq 1 ]
   echo "$output"
   [ "${lines[1]}" = 'not ok 1 truth' ]
-  [ "${lines[2]}" = "# (from function \`teardown' in test file $RELATIVE_FIXTURE_ROOT/failing_teardown.bats, line 2)" ]
-  [ "${lines[3]}" = "#   \`eval \"( exit \${STATUS:-1} )\"' failed" ]
+  [ "${lines[2]}" = "# (from function \`teardown\` in test file $RELATIVE_FIXTURE_ROOT/failing_teardown.bats, line 2)" ]
+  [ "${lines[3]}" = "#   \`eval \"( exit \${STATUS:-1} )\"\` failed" ]
 }
 
 @test "failing test with teardown failure" {
@@ -175,13 +175,13 @@ fixtures bats
   [ $status -eq 1 ]
   [ "${lines[1]}" =  'not ok 1 truth' ]
   [ "${lines[2]}" =  "# (in test file $RELATIVE_FIXTURE_ROOT/failing_teardown.bats, line 6)" ]
-  [ "${lines[3]}" = $'#   `[ "$PASS" = 1 ]\' failed' ]
+  [ "${lines[3]}" = $'#   `[ "$PASS" = 1 ]` failed' ]
 }
 
 @test "teardown failure with significant status" {
   PASS=1 STATUS=2 run bats "$FIXTURE_ROOT/failing_teardown.bats"
   [ $status -eq 1 ]
-  [ "${lines[3]}" = "#   \`eval \"( exit \${STATUS:-1} )\"' failed with status 2" ]
+  [ "${lines[3]}" = "#   \`eval \"( exit \${STATUS:-1} )\"\` failed with status 2" ]
 }
 
 @test "failing test file outside of BATS_CWD" {
@@ -388,7 +388,7 @@ fixtures bats
   [ "${lines[3]}" =  'ok 3 input redirection' ]
   [ "${lines[4]}" =  'not ok 4 failing' ]
   [ "${lines[5]}" =  "# (in test file $RELATIVE_FIXTURE_ROOT/single_line.bats, line 9)" ]
-  [ "${lines[6]}" = $'#   `@test "failing" { false; }\' failed' ]
+  [ "${lines[6]}" = $'#   `@test "failing" { false; }` failed' ]
 }
 
 @test "testing IFS not modified by run" {
@@ -487,16 +487,16 @@ END_OF_ERR_MSG
   run bats "$FIXTURE_ROOT/source_nonexistent_file_in_setup.bats"
   [ $status -eq 1 ]
   [ "${lines[1]}" = 'not ok 1 sourcing nonexistent file fails in setup' ]
-  [ "${lines[2]}" = "# (from function \`setup' in test file $RELATIVE_FIXTURE_ROOT/source_nonexistent_file_in_setup.bats, line 2)" ]
-  [ "${lines[3]}" = "#   \`source \"nonexistent file\"' failed" ]
+  [ "${lines[2]}" = "# (from function \`setup\` in test file $RELATIVE_FIXTURE_ROOT/source_nonexistent_file_in_setup.bats, line 2)" ]
+  [ "${lines[3]}" = "#   \`source \"nonexistent file\"\` failed" ]
 }
 
 @test "referencing unset parameter in setup produces error output" {
   run bats "$FIXTURE_ROOT/reference_unset_parameter_in_setup.bats"
   [ $status -eq 1 ]
   [ "${lines[1]}" = 'not ok 1 referencing unset parameter fails in setup' ]
-  [ "${lines[2]}" = "# (from function \`setup' in test file $RELATIVE_FIXTURE_ROOT/reference_unset_parameter_in_setup.bats, line 3)" ]
-  [ "${lines[3]}" = "#   \`echo \"\$unset_parameter\"' failed" ]
+  [ "${lines[2]}" = "# (from function \`setup\` in test file $RELATIVE_FIXTURE_ROOT/reference_unset_parameter_in_setup.bats, line 3)" ]
+  [ "${lines[3]}" = "#   \`echo \"\$unset_parameter\"\` failed" ]
 }
 
 @test "sourcing a nonexistent file in test produces error output" {
@@ -504,7 +504,7 @@ END_OF_ERR_MSG
   [ $status -eq 1 ]
   [ "${lines[1]}" = 'not ok 1 sourcing nonexistent file fails' ]
   [ "${lines[2]}" = "# (in test file $RELATIVE_FIXTURE_ROOT/source_nonexistent_file.bats, line 2)" ]
-  [ "${lines[3]}" = "#   \`source \"nonexistent file\"' failed" ]
+  [ "${lines[3]}" = "#   \`source \"nonexistent file\"\` failed" ]
 }
 
 @test "referencing unset parameter in test produces error output" {
@@ -512,23 +512,23 @@ END_OF_ERR_MSG
   [ $status -eq 1 ]
   [ "${lines[1]}" = 'not ok 1 referencing unset parameter fails' ]
   [ "${lines[2]}" = "# (in test file $RELATIVE_FIXTURE_ROOT/reference_unset_parameter.bats, line 3)" ]
-  [ "${lines[3]}" = "#   \`echo \"\$unset_parameter\"' failed" ]
+  [ "${lines[3]}" = "#   \`echo \"\$unset_parameter\"\` failed" ]
 }
 
 @test "sourcing a nonexistent file in teardown produces error output" {
   run bats "$FIXTURE_ROOT/source_nonexistent_file_in_teardown.bats"
   [ $status -eq 1 ]
   [ "${lines[1]}" = 'not ok 1 sourcing nonexistent file fails in teardown' ]
-  [ "${lines[2]}" = "# (from function \`teardown' in test file $RELATIVE_FIXTURE_ROOT/source_nonexistent_file_in_teardown.bats, line 2)" ]
-  [ "${lines[3]}" = "#   \`source \"nonexistent file\"' failed" ]
+  [ "${lines[2]}" = "# (from function \`teardown\` in test file $RELATIVE_FIXTURE_ROOT/source_nonexistent_file_in_teardown.bats, line 2)" ]
+  [ "${lines[3]}" = "#   \`source \"nonexistent file\"\` failed" ]
 }
 
 @test "referencing unset parameter in teardown produces error output" {
   run bats "$FIXTURE_ROOT/reference_unset_parameter_in_teardown.bats"
   [ $status -eq 1 ]
   [ "${lines[1]}" = 'not ok 1 referencing unset parameter fails in teardown' ]
-  [ "${lines[2]}" = "# (from function \`teardown' in test file $RELATIVE_FIXTURE_ROOT/reference_unset_parameter_in_teardown.bats, line 3)" ]
-  [ "${lines[3]}" = "#   \`echo \"\$unset_parameter\"' failed" ]
+  [ "${lines[2]}" = "# (from function \`teardown\` in test file $RELATIVE_FIXTURE_ROOT/reference_unset_parameter_in_teardown.bats, line 3)" ]
+  [ "${lines[3]}" = "#   \`echo \"\$unset_parameter\"\` failed" ]
 }
 
 @test "execute exported function without breaking failing test output" {
@@ -539,7 +539,7 @@ END_OF_ERR_MSG
   [ "${lines[0]}" = "1..1" ]
   [ "${lines[1]}" = "not ok 1 failing test" ]
   [ "${lines[2]}" = "# (in test file $RELATIVE_FIXTURE_ROOT/exported_function.bats, line 7)" ]
-  [ "${lines[3]}" = "#   \`false' failed" ]
+  [ "${lines[3]}" = "#   \`false\` failed" ]
   [ "${lines[4]}" = "# a='exported_function'" ]
 }
 
@@ -551,7 +551,7 @@ END_OF_ERR_MSG
   [ "${#lines[@]}" -eq 7 ]
   [ "${lines[1]}" = 'not ok 1 no final newline' ]
   [ "${lines[2]}" = "# (in test file $RELATIVE_FIXTURE_ROOT/no-final-newline.bats, line 2)" ]
-  [ "${lines[3]}" = "#   \`printf 'foo\nbar\nbaz' >&2 && return 1' failed" ]
+  [ "${lines[3]}" = "#   \`printf 'foo\nbar\nbaz' >&2 && return 1\` failed" ]
   [ "${lines[4]}" = '# foo' ]
   [ "${lines[5]}" = '# bar' ]
   [ "${lines[6]}" = '# baz' ]
@@ -572,11 +572,11 @@ END_OF_ERR_MSG
   [ "${#lines[@]}" -eq 9 ]
   [ "${lines[1]}" = 'not ok 1 access unbound variable' ]
   [ "${lines[2]}" = "# (in test file $RELATIVE_FIXTURE_ROOT/unbound_variable.bats, line 8)" ]
-  [ "${lines[3]}" = "#   \`foo=\$unset_variable' failed" ]
+  [ "${lines[3]}" = "#   \`foo=\$unset_variable\` failed" ]
   [[ "${lines[4]}" =~ ".src: line 8:" ]]
   [ "${lines[5]}" = 'not ok 2 access second unbound variable' ]
   [ "${lines[6]}" = "# (in test file $RELATIVE_FIXTURE_ROOT/unbound_variable.bats, line 13)" ]
-  [ "${lines[7]}" = "#   \`foo=\$second_unset_variable' failed" ]
+  [ "${lines[7]}" = "#   \`foo=\$second_unset_variable\` failed" ]
   [[ "${lines[8]}" =~ ".src: line 13:" ]]
 }
 
@@ -638,7 +638,7 @@ END_OF_ERR_MSG
   [[ "${lines[3]}" == "ok 3 passing test" ]]
   [[ "${lines[4]}" == "not ok 4 failing test" ]]
   [[ "${lines[5]}" == "# (in test file $RELATIVE_FIXTURE_ROOT/set_-eu_in_setup_and_teardown.bats, line 22)" ]]
-  [[ "${lines[6]}" == "#   \`false' failed" ]]
+  [[ "${lines[6]}" == "#   \`false\` failed" ]]
   [[ "${#lines[@]}" -eq 7 ]]
 }
 
@@ -747,7 +747,7 @@ suite "$BATS_FIXTURE_ROOT/failing.bats"
 begin 1 test_a_failing_test
 not ok 1 a failing test
 # (in test file test/fixtures/bats/failing.bats, line 4)
-#   \`eval "( exit ${STATUS:-1} )"' failed
+#   \`eval "( exit ${STATUS:-1} )"\` failed
 begin 2 test_a_successful_test
 ok 2 a succesful test
 unknown line
@@ -805,9 +805,9 @@ EOF
   [ "$status" -ne 0 ]
   [ "${lines[0]}" == 1..1 ]
   [ "${lines[1]}" == 'not ok 1 setup_file failed' ]
-  [ "${lines[2]}" == "# (from function \`helper' in file $RELATIVE_FIXTURE_ROOT/failure_in_free_code.bats, line 4," ]
+  [ "${lines[2]}" == "# (from function \`helper\` in file $RELATIVE_FIXTURE_ROOT/failure_in_free_code.bats, line 4," ]
   [ "${lines[3]}" == "#  in test file $RELATIVE_FIXTURE_ROOT/failure_in_free_code.bats, line 7)" ]
-  [ "${lines[4]}" == "#   \`helper' failed" ]
+  [ "${lines[4]}" == "#   \`helper\` failed" ]
 }
 
 @test "CTRL-C aborts and fails the current test" {
@@ -841,7 +841,7 @@ EOF
 
   [[ "${lines[1]}" == "not ok 1 test" ]]
   [[ "${lines[2]}" == "# (in test file ${RELATIVE_FIXTURE_ROOT}/hang_in_test.bats, line 7)" ]]
-  [[ "${lines[3]}" == "#   \`sleep 10' failed with status 130" ]]
+  [[ "${lines[3]}" == "#   \`sleep 10\` failed with status 130" ]]
   [[ "${lines[4]}" == "# Received SIGINT, aborting ..." ]]
 }
 
@@ -876,7 +876,7 @@ EOF
 
   [[ "${lines[1]}" == "not ok 1 test" ]]
   [[ "${lines[2]}" == "# (in test file ${RELATIVE_FIXTURE_ROOT}/hang_in_run.bats, line 7)" ]]
-  [[ "${lines[3]}" == "#   \`run sleep 10' failed with status 130" ]]
+  [[ "${lines[3]}" == "#   \`run sleep 10\` failed with status 130" ]]
   [[ "${lines[4]}" == "# Received SIGINT, aborting ..." ]]
 }
 
@@ -910,8 +910,8 @@ EOF
   echo "$output"
 
   [[ "${lines[1]}" == "not ok 1 empty" ]]
-  [[ "${lines[2]}" == "# (from function \`teardown' in test file ${RELATIVE_FIXTURE_ROOT}/hang_in_teardown.bats, line 4)" ]]
-  [[ "${lines[3]}" == "#   \`sleep 10' failed" ]]
+  [[ "${lines[2]}" == "# (from function \`teardown\` in test file ${RELATIVE_FIXTURE_ROOT}/hang_in_teardown.bats, line 4)" ]]
+  [[ "${lines[3]}" == "#   \`sleep 10\` failed" ]]
   [[ "${lines[4]}" == "# Received SIGINT, aborting ..." ]]
 }
 
@@ -945,8 +945,8 @@ EOF
   echo "$output"
 
   [[ "${lines[1]}" == "not ok 1 setup_file failed" ]]
-  [[ "${lines[2]}" == "# (from function \`setup_file' in test file ${RELATIVE_FIXTURE_ROOT}/hang_in_setup_file.bats, line 4)" ]]
-  [[ "${lines[3]}" == "#   \`sleep 10' failed with status 130" ]]
+  [[ "${lines[2]}" == "# (from function \`setup_file\` in test file ${RELATIVE_FIXTURE_ROOT}/hang_in_setup_file.bats, line 4)" ]]
+  [[ "${lines[3]}" == "#   \`sleep 10\` failed with status 130" ]]
   [[ "${lines[4]}" == "# Received SIGINT, aborting ..." ]]
 }
 
@@ -981,8 +981,8 @@ EOF
   [[ "${lines[0]}" == "1..1" ]]
   [[ "${lines[1]}" == "ok 1 empty" ]]
   [[ "${lines[2]}" == "not ok 2 teardown_file failed" ]]
-  [[ "${lines[3]}" == "# (from function \`teardown_file' in test file ${RELATIVE_FIXTURE_ROOT}/hang_in_teardown_file.bats, line 4)" ]]
-  [[ "${lines[4]}" == "#   \`sleep 10' failed with status 130" ]]
+  [[ "${lines[3]}" == "# (from function \`teardown_file\` in test file ${RELATIVE_FIXTURE_ROOT}/hang_in_teardown_file.bats, line 4)" ]]
+  [[ "${lines[4]}" == "#   \`sleep 10\` failed with status 130" ]]
   [[ "${lines[5]}" == "# Received SIGINT, aborting ..." ]]
   [[ "${lines[6]}" == "# bats warning: Executed 2 instead of expected 1 tests" ]]
 }

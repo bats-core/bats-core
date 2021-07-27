@@ -52,8 +52,8 @@ setup_file() {
   echo "$output"
   [[ "${lines[0]}" == "1..2" ]]
   [[ "${lines[1]}" == "not ok 1 setup_file failed" ]]
-  [[ "${lines[2]}" == "# (from function \`setup_file' in test file $RELATIVE_FIXTURE_ROOT/setup_file_failed.bats, line 2)" ]]
-  [[ "${lines[3]}" == "#   \`false' failed" ]]
+  [[ "${lines[2]}" == "# (from function \`setup_file\` in test file $RELATIVE_FIXTURE_ROOT/setup_file_failed.bats, line 2)" ]]
+  [[ "${lines[3]}" == "#   \`false\` failed" ]]
   [[ "${lines[4]}" == "# bats warning: Executed 1 instead of expected 2 tests" ]] # this warning is expected
   # to appease the count validator, we would have to reduce the expected number of tests (retroactively?) or 
   # output even those tests that should be skipped due to a failed setup_file.
@@ -68,8 +68,8 @@ setup_file() {
   [[ "${lines[0]}" == "1..1" ]]
   [[ "${lines[1]}" == "ok 1 test" ]]
   [[ "${lines[2]}" == "not ok 2 teardown_file failed" ]]
-  [[ "${lines[3]}" == "# (from function \`teardown_file' in test file $RELATIVE_FIXTURE_ROOT/teardown_file_failed.bats, line 3)" ]]
-  [[ "${lines[4]}" == "#   \`false' failed" ]]
+  [[ "${lines[3]}" == "# (from function \`teardown_file\` in test file $RELATIVE_FIXTURE_ROOT/teardown_file_failed.bats, line 3)" ]]
+  [[ "${lines[4]}" == "#   \`false\` failed" ]]
   [[ "${lines[5]}" == "# bats warning: Executed 2 instead of expected 1 tests" ]] # for now this warning is expected
   # for a failed teardown_file not to change the number of tests being reported, we would have to alter at least one provious test result report
   # this would require arbitrary amounts of buffering so we simply add our own line with a fake test number
@@ -85,7 +85,7 @@ setup_file() {
   [[ $output == "1..1
 not ok 1 failing test
 # (in test file $RELATIVE_FIXTURE_ROOT/teardown_file_after_failing_test.bats, line 6)
-#   \`false' failed" ]]
+#   \`false\` failed" ]]
 }
 
 @test "teardown_file should run even after user abort via CTRL-C" {
@@ -149,8 +149,8 @@ ok 2 must not see variable from first run" ]]
   echo "$output"
   [ "${lines[0]}" == "1..1" ]
   [ "${lines[1]}" == "not ok 1 setup_file failed" ]
-  [ "${lines[2]}" == "# (from function \`setup_file' in test file $RELATIVE_FIXTURE_ROOT/setup_file_halfway_error.bats, line 3)" ]
-  [ "${lines[3]}" == "#   \`false' failed" ]
+  [ "${lines[2]}" == "# (from function \`setup_file\` in test file $RELATIVE_FIXTURE_ROOT/setup_file_halfway_error.bats, line 3)" ]
+  [ "${lines[3]}" == "#   \`false\` failed" ]
 }
 
 @test "halfway teardown_file errors are caught and reported" {
@@ -160,8 +160,8 @@ ok 2 must not see variable from first run" ]]
   [[ "${lines[0]}" == "1..1" ]]
   [[ "${lines[1]}" == "ok 1 empty" ]]
   [[ "${lines[2]}" == "not ok 2 teardown_file failed" ]]
-  [[ "${lines[3]}" == "# (from function \`teardown_file' in test file $RELATIVE_FIXTURE_ROOT/teardown_file_halfway_error.bats, line 3)" ]]
-  [[ "${lines[4]}" == "#   \`false' failed" ]]
+  [[ "${lines[3]}" == "# (from function \`teardown_file\` in test file $RELATIVE_FIXTURE_ROOT/teardown_file_halfway_error.bats, line 3)" ]]
+  [[ "${lines[4]}" == "#   \`false\` failed" ]]
   [[ "${lines[5]}" == "# bats warning: Executed 2 instead of expected 1 tests" ]] # for now this warning is expected
 }
 

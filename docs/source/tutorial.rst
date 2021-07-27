@@ -60,7 +60,7 @@ and run it by
     $ ./test/bats/bin/bats test/test.bats
      ✗ can run our script
        (in test file test/test.bats, line 2)
-         `./project.sh' failed with status 127
+         `./project.sh` failed with status 127
        /tmp/bats-run-19605/bats.19627.src: line 2: ./project.sh: No such file or directory
 
     1 test, 1 failure
@@ -80,7 +80,7 @@ A new test run gives us
     $ ./test/bats/bin/bats test/test.bats
      ✗ can run our script
        (in test file test/test.bats, line 2)
-         `./project.sh' failed with status 127
+         `./project.sh` failed with status 127
        /tmp/bats-run-19605/bats.19627.src: line 2: ./project.sh: No such file or directory
 
     1 test, 1 failure
@@ -171,7 +171,7 @@ And gives is this test output:
     $ ./test/bats/bin/bats test/test.bats 
      ✗ can run our script
        (in test file test/test.bats, line 11)
-         `project.sh' failed
+         `project.sh` failed
        Welcome to our project!
        NOT IMPLEMENTED!
 
@@ -210,9 +210,9 @@ which gives us the following test output:
 
     $ LANG=C ./test/bats/bin/bats test/test.bats 
      ✗ can run our script
-       (from function `assert_output' in file test/test_helper/bats-assert/src/assert_output.bash, line 194,
+       (from function `assert_output` in file test/test_helper/bats-assert/src/assert_output.bash, line 194,
         in test file test/test.bats, line 14)
-         `assert_output 'Welcome to our project!'' failed
+         `assert_output 'Welcome to our project!'` failed
     
        -- output differs --
        expected (1 lines):
@@ -247,7 +247,7 @@ which gives us the following test result:
     $ ./test/bats/bin/bats test/test.bats 
      ✗ can run our script
        (in test file test/test.bats, line 13)
-         `run project.sh | grep Welcome' failed
+         `run project.sh | grep Welcome` failed
 
     1 test, 1 failure
 
@@ -319,9 +319,9 @@ This test fails as expected:
 
     $ ./test/bats/bin/bats test/test.bats 
      ✗ Show welcome message on first invocation
-       (from function `refute_output' in file test/test_helper/bats-assert/src/refute_output.bash, line 189,
+       (from function `refute_output` in file test/test_helper/bats-assert/src/refute_output.bash, line 189,
         in test file test/test.bats, line 17)
-         `refute_output --partial 'Welcome to our project!'' failed
+         `refute_output --partial 'Welcome to our project!'` failed
     
        -- output should not contain substring --
        substring (1 lines):
@@ -366,9 +366,9 @@ Nice, we're done, or are we? Running the test again now gives:
 
     $ ./test/bats/bin/bats test/test.bats 
      ✗ Show welcome message on first invocation
-       (from function `assert_output' in file test/test_helper/bats-assert/src/assert_output.bash, line 186,
+       (from function `assert_output` in file test/test_helper/bats-assert/src/assert_output.bash, line 186,
         in test file test/test.bats, line 14)
-         `assert_output --partial 'Welcome to our project!'' failed
+         `assert_output --partial 'Welcome to our project!'` failed
     
        -- output does not contain substring --
        substring : Welcome to our project!
@@ -587,8 +587,8 @@ Running this gives us:
 
    $ ./test/bats/bin/bats test/server.bats 
      ✗ 
-       (from function `setup_file' in test file test/server.bats, line 4)
-         `PORT=$(project.sh start-echo-server >/dev/null 2>&1)' failed
+       (from function `setup_file` in test file test/server.bats, line 4)
+         `PORT=$(project.sh start-echo-server >/dev/null 2>&1)` failed
 
     1 test, 1 failure 
 
@@ -627,7 +627,7 @@ However, running this a second time gives:
     $ ./test/bats/bin/bats test/server.bats
      ✗ server is reachable
        (in test file test/server.bats, line 14)
-         `nc -z -w 2 localhost "$PORT"' failed
+         `nc -z -w 2 localhost "$PORT"` failed
        2000
        Ncat: bind to :::2000: Address already in use. QUITTING.
        nc: port number invalid: 2000
