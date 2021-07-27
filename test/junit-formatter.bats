@@ -57,7 +57,7 @@ TESTSUITES_REGEX="<testsuites time=\"$FLOAT_REGEX\">"
   [[ "${lines[3]}" == "    <testcase classname=\"$ESCAPED_TEST_FILE_NAME\" name=\"Successful test with escape characters: &quot;&#39;&lt;&gt;&amp;&#27;[0m (0x1b)\" time=\""*"\" />" ]]
   [[ "${lines[4]}" == "    <testcase classname=\"$ESCAPED_TEST_FILE_NAME\" name=\"Failed test with escape characters: &quot;&#39;&lt;&gt;&amp;&#27;[0m (0x1b)\" "* ]]
   [[ "${lines[5]}" == '        <failure type="failure">(in test file '*"$ESCAPED_TEST_FILE_NAME, line 6)" ]]
-  [[ "${lines[6]}" == '  `echo &quot;&lt;&gt;&#39;&amp;&#27;[0m&quot; &amp;&amp; false&#39; failed'* ]]
+  [[ "${lines[6]}" == '  &#39;echo &quot;&lt;&gt;&#39;&amp;&#27;[0m&quot; &amp;&amp; false&#39; failed'* ]]
   [[ "${lines[9]}" == "    <testcase classname=\"$ESCAPED_TEST_FILE_NAME\" name=\"Skipped test with escape characters: &quot;&#39;&lt;&gt;&amp;&#27;[0m (0x1b)\" time=\""*"\">" ]]
   [[ "${lines[10]}" == "        <skipped>&quot;&#39;&lt;&gt;&amp;&#27;[0m</skipped>" ]]
 }
@@ -130,7 +130,7 @@ TESTSUITES_REGEX="<testsuites time=\"$FLOAT_REGEX\">"
   [[ "${lines[10]}" == 'hello Bilbo' ]]
   [[ "${lines[11]}" == 'teardown FD3</system-out>' ]]
   [[ "${lines[12]}" == '        <failure type="failure">(in test file '*'test/fixtures/junit-formatter/issue_360.bats, line 21)' ]]
-  [[ "${lines[13]}" == '  `false&#39; failed' ]]
+  [[ "${lines[13]}" == '  &#39;false&#39; failed' ]]
   # ... and then the stdout output
   [[ "${lines[14]}" == '# setup stdout' ]]
   [[ "${lines[15]}" == '# hello stdout' ]]
