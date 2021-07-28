@@ -1039,14 +1039,20 @@ EOF
   [[ "$output" =~ Bats* ]]
 }
 
-@test "pretty formatter summary is colorized" {
-  # pick up some test (no matter which), and run in with color in summary
-  run bats --pretty --filter 'no arguments' "$BATS_TEST_FILENAME"
-  # Now check for opening and closing escape sequences
-  # shellcheck disable=SC2086
-  echo $output | grep -q $'0 failures.\033\[0m'
-  # shellcheck disable=SC2086
-  echo $output | grep -q $'\033\[32;1m.1 test'
+@test "pretty formatter summary is colorized red on failure" {
+  run '=1' bats --pretty "$FIXTURE_ROOT/failing.bats"
+  
+  [ "${lines[3]}" == $'\033[0m\033[31;1m' ] # TODO: avoid checking for the leading reset too
+  [ "${lines[4]}" == '1 test, 1 failure' ]
+  [ "${lines[5]}" == $'\033[0m' ]
+}
+
+@test "pretty formatter summary is colorized green on success" {
+  run '=0' bats --pretty "$FIXTURE_ROOT/passing.bats"
+
+  [ "${lines[1]}" == $'\033[0m\033[32;1m' ] # TODO: avoid checking for the leading reset too
+  [ "${lines[2]}" == '1 test, 0 failures' ]
+  [ "${lines[3]}" == $'\033[0m' ]
 }
 
 @test "--print-output-on-failure works as expected" {
