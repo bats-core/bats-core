@@ -117,7 +117,8 @@ report_formatter=''
 recursive=
 export BATS_TEMPDIR_CLEANUP=1
 output=
-export VERBOSE="${VERBOSE:-false}"
+export BATS_VERBOSE=
+export BATS_TRACE_LEVEL=
 if [[ -z "${CI:-}" && -t 0 && -t 1 ]] && command -v tput >/dev/null; then
   formatter='pretty'
 fi
@@ -197,7 +198,18 @@ while [[ "$#" -ne 0 ]]; do
     shift
     ;;
   --verbose)
-      VERBOSE=true
+      BATS_VERBOSE=1
+    ;;
+  --trace|-x)
+      shift
+      BATS_TRACE_LEVEL="$1"
+      case "$BATS_TRACE_LEVEL" in
+        0|1|2)
+        ;;
+        *)
+          abort "Invalid trace level $BATS_TRACE_LEVEL"
+        ;;
+      esac
     ;;
   -*)
     abort "Bad command line option '$1'"

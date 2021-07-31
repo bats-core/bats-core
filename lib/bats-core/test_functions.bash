@@ -144,13 +144,13 @@ run() { # [--keep-empty-lines] [--output merged|separate|stderr|stdout] [--] <co
     ;;
   esac
 
-  # shellcheck disable=SC2034
-  BATS_TEST_COMMAND="${*}"
-  if $VERBOSE; then
-    printf "  %s\n" "${BATS_TEST_COMMAND}" >&3
-    printf "    %s\n" "${lines[@]:-}" >&3
+  if [[ $BATS_TRACE_LEVEL -gt 0 ]]; then
+    printf "$ %s\n" "$*"
   fi
-  
+  if [[ $BATS_TRACE_LEVEL -gt 1 ]]; then
+    printf "  %s\n" "${lines[@]}"
+  fi
+
   IFS="$origIFS"
   set "-$origFlags"
 }
