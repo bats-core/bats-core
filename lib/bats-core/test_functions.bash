@@ -125,20 +125,17 @@ run() { # [!|=N] [--keep-empty-lines] [--output merged|separate|stderr|stdout] [
   local origFlags="$-"
   set +eET
   local origIFS="$IFS"
+  status=0
   if [[ $keep_empty_lines ]]; then
     # 'output', 'status', 'lines' are global variables available to tests.
     # preserve trailing newlines by appending . and removing it later
     # shellcheck disable=SC2034
-    output="$($pre_command "$@"; status=$?; printf .; exit $status)"
-    # shellcheck disable=SC2034
-    status="$?"
+    output="$($pre_command "$@"; status=$?; printf .; exit $status)" || status="$?"    
     output="${output%.}"
   else
     # 'output', 'status', 'lines' are global variables available to tests.
     # shellcheck disable=SC2034
-    output="$($pre_command "$@")"
-    # shellcheck disable=SC2034
-    status="$?"
+    output="$($pre_command "$@")" || status="$?"
   fi
 
   bats_separate_lines lines output
@@ -164,11 +161,13 @@ run() { # [!|=N] [--keep-empty-lines] [--output merged|separate|stderr|stdout] [
   if [[ -n "$expected_rc" ]]; then
     if [[ "$expected_rc" = "-1" ]]; then
       if [[ "$status" -eq 0 ]]; then
-        printf "    expected nonzero exit code!\n"
+        bats_capture_stack_trace # fix backtrace
+        BATS_ERROR_SUFFIX=", expected nonzero exit code!"
         return 1
       fi
     elif [ "$status" -ne "$expected_rc" ]; then
-      printf "    expected exit code %d, got %d\n" "$expected_rc" "$status"
+      bats_capture_stack_trace # fix backtrace
+      BATS_ERROR_SUFFIX=", expected exit code $expected_rc, got $status"
       return 1
     fi
   fi

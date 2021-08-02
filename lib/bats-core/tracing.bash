@@ -5,6 +5,13 @@ bats_capture_stack_trace() {
 	local funcname
 	local i
 
+	# The last entry in the stack trace is not useful when en error occured:
+	# It is either duplicated (kinda correct) or has wrong line number (Bash < 4.4)
+	# Therefore we capture the stacktrace but use it only after the next debug
+	# trap fired.
+	# Expansion is required for empty arrays which otherwise error
+	BATS_CURRENT_STACK_TRACE=("${BATS_STACK_TRACE[@]+"${BATS_STACK_TRACE[@]}"}")
+
 	BATS_STACK_TRACE=()
 
 	for ((i = 2; i != ${#FUNCNAME[@]}; ++i)); do
@@ -80,9 +87,9 @@ bats_print_failed_command() {
 	printf '%s' "#   \`${failed_command}' "
 
 	if [[ "$BATS_ERROR_STATUS" -eq 1 ]]; then
-		printf 'failed\n'
+		printf 'failed%s\n' "$BATS_ERROR_SUFFIX"
 	else
-		printf 'failed with status %d\n' "$BATS_ERROR_STATUS"
+		printf 'failed with status %d%s\n' "$BATS_ERROR_STATUS" "$BATS_ERROR_SUFFIX"
 	fi
 }
 
@@ -151,12 +158,6 @@ bats_debug_trap() {
 	if [[ "$NORMALIZED_INPUT" != $NORMALIZED_BATS_ROOT/lib/* && 
 		  "$NORMALIZED_INPUT" != $NORMALIZED_BATS_ROOT/libexec/* &&
 		  "${BATS_INTERRUPTED-NOTSET}" == NOTSET ]]; then
-		# The last entry in the stack trace is not useful when en error occured:
-		# It is either duplicated (kinda correct) or has wrong line number (Bash < 4.4)
-		# Therefore we capture the stacktrace but use it only after the next debug
-		# trap fired.
-		# Expansion is required for empty arrays which otherwise error
-		BATS_CURRENT_STACK_TRACE=("${BATS_STACK_TRACE[@]+"${BATS_STACK_TRACE[@]}"}")
 		bats_capture_stack_trace
 	fi
 }
