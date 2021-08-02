@@ -52,12 +52,8 @@ status, and to fail if the command exits with any other value.
 On failure, both actual and expected values will be displayed,
 along with the invoked command and its output:
 
-    # run$ foo nonexistent_filename
-    # foo: error initializing: /etc/foo.conf missing
-    # [ rc=127 (** EXPECTED 1 **) ]
-    #/vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-    #| FAIL: exit code is 127; expected 1
-    #\^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    (in test file test.bats, line 2)
+     `run =1 foo nonexistent_filename' failed, expected exit code 1, got 127
 
 This error indicates a possible problem with the installation or
 configuration of `foo`; note that a simple `[ $status != 0 ]`
