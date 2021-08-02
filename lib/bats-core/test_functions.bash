@@ -68,7 +68,6 @@ run() { # [!|=N] [--keep-empty-lines] [--output merged|separate|stderr|stdout] [
   local expected_rc=
   local keep_empty_lines=
   local output_case=merged
-  shopt -s extglob
   # parse options starting with -
   while [[ $# -gt 0 ]] && [[ $1 == -* || $1 == '!' || $1 == '='* ]]; do
     case "$1" in
