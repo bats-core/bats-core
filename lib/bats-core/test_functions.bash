@@ -63,13 +63,28 @@ bats_separate_lines() { # <output-array> <input-var>
   fi
 }
 
-run() { # [--keep-empty-lines] [--output merged|separate|stderr|stdout] [--] <command to run...>
+run() { # [!|=N] [--keep-empty-lines] [--output merged|separate|stderr|stdout] [--] <command to run...>
   trap bats_interrupt_trap_in_run INT
+  local expected_rc=
   local keep_empty_lines=
   local output_case=merged
+  shopt -s extglob
   # parse options starting with -
-  while [[ $# -gt 0 && $1 == -* ]]; do
+  while [[ $# -gt 0 ]] && [[ $1 == -* || $1 == '!' || $1 == '='* ]]; do
     case "$1" in
+      '!')
+        expected_rc=-1
+      ;;
+      '='*)
+        expected_rc=${1#=}
+        if [[ $expected_rc =~ [^0-9] ]]; then
+          printf "Usage error: run: '=NNN' requires numeric NNN (got: %s)\n" "$expected_rc" >&2
+          return 1
+        elif [[ $expected_rc -gt 255 ]]; then
+          printf "Usage error: run: '=NNN': NNN must be <= 255 (got: %d)\n" "$expected_rc" >&2
+          return 1
+        fi
+      ;;
       --keep-empty-lines)
         keep_empty_lines=1
       ;;
@@ -146,6 +161,18 @@ run() { # [--keep-empty-lines] [--output merged|separate|stderr|stdout] [--] <co
 
   IFS="$origIFS"
   set "-$origFlags"
+
+  if [[ -n "$expected_rc" ]]; then
+    if [[ "$expected_rc" = "-1" ]]; then
+      if [[ "$status" -eq 0 ]]; then
+        printf "    expected nonzero exit code!\n"
+        return 1
+      fi
+    elif [ "$status" -ne "$expected_rc" ]; then
+      printf "    expected exit code %d, got %d\n" "$expected_rc" "$status"
+      return 1
+    fi
+  fi
 }
 
 setup() {
