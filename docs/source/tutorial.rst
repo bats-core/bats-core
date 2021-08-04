@@ -152,7 +152,7 @@ Therefore, our test could execute `project.sh` directly, without using a (relati
 Dealing with output
 -------------------
 
-Okay, we have a green test but our executable does not anything useful.
+Okay, we have a green test but our executable does not do anything useful.
 To keep things simple, let us start with an error message. Our new `src/project.sh` now reads:
 
 .. code-block:: bash
