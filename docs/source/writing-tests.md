@@ -35,14 +35,30 @@ The `$status` variable contains the status code of the command, and the
 `$output` variable contains the combined contents of the command's standard
 output and standard error streams.
 
+If invoked with one of the following as the first argument, `run`
+will perform an implicit check on the exit status of the invoked command:
+
+```pre
+    =N  expect exit status N (0-255), fail if otherwise
+    ! expect nonzero exit status (1-255), fail if command succeeds
+```
+
+We can then write the above more elegantly as:
+
+```bash
+@test "invoking foo with a nonexistent file prints an error" {
+  run =1 foo nonexistent_filename
+  [ "$output" = "foo: no such file 'nonexistent_filename'" ]
+}
+```
+
 A third special variable, the `$lines` array, is available for easily accessing
 individual lines of output. For example, if you want to test that invoking `foo`
 without any arguments prints usage information on the first line:
 
 ```bash
 @test "invoking foo without arguments prints usage" {
-  run foo
-  [ "$status" -eq 1 ]
+  run =1 foo
   [ "${lines[0]}" = "usage: foo <filename>" ]
 }
 ```
@@ -50,58 +66,6 @@ without any arguments prints usage information on the first line:
 __Note:__ The `run` helper executes its argument(s) in a subshell, so if
 writing tests against environmental side-effects like a variable's value
 being changed, these changes will not persist after `run` completes.
-
-### When not to use `run`
-
-In some cases, using `run` is redundant and results in a longer and less readable code.
-Here are a few examples.
-
-#### 1. In case you only need to check the command succeeded, it is better to not use run, since
-
-```bash
-run command args ...
-echo "$output"
-[ "$status" -eq 0 ]
-```
-
-is equivalent to
-
-```bash
-command args ...
-```
-
-since bats sets `set -e` for all tests.
-
-#### 2. In case you want to hide the command output (which `run` does), use output redirection instead
-
-This
-
-```bash
-run command ...
-[ "$status" -eq 0 ]
-```
-
-is equivalent to
-
-```bash
-command ... >/dev/null
-```
-
-Note that the output is only shown if the test case fails.
-
-#### 3. In case you need to assign command output to a variable (and maybe check the command exit status), it is better to not use run, since
-
-```bash
-run command args ...
-[ "$status" -eq 0 ]
-var="$output"
-```
-
-is equivalent to
-
-```bash
-var=$(command args ...)
-```
 
 ## Comment syntax
 

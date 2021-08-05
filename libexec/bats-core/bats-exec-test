@@ -162,6 +162,7 @@ bats_perform_test() {
   BATS_TEST_SKIPPED=
   BATS_TEARDOWN_COMPLETED=
   BATS_ERROR_STATUS=
+  BATS_ERROR_SUFFIX=
   trap 'bats_debug_trap "$BASH_SOURCE"' DEBUG
   trap 'bats_error_trap' ERR
   # mark this call as trap call

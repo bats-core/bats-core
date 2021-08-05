@@ -63,13 +63,27 @@ bats_separate_lines() { # <output-array> <input-var>
   fi
 }
 
-run() { # [--keep-empty-lines] [--output merged|separate|stderr|stdout] [--] <command to run...>
+run() { # [!|=N] [--keep-empty-lines] [--output merged|separate|stderr|stdout] [--] <command to run...>
   trap bats_interrupt_trap_in_run INT
+  local expected_rc=
   local keep_empty_lines=
   local output_case=merged
   # parse options starting with -
-  while [[ $# -gt 0 && $1 == -* ]]; do
+  while [[ $# -gt 0 ]] && [[ $1 == -* || $1 == '!' || $1 == '='* ]]; do
     case "$1" in
+      '!')
+        expected_rc=-1
+      ;;
+      '='*)
+        expected_rc=${1#=}
+        if [[ $expected_rc =~ [^0-9] ]]; then
+          printf "Usage error: run: '=NNN' requires numeric NNN (got: %s)\n" "$expected_rc" >&2
+          return 1
+        elif [[ $expected_rc -gt 255 ]]; then
+          printf "Usage error: run: '=NNN': NNN must be <= 255 (got: %d)\n" "$expected_rc" >&2
+          return 1
+        fi
+      ;;
       --keep-empty-lines)
         keep_empty_lines=1
       ;;
@@ -111,20 +125,17 @@ run() { # [--keep-empty-lines] [--output merged|separate|stderr|stdout] [--] <co
   local origFlags="$-"
   set +eET
   local origIFS="$IFS"
+  status=0
   if [[ $keep_empty_lines ]]; then
     # 'output', 'status', 'lines' are global variables available to tests.
     # preserve trailing newlines by appending . and removing it later
     # shellcheck disable=SC2034
-    output="$($pre_command "$@"; status=$?; printf .; exit $status)"
-    # shellcheck disable=SC2034
-    status="$?"
+    output="$($pre_command "$@"; status=$?; printf .; exit $status)" || status="$?"    
     output="${output%.}"
   else
     # 'output', 'status', 'lines' are global variables available to tests.
     # shellcheck disable=SC2034
-    output="$($pre_command "$@")"
-    # shellcheck disable=SC2034
-    status="$?"
+    output="$($pre_command "$@")" || status="$?"
   fi
 
   bats_separate_lines lines output
@@ -146,6 +157,21 @@ run() { # [--keep-empty-lines] [--output merged|separate|stderr|stdout] [--] <co
 
   IFS="$origIFS"
   set "-$origFlags"
+
+  if [[ -n "$expected_rc" ]]; then
+    if [[ "$expected_rc" = "-1" ]]; then
+      if [[ "$status" -eq 0 ]]; then
+        bats_capture_stack_trace # fix backtrace
+        BATS_ERROR_SUFFIX=", expected nonzero exit code!"
+        return 1
+      fi
+    elif [ "$status" -ne "$expected_rc" ]; then
+      bats_capture_stack_trace # fix backtrace
+      # shellcheck disable=SC2034
+      BATS_ERROR_SUFFIX=", expected exit code $expected_rc, got $status"
+      return 1
+    fi
+  fi
 }
 
 setup() {
