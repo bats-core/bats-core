@@ -390,7 +390,7 @@ fixtures bats
   [ "${lines[2]}" =  'ok 2 passing' ]
   [ "${lines[3]}" =  'ok 3 input redirection' ]
   [ "${lines[4]}" =  'not ok 4 failing' ]
-  [ "${lines[5]}" =  "# (in test file $RELATIVE_FIXTURE_ROOT/single_line_no_shellcheck.bats, line 10)" ]
+  [ "${lines[5]}" =  "# (in test file $RELATIVE_FIXTURE_ROOT/single_line_no_shellcheck.bats, line 9)" ]
   [ "${lines[6]}" = $'#   `@test "failing" { false; }\' failed' ]
 }
 

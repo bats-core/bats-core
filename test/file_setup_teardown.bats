@@ -113,7 +113,7 @@ not ok 1 failing test
   [[ -f "$LOG" ]]
   grep teardown_file_after_long_test.bats "$LOG"
   # but the test must not have run to the end!
-  grep "test finished successfully" "$LOG" && return 1
+  run ! grep "test finished successfully" "$LOG"
 }
 
 @test "setup_file runs even if all tests in the file are skipped" {
