@@ -1,3 +1,3 @@
-@test 'quux_in c' { }
-@test 'xyzzy in c' { }
-@test 'plugh_in c' { }
+@test 'quux_in c' { true; }
+@test 'xyzzy in c' { true; }
+@test 'plugh_in c' { true; }

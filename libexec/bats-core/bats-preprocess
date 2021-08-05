@@ -31,6 +31,9 @@ bats_encode_test_name() {
   printf -v "$2" '%s' "$result"
 }
 
+BATS_TEST_PATTERN="^[[:blank:]]*@test[[:blank:]]+(.*[^[:blank:]])[[:blank:]]+\{(.*)\$"
+BATS_TEST_PATTERN_COMMENT="[[:blank:]]*([^[:blank:]()]+)[[:blank:]]*\(?\)?[[:blank:]]+\{[[:blank:]]+#[[:blank:]]*@test[[:blank:]]*\$"
+
 test_file="$1"
 tests=()
 {

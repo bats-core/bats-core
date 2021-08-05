@@ -6,11 +6,13 @@ setup_file() {
 }
 
 @test "setup_file is run once per file" {
+    # shellcheck disable=SC2031,SC2030
     export LOG="$BATS_TEST_TMPDIR/setup_file_once.log"
     bats "$FIXTURE_ROOT/setup_file.bats"
 }
 
 @test "teardown_file is run once per file" {
+  # shellcheck disable=SC2031,SC2030
   export LOG="$BATS_TEST_TMPDIR/teardown_file_once.log"
   run bats "$FIXTURE_ROOT/teardown_file.bats"
   [[ $status -eq 0 ]]
@@ -24,6 +26,7 @@ setup_file() {
 }
 
 @test "setup_file is called correctly in multi file suite" {
+    # shellcheck disable=SC2031,SC2030
     export LOG="$BATS_TEST_TMPDIR/setup_file_multi_file_suite.log"
     run bats "$FIXTURE_ROOT/setup_file.bats" "$FIXTURE_ROOT/no_setup_file.bats" "$FIXTURE_ROOT/setup_file2.bats"
     [[ $status -eq 0 ]]
@@ -35,6 +38,7 @@ setup_file() {
 }
 
 @test "teardown_file is called correctly in multi file suite" {
+  # shellcheck disable=SC2031,SC2030
   export LOG="$BATS_TEST_TMPDIR/teardown_file_multi_file_suite.log"
   run bats "$FIXTURE_ROOT/teardown_file.bats" "$FIXTURE_ROOT/no_teardown_file.bats" "$FIXTURE_ROOT/teardown_file2.bats"
   [[ $status -eq 0 ]]
@@ -77,6 +81,7 @@ setup_file() {
 }
 
 @test "teardown_file runs even if any test in the file failed" {
+  # shellcheck disable=SC2031,SC2030
   export LOG="$BATS_TEST_TMPDIR/teardown_file_failed.log"
   run bats "$FIXTURE_ROOT/teardown_file_after_failing_test.bats"
   [[ $status -ne 0 ]]
@@ -89,8 +94,8 @@ not ok 1 failing test
 }
 
 @test "teardown_file should run even after user abort via CTRL-C" {
+  # shellcheck disable=SC2031,SC2030
   export LOG="$BATS_TEST_TMPDIR/teardown_file_abort.log"
-  STARTTIME=$SECONDS
   # guarantee that background processes get their own process group -> pid=pgid
   set -m
   SECONDS=0
@@ -112,6 +117,7 @@ not ok 1 failing test
 }
 
 @test "setup_file runs even if all tests in the file are skipped" {
+  # shellcheck disable=SC2031,SC2030
   export LOG="$BATS_TEST_TMPDIR/setup_file_skipped.log" 
   run bats "$FIXTURE_ROOT/setup_file_even_if_all_tests_are_skipped.bats"
   [[ -f "$LOG" ]]
@@ -119,6 +125,7 @@ not ok 1 failing test
 }
 
 @test "teardown_file runs even if all tests in the file are skipped" {
+  # shellcheck disable=SC2031
   export LOG="$BATS_TEST_TMPDIR/teardown_file_skipped.log" 
   run bats "$FIXTURE_ROOT/teardown_file_even_if_all_tests_are_skipped.bats"
   [[ $status -eq 0 ]]
@@ -130,7 +137,8 @@ not ok 1 failing test
   # example: BATS_ROOT was unset in one test but used in others, therefore, the suite failed
   # Simulate leaking env var from first to second test by: export SETUP_FILE_VAR="LEAK!"
   run bats "$FIXTURE_ROOT/setup_file_does_not_leak_env.bats" "$FIXTURE_ROOT/setup_file_does_not_leak_env2.bats"
-  [[ $status -eq 0 ]] || (echo $output; return 1)
+  echo "$output"
+  [[ $status -eq 0 ]]
 }
 
 @test "teardown_file must not leak context between tests in the same suite" {

@@ -4,7 +4,7 @@ loop_func() {
   local d
 
   for d in $search ; do
-    echo $d
+    echo "$d"
   done
 }
 

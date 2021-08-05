@@ -15,6 +15,7 @@ load test_helper
 
 setup() {
   # give each test their own tmpdir to allow for parallelization without interference
+  # shellcheck disable=SC2103,SC2164
   cd "$BATS_TEST_TMPDIR"
   mkdir -p {usr/bin,opt/bats-core}
   ls -lR .
@@ -23,12 +24,14 @@ setup() {
   ln -s "usr/bin" "bin"
 
   if [[ ! -L "bin" ]]; then
+    # shellcheck disable=SC2103,SC2164
     cd - >/dev/null
     skip "symbolic links aren't functional on OSTYPE=$OSTYPE"
   fi
 
   ln -s "$BATS_TEST_TMPDIR/opt/bats-core/bin/bats" \
     "$BATS_TEST_TMPDIR/usr/bin/bats"
+  # shellcheck disable=SC2103,SC2164
   cd - >/dev/null
 }
 
@@ -43,6 +46,7 @@ setup() {
 # Set in setup
 # - /bin => /usr/bin (relative directory)
 @test "set BATS_ROOT with extreme symlink resolution" {
+  # shellcheck disable=SC2103
   cd "$BATS_TEST_TMPDIR"
   mkdir -p "opt/bats/bin2"
   pwd
@@ -62,6 +66,7 @@ setup() {
 # - /opt/bats-core/bin/baz => /opt/bats-core/bin/bats (relative executable)
   ln -s bats opt/bats-core/bin/baz
 
+  # shellcheck disable=SC2103,SC2164
   cd - >/dev/null
   run "$BATS_TEST_TMPDIR/bin/foo" -v
   echo "$output"
@@ -78,6 +83,7 @@ setup() {
 
 @test "set BATS_ROOT from PATH" {
   cd /tmp
+  # shellcheck disable=SC2031,SC2030
   PATH="$PATH:$BATS_TEST_TMPDIR/bin"
   run bats -v
   [ "$status" -eq 0 ]
@@ -86,6 +92,7 @@ setup() {
 
 @test "#182 and probably #184 as well" {
   cd /tmp
+  # shellcheck disable=SC2031,SC2030
   PATH="$PATH:$BATS_TEST_TMPDIR/bin"
   run bash bats -v
   [ "$status" -eq 0 ]

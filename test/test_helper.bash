@@ -1,13 +1,14 @@
 emulate_bats_env() {
   export BATS_CWD="$PWD"
-  export BATS_TEST_PATTERN="^[[:blank:]]*@test[[:blank:]]+(.*[^[:blank:]])[[:blank:]]+\{(.*)\$"
   export BATS_TEST_FILTER=
   export BATS_ROOT_PID=$$
-  export BATS_RUN_TMPDIR=$(mktemp -d "${BATS_RUN_TMPDIR}/emulated-tmpdir-${BATS_ROOT_PID}-XXXXXX")
+  export BATS_RUN_TMPDIR
+  BATS_RUN_TMPDIR=$(mktemp -d "${BATS_RUN_TMPDIR}/emulated-tmpdir-${BATS_ROOT_PID}-XXXXXX")
 }
 
 fixtures() {
   FIXTURE_ROOT="$BATS_TEST_DIRNAME/fixtures/$1"
+  # shellcheck disable=SC2034
   RELATIVE_FIXTURE_ROOT="${FIXTURE_ROOT#$BATS_CWD/}"
 }
 
@@ -23,5 +24,6 @@ if ! command -v tput >/dev/null; then
 fi
 
 emit_debug_output() {
+  # shellcheck disable=SC2154
   printf '%s\n' 'output:' "$output" >&2
 }

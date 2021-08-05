@@ -1,3 +1,3 @@
-@test 'foo in a' { }
-@test '--bar in a' { }
-@test 'baz in a' { }
+@test 'foo in a' { true; }
+@test '--bar in a' { true; }
+@test 'baz in a' { true; }

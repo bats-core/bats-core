@@ -35,7 +35,8 @@ single-use-latch::wait() { # <latch-name> <latch-size> [<timeout-in-seconds> [<s
     local timeout_in_seconds="${3:-0}"
     local sleep_cycle_time="${4:-1}"
     
-    local LATCH_FILE="$(single-use-latch::_filename "$latch_name")"
+    local LATCH_FILE
+    LATCH_FILE="$(single-use-latch::_filename "$latch_name")"
     local start="$SECONDS"
     while [[ (! -e "$LATCH_FILE") || $(wc -l <"$LATCH_FILE" ) -lt $latch_size ]]; do
         if [[ $timeout_in_seconds -ne 0 && $(( SECONDS - start )) -gt $timeout_in_seconds ]]; then
@@ -52,7 +53,8 @@ single-use-latch::wait() { # <latch-name> <latch-size> [<timeout-in-seconds> [<s
 # SINGLE_USE_LATCH_DIR must be exported!
 single-use-latch::signal() { # <latch-name>
     local latch_name="$1"
-    local LATCH_FILE="$(single-use-latch::_filename "$latch_name")"
+    local LATCH_FILE
+    LATCH_FILE="$(single-use-latch::_filename "$latch_name")"
     # mark our passing
     # concurrent process might interleave but will still post their newline
     echo "passed-$$" >> "$LATCH_FILE"
