@@ -4,6 +4,7 @@ set -e
 
 BATS_ROOT="${0%/*}"
 PREFIX="$1"
+LIBDIR="${2:-lib}"
 
 if [[ -z "$PREFIX" ]]; then
   printf '%s\n' \
@@ -25,7 +26,7 @@ for elt in "$BATS_ROOT/libexec/bats-core"/*; do
 done
 [[ -d "$d" ]] && rmdir "$d"
 
-d="$PREFIX/lib/bats-core"
+d="$PREFIX/${LIBDIR}/bats-core"
 for elt in "$BATS_ROOT/lib/bats-core"/*; do
   elt=${elt##*/}
   rm -f "$d/$elt"
