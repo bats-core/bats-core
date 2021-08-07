@@ -17,6 +17,12 @@ setup() {
   [ "$status" -eq 0 ]
   [ "$output" == "Installed Bats to $INSTALL_DIR/bin/bats" ]
   [ -x "$INSTALL_DIR/bin/bats" ]
+  [ -x "$INSTALL_DIR/lib/bats-core/formatter.bash" ]
+  [ -x "$INSTALL_DIR/lib/bats-core/preprocessing.bash" ]
+  [ -x "$INSTALL_DIR/lib/bats-core/semaphore.bash" ]
+  [ -x "$INSTALL_DIR/lib/bats-core/test_functions.bash" ]
+  [ -x "$INSTALL_DIR/lib/bats-core/tracing.bash" ]
+  [ -x "$INSTALL_DIR/lib/bats-core/validator.bash" ]
   [ -x "$INSTALL_DIR/libexec/bats-core/bats" ]
   [ -x "$INSTALL_DIR/libexec/bats-core/bats-exec-suite" ]
   [ -x "$INSTALL_DIR/libexec/bats-core/bats-exec-test" ]
@@ -33,6 +39,58 @@ setup() {
   run "$PATH_TO_UNINSTALL_SHELL" "$INSTALL_DIR"
   [ "$status" -eq 0 ]
   [ ! -x "$INSTALL_DIR/bin/bats" ]
+  [ ! -x "$INSTALL_DIR/lib/bats-core/formatter.bash" ]
+  [ ! -x "$INSTALL_DIR/lib/bats-core/preprocessing.bash" ]
+  [ ! -x "$INSTALL_DIR/lib/bats-core/semaphore.bash" ]
+  [ ! -x "$INSTALL_DIR/lib/bats-core/test_functions.bash" ]
+  [ ! -x "$INSTALL_DIR/lib/bats-core/tracing.bash" ]
+  [ ! -x "$INSTALL_DIR/lib/bats-core/validator.bash" ]
+  [ ! -x "$INSTALL_DIR/libexec/bats-core/bats" ]
+  [ ! -x "$INSTALL_DIR/libexec/bats-core/bats-exec-suite" ]
+  [ ! -x "$INSTALL_DIR/libexec/bats-core/bats-exec-test" ]
+  [ ! -x "$INSTALL_DIR/libexec/bats-core/bats-format-junit" ]
+  [ ! -x "$INSTALL_DIR/libexec/bats-core/bats-format-pretty" ]
+  [ ! -x "$INSTALL_DIR/libexec/bats-core/bats-preprocess" ]
+  [ ! -x "$INSTALL_DIR/libexec/bats-core" ]
+  [ ! -x "$INSTALL_DIR/share/man/man1/bats.1" ]
+  [ ! -x "$INSTALL_DIR/share/man/man7/bats.7" ]
+}
+
+@test "install.sh creates a multilib valid installation, and uninstall.sh undos it" {
+  rm -rf "$INSTALL_DIR"
+  LIBDIR="lib64"
+  run "$PATH_TO_INSTALL_SHELL" "$INSTALL_DIR" "$LIBDIR"
+  [ "$status" -eq 0 ]
+  [ "$output" == "Installed Bats to $INSTALL_DIR/bin/bats" ]
+  [ -x "$INSTALL_DIR/bin/bats" ]
+  [ -x "$INSTALL_DIR/$LIBDIR/bats-core/formatter.bash" ]
+  [ -x "$INSTALL_DIR/$LIBDIR/bats-core/preprocessing.bash" ]
+  [ -x "$INSTALL_DIR/$LIBDIR/bats-core/semaphore.bash" ]
+  [ -x "$INSTALL_DIR/$LIBDIR/bats-core/test_functions.bash" ]
+  [ -x "$INSTALL_DIR/$LIBDIR/bats-core/tracing.bash" ]
+  [ -x "$INSTALL_DIR/$LIBDIR/bats-core/validator.bash" ]
+  [ -x "$INSTALL_DIR/libexec/bats-core/bats" ]
+  [ -x "$INSTALL_DIR/libexec/bats-core/bats-exec-suite" ]
+  [ -x "$INSTALL_DIR/libexec/bats-core/bats-exec-test" ]
+  [ -x "$INSTALL_DIR/libexec/bats-core/bats-format-junit" ]
+  [ -x "$INSTALL_DIR/libexec/bats-core/bats-format-pretty" ]
+  [ -x "$INSTALL_DIR/libexec/bats-core/bats-preprocess" ]
+  [ -f "$INSTALL_DIR/share/man/man1/bats.1" ]
+  [ -f "$INSTALL_DIR/share/man/man7/bats.7" ]
+
+  run "$INSTALL_DIR/bin/bats" -v
+  [ "$status" -eq 0 ]
+  [ "${output%% *}" == 'Bats' ]
+
+  run "$PATH_TO_UNINSTALL_SHELL" "$INSTALL_DIR" "$LIBDIR"
+  [ "$status" -eq 0 ]
+  [ ! -x "$INSTALL_DIR/bin/bats" ]
+  [ ! -x "$INSTALL_DIR/$LIBDIR/bats-core/formatter.bash" ]
+  [ ! -x "$INSTALL_DIR/$LIBDIR/bats-core/preprocessing.bash" ]
+  [ ! -x "$INSTALL_DIR/$LIBDIR/bats-core/semaphore.bash" ]
+  [ ! -x "$INSTALL_DIR/$LIBDIR/bats-core/test_functions.bash" ]
+  [ ! -x "$INSTALL_DIR/$LIBDIR/bats-core/tracing.bash" ]
+  [ ! -x "$INSTALL_DIR/$LIBDIR/bats-core/validator.bash" ]
   [ ! -x "$INSTALL_DIR/libexec/bats-core/bats" ]
   [ ! -x "$INSTALL_DIR/libexec/bats-core/bats-exec-suite" ]
   [ ! -x "$INSTALL_DIR/libexec/bats-core/bats-exec-test" ]
@@ -86,4 +144,8 @@ setup() {
   run "$bats_symlink" -v
   [ "$status" -eq 0 ]
   [ "${output%% *}" == 'Bats' ]
+}
+
+teardown() {
+  rm -rf "$INSTALL_DIR"
 }
