@@ -147,7 +147,7 @@ check_parallel_tests() { # <expected maximum parallelity>
   # (setup should have skipped already, if there was no GNU parallel)
   unset BATS_NO_PARALLELIZE_ACROSS_FILES
   FILE_MARKER=$(mktemp "${BATS_RUN_TMPDIR}/file_marker.XXXXXX") \
-    bats --jobs 2 "$FIXTURE_ROOT/must_not_parallelize_across_files/" && return 1
+    run ! bats --jobs 2 "$FIXTURE_ROOT/must_not_parallelize_across_files/"
 }
 
 @test "--no-parallelize-across-files prevents parallelization across files" {
@@ -156,11 +156,11 @@ check_parallel_tests() { # <expected maximum parallelity>
 }
 
 @test "--no-parallelize-across-files does not prevent parallelization within files" {
-  bats --jobs 2 --no-parallelize-across-files "$FIXTURE_ROOT/must_not_parallelize_within_file.bats" && return 1
+  run ! bats --jobs 2 --no-parallelize-across-files "$FIXTURE_ROOT/must_not_parallelize_within_file.bats"
 }
 
 @test "--no-parallelize-within-files test file detects parallel execution" {
-  bats --jobs 2 "$FIXTURE_ROOT/must_not_parallelize_within_file.bats" && return 1
+  run ! bats --jobs 2 "$FIXTURE_ROOT/must_not_parallelize_within_file.bats"
 }
 
 @test "--no-parallelize-within-files prevents parallelization within files" {
@@ -172,7 +172,7 @@ check_parallel_tests() { # <expected maximum parallelity>
   # (setup should have skipped already, if there was no GNU parallel)
   unset BATS_NO_PARALLELIZE_ACROSS_FILES
   FILEMARKER=$(mktemp "${BATS_RUN_TMPDIR}/file_marker.XXXXXX") \
-    bats --jobs 2 --no-parallelize-within-files "$FIXTURE_ROOT/must_not_parallelize_across_files/" && return 1
+    run ! bats --jobs 2 --no-parallelize-within-files "$FIXTURE_ROOT/must_not_parallelize_across_files/"
 }
 
 @test "BATS_NO_PARALLELIZE_WITHIN_FILE works from inside setup_file()" {
@@ -184,9 +184,9 @@ check_parallel_tests() { # <expected maximum parallelity>
 }
 
 @test "BATS_NO_PARALLELIZE_WITHIN_FILE does not work from inside setup()" {
-  DISABLE_IN_SETUP_FUNCTION=1 bats --jobs 2 "$FIXTURE_ROOT/must_not_parallelize_within_file.bats" && return 1
+  DISABLE_IN_SETUP_FUNCTION=1 run ! bats --jobs 2 "$FIXTURE_ROOT/must_not_parallelize_within_file.bats"
 }
 
 @test "BATS_NO_PARALLELIZE_WITHIN_FILE does not work from inside test function" {
-  DISABLE_IN_TEST_FUNCTION=1 bats --jobs 2 "$FIXTURE_ROOT/must_not_parallelize_within_file.bats" && return 1
+  DISABLE_IN_TEST_FUNCTION=1 run ! bats --jobs 2 "$FIXTURE_ROOT/must_not_parallelize_within_file.bats"
 }
