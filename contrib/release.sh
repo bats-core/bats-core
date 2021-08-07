@@ -65,7 +65,8 @@ git commit -m "feat: release Bats v${NEW_BATS_VERSION}"
 # changelog start
 EOF
 
-local DELIM=$(echo -en "\001");
+local DELIM
+DELIM=$(echo -en "\001");
 sed -E -n "\\${DELIM}^## \[${NEW_BATS_VERSION}\]${DELIM},\\${DELIM}^## ${DELIM}p" docs/CHANGELOG.md \
   | head -n -1 \
   | sed -E \

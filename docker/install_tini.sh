@@ -19,8 +19,8 @@ esac
 
 echo "Installing tini for $TINI_PLATFORM"
 
-wget https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini-static-${TINI_PLATFORM} -O /tini
-wget https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini-static-${TINI_PLATFORM}.asc -O /tini.asc
+wget "https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini-static-${TINI_PLATFORM}" -O /tini
+wget "https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini-static-${TINI_PLATFORM}.asc" -O /tini.asc
 
 chmod +x /tini
 

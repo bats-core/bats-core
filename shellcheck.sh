@@ -7,11 +7,10 @@ while IFS=  read -r -d $'\0'; do
     targets+=("$REPLY")
 done < <(
   find \
-    bin/bats \
-    libexec/bats-core \
-    lib/bats-core \
-    shellcheck.sh \
+    . \
     -type f \
+    \( -name \*.bash -o -name \*.sh -o -name \*.bats \) \
+    -not -name "*_no_shellcheck*" \
     -print0
   )
 

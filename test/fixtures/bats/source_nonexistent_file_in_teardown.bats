@@ -1,4 +1,5 @@
 teardown() {
+  # shellcheck disable=SC1091
   source "nonexistent file"
 }
 
