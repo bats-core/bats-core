@@ -13,7 +13,7 @@ if [[ -z "$PREFIX" ]]; then
   exit 1
 fi
 
-install -d -m 755 "$PREFIX"/{bin,libexec/bats-core,${LIBDIR}/bats-core,share/man/man{1,7}}
+install -d -m 755 "$PREFIX"/{bin,libexec/bats-core,"${LIBDIR}"/bats-core,share/man/man{1,7}}
 install -m 755 "$BATS_ROOT/bin"/* "$PREFIX/bin"
 install -m 755 "$BATS_ROOT/libexec/bats-core"/* "$PREFIX/libexec/bats-core"
 install -m 755 "$BATS_ROOT/lib/bats-core"/* "$PREFIX/${LIBDIR}/bats-core"

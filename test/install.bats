@@ -57,7 +57,7 @@ setup() {
 }
 
 @test "install.sh creates a multilib valid installation, and uninstall.sh undos it" {
-  rm -rf $INSTALL_DIR
+  rm -rf "$INSTALL_DIR"
   LIBDIR="lib64"
   run "$PATH_TO_INSTALL_SHELL" "$INSTALL_DIR" "$LIBDIR"
   [ "$status" -eq 0 ]
@@ -147,5 +147,5 @@ setup() {
 }
 
 teardown() {
-  rm -rf $INSTALL_DIR
+  rm -rf "$INSTALL_DIR"
 }
