@@ -57,16 +57,20 @@ begin() {
   go_to_column 1
 }
 
-pass() {
+finish_test() {
   move_up $line_backoff_count
   go_to_column 0
-  buffer ' ✓ %s' "$name"
+  buffer "$@"
   if [[ -n "$BATS_ENABLE_TIMING" ]]; then
     set_color 2
     buffer ' [%s]' "$1"
   fi
   advance
-  move_down $line_backoff_count
+  move_down $(( line_backoff_count - 1 ))
+}
+
+pass() {
+  finish_test ' ✓ %s' "$name"
 }
 
 skip() {
@@ -74,24 +78,12 @@ skip() {
   if [[ -n "$reason" ]]; then
     reason=": $reason"
   fi
-  move_up $line_backoff_count
-  go_to_column 0
-  buffer ' - %s (skipped%s)' "$name" "$reason"
-  advance
-  move_down $line_backoff_count
+  BATS_ENABLE_TIMING= finish_test ' - %s (skipped%s)' "$name" "$reason"
 }
 
 fail() {
-  move_up $line_backoff_count
-  go_to_column 0
   set_color 1 bold
-  buffer ' ✗ %s' "$name"
-  if [[ -n "$BATS_ENABLE_TIMING" ]]; then
-    set_color 2
-    buffer ' [%s]' "$1"
-  fi
-  advance
-  move_down $line_backoff_count
+  finish_test ' ✗ %s' "$name"
 }
 
 log() {
