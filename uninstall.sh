@@ -6,6 +6,10 @@ BATS_ROOT="${0%/*}"
 PREFIX="$1"
 LIBDIR="${2:-lib}"
 
+if [[ "$BATS_ROOT" = "$0" ]]; then
+  BATS_ROOT=./
+fi
+
 if [[ -z "$PREFIX" ]]; then
   printf '%s\n' \
     "usage: $0 <prefix>" \
