@@ -161,6 +161,10 @@ run() { # [!|=N] [--keep-empty-lines] [--output merged|separate|stderr|stdout] [
   IFS="$origIFS"
   set "-$origFlags"
 
+  if [[ ${BATS_VERBOSE_RUN:-} ]]; then
+    printf "%s\n" "$output" 
+  fi
+
   if [[ -n "$expected_rc" ]]; then
     if [[ "$expected_rc" = "-1" ]]; then
       if [[ "$status" -eq 0 ]]; then

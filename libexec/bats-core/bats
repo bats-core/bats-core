@@ -203,6 +203,9 @@ while [[ "$#" -ne 0 ]]; do
   --show-output-of-succeeding-tests)
     flags+=(--show-output-of-succeeding-tests)
     ;;
+  --verbose-run)
+    flags+=(--verbose-run)
+    ;;
   -*)
     abort "Bad command line option '$1'"
     ;;

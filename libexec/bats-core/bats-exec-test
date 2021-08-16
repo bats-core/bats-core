@@ -9,6 +9,7 @@ BATS_EXTENDED_SYNTAX=''
 BATS_TRACE_LEVEL="${BATS_TRACE_LEVEL:-0}"
 BATS_PRINT_OUTPUT_ON_FAILURE="${BATS_PRINT_OUTPUT_ON_FAILURE:-}"
 BATS_SHOW_OUTPUT_OF_SUCCEEDING_TESTS="${BATS_SHOW_OUTPUT_OF_SUCCEEDING_TESTS:-}"
+BATS_VERBOSE_RUN="${BATS_VERBOSE_RUN:-}"
 
 while [[ "$#" -ne 0 ]]; do
   case "$1" in
@@ -36,6 +37,9 @@ while [[ "$#" -ne 0 ]]; do
     ;;
   --show-output-of-succeeding-tests)
     BATS_SHOW_OUTPUT_OF_SUCCEEDING_TESTS=1
+    ;;
+  --verbose-run)
+    BATS_VERBOSE_RUN=1
     ;;
   *)
     break

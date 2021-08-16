@@ -1072,3 +1072,23 @@ EOF
   [ "${lines[2]}" == '# output' ]
   [ ${#lines[@]} -eq 3 ]
 }
+
+@test "--verbose-run prints output" {
+  run '=1' bats --verbose-run "$FIXTURE_ROOT/verbose-run.bats"
+  [ "${lines[0]}" == '1..1' ]
+  [ "${lines[1]}" == 'not ok 1 test' ]
+  [ "${lines[2]}" == '# (in test file test/fixtures/bats/verbose-run.bats, line 2)' ]
+  [ "${lines[3]}" == "#   \`run ! echo test' failed, expected nonzero exit code!" ]
+  [ "${lines[4]}" == '# test' ]
+  [ ${#lines[@]} -eq 5 ]
+}
+
+@test "BATS_VERBOSE_RUN=1 also prints output" {
+  run '=1' env BATS_VERBOSE_RUN=1 bats "$FIXTURE_ROOT/verbose-run.bats"
+  [ "${lines[0]}" == '1..1' ]
+  [ "${lines[1]}" == 'not ok 1 test' ]
+  [ "${lines[2]}" == '# (in test file test/fixtures/bats/verbose-run.bats, line 2)' ]
+  [ "${lines[3]}" == "#   \`run ! echo test' failed, expected nonzero exit code!" ]
+  [ "${lines[4]}" == '# test' ]
+  [ ${#lines[@]} -eq 5 ]
+}
