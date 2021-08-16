@@ -50,6 +50,9 @@ while [[ "$#" -ne 0 ]]; do
   --print-output-on-failure)
     flags+=(--print-output-on-failure)
     ;;
+  --show-output-of-succeeding-tests)
+    flags+=(--show-output-of-succeeding-tests)
+    ;;
   *)
     break
     ;;

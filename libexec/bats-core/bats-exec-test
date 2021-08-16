@@ -7,7 +7,8 @@ BATS_TEST_FILTER=''
 BATS_ENABLE_TIMING=''
 BATS_EXTENDED_SYNTAX=''
 BATS_TRACE_LEVEL="${BATS_TRACE_LEVEL:-0}"
-BATS_PRINT_OUTPUT_ON_FAILURE=''
+BATS_PRINT_OUTPUT_ON_FAILURE="${BATS_PRINT_OUTPUT_ON_FAILURE:-}"
+BATS_SHOW_OUTPUT_OF_SUCCEEDING_TESTS="${BATS_SHOW_OUTPUT_OF_SUCCEEDING_TESTS:-}"
 
 while [[ "$#" -ne 0 ]]; do
   case "$1" in
@@ -32,6 +33,9 @@ while [[ "$#" -ne 0 ]]; do
     ;;
   --print-output-on-failure)
     BATS_PRINT_OUTPUT_ON_FAILURE=1
+    ;;
+  --show-output-of-succeeding-tests)
+    BATS_SHOW_OUTPUT_OF_SUCCEEDING_TESTS=1
     ;;
   *)
     break
@@ -98,6 +102,8 @@ bats_exit_trap() {
     BATS_TEST_TIME=" in "$(( $(get_mills_since_epoch) - BATS_TEST_START_TIME ))"ms"
   fi
 
+  local print_bats_out="${BATS_SHOW_OUTPUT_OF_SUCCEEDING_TESTS}"
+
   if [[ -z "$BATS_TEST_COMPLETED" || -z "$BATS_TEARDOWN_COMPLETED" || "${BATS_INTERRUPTED-NOTSET}" != NOTSET ]]; then
     if [[ "$BATS_ERROR_STATUS" -eq 0 ]]; then
       # For some versions of bash, `$?` may not be set properly for some error
@@ -120,17 +126,21 @@ bats_exit_trap() {
       printf "Last output:\n%s\n" "$output" >> "$BATS_OUT"
     fi 
 
+    print_bats_out=1
+    status=1
+  else
+    printf 'ok %d %s%s\n' "$BATS_SUITE_TEST_NUMBER" "${BATS_TEST_DESCRIPTION}${BATS_TEST_TIME}" \
+      "$skipped" >&3
+    status=0
+  fi
+
+  if [[ $print_bats_out ]]; then
     while IFS= read -r line; do
       printf '# %s\n' "$line" || break # avoid feedback loop when errors are redirected into BATS_OUT (see #353)
     done <"$BATS_OUT" >&3
     if [[ -n "$line" ]]; then
       printf '# %s\n' "$line"
     fi
-    status=1
-  else
-    printf 'ok %d %s%s\n' "$BATS_SUITE_TEST_NUMBER" "${BATS_TEST_DESCRIPTION}${BATS_TEST_TIME}" \
-      "$skipped" >&3
-    status=0
   fi
 
   rm -f "$BATS_OUT"

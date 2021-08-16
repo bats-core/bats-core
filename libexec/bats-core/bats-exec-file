@@ -5,6 +5,7 @@ export flags=()
 num_jobs=1
 filter=''
 extended_syntax=''
+BATS_TRACE_LEVEL="${BATS_TRACE_LEVEL:-0}"
 
 while [[ "$#" -ne 0 ]]; do
   case "$1" in
@@ -37,6 +38,9 @@ while [[ "$#" -ne 0 ]]; do
     ;;
   --print-output-on-failure)
     flags+=(--print-output-on-failure)
+    ;;
+  --show-output-of-succeeding-tests)
+    flags+=(--show-output-of-succeeding-tests)
     ;;
   *)
     break

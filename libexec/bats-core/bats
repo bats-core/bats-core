@@ -200,6 +200,9 @@ while [[ "$#" -ne 0 ]]; do
   --print-output-on-failure)
     flags+=(--print-output-on-failure)
     ;;
+  --show-output-of-succeeding-tests)
+    flags+=(--show-output-of-succeeding-tests)
+    ;;
   -*)
     abort "Bad command line option '$1'"
     ;;
