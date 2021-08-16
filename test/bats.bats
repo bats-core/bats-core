@@ -578,11 +578,11 @@ END_OF_ERR_MSG
   [ "${lines[1]}" = 'not ok 1 access unbound variable' ]
   [ "${lines[2]}" = "# (in test file $RELATIVE_FIXTURE_ROOT/unbound_variable.bats, line 9)" ]
   [ "${lines[3]}" = "#   \`foo=\$unset_variable' failed" ]
-  [[ "${lines[4]}" == *".src: line 9:"* ]]
+  [[ "${lines[4]}" =~ ".src: line 9:" ]]
   [ "${lines[5]}" = 'not ok 2 access second unbound variable' ]
   [ "${lines[6]}" = "# (in test file $RELATIVE_FIXTURE_ROOT/unbound_variable.bats, line 15)" ]
   [ "${lines[7]}" = "#   \`foo=\$second_unset_variable' failed" ]
-  [[ "${lines[8]}" == *".src: line 15:"* ]]
+  [[ "${lines[8]}" =~ ".src: line 15:" ]]
 }
 
 @test "report correct line on external function calls" {
@@ -884,12 +884,11 @@ EOF
   wait $SUBPROCESS_PID && return 1
 
   run cat "$TEMPFILE"
-  echo "$output"
-
-  [[ "${lines[1]}" == "not ok 1 test" ]]
-  [[ "${lines[2]}" == "# (in test file ${RELATIVE_FIXTURE_ROOT}/hang_in_run.bats, line 7)" ]]
-  [[ "${lines[3]}" == "#   \`run sleep 10' failed with status 130" ]]
-  [[ "${lines[4]}" == "# Received SIGINT, aborting ..." ]]
+  
+  [ "${lines[1]}" == "not ok 1 test" ]
+  [ "${lines[2]}" == "# (in test file ${RELATIVE_FIXTURE_ROOT}/hang_in_run.bats, line 7)" ]
+  [ "${lines[3]}" == "#   \`run sleep 10' failed with status 130" ]
+  [ "${lines[4]}" == "# Received SIGINT, aborting ..." ]
 }
 
 @test "CTRL-C aborts and fails the current teardown" {
