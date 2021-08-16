@@ -35,6 +35,9 @@ while [[ "$#" -ne 0 ]]; do
   --trace)
     flags+=('--trace')
     ;;
+  --print-output-on-failure)
+    flags+=(--print-output-on-failure)
+    ;;
   *)
     break
     ;;

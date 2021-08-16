@@ -7,6 +7,7 @@ BATS_TEST_FILTER=''
 BATS_ENABLE_TIMING=''
 BATS_EXTENDED_SYNTAX=''
 BATS_TRACE_LEVEL="${BATS_TRACE_LEVEL:-0}"
+BATS_PRINT_OUTPUT_ON_FAILURE=''
 
 while [[ "$#" -ne 0 ]]; do
   case "$1" in
@@ -28,6 +29,9 @@ while [[ "$#" -ne 0 ]]; do
     ;;
   --trace)
     (( ++BATS_TRACE_LEVEL )) # avoid returning 0
+    ;;
+  --print-output-on-failure)
+    BATS_PRINT_OUTPUT_ON_FAILURE=1
     ;;
   *)
     break
@@ -111,6 +115,10 @@ bats_exit_trap() {
     printf 'not ok %d %s\n' "$BATS_SUITE_TEST_NUMBER" "${BATS_TEST_DESCRIPTION}${BATS_TEST_TIME}" >&3
     bats_print_stack_trace "${BATS_STACK_TRACE[@]}" >&3
     bats_print_failed_command >&3
+
+    if [[ $BATS_PRINT_OUTPUT_ON_FAILURE && -n "${output:-}" ]]; then
+      printf "Last output:\n%s\n" "$output" >> "$BATS_OUT"
+    fi 
 
     while IFS= read -r line; do
       printf '# %s\n' "$line" || break # avoid feedback loop when errors are redirected into BATS_OUT (see #353)

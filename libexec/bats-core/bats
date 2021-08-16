@@ -197,6 +197,9 @@ while [[ "$#" -ne 0 ]]; do
   -x | --trace)
     flags+=(--trace)
     ;;
+  --print-output-on-failure)
+    flags+=(--print-output-on-failure)
+    ;;
   -*)
     abort "Bad command line option '$1'"
     ;;
