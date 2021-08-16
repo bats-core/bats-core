@@ -1,7 +1,9 @@
 #!/usr/bin/env bats
 
-load test_helper
-fixtures bats
+setup() {
+  load test_helper
+  fixtures bats
+}
 
 @test "no arguments prints message and usage instructions" {
   run bats
@@ -1030,4 +1032,20 @@ EOF
   grep libexec/bats-core/ <<< "$output"
   grep test/fixtures <<< "$output"
   grep install.sh <<< "$output"
+}
+
+@test "BATS_TEST_COMMAND: test content of variable" {
+  run bats -v
+  [[ "${BATS_TEST_COMMAND[*]}" == "bats -v" ]]
+  [[ "$output" =~ Bats* ]]
+}
+
+@test "pretty formatter summary is colorized" {
+  # pick up some test (no matter which), and run in with color in summary
+  run bats --pretty --filter 'no arguments' "$BATS_TEST_FILENAME"
+  # Now check for opening and closing escape sequences
+  # shellcheck disable=SC2086
+  echo $output | grep -q $'0 failures.\033\[0m'
+  # shellcheck disable=SC2086
+  echo $output | grep -q $'\033\[32;1m.1 test'
 }

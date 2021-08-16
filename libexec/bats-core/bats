@@ -48,6 +48,7 @@ HELP_TEXT_HEADER
   -t, --tap                 Shorthand for "--formatter tap"
   --verbose                 Print command and STDOUT/ERR of test[s]
   -T, --timing              Add timing information to tests
+  -x, --trace <level>       Print executed commands, specify twice to print recursively
   -v, --version             Display the version number
 
   For more information, see https://github.com/bats-core/bats-core
@@ -115,7 +116,6 @@ report_formatter=''
 recursive=
 export BATS_TEMPDIR_CLEANUP=1
 output=
-export VERBOSE="${VERBOSE:-false}"
 if [[ -z "${CI:-}" && -t 0 && -t 1 ]] && command -v tput >/dev/null; then
   formatter='pretty'
 fi
@@ -194,8 +194,8 @@ while [[ "$#" -ne 0 ]]; do
     BATS_RUN_TMPDIR="$2"
     shift
     ;;
-  --verbose)
-      VERBOSE=true
+  -x | --trace)
+    flags+=(--trace)
     ;;
   -*)
     abort "Bad command line option '$1'"

@@ -146,6 +146,27 @@ bats_normalize_windows_dir_path() { # <output-var> <path>
 	printf -v "$output_var" "%s" "$NORMALIZED_INPUT"
 }
 
+bats_emit_trace() {
+	if [[ $BATS_TRACE_LEVEL -gt 0 ]]; then
+		local line=${BASH_LINENO[1]}
+		if [[ $BASH_COMMAND != '"$BATS_TEST_NAME" >> "$BATS_OUT" 2>&1' && $BASH_COMMAND != "bats_test_begin "* ]] &&
+			[[ $BASH_COMMAND != "$BATS_LAST_BASH_COMMAND" || $line != $BATS_LAST_BASH_LINENO ]] &&
+			# avoid printing a function twice (at call site and at definiton site)
+			[[ $BASH_COMMAND != "$BATS_LAST_BASH_COMMAND" || ${BASH_LINENO[2]} != $BATS_LAST_BASH_LINENO || ${BASH_SOURCE[3]} != $BATS_LAST_BASH_SOURCE ]]; then
+			local file="${BASH_SOURCE[2]}" # skip over bats_emit_trace and bats_debug_trap
+			if [[ $file == ${BATS_TEST_SOURCE} ]]; then
+				file="$BATS_TEST_FILENAME"
+			fi
+			padding='$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$' 
+			printf '%s [%s:%d]\n' "${padding::${#BASH_LINENO[@]}-4}" "${file##*/}" "$line"
+			printf '%s %s\n'  "${padding::${#BASH_LINENO[@]}-4}" "$BASH_COMMAND" 
+			BATS_LAST_BASH_COMMAND="$BASH_COMMAND"
+			BATS_LAST_BASH_LINENO="$line"
+			BATS_LAST_BASH_SOURCE="${BASH_SOURCE[2]}"
+		fi
+	fi
+}
+
 bats_debug_trap() {
 	# on windows we sometimes get a mix of paths (when install via nmp install -g)
 	# which have C:/... or /c/... comparing them is going to be problematic.
@@ -159,6 +180,7 @@ bats_debug_trap() {
 		  "$NORMALIZED_INPUT" != $NORMALIZED_BATS_ROOT/libexec/* &&
 		  "${BATS_INTERRUPTED-NOTSET}" == NOTSET ]]; then
 		bats_capture_stack_trace
+		bats_emit_trace
 	fi
 }
 

@@ -6,6 +6,7 @@ BATS_COUNT_ONLY=''
 BATS_TEST_FILTER=''
 BATS_ENABLE_TIMING=''
 BATS_EXTENDED_SYNTAX=''
+BATS_TRACE_LEVEL="${BATS_TRACE_LEVEL:-0}"
 
 while [[ "$#" -ne 0 ]]; do
   case "$1" in
@@ -24,6 +25,9 @@ while [[ "$#" -ne 0 ]]; do
   -x)
     # shellcheck disable=SC2034
     BATS_EXTENDED_SYNTAX='-x'
+    ;;
+  --trace)
+    (( ++BATS_TRACE_LEVEL )) # avoid returning 0
     ;;
   *)
     break
