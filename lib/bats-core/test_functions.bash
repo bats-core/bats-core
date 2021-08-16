@@ -156,6 +156,13 @@ run() { # [!|=N] [--keep-empty-lines] [--output merged|separate|stderr|stdout] [
     ;;
   esac
 
+  # shellcheck disable=SC2034
+  BATS_TEST_COMMAND="${*}"
+  if $VERBOSE; then
+    printf "  %s\n" "${BATS_TEST_COMMAND}" >&3
+    printf "    %s\n" "${lines[@]:-}" >&3
+  fi
+  
   IFS="$origIFS"
   set "-$origFlags"
 

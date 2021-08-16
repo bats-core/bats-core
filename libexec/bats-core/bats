@@ -46,6 +46,7 @@ HELP_TEXT_HEADER
   -p, --pretty              Shorthand for "--formatter pretty"
   -r, --recursive           Include tests in subdirectories
   -t, --tap                 Shorthand for "--formatter tap"
+  --verbose                 Print command and STDOUT/ERR of test[s]
   -T, --timing              Add timing information to tests
   -v, --version             Display the version number
 
@@ -114,6 +115,7 @@ report_formatter=''
 recursive=
 export BATS_TEMPDIR_CLEANUP=1
 output=
+export VERBOSE="${VERBOSE:-false}"
 if [[ -z "${CI:-}" && -t 0 && -t 1 ]] && command -v tput >/dev/null; then
   formatter='pretty'
 fi
@@ -191,6 +193,9 @@ while [[ "$#" -ne 0 ]]; do
   --tempdir) # for internal test consumption only!
     BATS_RUN_TMPDIR="$2"
     shift
+    ;;
+  --verbose)
+      VERBOSE=true
     ;;
   -*)
     abort "Bad command line option '$1'"
