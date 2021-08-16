@@ -131,7 +131,7 @@ run() { # [!|=N] [--keep-empty-lines] [--output merged|separate|stderr|stdout] [
     # 'output', 'status', 'lines' are global variables available to tests.
     # preserve trailing newlines by appending . and removing it later
     # shellcheck disable=SC2034
-    output="$($pre_command "$@"; status=$?; printf .; exit $status)" || status="$?"    
+    output="$($pre_command "$@"; status=$?; printf .; exit $status)" || status="$?"
     output="${output%.}"
   else
     # 'output', 'status', 'lines' are global variables available to tests.
