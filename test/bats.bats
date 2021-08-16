@@ -1092,3 +1092,23 @@ EOF
   [ "${lines[4]}" == '# test' ]
   [ ${#lines[@]} -eq 5 ]
 }
+
+@test "--gather-test-outputs-in gathers outputs of all tests (even succeeding!)" {
+  local OUTPUT_DIR="$BATS_TEST_TMPDIR/logs"
+  run bats --verbose-run --gather-test-outputs-in "$OUTPUT_DIR" "$FIXTURE_ROOT/print_output_on_failure.bats"
+
+  [ -d "$OUTPUT_DIR" ] # will be generated!
+
+  [ $(ls "$OUTPUT_DIR" | wc -l) -eq 3 ]
+
+  # even outputs of successful tests are generated
+  OUTPUT=$(<"$OUTPUT_DIR/1-no failure prints no output.log") # own line to trigger failure if file does not exist
+  [ "$OUTPUT" ==  "success" ]
+  
+  OUTPUT=$(<"$OUTPUT_DIR/2-failure prints output.log")
+  [ "$OUTPUT" == "fail hard" ]
+
+  # even empty outputs are generated
+  OUTPUT=$(<"$OUTPUT_DIR/3-empty output on failure.log")
+  [ "$OUTPUT" == "" ]
+}

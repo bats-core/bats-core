@@ -56,6 +56,10 @@ while [[ "$#" -ne 0 ]]; do
   --verbose-run)
     flags+=(--verbose-run)
     ;;
+  --gather-test-outputs-in)
+    shift
+    flags+=(--gather-test-outputs-in "$1")
+    ;;
   *)
     break
     ;;

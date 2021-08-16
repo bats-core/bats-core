@@ -10,6 +10,7 @@ BATS_TRACE_LEVEL="${BATS_TRACE_LEVEL:-0}"
 BATS_PRINT_OUTPUT_ON_FAILURE="${BATS_PRINT_OUTPUT_ON_FAILURE:-}"
 BATS_SHOW_OUTPUT_OF_SUCCEEDING_TESTS="${BATS_SHOW_OUTPUT_OF_SUCCEEDING_TESTS:-}"
 BATS_VERBOSE_RUN="${BATS_VERBOSE_RUN:-}"
+BATS_GATHER_TEST_OUTPUTS_IN="${BATS_GATHER_TEST_OUTPUTS_IN:-}"
 
 while [[ "$#" -ne 0 ]]; do
   case "$1" in
@@ -40,6 +41,10 @@ while [[ "$#" -ne 0 ]]; do
     ;;
   --verbose-run)
     BATS_VERBOSE_RUN=1
+    ;;
+  --gather-test-outputs-in)
+    shift
+    BATS_GATHER_TEST_OUTPUTS_IN="$1"
     ;;
   *)
     break
@@ -145,6 +150,10 @@ bats_exit_trap() {
     if [[ -n "$line" ]]; then
       printf '# %s\n' "$line"
     fi
+  fi
+
+  if [[ $BATS_GATHER_TEST_OUTPUTS_IN ]]; then
+    cp "$BATS_OUT" "$BATS_GATHER_TEST_OUTPUTS_IN/$BATS_SUITE_TEST_NUMBER-$BATS_TEST_DESCRIPTION.log"
   fi
 
   rm -f "$BATS_OUT"

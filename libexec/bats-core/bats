@@ -206,6 +206,14 @@ while [[ "$#" -ne 0 ]]; do
   --verbose-run)
     flags+=(--verbose-run)
     ;;
+  --gather-test-outputs-in)
+    shift
+    output_dir="$1"
+    if ! mkdir "$output_dir"; then
+      abort "Could not create $output_dir for --gather-test-outputs-in"
+    fi
+    flags+=(--gather-test-outputs-in "$output_dir")
+    ;;
   -*)
     abort "Bad command line option '$1'"
     ;;
