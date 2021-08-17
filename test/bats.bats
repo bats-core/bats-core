@@ -1068,7 +1068,7 @@ EOF
   [ "${lines[5]}" == '# Last output:' ]
   [ "${lines[6]}" == '# fail hard' ]
   [ "${lines[7]}" == 'not ok 3 empty output on failure' ]
-  [ "${lines[8]}" == "# (in test file $RELATIVE_FIXTURE_ROT/print_output_on_failure.bats, line 10)" ]
+  [ "${lines[8]}" == "# (in test file $RELATIVE_FIXTURE_ROOT/print_output_on_failure.bats, line 10)" ]
   [ "${lines[9]}" == "#   \`false' failed" ]
   [ ${#lines[@]} -eq 10 ]
 }
