@@ -15,24 +15,6 @@ setup() {
   [ ${#lines[@]} -eq 5 ]
 }
 
-@test "--trace prints trace" {
-  run '=1' bats --trace "$FIXTURE_ROOT/failing_complex.bats"
-  [ "${lines[0]}" = '1..1' ]
-  [ "${lines[1]}" = 'not ok 1 a complex failing test' ]
-  [ "${lines[2]}" = "# (in test file $RELATIVE_FIXTURE_ROOT/failing_complex.bats, line 4)" ]
-  [ "${lines[3]}" = "#   \`[ \$status -eq 0 ]' failed" ]
-  [ "${lines[4]}" = '# $ [failing_complex.bats:2]' ]
-  [ "${lines[5]}" = '# $ echo 123' ]
-  [ "${lines[6]}" = '# 123' ]
-  [ "${lines[7]}" = '# $ [failing_complex.bats:3]' ]
-  # shellcheck disable=SC2016
-  [ "${lines[8]}" = '# $ run bats "$BATS_TEST_DIRNAME/failing.bats"' ]
-  [ "${lines[9]}" = '# $ [failing_complex.bats:4]' ]
-  # shellcheck disable=SC2016
-  [ "${lines[10]}" = '# $ [ $status -eq 0 ]' ]
-  [ ${#lines[@]} -eq 11 ]
-}
-
 @test "--trace recurses into functions but not into run" {
     run '=1' bats --trace "$FIXTURE_ROOT/failing_recursive.bats"
     echo "$output"
