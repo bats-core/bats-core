@@ -17,7 +17,7 @@ setup() {
 
 @test "--trace recurses into functions but not into run" {
     run '=1' bats --trace "$FIXTURE_ROOT/failing_recursive.bats"
-    echo "$output"
+    
     [ "${lines[0]}" = '1..1' ]
     [ "${lines[1]}" = 'not ok 1 a recursive failing test' ]
     [ "${lines[2]}" = "# (in test file $RELATIVE_FIXTURE_ROOT/failing_recursive.bats, line 12)" ]
@@ -58,5 +58,36 @@ setup() {
     [ "${lines[29]}" = '# $ run fun 2' ]
     [ "${lines[30]}" = '# $ [failing_recursive.bats:12]' ]
     [ "${lines[31]}" = '# $ false' ]
-    [ ${#lines[@]} -eq 32 ]
+
+    # the trace on return from a function differs between bash versions
+    check_bash_5() {
+      [ ${#lines[@]} -eq 32 ]
+    }
+
+    # "alias" same behavior to have single point of truth
+    check_bash_4_4() { check_bash_5; }
+    check_bash_4_3() { check_bash_5; }
+    check_bash_4_2() { check_bash_4_0; }
+    check_bash_4_1() { check_bash_4_0; }
+
+    check_bash_4_0() {
+      # bash bug: the lineno from the debug_trap spills over -> ignore it
+      [[ "${lines[32]}" = '# $ [failing_recursive.bats:'*']' ]]
+      [ "${lines[33]}" = '# $ false' ]
+      [ ${#lines[@]} -eq 34 ]
+    }
+
+    check_bash_3_2() {
+      # lineno from function definition
+      [ "${lines[32]}" = '# $ [failing_recursive.bats:8]' ]
+      [ "${lines[33]}" = '# $ false' ]
+      [ ${#lines[@]} -eq 34 ]
+    }
+
+    IFS=. read -r -a bash_version <<< "${BASH_VERSION}"
+    check_func="check_bash_${bash_version[0]}"
+    if [[ $(type -t "$check_func") != function ]]; then
+      check_func="check_bash_${bash_version[0]}_${bash_version[1]}"
+    fi
+    $check_func
 }
