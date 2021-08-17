@@ -25,8 +25,10 @@ setup() {
   [ "${lines[5]}" = '# $ echo 123' ]
   [ "${lines[6]}" = '# 123' ]
   [ "${lines[7]}" = '# $ [failing_complex.bats:3]' ]
-  [ "${lines[8]}" = '# $ run bats $BATS_TEST_DIRNAME/failing.bats' ]
+  # shellcheck disable=SC2016
+  [ "${lines[8]}" = '# $ run bats "$BATS_TEST_DIRNAME/failing.bats"' ]
   [ "${lines[9]}" = '# $ [failing_complex.bats:4]' ]
+  # shellcheck disable=SC2016
   [ "${lines[10]}" = '# $ [ $status -eq 0 ]' ]
   [ ${#lines[@]} -eq 11 ]
 }
@@ -44,23 +46,31 @@ setup() {
     [ "${lines[7]}" = '# $ [failing_recursive.bats:10]' ]
     [ "${lines[8]}" = '# $ fun 2' ]
     [ "${lines[9]}" = '# $$ [failing_recursive.bats:2]' ]
-    [ "${lines[10]}" = '# $$ echo $1' ]
+    # shellcheck disable=SC2016
+    [ "${lines[10]}" = '# $$ echo "$1"' ]
     [ "${lines[11]}" = '# 2' ]
     [ "${lines[12]}" = '# $$ [failing_recursive.bats:3]' ]
+    # shellcheck disable=SC2016
     [ "${lines[13]}" = '# $$ [[ $1 -gt 0 ]]' ]
     [ "${lines[14]}" = '# $$ [failing_recursive.bats:4]' ]
+    # shellcheck disable=SC2016
     [ "${lines[15]}" = '# $$ fun $(($1 - 1))' ]
     [ "${lines[16]}" = '# $$$ [failing_recursive.bats:2]' ]
-    [ "${lines[17]}" = '# $$$ echo $1' ]
+    # shellcheck disable=SC2016
+    [ "${lines[17]}" = '# $$$ echo "$1"' ]
     [ "${lines[18]}" = '# 1' ]
     [ "${lines[19]}" = '# $$$ [failing_recursive.bats:3]' ]
+    # shellcheck disable=SC2016
     [ "${lines[20]}" = '# $$$ [[ $1 -gt 0 ]]' ]
     [ "${lines[21]}" = '# $$$ [failing_recursive.bats:4]' ]
+    # shellcheck disable=SC2016
     [ "${lines[22]}" = '# $$$ fun $(($1 - 1))' ]
     [ "${lines[23]}" = '# $$$$ [failing_recursive.bats:2]' ]
-    [ "${lines[24]}" = '# $$$$ echo $1' ]
+    # shellcheck disable=SC2016
+    [ "${lines[24]}" = '# $$$$ echo "$1"' ]
     [ "${lines[25]}" = '# 0' ]
     [ "${lines[26]}" = '# $$$$ [failing_recursive.bats:3]' ]
+    # shellcheck disable=SC2016
     [ "${lines[27]}" = '# $$$$ [[ $1 -gt 0 ]]' ]
     [ "${lines[28]}" = '# $ [failing_recursive.bats:11]' ]
     [ "${lines[29]}" = '# $ run fun 2' ]

@@ -578,10 +578,12 @@ END_OF_ERR_MSG
   [ "${lines[1]}" = 'not ok 1 access unbound variable' ]
   [ "${lines[2]}" = "# (in test file $RELATIVE_FIXTURE_ROOT/unbound_variable.bats, line 9)" ]
   [ "${lines[3]}" = "#   \`foo=\$unset_variable' failed" ]
+  # shellcheck disable=SC2076
   [[ "${lines[4]}" =~ ".src: line 9:" ]]
   [ "${lines[5]}" = 'not ok 2 access second unbound variable' ]
   [ "${lines[6]}" = "# (in test file $RELATIVE_FIXTURE_ROOT/unbound_variable.bats, line 15)" ]
   [ "${lines[7]}" = "#   \`foo=\$second_unset_variable' failed" ]
+  # shellcheck disable=SC2076
   [[ "${lines[8]}" =~ ".src: line 15:" ]]
 }
 
@@ -1105,8 +1107,6 @@ EOF
 
   [ -d "$OUTPUT_DIR" ] # will be generated!
 
-  [ $(ls "$OUTPUT_DIR" | wc -l) -eq 3 ]
-
   # even outputs of successful tests are generated
   OUTPUT=$(<"$OUTPUT_DIR/1-no failure prints no output.log") # own line to trigger failure if file does not exist
   [ "$OUTPUT" ==  "success" ]
@@ -1117,4 +1117,6 @@ EOF
   # even empty outputs are generated
   OUTPUT=$(<"$OUTPUT_DIR/3-empty output on failure.log")
   [ "$OUTPUT" == "" ]
+
+  [ "$(find "$OUTPUT_DIR" -type f | wc -l)" -eq 3 ]
 }

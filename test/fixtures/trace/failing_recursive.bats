@@ -1,5 +1,5 @@
 fun() {
-  echo $1
+  echo "$1"
   if [[ $1 -gt 0 ]]; then
     fun $(($1 - 1))
   fi
