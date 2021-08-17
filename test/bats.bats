@@ -1063,12 +1063,12 @@ EOF
   [ "${lines[1]}" == 'ok 1 no failure prints no output' ]
   # ^ no output despite --show-output-of-succeeding-tests, because there is no failure
   [ "${lines[2]}" == 'not ok 2 failure prints output' ]
-  [ "${lines[3]}" == '# (in test file test/fixtures/bats/print_output_on_failure.bats, line 6)' ]
+  [ "${lines[3]}" == "# (in test file $RELATIVE_FIXTURE_ROOT/print_output_on_failure.bats, line 6)" ]
   [ "${lines[4]}" == "#   \`run '=1' echo \"fail hard\"' failed, expected exit code 1, got 0" ]
   [ "${lines[5]}" == '# Last output:' ]
   [ "${lines[6]}" == '# fail hard' ]
   [ "${lines[7]}" == 'not ok 3 empty output on failure' ]
-  [ "${lines[8]}" == '# (in test file test/fixtures/bats/print_output_on_failure.bats, line 10)' ]
+  [ "${lines[8]}" == "# (in test file $RELATIVE_FIXTURE_ROT/print_output_on_failure.bats, line 10)" ]
   [ "${lines[9]}" == "#   \`false' failed" ]
   [ ${#lines[@]} -eq 10 ]
 }
@@ -1085,7 +1085,7 @@ EOF
   run '=1' bats --verbose-run "$FIXTURE_ROOT/verbose-run.bats"
   [ "${lines[0]}" == '1..1' ]
   [ "${lines[1]}" == 'not ok 1 test' ]
-  [ "${lines[2]}" == '# (in test file test/fixtures/bats/verbose-run.bats, line 2)' ]
+  [ "${lines[2]}" == "# (in test file $RELATIVE_FIXTURE_ROOT/verbose-run.bats, line 2)" ]
   [ "${lines[3]}" == "#   \`run ! echo test' failed, expected nonzero exit code!" ]
   [ "${lines[4]}" == '# test' ]
   [ ${#lines[@]} -eq 5 ]
@@ -1095,7 +1095,7 @@ EOF
   run '=1' env BATS_VERBOSE_RUN=1 bats "$FIXTURE_ROOT/verbose-run.bats"
   [ "${lines[0]}" == '1..1' ]
   [ "${lines[1]}" == 'not ok 1 test' ]
-  [ "${lines[2]}" == '# (in test file test/fixtures/bats/verbose-run.bats, line 2)' ]
+  [ "${lines[2]}" == "# (in test file $RELATIVE_FIXTURE_ROOT/verbose-run.bats, line 2)" ]
   [ "${lines[3]}" == "#   \`run ! echo test' failed, expected nonzero exit code!" ]
   [ "${lines[4]}" == '# test' ]
   [ ${#lines[@]} -eq 5 ]

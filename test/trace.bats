@@ -19,7 +19,7 @@ setup() {
   run '=1' bats --trace "$FIXTURE_ROOT/failing_complex.bats"
   [ "${lines[0]}" = '1..1' ]
   [ "${lines[1]}" = 'not ok 1 a complex failing test' ]
-  [ "${lines[2]}" = '# (in test file test/fixtures/trace/failing_complex.bats, line 4)' ]
+  [ "${lines[2]}" = "# (in test file $RELATIVE_FIXTURE_ROOT/failing_complex.bats, line 4)" ]
   [ "${lines[3]}" = "#   \`[ \$status -eq 0 ]' failed" ]
   [ "${lines[4]}" = '# $ [failing_complex.bats:2]' ]
   [ "${lines[5]}" = '# $ echo 123' ]
@@ -38,7 +38,7 @@ setup() {
     echo "$output"
     [ "${lines[0]}" = '1..1' ]
     [ "${lines[1]}" = 'not ok 1 a recursive failing test' ]
-    [ "${lines[2]}" = '# (in test file test/fixtures/trace/failing_recursive.bats, line 12)' ]
+    [ "${lines[2]}" = "# (in test file $RELATIVE_FIXTURE_ROOT/failing_recursive.bats, line 12)" ]
     [ "${lines[3]}" = "#   \`false' failed" ]
     [ "${lines[4]}" = '# $ [failing_recursive.bats:9]' ]
     [ "${lines[5]}" = '# $ echo Outer' ]
