@@ -74,6 +74,16 @@ print-stderr-stdout() {
     [ ${#stderr_lines[@]} -eq 1 ]
 }
 
+@test "--output works without -- separator" {
+    run --output stderr print-stderr-stdout
+    echo "output='$output' stderr='$stderr'"
+    [ "${output-notset}" = notset ]
+    [ ${#lines[@]} -eq 0 ]
+
+    [ "$stderr" = stderr ]
+    [ ${#stderr_lines[@]} -eq 1 ]
+}
+
 @test "run --output separate splits output" {
     run --output separate -- print-stderr-stdout
     echo "output='$output' stderr='$stderr'"

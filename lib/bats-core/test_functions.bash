@@ -90,6 +90,7 @@ run() { # [!|=N] [--keep-empty-lines] [--output merged|separate|stderr|stdout] [
       --output)
         output_case="$2"
         shift 2 # consume the value too!
+        continue
       ;;
       --)
         shift # eat the -- before breaking away
