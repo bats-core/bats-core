@@ -10,6 +10,11 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 
 ## [Unreleased]
 
+### Fixed
+
+* don't run setup_file/teardown_file on files without tests, e.g. due to
+  filtering (#484)
+
 ## [1.4.1] - 2021-07-24
 
 ### Added
