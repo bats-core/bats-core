@@ -79,7 +79,7 @@ skip() {
   if [[ -n "$reason" ]]; then
     reason=": $reason"
   fi
-  BATS_ENABLE_TIMING= finish_test ' - %s (skipped%s)' "$name" "$reason"
+  BATS_ENABLE_TIMING='' finish_test ' - %s (skipped%s)' "$name" "$reason"
 }
 
 fail() {
