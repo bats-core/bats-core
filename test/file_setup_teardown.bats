@@ -125,7 +125,7 @@ not ok 1 failing test
 }
 
 @test "teardown_file runs even if all tests in the file are skipped" {
-  # shellcheck disable=SC2031
+  # shellcheck disable=SC2031,SC2030
   export LOG="$BATS_TEST_TMPDIR/teardown_file_skipped.log" 
   run bats "$FIXTURE_ROOT/teardown_file_even_if_all_tests_are_skipped.bats"
   [[ $status -eq 0 ]]
@@ -175,4 +175,14 @@ ok 2 must not see variable from first run" ]]
 
 @test "variables exported in setup_file are visible in tests" {
   [[ $SETUP_FILE_EXPORT_TEST == "true" ]]
+}
+
+@test "Don't run setup_file for files without tests" {
+  # shellcheck disable=SC2031
+  export LOG="$BATS_TEST_TMPDIR/setup_file.log"
+  # only select the test from no_setup_file
+  run bats -f test "$FIXTURE_ROOT/setup_file.bats" "$FIXTURE_ROOT/no_setup_file.bats"
+
+  [ ! -f "$LOG" ] # setup_file must not have been executed!
+  [ "${lines[0]}" == '1..1' ] # but at least one test should have been run
 }

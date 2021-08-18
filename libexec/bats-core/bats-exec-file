@@ -291,8 +291,14 @@ if [[ -n "$extended_syntax" ]]; then
   printf "suite %s\n" "$filename"
 fi
 
-bats_preprocess_source "$filename"
 bats_read_tests_list_file
+# don't run potentially expensive setup/teardown_file
+# when there are no tests to run
+if [[ ${#tests_to_run[@]} -eq 0 ]]; then
+  exit 0
+fi
+
+bats_preprocess_source "$filename"
 bats_run_setup_file
 bats_run_tests
 bats_run_teardown_file
