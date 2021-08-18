@@ -9,8 +9,10 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Check that PR is mentioned in Changelog
-        run:
-          grep "#${{github.event.pull_request.number}}" docs/CHANGELOG.md
+        run: |
+          if ! ./.github/workflows/check_pr_label.sh "${{github.event.pull_request.number}}" "no changelog"; then
+            grep "#${{github.event.pull_request.number}}" docs/CHANGELOG.md
+          fi
     if: ${{github.event.pull_request}}
   shellcheck:
     runs-on: ubuntu-20.04
