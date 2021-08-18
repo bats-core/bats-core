@@ -31,6 +31,15 @@ process.
 THE RUN HELPER
 --------------
 
+Usage: run [OPTIONS] [--] <command...>
+Options:
+       !        check for non zero exit code
+       =<N>     check that exit code is <N>
+       --output {merged,separate,stdout,stderr}
+                control which output is recorded
+       --keep-empty-lines
+                retain emtpy lines in `${lines[@]}`
+
 Many Bats tests need to run a command and then make assertions about
 its exit status and output. Bats includes a `run` helper that invokes
 its arguments as a command, saves the exit status and output into
@@ -73,6 +82,19 @@ the first line:
       [ "${lines[0]}" = "usage: foo <filename>" ]
     }
 
+By default `run` leaves out empty lines in `${lines[@]}`. Use `run --keep-empty-lines` to retain them.
+
+Additionally, you can use `run --output <mode>` to control what goes into `$output` and `$lines`.
+The available values for `<mode>` are:
+
+- `merged`: the default when `--output` is not specified, interleaves stdout and stderr
+- `separate`: splits stderr off to `$stderr` and `${stderr_lines[@]}`, stdout is still available as `$output` and `${lines[@]}`
+- `stderr`: discards stdout and fills '$stderr` and `${stderr_lines[@]}`
+- `stdout`: discards stdout and fills `$output` and `${lines[@]}`
+
+All additional parameters to run should come before the command.
+If you want to run a command that starts with `-`, prefix it with `--` to
+prevent `run` from parsing it as an option.
 
 THE LOAD COMMAND
 ----------------
