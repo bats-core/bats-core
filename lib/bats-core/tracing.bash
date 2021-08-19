@@ -172,14 +172,18 @@ bats_debug_trap() {
 	# on windows we sometimes get a mix of paths (when install via nmp install -g)
 	# which have C:/... or /c/... comparing them is going to be problematic.
 	# We need to normalize them to a common format!
-	bats_normalize_windows_dir_path NORMALIZED_BATS_ROOT "$BATS_ROOT"
 	bats_normalize_windows_dir_path NORMALIZED_INPUT "${1%/*}"
+	local file_excluded=
+	for path in "${_BATS_DEBUG_EXCLUDE_PATHS[@]}"; do
+		if [[ "$NORMALIZED_INPUT" == "$path"* ]]; then
+			file_excluded=1
+			break
+		fi
+	done
 	
 	# don't update the trace within library functions or we get backtraces from inside traps
 	# also don't record new stack traces while handling interruptions, to avoid overriding the interrupted command
-	if [[ "$NORMALIZED_INPUT" != $NORMALIZED_BATS_ROOT/lib/* && 
-		  "$NORMALIZED_INPUT" != $NORMALIZED_BATS_ROOT/libexec/* &&
-		  "${BATS_INTERRUPTED-NOTSET}" == NOTSET ]]; then
+	if [[ -z "$file_excluded" && "${BATS_INTERRUPTED-NOTSET}" == NOTSET ]]; then
 		bats_capture_stack_trace
 		bats_emit_trace
 	fi
@@ -206,4 +210,44 @@ bats_error_trap() {
 		BATS_STACK_TRACE=("${BATS_CURRENT_STACK_TRACE[@]}")
 		trap - DEBUG
 	fi
+}
+
+bats_add_debug_exclude_path() { # <path>
+	if [[ -z "$1" ]]; then # don't exclude everything
+		printf "bats_add_debug_exclude_path: Exclude path must not be empty!\n" >&2
+		return 1
+	fi
+	if [[ "$OSTYPE" == cygwin || "$OSTYPE" == msys ]]; then
+		bats_normalize_windows_dir_path normalized_dir "$1"
+		_BATS_DEBUG_EXCLUDE_PATHS+=("$normalized_dir")
+	else
+		_BATS_DEBUG_EXCLUDE_PATHS+=("$1")
+	fi
+}
+
+bats_setup_tracing() {
+	_BATS_DEBUG_EXCLUDE_PATHS=()
+	# exclude some paths by default
+	bats_add_debug_exclude_path "$BATS_ROOT/lib/"
+	bats_add_debug_exclude_path "$BATS_ROOT/libexec/"
+
+
+	# try to exclude helper libraries if found
+	if [[ -n "$BATS_TRACE_LEVEL" ]]; then
+		while read -r path; do
+			bats_add_debug_exclude_path "$path"
+		done < <(find "$PWD" -type d -name bats-assert -o -name bats-support)
+	fi
+
+	# exclude user defined libraries
+	IFS=':' read -r exclude_paths <<< "${BATS_DEBUG_EXCLUDE_PATHS}"
+	for path in "${exclude_paths[@]}"; do
+		if [[ -n "$path" ]]; then
+			bats_add_debug_exclude_path "$path"
+		fi
+	done
+
+	# turn on traps after setting excludedes to avoid tracing the exclude setup
+	trap 'bats_debug_trap "$BASH_SOURCE"' DEBUG
+  	trap 'bats_error_trap' ERR
 }

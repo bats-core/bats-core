@@ -101,11 +101,8 @@ bats_run_setup_file() {
   BATS_TEARDOWN_FILE_COMPLETED=
   # shellcheck disable=2034
   BATS_ERROR_STATUS= # used in tracing.bash
-  trap 'bats_debug_trap "$BASH_SOURCE"' DEBUG
-
   touch "$BATS_OUT"
-
-  trap 'bats_error_trap' ERR
+  bats_setup_tracing
   trap 'bats_file_teardown_trap' EXIT
 
   local status=0
