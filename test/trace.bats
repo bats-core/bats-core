@@ -25,43 +25,36 @@ setup() {
     [ "${lines[4]}" = '# $ [failing_recursive.bats:9]' ]
     [ "${lines[5]}" = '# $ echo Outer' ]
     [ "${lines[6]}" = '# Outer' ]
-    [ "${lines[7]}" = '# $ [failing_recursive.bats:10]' ]
-    [ "${lines[8]}" = '# $ fun 2' ]
-    [ "${lines[9]}" = '# $$ [failing_recursive.bats:2]' ]
+    [ "${lines[7]}" = '# $ fun 2' ]
+    [ "${lines[8]}" = '# $$ [failing_recursive.bats:2]' ]
     # shellcheck disable=SC2016
-    [ "${lines[10]}" = '# $$ echo "$1"' ]
-    [ "${lines[11]}" = '# 2' ]
-    [ "${lines[12]}" = '# $$ [failing_recursive.bats:3]' ]
+    [ "${lines[9]}" = '# $$ echo "$1"' ]
+    [ "${lines[10]}" = '# 2' ]
     # shellcheck disable=SC2016
-    [ "${lines[13]}" = '# $$ [[ $1 -gt 0 ]]' ]
-    [ "${lines[14]}" = '# $$ [failing_recursive.bats:4]' ]
+    [ "${lines[11]}" = '# $$ [[ $1 -gt 0 ]]' ]
     # shellcheck disable=SC2016
-    [ "${lines[15]}" = '# $$ fun $(($1 - 1))' ]
-    [ "${lines[16]}" = '# $$$ [failing_recursive.bats:2]' ]
+    [ "${lines[12]}" = '# $$ fun $(($1 - 1))' ]
+    [ "${lines[13]}" = '# $$$ [failing_recursive.bats:2]' ]
     # shellcheck disable=SC2016
-    [ "${lines[17]}" = '# $$$ echo "$1"' ]
-    [ "${lines[18]}" = '# 1' ]
-    [ "${lines[19]}" = '# $$$ [failing_recursive.bats:3]' ]
+    [ "${lines[14]}" = '# $$$ echo "$1"' ]
+    [ "${lines[15]}" = '# 1' ]
     # shellcheck disable=SC2016
-    [ "${lines[20]}" = '# $$$ [[ $1 -gt 0 ]]' ]
-    [ "${lines[21]}" = '# $$$ [failing_recursive.bats:4]' ]
+    [ "${lines[16]}" = '# $$$ [[ $1 -gt 0 ]]' ]
     # shellcheck disable=SC2016
-    [ "${lines[22]}" = '# $$$ fun $(($1 - 1))' ]
-    [ "${lines[23]}" = '# $$$$ [failing_recursive.bats:2]' ]
+    [ "${lines[17]}" = '# $$$ fun $(($1 - 1))' ]
+    [ "${lines[18]}" = '# $$$$ [failing_recursive.bats:2]' ]
     # shellcheck disable=SC2016
-    [ "${lines[24]}" = '# $$$$ echo "$1"' ]
-    [ "${lines[25]}" = '# 0' ]
-    [ "${lines[26]}" = '# $$$$ [failing_recursive.bats:3]' ]
+    [ "${lines[19]}" = '# $$$$ echo "$1"' ]
+    [ "${lines[20]}" = '# 0' ]
     # shellcheck disable=SC2016
-    [ "${lines[27]}" = '# $$$$ [[ $1 -gt 0 ]]' ]
-    [ "${lines[28]}" = '# $ [failing_recursive.bats:11]' ]
-    [ "${lines[29]}" = '# $ run fun 2' ]
-    [ "${lines[30]}" = '# $ [failing_recursive.bats:12]' ]
-    [ "${lines[31]}" = '# $ false' ]
+    [ "${lines[21]}" = '# $$$$ [[ $1 -gt 0 ]]' ]
+    [ "${lines[22]}" = '# $ [failing_recursive.bats:11]' ]
+    [ "${lines[23]}" = '# $ run fun 2' ]
+    [ "${lines[24]}" = '# $ false' ]
 
     # the trace on return from a function differs between bash versions
     check_bash_5() {
-      [ ${#lines[@]} -eq 32 ]
+      [ ${#lines[@]} -eq 25 ]
     }
 
     # "alias" same behavior to have single point of truth
@@ -72,16 +65,14 @@ setup() {
 
     check_bash_4_0() {
       # bash bug: the lineno from the debug_trap spills over -> ignore it
-      [[ "${lines[32]}" = '# $ [failing_recursive.bats:'*']' ]]
-      [ "${lines[33]}" = '# $ false' ]
-      [ ${#lines[@]} -eq 34 ]
+      [ "${lines[25]}" = '# $ false' ]
+      [ ${#lines[@]} -eq 26 ]
     }
 
     check_bash_3_2() {
       # lineno from function definition
-      [ "${lines[32]}" = '# $ [failing_recursive.bats:8]' ]
-      [ "${lines[33]}" = '# $ false' ]
-      [ ${#lines[@]} -eq 34 ]
+      [ "${lines[25]}" = '# $ false' ]
+      [ ${#lines[@]} -eq 26 ]
     }
 
     IFS=. read -r -a bash_version <<< "${BASH_VERSION}"
