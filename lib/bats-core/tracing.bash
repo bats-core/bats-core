@@ -248,7 +248,7 @@ bats_setup_tracing() {
 	fi
 
 	# exclude user defined libraries
-	IFS=':' read -r exclude_paths <<< "${BATS_DEBUG_EXCLUDE_PATHS}"
+	IFS=':' read -r exclude_paths <<< "${BATS_DEBUG_EXCLUDE_PATHS:-}"
 	for path in "${exclude_paths[@]}"; do
 		if [[ -n "$path" ]]; then
 			bats_add_debug_exclude_path "$path"
