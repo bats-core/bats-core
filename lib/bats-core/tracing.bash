@@ -158,12 +158,15 @@ bats_emit_trace() {
 			if [[ $file == "${BATS_TEST_SOURCE}" ]]; then
 				file="$BATS_TEST_FILENAME"
 			fi
-			padding='$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$' 
-			printf '%s [%s:%d]\n' "${padding::${#BASH_LINENO[@]}-4}" "${file##*/}" "$line"
+			padding='$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$'
+			if (( BATS_LAST_STACK_DEPTH != ${#BASH_LINENO[@]} )); then
+				printf '%s [%s:%d]\n' "${padding::${#BASH_LINENO[@]}-4}" "${file##*/}" "$line"
+			fi
 			printf '%s %s\n'  "${padding::${#BASH_LINENO[@]}-4}" "$BASH_COMMAND" 
 			BATS_LAST_BASH_COMMAND="$BASH_COMMAND"
 			BATS_LAST_BASH_LINENO="$line"
 			BATS_LAST_BASH_SOURCE="${BASH_SOURCE[2]}"
+			BATS_LAST_STACK_DEPTH="${#BASH_LINENO[@]}"
 		fi
 	fi
 }
@@ -232,8 +235,13 @@ bats_setup_tracing() {
 	bats_add_debug_exclude_path "$BATS_ROOT/libexec/"
 
 
-	# try to exclude helper libraries if found
 	if [[ -n "$BATS_TRACE_LEVEL" ]]; then
+		# avoid undefined variable errors
+		BATS_LAST_BASH_COMMAND=
+		BATS_LAST_BASH_LINENO=
+		BATS_LAST_BASH_SOURCE=
+		BATS_LAST_STACK_DEPTH=
+		# try to exclude helper libraries if found, this is only relevant for tracing
 		while read -r path; do
 			bats_add_debug_exclude_path "$path"
 		done < <(find "$PWD" -type d -name bats-assert -o -name bats-support)
