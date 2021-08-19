@@ -202,7 +202,7 @@ bats_perform_test() {
   trap 'bats_teardown_trap as-exit-trap' EXIT
 
   BATS_TEST_START_TIME=$(get_mills_since_epoch)
-  "$BATS_TEST_NAME" >>"$BATS_OUT" 2>&1
+  "$BATS_TEST_NAME" >>"$BATS_OUT" 2>&1 4>&1
 
   BATS_TEST_COMPLETED=1
   trap 'bats_exit_trap' EXIT

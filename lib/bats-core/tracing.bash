@@ -150,7 +150,7 @@ bats_emit_trace() {
 	if [[ $BATS_TRACE_LEVEL -gt 0 ]]; then
 		local line=${BASH_LINENO[1]}
 		# shellcheck disable=SC2016
-		if [[ $BASH_COMMAND != '"$BATS_TEST_NAME" >> "$BATS_OUT" 2>&1' && $BASH_COMMAND != "bats_test_begin "* ]] && # don't emit these internal calls
+		if [[ $BASH_COMMAND != '"$BATS_TEST_NAME" >> "$BATS_OUT" 2>&1 4>&1' && $BASH_COMMAND != "bats_test_begin "* ]] && # don't emit these internal calls
 			[[ $BASH_COMMAND != "$BATS_LAST_BASH_COMMAND" || $line != "$BATS_LAST_BASH_LINENO" ]] &&
 			# avoid printing a function twice (at call site and at definiton site)
 			[[ $BASH_COMMAND != "$BATS_LAST_BASH_COMMAND" || ${BASH_LINENO[2]} != "$BATS_LAST_BASH_LINENO" || ${BASH_SOURCE[3]} != "$BATS_LAST_BASH_SOURCE" ]]; then
@@ -160,9 +160,9 @@ bats_emit_trace() {
 			fi
 			padding='$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$'
 			if (( BATS_LAST_STACK_DEPTH != ${#BASH_LINENO[@]} )); then
-				printf '%s [%s:%d]\n' "${padding::${#BASH_LINENO[@]}-4}" "${file##*/}" "$line"
+				printf '%s [%s:%d]\n' "${padding::${#BASH_LINENO[@]}-4}" "${file##*/}" "$line" >&4
 			fi
-			printf '%s %s\n'  "${padding::${#BASH_LINENO[@]}-4}" "$BASH_COMMAND" 
+			printf '%s %s\n'  "${padding::${#BASH_LINENO[@]}-4}" "$BASH_COMMAND"  >&4
 			BATS_LAST_BASH_COMMAND="$BASH_COMMAND"
 			BATS_LAST_BASH_LINENO="$line"
 			BATS_LAST_BASH_SOURCE="${BASH_SOURCE[2]}"
@@ -235,7 +235,8 @@ bats_setup_tracing() {
 	bats_add_debug_exclude_path "$BATS_ROOT/libexec/"
 
 
-	if [[ -n "$BATS_TRACE_LEVEL" ]]; then
+	exec 4<&1 # used for tracing
+	if [[ "${BATS_TRACE_LEVEL:-0}" -gt 0 ]]; then
 		# avoid undefined variable errors
 		BATS_LAST_BASH_COMMAND=
 		BATS_LAST_BASH_LINENO=
