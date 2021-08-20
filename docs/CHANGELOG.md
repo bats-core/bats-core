@@ -12,7 +12,7 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 
 ### Added
 
-* Experimental: add return code checks to `run` via `!`/`=N` (#467, #477)
+* Experimental: add return code checks to `run` via `!`/`=N` (#367)
 * `install.sh` and `uninstall.sh` take an optional second parameter for the lib
   folder name to allow for multilib install, e.g. into lib64 (#452)
 * add `run` flag `--keep-empty-lines` to retain empty lines in `${lines[@]}` (#224,
