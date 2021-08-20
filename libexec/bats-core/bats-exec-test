@@ -20,7 +20,6 @@ while [[ "$#" -ne 0 ]]; do
     ;;
   -T)
     BATS_ENABLE_TIMING='-T'
-    BATS_PERFORM_TEST_CMD+=('-T')
     ;;
   -x)
     # shellcheck disable=SC2034

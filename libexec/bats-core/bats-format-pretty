@@ -63,13 +63,14 @@ finish_test() {
   buffer "$@"
   if [[ -n "$BATS_ENABLE_TIMING" ]]; then
     set_color 2
-    buffer ' [%s]' "$1"
+    buffer ' [%s]' "$TIMING"
   fi
   advance
   move_down $(( line_backoff_count - 1 ))
 }
 
 pass() {
+  TIMING="$1"
   finish_test ' ✓ %s' "$name"
 }
 
@@ -78,11 +79,12 @@ skip() {
   if [[ -n "$reason" ]]; then
     reason=": $reason"
   fi
-  BATS_ENABLE_TIMING= finish_test ' - %s (skipped%s)' "$name" "$reason"
+  BATS_ENABLE_TIMING='' finish_test ' - %s (skipped%s)' "$name" "$reason"
 }
 
 fail() {
   set_color 1 bold
+  TIMING="$1"
   finish_test ' ✗ %s' "$name"
 }
 

@@ -67,6 +67,23 @@ __Note:__ The `run` helper executes its argument(s) in a subshell, so if
 writing tests against environmental side-effects like a variable's value
 being changed, these changes will not persist after `run` completes.
 
+By default `run` leaves out empty lines in `${lines[@]}`. Use 
+`run --keep-empty-lines` to retain them.
+
+Additionally, you can use `run --output <mode>` to control what goes into
+`$output` and `$lines`. The available values for `<mode>` are:
+
+- `merged`: the default when `--output` is not specified, interleaves stdout and
+  stderr
+- `separate`: splits stderr off to `$stderr` and `${stderr_lines[@]}`, stdout is
+  still available as `$output` and `${lines[@]}`
+- `stderr`: discards stdout and fills '$stderr` and `${stderr_lines[@]}`
+- `stdout`: discards stdout and fills `$output` and `${lines[@]}`
+
+All additional parameters to run should come before the command.
+If you want to run a command that starts with `-`, prefix it with `--` to
+prevent `run` from parsing it as an option.
+
 ## Comment syntax
 
 External tools (like `shellcheck`, `shfmt`, and various IDE's) may not support

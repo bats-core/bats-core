@@ -1014,3 +1014,20 @@ EOF
   run stars
   [ "${lines[0]}" = '**' ]
 }
+
+@test "ensure all folders are shellchecked" {
+  if [[ ! -f "$BATS_ROOT/shellcheck.sh" ]]; then
+    skip "\$BATS_ROOT/shellcheck.sh is required for this test"
+  fi
+  cd "$BATS_ROOT"
+  run "./shellcheck.sh" --list
+  echo "$output"
+
+  grep bin/bats <<< "$output"
+  grep contrib/ <<< "$output"
+  grep docker/ <<< "$output"
+  grep lib/bats-core/ <<< "$output"
+  grep libexec/bats-core/ <<< "$output"
+  grep test/fixtures <<< "$output"
+  grep install.sh <<< "$output"
+}

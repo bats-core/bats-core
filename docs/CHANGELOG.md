@@ -10,10 +10,27 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 
 ## [Unreleased]
 
+### Added
+
+* Experimental: add return code checks to `run` via `!`/`=N` (#467, #477)
+* `install.sh` and `uninstall.sh` take an optional second parameter for the lib
+  folder name to allow for multilib install, e.g. into lib64 (#452)
+* add `run` flag `--keep-empty-lines` to retain empty lines in `${lines[@]}` (#224,
+  a894fbfa)
+* add `run` flag `--output merged|separate|stderr|stdout` (default: `merged`) to
+  select how `$output` and `$lines` are filled (#47, 5c9b173d)
+
 ### Fixed
 
+* don't glob `run`'s `$output` when splitting into `${lines[@]}`
+  (#151, #152, #158, #156, #281, #289)
+* remove empty line after test with pretty formatter on some terminals (#481)
 * don't run setup_file/teardown_file on files without tests, e.g. due to
   filtering (#484)
+
+#### Documentation
+
+* minor edits (#478)
 
 ## [1.4.1] - 2021-07-24
 
