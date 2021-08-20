@@ -28,14 +28,14 @@ nonexistent filename, exits with a `1` status code and prints an error message.
   run foo nonexistent_filename
   [ "$status" -eq 1 ]
   [ "$output" = "foo: no such file 'nonexistent_filename'" ]
-  [ "$BATS_TEST_COMMAND" = "foo nonexistent_filename" ]
+  [ "$BATS_RUN_COMMAND" = "foo nonexistent_filename" ]
 
 }
 ```
 
 The `$status` variable contains the status code of the command, the
 `$output` variable contains the combined contents of the command's standard
-output and standard error streams, and the `$BATS_TEST_COMMAND` string contains the
+output and standard error streams, and the `$BATS_RUN_COMMAND` string contains the
 command and command arguments passed to `run` for execution.
 
 If invoked with one of the following as the first argument, `run`
@@ -278,7 +278,7 @@ your custom text. Here are some detailed guidelines to refer to:
 
 There are several global variables you can use to introspect on Bats tests:
 
-- `$BATS_TEST_COMMAND` is the run command used in your test case.
+- `$BATS_RUN_COMMAND` is the run command used in your test case.
 - `$BATS_TEST_FILENAME` is the fully expanded path to the Bats test file.
 - `$BATS_TEST_DIRNAME` is the directory in which the Bats test file is located.
 - `$BATS_TEST_NAMES` is an array of function names for each test case.

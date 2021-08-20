@@ -157,7 +157,7 @@ run() { # [!|=N] [--keep-empty-lines] [--output merged|separate|stderr|stdout] [
   esac
 
   # shellcheck disable=SC2034
-  BATS_TEST_COMMAND="${*}"
+  BATS_RUN_COMMAND="${*}"
   IFS="$origIFS"
   set "-$origFlags"
 

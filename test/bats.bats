@@ -1035,10 +1035,12 @@ EOF
   grep install.sh <<< "$output"
 }
 
-@test "BATS_TEST_COMMAND: test content of variable" {
+@test "BATS_RUN_COMMAND: test content of variable" {
   run bats -v
-  [[ "${BATS_TEST_COMMAND[*]}" == "bats -v" ]]
-  [[ "$output" =~ Bats* ]]
+  [[ "${BATS_RUN_COMMAND}" == "bats -v" ]]
+  run bats "${BATS_TEST_DESCRIPTION}"
+  echo "$BATS_RUN_COMMAND"
+  [[ "$BATS_RUN_COMMAND" == "bats BATS_RUN_COMMAND: test content of variable" ]]
 }
 
 @test "pretty formatter summary is colorized red on failure" {
