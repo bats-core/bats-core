@@ -72,6 +72,7 @@ finish_test() {
 pass() {
   TIMING="$1"
   finish_test ' ✓ %s' "$name"
+  test_result=pass
 }
 
 skip() {
@@ -80,16 +81,25 @@ skip() {
     reason=": $reason"
   fi
   BATS_ENABLE_TIMING='' finish_test ' - %s (skipped%s)' "$name" "$reason"
+  test_result=skip
 }
 
 fail() {
   set_color 1 bold
   TIMING="$1"
   finish_test ' ✗ %s' "$name"
+  test_result=fail
 }
 
 log() {
-  set_color 1
+  case $test_result in
+    pass)
+    clear_color
+    ;;
+    fail)
+    set_color 1
+    ;;
+  esac
   buffer '   %s\n' "$1"
   clear_color
 }
@@ -191,6 +201,13 @@ buffer() {
   # shellcheck disable=SC2059
   printf -v content -- "$@"
   _buffer+="$content"
+}
+
+prefix_buffer_with() {
+  local old_buffer="$_buffer"
+  _buffer=''
+  "$@"
+  _buffer="$_buffer$old_buffer"
 }
 
 flush() {
