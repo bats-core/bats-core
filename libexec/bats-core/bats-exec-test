@@ -86,6 +86,11 @@ source "$BATS_ROOT/lib/bats-core/tracing.bash"
 bats_teardown_trap() {
   bats_check_status_from_trap
   local bats_teardown_trap_status=0
+
+  # `bats_teardown_trap` is always called with one parameter (BATS_TEARDOWN_STARTED)
+  # The second paramerts is optional and correspond for to the killer pid
+  # that will be forwarded to the exit trap to kill it if necesary
+  local killer_pid=${2:-}
   # mark the start of this function to distinguish where skip is called
   # parameter 1 will signify the reason why this function was called
   # this is used to identify when this is called as exit trap function
@@ -99,7 +104,7 @@ bats_teardown_trap() {
     BATS_ERROR_STATUS="$bats_teardown_trap_status"
   fi
 
-  bats_exit_trap
+  bats_exit_trap "$killer_pid"
 }
 
 # shellcheck source=lib/bats-core/common.bash
@@ -107,18 +112,26 @@ source "$BATS_ROOT/lib/bats-core/common.bash"
 
 bats_exit_trap() {
   local status
-  local skipped=''
+  local exit_metadata=''
+  local killer_pid=${1:-}
   trap - ERR EXIT
+  if [[ -n "${BATS_TIMEOUT:-}" ]]; then
+    # Kill the watchdog in the case of of kernel finished before the timeout
+    bats_strike_back "$killer_pid" || status=1
+  fi
 
   if [[ -n "$BATS_TEST_SKIPPED" ]]; then
-    skipped=' # skip'
+    exit_metadata=' # skip'
     if [[ "$BATS_TEST_SKIPPED" != '1' ]]; then
-      skipped+=" $BATS_TEST_SKIPPED"
+        exit_metadata+=" $BATS_TEST_SKIPPED"
     fi
+  # 141 is the error code raised by pkill
+  elif [[ "$BATS_ERROR_STATUS" -eq 141 ]]; then
+     exit_metadata+=' # timeout'
   fi
 
   BATS_TEST_TIME=''
-  if [[ -z "${skipped}" && -n "$BATS_ENABLE_TIMING" ]]; then
+  if [[ -z "$BATS_TEST_SKIPPED" && -n "$BATS_ENABLE_TIMING" ]]; then
     BATS_TEST_TIME=" in "$(( $(get_mills_since_epoch) - BATS_TEST_START_TIME ))"ms"
   fi
 
@@ -143,7 +156,7 @@ bats_exit_trap() {
       status=126 # signify retry
       rm -r "$BATS_TEST_TMPDIR" # clean up for retry
     else
-      printf 'not ok %d %s\n' "$BATS_SUITE_TEST_NUMBER" "${BATS_TEST_NAME_PREFIX:-}${BATS_TEST_DESCRIPTION}${BATS_TEST_TIME}" >&3
+      printf 'not ok %d %s%s\n' "$BATS_SUITE_TEST_NUMBER" "${BATS_TEST_NAME_PREFIX:-}${BATS_TEST_DESCRIPTION}${BATS_TEST_TIME}" "$exit_metadata" >&3
       local stack_trace
       bats_get_failure_stack_trace stack_trace
       bats_print_stack_trace "${stack_trace[@]}" >&3
@@ -159,7 +172,7 @@ bats_exit_trap() {
     fi
   else
     printf 'ok %d %s%s\n' "$BATS_SUITE_TEST_NUMBER" "${BATS_TEST_NAME_PREFIX:-}${BATS_TEST_DESCRIPTION}${BATS_TEST_TIME}" \
-      "$skipped" >&3
+      "$exit_metadata" >&3
     status=0
     local state=passed
   fi
@@ -182,6 +195,29 @@ bats_exit_trap() {
   exit "$status"
 }
 
+bats_timout() {
+  local target_pid
+  target_pid=$$
+  # Start another process to kill the children of this process
+  (
+     sleep "$BATS_TIMEOUT"
+     if ps "$target_pid" &> /dev/null ; then
+        pkill -PIPE -P "$target_pid" &> /dev/null
+        wait "$target_pid" &> /dev/null
+     fi
+  ) &
+}
+
+bats_strike_back() {
+  # This will kill the killers in the case he is sleeping,
+  local killer_pid=$1
+  if ps -p "$killer_pid" > /dev/null; then
+      pkill -PIPE -P "$killer_pid" &> /dev/null
+      wait "$killer_pid" &> /dev/null
+  fi
+  wait
+}
+
 get_mills_since_epoch() {
   local ms_since_epoch
   ms_since_epoch=$(date +%s%N)
@@ -202,20 +238,25 @@ bats_perform_test() {
     exit 1
   fi
 
+  local BATS_killer_pid=''
+  if [[ -n "${BATS_TIMEOUT:-}" ]]; then
+    bats_timout
+    BATS_killer_pid=$!
+  fi
   BATS_TEST_COMPLETED=
   BATS_TEST_SKIPPED=
   BATS_TEARDOWN_COMPLETED=
   BATS_ERROR_STATUS=
   bats_setup_tracing
   # mark this call as trap call
-  trap 'bats_teardown_trap as-exit-trap' EXIT
+  trap "bats_teardown_trap as-exit-trap $BATS_killer_pid" EXIT
 
   BATS_TEST_START_TIME=$(get_mills_since_epoch)
   "$BATS_TEST_NAME" >>"$BATS_OUT" 2>&1 4>&1
 
   BATS_TEST_COMPLETED=1
-  trap 'bats_exit_trap' EXIT
-  bats_teardown_trap "" # pass empty parameter to signify call outside trap
+  trap "bats_exit_trap $BATS_killer_pid" EXIT
+  bats_teardown_trap "" $BATS_killer_pid # pass empty parameter to signify call outside trap
 }
 
 trap bats_interrupt_trap INT
