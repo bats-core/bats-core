@@ -158,7 +158,7 @@ bats_emit_trace() {
 			if [[ $file == "${BATS_TEST_SOURCE}" ]]; then
 				file="$BATS_TEST_FILENAME"
 			fi
-			padding='$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$'
+			local padding='$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$'
 			if (( BATS_LAST_STACK_DEPTH != ${#BASH_LINENO[@]} )); then
 				printf '%s [%s:%d]\n' "${padding::${#BASH_LINENO[@]}-4}" "${file##*/}" "$line" >&4
 			fi
@@ -175,8 +175,9 @@ bats_debug_trap() {
 	# on windows we sometimes get a mix of paths (when install via nmp install -g)
 	# which have C:/... or /c/... comparing them is going to be problematic.
 	# We need to normalize them to a common format!
+	local NORMALIZED_INPUT
 	bats_normalize_windows_dir_path NORMALIZED_INPUT "${1%/*}"
-	local file_excluded=
+	local file_excluded='' path
 	for path in "${_BATS_DEBUG_EXCLUDE_PATHS[@]}"; do
 		if [[ "$NORMALIZED_INPUT" == "$path"* ]]; then
 			file_excluded=1
