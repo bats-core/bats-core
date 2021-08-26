@@ -3,6 +3,7 @@ set -eET
 
 # Variables used in other scripts.
 BATS_ENABLE_TIMING=''
+BATS_TIMEOUT=''
 BATS_EXTENDED_SYNTAX=''
 BATS_TRACE_LEVEL="${BATS_TRACE_LEVEL:-0}"
 BATS_PRINT_OUTPUT_ON_FAILURE="${BATS_PRINT_OUTPUT_ON_FAILURE:-}"
@@ -91,6 +92,7 @@ bats_teardown_trap() {
   # The second paramerts is optional and correspond for to the killer pid
   # that will be forwarded to the exit trap to kill it if necesary
   local killer_pid=${2:-}
+  
   # mark the start of this function to distinguish where skip is called
   # parameter 1 will signify the reason why this function was called
   # this is used to identify when this is called as exit trap function
@@ -127,11 +129,11 @@ bats_exit_trap() {
     fi
   # 141 is the error code raised by pkill
   elif [[ "$BATS_ERROR_STATUS" -eq 141 ]]; then
-     exit_metadata+=' # timeout'
+     exit_metadata=' # timeout'
   fi
 
   BATS_TEST_TIME=''
-  if [[ -z "$BATS_TEST_SKIPPED" && -n "$BATS_ENABLE_TIMING" ]]; then
+  if [[ -z "${exit_metadata}" && -n "$BATS_ENABLE_TIMING" ]]; then
     BATS_TEST_TIME=" in "$(( $(get_mills_since_epoch) - BATS_TEST_START_TIME ))"ms"
   fi
 
