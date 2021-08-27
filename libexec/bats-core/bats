@@ -32,6 +32,9 @@ HELP_TEXT_HEADER
   -f, --filter <regex>      Only run tests that match the regular expression
   -F, --formatter <type>    Switch between formatters: pretty (default),
                               tap (default w/o term), tap13, junit
+  --gather-test-outputs-in <directory>
+                            Gather the output of failing *and* passing tests 
+                            as files in directory
   -h, --help                Display this help message
   -j, --jobs <jobs>         Number of parallel jobs (requires GNU parallel)
   --no-tempdir-cleanup      Preserve test output temporary directory
@@ -44,11 +47,14 @@ HELP_TEXT_HEADER
   --report-formatter <type> Switch between reporters (same options as --formatter)
   -o, --output <dir>        Directory to write report files
   -p, --pretty              Shorthand for "--formatter pretty"
+  --print-output-on-failure Automatically print the value of `$output` on failed tests
   -r, --recursive           Include tests in subdirectories
+  --show-output-of-passing-tests
+                            Print output of passing tests
   -t, --tap                 Shorthand for "--formatter tap"
-  --verbose                 Print command and STDOUT/ERR of test[s]
   -T, --timing              Add timing information to tests
-  -x, --trace <level>       Print executed commands, specify twice to print recursively
+  -x, --trace               Print test commands as they are executed (like `set -x`)
+  --verbose-run             Make `run` print `$output` by default
   -v, --version             Display the version number
 
   For more information, see https://github.com/bats-core/bats-core
