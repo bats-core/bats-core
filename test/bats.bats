@@ -1060,10 +1060,10 @@ EOF
 }
 
 @test "--print-output-on-failure works as expected" {
-  run bats --print-output-on-failure --show-output-of-succeeding-tests "$FIXTURE_ROOT/print_output_on_failure.bats"
+  run bats --print-output-on-failure --show-output-of-passing-tests "$FIXTURE_ROOT/print_output_on_failure.bats"
   [ "${lines[0]}" == '1..3' ]
   [ "${lines[1]}" == 'ok 1 no failure prints no output' ]
-  # ^ no output despite --show-output-of-succeeding-tests, because there is no failure
+  # ^ no output despite --show-output-of-passing-tests, because there is no failure
   [ "${lines[2]}" == 'not ok 2 failure prints output' ]
   [ "${lines[3]}" == "# (in test file $RELATIVE_FIXTURE_ROOT/print_output_on_failure.bats, line 6)" ]
   [ "${lines[4]}" == "#   \`run '=1' echo \"fail hard\"' failed, expected exit code 1, got 0" ]
@@ -1075,8 +1075,8 @@ EOF
   [ ${#lines[@]} -eq 10 ]
 }
 
-@test "--show-output-of-succeeding-tests works as expected" {
-  run '=0' bats --show-output-of-succeeding-tests "$FIXTURE_ROOT/show-output-of-succeeding-tests.bats"
+@test "--show-output-of-passing-tests works as expected" {
+  run '=0' bats --show-output-of-passing-tests "$FIXTURE_ROOT/show-output-of-passing-tests.bats"
   [ "${lines[0]}" == '1..1' ]
   [ "${lines[1]}" == 'ok 1 test' ]
   [ "${lines[2]}" == '# output' ]

@@ -36,7 +36,7 @@ while [[ "$#" -ne 0 ]]; do
   --print-output-on-failure)
     BATS_PRINT_OUTPUT_ON_FAILURE=1
     ;;
-  --show-output-of-succeeding-tests)
+  --show-output-of-passing-tests)
     BATS_SHOW_OUTPUT_OF_SUCCEEDING_TESTS=1
     ;;
   --verbose-run)
