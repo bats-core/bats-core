@@ -131,7 +131,7 @@ run() { # [!|=N] [--keep-empty-lines] [--output merged|separate|stderr|stdout] [
     # 'output', 'status', 'lines' are global variables available to tests.
     # preserve trailing newlines by appending . and removing it later
     # shellcheck disable=SC2034
-    output="$($pre_command "$@"; status=$?; printf .; exit $status)" || status="$?"    
+    output="$($pre_command "$@"; status=$?; printf .; exit $status)" || status="$?"
     output="${output%.}"
   else
     # 'output', 'status', 'lines' are global variables available to tests.
@@ -156,8 +156,14 @@ run() { # [!|=N] [--keep-empty-lines] [--output merged|separate|stderr|stdout] [
     ;;
   esac
 
+  # shellcheck disable=SC2034
+  BATS_RUN_COMMAND="${*}"
   IFS="$origIFS"
   set "-$origFlags"
+
+  if [[ ${BATS_VERBOSE_RUN:-} ]]; then
+    printf "%s\n" "$output" 
+  fi
 
   if [[ -n "$expected_rc" ]]; then
     if [[ "$expected_rc" = "-1" ]]; then

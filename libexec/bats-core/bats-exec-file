@@ -5,6 +5,7 @@ export flags=()
 num_jobs=1
 filter=''
 extended_syntax=''
+BATS_TRACE_LEVEL="${BATS_TRACE_LEVEL:-0}"
 
 while [[ "$#" -ne 0 ]]; do
   case "$1" in
@@ -31,6 +32,22 @@ while [[ "$#" -ne 0 ]]; do
     BATS_NO_PARALLELIZE_WITHIN_FILE=1
     ;;
   --dummy-flag)
+    ;;
+  --trace)
+    flags+=('--trace')
+    ;;
+  --print-output-on-failure)
+    flags+=(--print-output-on-failure)
+    ;;
+  --show-output-of-passing-tests)
+    flags+=(--show-output-of-passing-tests)
+    ;;
+  --verbose-run)
+    flags+=(--verbose-run)
+    ;;
+  --gather-test-outputs-in)
+    shift
+    flags+=(--gather-test-outputs-in "$1")
     ;;
   *)
     break
@@ -84,11 +101,8 @@ bats_run_setup_file() {
   BATS_TEARDOWN_FILE_COMPLETED=
   # shellcheck disable=2034
   BATS_ERROR_STATUS= # used in tracing.bash
-  trap 'bats_debug_trap "$BASH_SOURCE"' DEBUG
-
   touch "$BATS_OUT"
-
-  trap 'bats_error_trap' ERR
+  bats_setup_tracing
   trap 'bats_file_teardown_trap' EXIT
 
   local status=0

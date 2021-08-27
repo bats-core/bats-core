@@ -1,7 +1,9 @@
 #!/usr/bin/env bats
 
-load test_helper
-fixtures bats
+setup() {
+  load test_helper
+  fixtures bats
+}
 
 @test "no arguments prints message and usage instructions" {
   run bats
@@ -576,11 +578,13 @@ END_OF_ERR_MSG
   [ "${lines[1]}" = 'not ok 1 access unbound variable' ]
   [ "${lines[2]}" = "# (in test file $RELATIVE_FIXTURE_ROOT/unbound_variable.bats, line 9)" ]
   [ "${lines[3]}" = "#   \`foo=\$unset_variable' failed" ]
-  [[ "${lines[4]}" == *".src: line 9:"* ]]
+  # shellcheck disable=SC2076
+  [[ "${lines[4]}" =~ ".src: line 9:" ]]
   [ "${lines[5]}" = 'not ok 2 access second unbound variable' ]
   [ "${lines[6]}" = "# (in test file $RELATIVE_FIXTURE_ROOT/unbound_variable.bats, line 15)" ]
   [ "${lines[7]}" = "#   \`foo=\$second_unset_variable' failed" ]
-  [[ "${lines[8]}" == *".src: line 15:"* ]]
+  # shellcheck disable=SC2076
+  [[ "${lines[8]}" =~ ".src: line 15:" ]]
 }
 
 @test "report correct line on external function calls" {
@@ -882,12 +886,11 @@ EOF
   wait $SUBPROCESS_PID && return 1
 
   run cat "$TEMPFILE"
-  echo "$output"
-
-  [[ "${lines[1]}" == "not ok 1 test" ]]
-  [[ "${lines[2]}" == "# (in test file ${RELATIVE_FIXTURE_ROOT}/hang_in_run.bats, line 7)" ]]
-  [[ "${lines[3]}" == "#   \`run sleep 10' failed with status 130" ]]
-  [[ "${lines[4]}" == "# Received SIGINT, aborting ..." ]]
+  
+  [ "${lines[1]}" == "not ok 1 test" ]
+  [ "${lines[2]}" == "# (in test file ${RELATIVE_FIXTURE_ROOT}/hang_in_run.bats, line 7)" ]
+  [ "${lines[3]}" == "#   \`run sleep 10' failed with status 130" ]
+  [ "${lines[4]}" == "# Received SIGINT, aborting ..." ]
 }
 
 @test "CTRL-C aborts and fails the current teardown" {
@@ -1030,4 +1033,92 @@ EOF
   grep libexec/bats-core/ <<< "$output"
   grep test/fixtures <<< "$output"
   grep install.sh <<< "$output"
+}
+
+@test "BATS_RUN_COMMAND: test content of variable" {
+  run bats -v
+  [[ "${BATS_RUN_COMMAND}" == "bats -v" ]]
+  run bats "${BATS_TEST_DESCRIPTION}"
+  echo "$BATS_RUN_COMMAND"
+  [[ "$BATS_RUN_COMMAND" == "bats BATS_RUN_COMMAND: test content of variable" ]]
+}
+
+@test "pretty formatter summary is colorized red on failure" {
+  run '=1' bats --pretty "$FIXTURE_ROOT/failing.bats"
+  
+  [ "${lines[3]}" == $'\033[0m\033[31;1m' ] # TODO: avoid checking for the leading reset too
+  [ "${lines[4]}" == '1 test, 1 failure' ]
+  [ "${lines[5]}" == $'\033[0m' ]
+}
+
+@test "pretty formatter summary is colorized green on success" {
+  run '=0' bats --pretty "$FIXTURE_ROOT/passing.bats"
+
+  [ "${lines[1]}" == $'\033[0m\033[32;1m' ] # TODO: avoid checking for the leading reset too
+  [ "${lines[2]}" == '1 test, 0 failures' ]
+  [ "${lines[3]}" == $'\033[0m' ]
+}
+
+@test "--print-output-on-failure works as expected" {
+  run bats --print-output-on-failure --show-output-of-passing-tests "$FIXTURE_ROOT/print_output_on_failure.bats"
+  [ "${lines[0]}" == '1..3' ]
+  [ "${lines[1]}" == 'ok 1 no failure prints no output' ]
+  # ^ no output despite --show-output-of-passing-tests, because there is no failure
+  [ "${lines[2]}" == 'not ok 2 failure prints output' ]
+  [ "${lines[3]}" == "# (in test file $RELATIVE_FIXTURE_ROOT/print_output_on_failure.bats, line 6)" ]
+  [ "${lines[4]}" == "#   \`run '=1' echo \"fail hard\"' failed, expected exit code 1, got 0" ]
+  [ "${lines[5]}" == '# Last output:' ]
+  [ "${lines[6]}" == '# fail hard' ]
+  [ "${lines[7]}" == 'not ok 3 empty output on failure' ]
+  [ "${lines[8]}" == "# (in test file $RELATIVE_FIXTURE_ROOT/print_output_on_failure.bats, line 10)" ]
+  [ "${lines[9]}" == "#   \`false' failed" ]
+  [ ${#lines[@]} -eq 10 ]
+}
+
+@test "--show-output-of-passing-tests works as expected" {
+  run '=0' bats --show-output-of-passing-tests "$FIXTURE_ROOT/show-output-of-passing-tests.bats"
+  [ "${lines[0]}" == '1..1' ]
+  [ "${lines[1]}" == 'ok 1 test' ]
+  [ "${lines[2]}" == '# output' ]
+  [ ${#lines[@]} -eq 3 ]
+}
+
+@test "--verbose-run prints output" {
+  run '=1' bats --verbose-run "$FIXTURE_ROOT/verbose-run.bats"
+  [ "${lines[0]}" == '1..1' ]
+  [ "${lines[1]}" == 'not ok 1 test' ]
+  [ "${lines[2]}" == "# (in test file $RELATIVE_FIXTURE_ROOT/verbose-run.bats, line 2)" ]
+  [ "${lines[3]}" == "#   \`run ! echo test' failed, expected nonzero exit code!" ]
+  [ "${lines[4]}" == '# test' ]
+  [ ${#lines[@]} -eq 5 ]
+}
+
+@test "BATS_VERBOSE_RUN=1 also prints output" {
+  run '=1' env BATS_VERBOSE_RUN=1 bats "$FIXTURE_ROOT/verbose-run.bats"
+  [ "${lines[0]}" == '1..1' ]
+  [ "${lines[1]}" == 'not ok 1 test' ]
+  [ "${lines[2]}" == "# (in test file $RELATIVE_FIXTURE_ROOT/verbose-run.bats, line 2)" ]
+  [ "${lines[3]}" == "#   \`run ! echo test' failed, expected nonzero exit code!" ]
+  [ "${lines[4]}" == '# test' ]
+  [ ${#lines[@]} -eq 5 ]
+}
+
+@test "--gather-test-outputs-in gathers outputs of all tests (even succeeding!)" {
+  local OUTPUT_DIR="$BATS_TEST_TMPDIR/logs"
+  run bats --verbose-run --gather-test-outputs-in "$OUTPUT_DIR" "$FIXTURE_ROOT/print_output_on_failure.bats"
+
+  [ -d "$OUTPUT_DIR" ] # will be generated!
+
+  # even outputs of successful tests are generated
+  OUTPUT=$(<"$OUTPUT_DIR/1-no failure prints no output.log") # own line to trigger failure if file does not exist
+  [ "$OUTPUT" ==  "success" ]
+  
+  OUTPUT=$(<"$OUTPUT_DIR/2-failure prints output.log")
+  [ "$OUTPUT" == "fail hard" ]
+
+  # even empty outputs are generated
+  OUTPUT=$(<"$OUTPUT_DIR/3-empty output on failure.log")
+  [ "$OUTPUT" == "" ]
+
+  [ "$(find "$OUTPUT_DIR" -type f | wc -l)" -eq 3 ]
 }

@@ -12,7 +12,15 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 
 ### Added
 
-* Experimental: add return code checks to `run` via `!`/`=N` (#467, #477)
+* new command line flags (#488)
+  * `--verbose-run`: Make `run` print `$output` by default
+  * `-x`, `--trace`: Print test commands as they are executed (like `set -x`)`
+  * `--show-output-of-passing-tests`: Print output of passing tests
+  * `--print-output-on-failure`: Automatically print the value of  `$output` on
+    failed tests
+  * `--gather-test-outputs-in <directory>`: Gather the output of failing **and**
+    passing tests as files in directory
+* Experimental: add return code checks to `run` via `!`/`=N` (#367)
 * `install.sh` and `uninstall.sh` take an optional second parameter for the lib
   folder name to allow for multilib install, e.g. into lib64 (#452)
 * add `run` flag `--keep-empty-lines` to retain empty lines in `${lines[@]}` (#224,

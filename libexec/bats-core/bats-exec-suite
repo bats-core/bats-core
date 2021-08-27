@@ -44,6 +44,22 @@ while [[ "$#" -ne 0 ]]; do
     ;;
   --dummy-flag)
     ;;
+  --trace)
+    flags+=('--trace')
+    ;;
+  --print-output-on-failure)
+    flags+=(--print-output-on-failure)
+    ;;
+  --show-output-of-passing-tests)
+    flags+=(--show-output-of-passing-tests)
+    ;;
+  --verbose-run)
+    flags+=(--verbose-run)
+    ;;
+  --gather-test-outputs-in)
+    shift
+    flags+=(--gather-test-outputs-in "$1")
+    ;;
   *)
     break
     ;;
