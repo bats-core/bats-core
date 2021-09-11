@@ -145,6 +145,9 @@ bats_file_teardown_trap() {
   bats_file_exit_trap
 }
 
+# shellcheck source=lib/bats-core/common.bash
+source "$BATS_ROOT/lib/bats-core/common.bash"
+
 bats_file_exit_trap() {
   trap - ERR EXIT
   if [[ -z "$BATS_SETUP_FILE_COMPLETED" || -z "$BATS_TEARDOWN_FILE_COMPLETED" ]]; then
@@ -160,12 +163,7 @@ bats_file_exit_trap() {
     printf "not ok %d %s\n" "$((test_number_in_suite + 1))" "$FAILURE_REASON failed" >&3
     bats_print_stack_trace "${BATS_STACK_TRACE[@]}" >&3
     bats_print_failed_command >&3
-    while IFS= read -r line; do
-      printf "# %s\n" "$line"
-    done <"$BATS_OUT" >&3
-    if [[ -n "$line" ]]; then
-      printf '# %s\n' "$line"
-    fi
+    bats_prefix_lines_for_tap_output < "$BATS_OUT" >&3
     rm -rf "$BATS_OUT"
     status=1
   fi

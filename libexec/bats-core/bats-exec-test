@@ -93,6 +93,9 @@ bats_teardown_trap() {
   bats_exit_trap
 }
 
+# shellcheck source=lib/bats-core/common.bash
+source "$BATS_ROOT/lib/bats-core/common.bash"
+
 bats_exit_trap() {
   local line
   local status
@@ -144,12 +147,7 @@ bats_exit_trap() {
   fi
 
   if [[ $print_bats_out ]]; then
-    while IFS= read -r line; do
-      printf '# %s\n' "$line" || break # avoid feedback loop when errors are redirected into BATS_OUT (see #353)
-    done <"$BATS_OUT" >&3
-    if [[ -n "$line" ]]; then
-      printf '# %s\n' "$line"
-    fi
+    bats_prefix_lines_for_tap_output < "$BATS_OUT" >&3
   fi
 
   if [[ $BATS_GATHER_TEST_OUTPUTS_IN ]]; then
