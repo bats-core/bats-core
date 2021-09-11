@@ -553,13 +553,17 @@ END_OF_ERR_MSG
   printf 'num lines: %d\n' "${#lines[@]}" >&2
   printf 'LINE: %s\n' "${lines[@]}" >&2
   [ "$status" -eq 1 ]
-  [ "${#lines[@]}" -eq 7 ]
-  [ "${lines[1]}" = 'not ok 1 no final newline' ]
-  [ "${lines[2]}" = "# (in test file $RELATIVE_FIXTURE_ROOT/no-final-newline.bats, line 2)" ]
-  [ "${lines[3]}" = "#   \`printf 'foo\nbar\nbaz' >&2 && return 1' failed" ]
+  [ "${#lines[@]}" -eq 11 ]
+  [ "${lines[1]}" = 'not ok 1 error in test' ]
+  [ "${lines[2]}" = "# (in test file $RELATIVE_FIXTURE_ROOT/no-final-newline.bats, line 3)" ]
+  [ "${lines[3]}" = "#   \`false' failed" ]
   [ "${lines[4]}" = '# foo' ]
   [ "${lines[5]}" = '# bar' ]
-  [ "${lines[6]}" = '# baz' ]
+  [ "${lines[6]}" = 'not ok 2 test function returns nonzero' ]
+  [ "${lines[7]}" = "# (in test file $RELATIVE_FIXTURE_ROOT/no-final-newline.bats, line 7)" ]
+  [ "${lines[8]}" = "#   \`printf 'foo\nbar'' failed" ]
+  [ "${lines[9]}" = '# foo' ]
+  [ "${lines[10]}" = '# bar' ]
 }
 
 @test "run tests which consume stdin (see #197)" {

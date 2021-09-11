@@ -35,6 +35,8 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 * remove empty line after test with pretty formatter on some terminals (#481)
 * don't run setup_file/teardown_file on files without tests, e.g. due to
   filtering (#484)
+* print final line without newline on Bash 3.2 for midtest (ERREXIT) failures
+  too (#495, #145)
 
 #### Documentation
 

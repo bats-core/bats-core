@@ -1,3 +1,9 @@
-@test "no final newline" {
-  printf 'foo\nbar\nbaz' >&2 && return 1
+@test "error in test" {
+  printf 'foo\nbar'
+  false
+}
+
+@test "test function returns nonzero" {
+  printf 'foo\nbar'
+  return 1
 }
