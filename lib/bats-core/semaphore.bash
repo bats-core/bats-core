@@ -24,7 +24,7 @@ bats_semaphore_setup() {
             return $status
         }
     else
-        printf "ERROR: flock/shlock not found!\n" >&2
+        printf "ERROR: flock/shlock is required for parallelization within files!\n" >&2
         exit 1
     fi
 }
