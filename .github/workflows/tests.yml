@@ -153,5 +153,5 @@ jobs:
         with:
           prepare: pkg install -y bash parallel ${{ matrix.packages }}
           run: |
-            time ./bin/bats test/
+            time ./bin/bats --print-output-on-failure test/
     
