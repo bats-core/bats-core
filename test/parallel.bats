@@ -190,3 +190,18 @@ check_parallel_tests() { # <expected maximum parallelity>
 @test "BATS_NO_PARALLELIZE_WITHIN_FILE does not work from inside test function" {
   DISABLE_IN_TEST_FUNCTION=1 run ! bats --jobs 2 "$FIXTURE_ROOT/must_not_parallelize_within_file.bats"
 }
+
+@test "Tell about missing flock and shlock" {
+  if ! command -v parallel; then
+    skip "this test requires GNU parallel to be installed"
+  fi
+  if command -v flock; then
+    skip "this test requires flock not to be installed"
+  fi
+  if command -v shlock; then
+    skip "this test requires flock not to be installed"
+  fi
+
+  run ! bats --jobs "$FIXTURE_ROOT/parallel.bats"
+  [ "${lines[0]}" == "error" ]
+}

@@ -4,7 +4,6 @@ set -e
 count_only_flag=''
 filter=''
 num_jobs=${BATS_NUMBER_OF_PARALLEL_JOBS-1}
-have_gnu_parallel=
 bats_no_parallelize_across_files=${BATS_NO_PARALLELIZE_ACROSS_FILES-}
 bats_no_parallelize_within_files=
 flags=('--dummy-flag') # add a dummy flag to prevent unset varialeb errors on empty array expansion in old bash versions
@@ -67,12 +66,14 @@ while [[ "$#" -ne 0 ]]; do
   shift
 done
 
-if (type -p parallel &>/dev/null); then
-  # shellcheck disable=SC2034
-  have_gnu_parallel=1
-elif [[ "$num_jobs" != 1 && -z "$bats_no_parallelize_across_files" ]]; then
-  abort "Cannot execute \"${num_jobs}\" jobs without GNU parallel"
-  exit 1
+if [[ "$num_jobs" != 1 ]]; then
+  if ! type -p parallel >/dev/null && [[ -z "$bats_no_parallelize_across_files" ]]; then
+    abort "Cannot execute \"${num_jobs}\" jobs without GNU parallel"
+    exit 1
+  fi
+  # shellcheck source=lib/bats-core/semaphore.bash
+  source '../../lib/bats-core/semaphore.bash'
+  bats_semaphore_setup
 fi
 
 # create a file that contains all (filtered) tests to run from all files
