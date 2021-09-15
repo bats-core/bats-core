@@ -1139,7 +1139,7 @@ EOF
     skip "this test requires flock not to be installed"
   fi
 
-  run ! bats --jobs "$FIXTURE_ROOT/parallel.bats"
+  run ! bats --jobs 2 "$FIXTURE_ROOT/parallel.bats"
   [ "${lines[0]}" == "ERROR: flock/shlock is required for parallelization within files!" ]
   [ "${#lines[@]}" -eq 1 ]
 }
