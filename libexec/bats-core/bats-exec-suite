@@ -72,7 +72,7 @@ if [[ "$num_jobs" != 1 ]]; then
     exit 1
   fi
   # shellcheck source=lib/bats-core/semaphore.bash
-  source '../../lib/bats-core/semaphore.bash'
+  source "${BATS_ROOT}/lib/bats-core/semaphore.bash"
   bats_semaphore_setup
 fi
 
