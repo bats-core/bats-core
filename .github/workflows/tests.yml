@@ -61,20 +61,12 @@ jobs:
           bats test  
 
   windows:
-    strategy:
-      matrix:
-        os: ['windows-2019']
-        env_vars:
-          - ''
-          # allow for some parallelity without GNU parallel, since it is not installed by default
-          - 'BATS_NO_PARALLELIZE_ACROSS_FILES=1 BATS_NUMBER_OF_PARALLEL_JOBS=2'
-    runs-on: ${{ matrix.os }}
+    runs-on: windows-2019
     steps:
       - uses: actions/checkout@v2
-      - name: Run test on OS ${{ matrix.os }}
-        run: |
+      - run: |
           bash --version
-          bash -c "time ${{ matrix.env_vars }} bin/bats --formatter tap test"
+          bash -c "time bin/bats --formatter tap test"
 
   npm_on_windows:
     strategy:
