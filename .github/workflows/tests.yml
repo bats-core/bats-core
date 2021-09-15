@@ -27,7 +27,7 @@ jobs:
   linux:
     strategy:
       matrix:
-        os: ['ubuntu-20.04', 'ubuntu-18.04', 'ubuntu-16.04']
+        os: ['ubuntu-20.04', 'ubuntu-18.04']
         env_vars:
           - ''
           # allow for some parallelity without GNU parallel, since it is not installed by default
@@ -46,7 +46,7 @@ jobs:
   npm_on_linux:
     strategy:
       matrix:
-        os: ['ubuntu-20.04', 'ubuntu-18.04', 'ubuntu-16.04']
+        os: ['ubuntu-20.04', 'ubuntu-18.04']
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
