@@ -1126,3 +1126,18 @@ EOF
 
   [ "$(find "$OUTPUT_DIR" -type f | wc -l)" -eq 3 ]
 }
+
+@test "Tell about missing flock and shlock" {
+  if ! command -v parallel; then
+    skip "this test requires GNU parallel to be installed"
+  fi
+  if command -v flock; then
+    skip "this test requires flock not to be installed"
+  fi
+  if command -v shlock; then
+    skip "this test requires flock not to be installed"
+  fi
+
+  run ! bats --jobs "$FIXTURE_ROOT/parallel.bats"
+  [ "${lines[0]}" == "error" ]
+}
