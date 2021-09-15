@@ -147,4 +147,19 @@ jobs:
           docker build --build-arg bashver="${{ matrix.version }}" --tag "bats/bats:bash-${{ matrix.version }}" .
           docker run -it "bash:${{ matrix.version }}" --version
           time docker run -it ${{ matrix.env_vars }} "bats/bats:bash-${{ matrix.version }}" --tap /opt/bats/test
+  
+  freebsd:
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        packages:
+          - flock
+          - ""
+    steps:
+      - uses: actions/checkout@v2
+      - uses: vmactions/freebsd-vm@v0.1.5
+        with:
+          prepare: pkg install -y bash parallel ${{ matrix.packages }}
+          run: |
+            time ./bin/bats test/
     
