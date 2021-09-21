@@ -809,6 +809,7 @@ EOF
 
 @test "Parallel mode works on MacOS with over subscription (issue #433)" {
   type -p parallel &>/dev/null || skip "--jobs requires GNU parallel"
+  (type -p flock &>/dev/null || type -p shlock &>/dev/null) || skip "--jobs requires flock/shlock"
   run bats -j 2 "$FIXTURE_ROOT/issue-433"
 
   [ "$status" -eq 0 ]
@@ -1125,4 +1126,20 @@ EOF
   [ "$OUTPUT" == "" ]
 
   [ "$(find "$OUTPUT_DIR" -type f | wc -l)" -eq 3 ]
+}
+
+@test "Tell about missing flock and shlock" {
+  if ! command -v parallel; then
+    skip "this test requires GNU parallel to be installed"
+  fi
+  if command -v flock; then
+    skip "this test requires flock not to be installed"
+  fi
+  if command -v shlock; then
+    skip "this test requires flock not to be installed"
+  fi
+
+  run ! bats --jobs 2 "$FIXTURE_ROOT/parallel.bats"
+  [ "${lines[0]}" == "ERROR: flock/shlock is required for parallelization within files!" ]
+  [ "${#lines[@]}" -eq 1 ]
 }

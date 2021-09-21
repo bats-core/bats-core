@@ -5,6 +5,7 @@ fixtures parallel
 
 setup() {
   type -p parallel &>/dev/null || skip "--jobs requires GNU parallel"
+  (type -p flock &>/dev/null && type -p shlock &>/dev/null) || skip "--jobs requires flock/shlock"
 }
 
 check_parallel_tests() { # <expected maximum parallelity>

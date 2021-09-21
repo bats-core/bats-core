@@ -37,6 +37,7 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
   filtering (#484)
 * print final line without newline on Bash 3.2 for midtest (ERREXIT) failures
   too (#495, #145)
+* abort with error on missing flock/shlock when running in parallel mode  (#496)
 
 #### Documentation
 

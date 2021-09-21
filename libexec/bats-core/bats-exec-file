@@ -224,6 +224,7 @@ bats_run_tests_in_parallel() {
   mkdir -p "$output_folder"
   # shellcheck source=lib/bats-core/semaphore.bash
   source "$BATS_ROOT/lib/bats-core/semaphore.bash"
+  bats_semaphore_setup
   # the test_number_in_file is not yet incremented -> one before the next test to run
   local test_number_in_suite_of_last_finished_test="$test_number_in_suite" # stores which test was printed last
   for test_name in "${tests_to_run[@]}"; do

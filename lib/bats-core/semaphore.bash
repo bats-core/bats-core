@@ -1,5 +1,34 @@
 #!/usr/bin/env bash
 
+# setup the semaphore environment for the loading file
+bats_semaphore_setup() {
+    export -f bats_semaphore_get_free_slot_count
+    export -f bats_semaphore_acquire_while_locked
+    export BATS_SEMAPHORE_DIR="$BATS_RUN_TMPDIR/semaphores"
+
+    if command -v flock >/dev/null; then
+    bats_run_under_lock() {
+        flock "$BATS_SEMAPHORE_DIR" "$@"
+    }
+    elif command -v shlock >/dev/null; then
+        bats_run_under_lock() {
+            local lockfile="$BATS_SEMAPHORE_DIR/shlock.lock"
+            while ! shlock -p $$ -f "$lockfile"; do
+                sleep 1
+            done
+            # we got the lock now, execute the command
+            "$@"
+            local status=$?
+            # free the lock
+            rm -f "$lockfile"
+            return $status
+        }
+    else
+        printf "ERROR: flock/shlock is required for parallelization within files!\n" >&2
+        exit 1
+    fi
+}
+
 # $1 - output directory for stdout/stderr
 # $@ - command to run
 # run the given command in a semaphore
@@ -14,8 +43,6 @@ bats_semaphore_run() {
     bats_semaphore_release_wrapper "$output_dir" "$semaphore_slot" "$@" &
     printf "%d\n" "$!"
 }
-
-export BATS_SEMAPHORE_DIR="$BATS_RUN_TMPDIR/semaphores"
 
 # $1 - output directory for stdout/stderr
 # $@ - command to run
@@ -51,27 +78,6 @@ bats_semaphore_acquire_while_locked() {
     return 1
 }
 
-export -f bats_semaphore_acquire_while_locked
-
-if command -v flock >/dev/null; then
-    bats_run_under_lock() {
-        flock "$BATS_SEMAPHORE_DIR" "$@"
-    }
-elif command -v shlock >/dev/null; then
-    bats_run_under_lock() {
-        local lockfile="$BATS_SEMAPHORE_DIR/shlock.lock"
-        while ! shlock -p $$ -f "$lockfile"; do
-            sleep 1
-        done
-        # we got the lock now, execute the command
-        "$@"
-        local status=$?
-        # free the lock
-        rm -f "$lockfile"
-        return $status
-    }
-fi
-
 # block until a semaphore slot becomes free
 # prints the number of the slot that it received
 bats_semaphore_acquire_slot() {
@@ -99,5 +105,3 @@ bats_semaphore_get_free_slot_count() {
     until used_slots=$(find "$BATS_SEMAPHORE_DIR" -name 'slot-*' 2>/dev/null | wc -l); do :; done
     echo $(( BATS_SEMAPHORE_NUMBER_OF_SLOTS - used_slots ))
 }
-
-export -f bats_semaphore_get_free_slot_count

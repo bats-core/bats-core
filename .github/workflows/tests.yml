@@ -27,7 +27,7 @@ jobs:
   linux:
     strategy:
       matrix:
-        os: ['ubuntu-20.04', 'ubuntu-18.04', 'ubuntu-16.04']
+        os: ['ubuntu-20.04', 'ubuntu-18.04']
         env_vars:
           - ''
           # allow for some parallelity without GNU parallel, since it is not installed by default
@@ -46,7 +46,7 @@ jobs:
   npm_on_linux:
     strategy:
       matrix:
-        os: ['ubuntu-20.04', 'ubuntu-18.04', 'ubuntu-16.04']
+        os: ['ubuntu-20.04', 'ubuntu-18.04']
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
@@ -61,20 +61,12 @@ jobs:
           bats test  
 
   windows:
-    strategy:
-      matrix:
-        os: ['windows-2019']
-        env_vars:
-          - ''
-          # allow for some parallelity without GNU parallel, since it is not installed by default
-          - 'BATS_NO_PARALLELIZE_ACROSS_FILES=1 BATS_NUMBER_OF_PARALLEL_JOBS=2'
-    runs-on: ${{ matrix.os }}
+    runs-on: windows-2019
     steps:
       - uses: actions/checkout@v2
-      - name: Run test on OS ${{ matrix.os }}
-        run: |
+      - run: |
           bash --version
-          bash -c "time ${{ matrix.env_vars }} bin/bats --formatter tap test"
+          bash -c "time bin/bats --formatter tap test"
 
   npm_on_windows:
     strategy:
@@ -147,4 +139,19 @@ jobs:
           docker build --build-arg bashver="${{ matrix.version }}" --tag "bats/bats:bash-${{ matrix.version }}" .
           docker run -it "bash:${{ matrix.version }}" --version
           time docker run -it ${{ matrix.env_vars }} "bats/bats:bash-${{ matrix.version }}" --tap /opt/bats/test
+  
+  freebsd:
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        packages:
+          - flock
+          - ""
+    steps:
+      - uses: actions/checkout@v2
+      - uses: vmactions/freebsd-vm@v0.1.5
+        with:
+          prepare: pkg install -y bash parallel ${{ matrix.packages }}
+          run: |
+            time ./bin/bats --print-output-on-failure test/
     
