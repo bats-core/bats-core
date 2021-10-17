@@ -20,14 +20,12 @@ bats_capture_stack_trace() {
 		test_file="${BASH_SOURCE[$i]:-$BATS_TEST_SOURCE}"
 		funcname="${FUNCNAME[$i]}"
 		BATS_STACK_TRACE+=("${BASH_LINENO[$((i - 1))]} $funcname $test_file")
-		if [[ "$test_file" == "$BATS_TEST_SOURCE" ]]; then
-			case "$funcname" in
-			"$BATS_TEST_NAME" | setup | teardown | setup_file | teardown_file)
-				break
-				;;
-			esac
-		fi
-		if [[ "${BASH_SOURCE[$i + 1]}" == *"bats-exec-file" ]] && [[ "$funcname" == 'source' ]]; then
+		case "$funcname" in
+		"$BATS_TEST_NAME" | setup | teardown | setup_file | teardown_file)
+			break
+			;;
+		esac
+		if [[ "${BASH_SOURCE[$i + 1]:-}" == *"bats-exec-file" ]] && [[ "$funcname" == 'source' ]]; then
 			break
 		fi
 	done
