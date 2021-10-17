@@ -92,7 +92,7 @@ skip() {
 
 fail() {
   set_color 1 bold
-  TIMING="$1"
+  TIMING="${1:-}"
   finish_test ' ✗ %s' "$name"
   test_result=fail
 }
@@ -190,7 +190,7 @@ set_color() {
   local color="$1"
   local weight=22
 
-  if [[ "$2" == 'bold' ]]; then
+  if [[ "${2:-}" == 'bold' ]]; then
     weight=1
   fi
   buffer '\x1B[%d;%dm' "$((30 + color))" "$weight"
