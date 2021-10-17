@@ -29,6 +29,8 @@ emit_debug_output() {
 }
 
 run_under_clean_bats_env() {
+  # we want the variable names to be separate
+  # shellcheck disable=SC2086
   unset ${!BATS_@}
   "$@"
 }
