@@ -53,8 +53,11 @@ while [[ "$#" -ne 0 ]]; do
   shift
 done
 
-BATS_TEST_FILENAME="$1"
-shift
+export BATS_TEST_FILENAME="$1"
+export BATS_TEST_NAME="$2"
+export BATS_SUITE_TEST_NUMBER="$3"
+export BATS_TEST_NUMBER="$4"
+
 if [[ -z "$BATS_TEST_FILENAME" ]]; then
   printf 'usage: bats-exec-test <filename>\n' >&2
   exit 1
@@ -171,10 +174,6 @@ get_mills_since_epoch() {
 }
 
 bats_perform_test() {
-  export BATS_TEST_NAME="$1"
-  export BATS_SUITE_TEST_NUMBER="$2"
-  export BATS_TEST_NUMBER="$3"
-
   if ! declare -F "$BATS_TEST_NAME" &>/dev/null; then
     printf "bats: unknown test name \`%s'\n" "$BATS_TEST_NAME" >&2
     exit 1
@@ -232,4 +231,4 @@ exec 3<&1
 
 # Run the given test.
 bats_evaluate_preprocessed_source
-bats_perform_test "$@"
+bats_perform_test

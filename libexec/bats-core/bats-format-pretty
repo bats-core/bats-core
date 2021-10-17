@@ -5,6 +5,7 @@ set -e
 source "$BATS_ROOT/lib/bats-core/formatter.bash"
 
 BASE_PATH=.
+BATS_ENABLE_TIMING=
 
 while [[ "$#" -ne 0 ]]; do
   case "$1" in
@@ -39,8 +40,13 @@ update_count_column_left() {
   count_column_left=$((screen_width - count_column_width))
 }
 
-trap update_screen_width WINCH
+# avoid unset variables
+count=0
+screen_width=80
+update_count_column_width
 update_screen_width
+
+trap update_screen_width WINCH
 
 begin() {
   line_backoff_count=0
@@ -70,7 +76,7 @@ finish_test() {
 }
 
 pass() {
-  TIMING="$1"
+  TIMING="${1:-}"
   finish_test ' ✓ %s' "$name"
   test_result=pass
 }
