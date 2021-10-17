@@ -27,7 +27,7 @@ bats_capture_stack_trace() {
 				;;
 			esac
 		fi
-		if [[ "${BASH_SOURCE[$i + 1]}" == *"bats-exec-file" ]] && [[ "$funcname" == 'source' ]]; then
+		if [[ "${BASH_SOURCE[$i + 1]:-}" == *"bats-exec-file" ]] && [[ "$funcname" == 'source' ]]; then
 			break
 		fi
 	done
