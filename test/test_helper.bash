@@ -27,3 +27,8 @@ emit_debug_output() {
   # shellcheck disable=SC2154
   printf '%s\n' 'output:' "$output" >&2
 }
+
+run_under_clean_bats_env() {
+  unset ${!BATS_@}
+  "$@"
+}

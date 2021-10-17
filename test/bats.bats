@@ -419,10 +419,10 @@ setup() {
 @test 'ensure compatibility with unofficial Bash strict mode' {
   local expected='ok 1 unofficial Bash strict mode conditions met'
 
-  # Run Bats under `set -u` to catch as many unset variable accesses as
-  # possible.
-  run bash -u "${BATS_TEST_DIRNAME%/*}/bin/bats" \
-    "$FIXTURE_ROOT/unofficial_bash_strict_mode.bats"
+  # Run Bats under SHELLOPTS=nounset (recursive `set -u`) to catch 
+  # as many unset variable accesses as possible.
+  run run_under_clean_bats_env env SHELLOPTS=nounset \
+    "${BATS_ROOT}/bin/bats" "$FIXTURE_ROOT/unofficial_bash_strict_mode.bats"
   if [[ "$status" -ne 0 || "${lines[1]}" != "$expected" ]]; then
     cat <<END_OF_ERR_MSG
 
@@ -440,7 +440,7 @@ See:
 If there is no error output from the test fixture, run the following to
 debug the problem:
 
-  $ bash -u bats $RELATIVE_FIXTURE_ROOT/unofficial_bash_strict_mode.bats
+  $ SHELLOPTS=nounset bats $RELATIVE_FIXTURE_ROOT/unofficial_bash_strict_mode.bats
 
 If there's no error output even with this command, make sure you're using the
 latest version of Bash, as versions before 4.1-alpha may not produce any error
