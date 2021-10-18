@@ -148,7 +148,7 @@ jobs:
         shell: 'script -q -e -c "bash {0}"' # work around tty issues
         run: |
           set -e
-          time docker run -it -v $PWD:/opt/bats alpine sh -c "apk add bash; /opt/bats/bin/bats --tap /opt/bats/test"
+          time docker run -it -v $PWD:/opt/bats alpine sh -c "apk add bash ncurses; /opt/bats/bin/bats --tap /opt/bats/test"
 
   freebsd:
     runs-on: macos-latest
