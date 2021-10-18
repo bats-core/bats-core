@@ -140,6 +140,16 @@ jobs:
           docker run -it "bash:${{ matrix.version }}" --version
           time docker run -it ${{ matrix.env_vars }} "bats/bats:bash-${{ matrix.version }}" --tap /opt/bats/test
   
+  alpine:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run test on bash version ${{ matrix.version }}
+        shell: 'script -q -e -c "bash {0}"' # work around tty issues
+        run: |
+          set -e
+          time docker run -it -v $PWD:/opt/bats alpine sh -c "apk add bash; /opt/bats/bin/bats --tap /opt/bats/test"
+
   freebsd:
     runs-on: macos-latest
     strategy:
