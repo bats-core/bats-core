@@ -66,7 +66,7 @@ elif [[ ! -f "$BATS_TEST_FILENAME" ]]; then
   exit 1
 fi
 
-if ! BATS_TEST_TMPDIR=$(mktemp -d "${BATS_FILE_TMPDIR}/test-tmpdir-${BATS_TEST_NAME}-XXXXXX");then
+if ! BATS_TEST_TMPDIR=$(mktemp -d "${BATS_FILE_TMPDIR}/test-tmpdir-${BATS_TEST_NAME::200}-XXXXXX");then
   printf '%s\n' "Failed to create BATS_TEST_TMPDIR with mktemp" >&2
   exit 1
 fi
