@@ -239,13 +239,15 @@ if [[ -n "${BATS_RUN_TMPDIR:-}" ]];then
     printf "Error: Failed to create BATS_RUN_TMPDIR (%s)\n" "$BATS_RUN_TMPDIR" >&2
     exit 1
   fi
-elif ! BATS_RUN_TMPDIR=$(mktemp -d "${BATS_TMPDIR}/bats-run-$BATS_ROOT_PID-XXXXXX");then
-  printf "Error: Failed to create BATS_RUN_TMPDIR (%s) with mktemp\n" "${BATS_TMPDIR}/bats-run-$BATS_ROOT_PID-XXXXXX" >&2
+elif ! BATS_RUN_TMPDIR=$(mktemp -d "${BATS_TMPDIR}/bats-run-XXXXXX");then
+  printf "Error: Failed to create BATS_RUN_TMPDIR (%s) with mktemp\n" "${BATS_TMPDIR}/bats-run-XXXXXX" >&2
   exit 1
 fi
 
 if [[ -n "$BATS_TEMPDIR_CLEANUP" ]]; then
   trap 'rm -rf "$BATS_RUN_TMPDIR"' ERR EXIT
+else
+  trap 'printf "BATS_RUN_TMPDIR: $BATS_RUN_TMPDIR\n">&2' EXIT
 fi
 
 if [[ "$formatter" != "tap" ]]; then

@@ -66,11 +66,25 @@ elif [[ ! -f "$BATS_TEST_FILENAME" ]]; then
   exit 1
 fi
 
-if ! BATS_TEST_TMPDIR=$(mktemp -d "${BATS_FILE_TMPDIR}/test-tmpdir-${BATS_TEST_NAME::200}-XXXXXX");then
-  printf '%s\n' "Failed to create BATS_TEST_TMPDIR with mktemp" >&2
-  exit 1
-fi
-export BATS_TEST_TMPDIR
+bats_create_test_tmpdirs() {
+  local tests_tmpdir="${BATS_RUN_TMPDIR}/test/"
+  if [[ ! -d $tests_tmpdir ]]; then
+    if ! mkdir "$tests_tmpdir"; then
+      printf 'Failed to create: %s\n' "$tests_tmpdir" >&2
+      exit 1
+    fi
+  fi
+
+  BATS_TEST_TMPDIR="$tests_tmpdir/$BATS_SUITE_TEST_NUMBER"
+  if ! mkdir "$BATS_TEST_TMPDIR"; then
+    printf 'Failed to create BATS_TEST_TMPDIR: %s\n' "$BATS_TEST_TMPDIR" >&2
+    exit 1
+  fi
+
+  printf "%s\n" "$BATS_TEST_NAME" > "$BATS_TEST_TMPDIR.name"
+
+  export BATS_TEST_TMPDIR
+}
 
 # load the test helper functions like `load` or `run` that are needed to run a (preprocessed) .bats file without bash errors
 # shellcheck source=lib/bats-core/test_functions.bash disable=SC2153
@@ -229,6 +243,7 @@ source "$BATS_ROOT/lib/bats-core/preprocessing.bash"
 
 exec 3<&1
 
+bats_create_test_tmpdirs
 # Run the given test.
 bats_evaluate_preprocessed_source
 bats_perform_test

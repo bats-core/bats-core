@@ -64,13 +64,7 @@ if [[ ! -f "$filename" ]]; then
   exit 1
 fi
 
-BATS_TEST_FILENAME="$filename"
-
-if ! BATS_FILE_TMPDIR=$(mktemp -d "${BATS_SUITE_TMPDIR}/file-tmpdir-$(basename "${BATS_TEST_FILENAME}")-XXXXXX");then
-  printf '%s\n' "Failed to create BATS_FILE_TMPDIR with mktemp" >&2
-  exit 1
-fi
-export BATS_FILE_TMPDIR
+export BATS_TEST_FILENAME="$filename"
 
 # shellcheck source=lib/bats-core/preprocessing.bash
 # shellcheck disable=SC2153
@@ -298,6 +292,23 @@ bats_run_tests() {
   export status
 }
 
+bats_create_file_tempdirs() {
+  local bats_files_tmpdir="${BATS_RUN_TMPDIR}/file"
+  if [[ ! -d $bats_files_tmpdir ]]; then
+    if ! mkdir "$bats_files_tmpdir"; then
+      printf 'Failed to create %s\n' "$bats_files_tmpdir" >&2
+      exit 1
+    fi
+  fi
+  BATS_FILE_TMPDIR="$bats_files_tmpdir/$first_test_number_in_suite"
+  if ! mkdir "$BATS_FILE_TMPDIR"; then
+    printf 'Failed to create %s\n' "$BATS_FILE_TMPDIR" >&2
+    exit 1
+  fi
+  ln -s "$BATS_TEST_FILENAME" "$BATS_FILE_TMPDIR-$(basename "$BATS_TEST_FILENAME").source_file"
+  export BATS_FILE_TMPDIR
+}
+
 trap 'BATS_INTERRUPTED=true' INT
 
 if [[ -n "$extended_syntax" ]]; then
@@ -305,6 +316,8 @@ if [[ -n "$extended_syntax" ]]; then
 fi
 
 bats_read_tests_list_file
+bats_create_file_tempdirs
+
 # don't run potentially expensive setup/teardown_file
 # when there are no tests to run
 if [[ ${#tests_to_run[@]} -eq 0 ]]; then
