@@ -302,7 +302,7 @@ bats_create_file_tempdirs() {
   fi
   BATS_FILE_TMPDIR="$bats_files_tmpdir/$first_test_number_in_suite"
   if ! mkdir "$BATS_FILE_TMPDIR"; then
-    printf 'Failed to create %s\n' "$BATS_FILE_TMPDIR" >&2
+    printf 'Failed to create BATS_FILE_TMPDIR=%s\n' "$BATS_FILE_TMPDIR" >&2
     exit 1
   fi
   ln -s "$BATS_TEST_FILENAME" "$BATS_FILE_TMPDIR-$(basename "$BATS_TEST_FILENAME").source_file"
