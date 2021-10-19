@@ -316,13 +316,15 @@ if [[ -n "$extended_syntax" ]]; then
 fi
 
 bats_read_tests_list_file
-bats_create_file_tempdirs
 
 # don't run potentially expensive setup/teardown_file
 # when there are no tests to run
 if [[ ${#tests_to_run[@]} -eq 0 ]]; then
   exit 0
 fi
+
+# requires the test list to be read but not empty
+bats_create_file_tempdirs
 
 bats_preprocess_source "$filename"
 bats_run_setup_file
