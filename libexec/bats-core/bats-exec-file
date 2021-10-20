@@ -294,11 +294,9 @@ bats_run_tests() {
 
 bats_create_file_tempdirs() {
   local bats_files_tmpdir="${BATS_RUN_TMPDIR}/file"
-  if [[ ! -d $bats_files_tmpdir ]]; then
-    if ! mkdir "$bats_files_tmpdir"; then
-      printf 'Failed to create %s\n' "$bats_files_tmpdir" >&2
-      exit 1
-    fi
+  if ! mkdir -p "$bats_files_tmpdir"; then
+    printf 'Failed to create %s\n' "$bats_files_tmpdir" >&2
+    exit 1
   fi
   BATS_FILE_TMPDIR="$bats_files_tmpdir/$first_test_number_in_suite"
   if ! mkdir "$BATS_FILE_TMPDIR"; then

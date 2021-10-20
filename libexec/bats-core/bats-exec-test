@@ -68,11 +68,9 @@ fi
 
 bats_create_test_tmpdirs() {
   local tests_tmpdir="${BATS_RUN_TMPDIR}/test/"
-  if [[ ! -d $tests_tmpdir ]]; then
-    if ! mkdir "$tests_tmpdir"; then
-      printf 'Failed to create: %s\n' "$tests_tmpdir" >&2
-      exit 1
-    fi
+  if ! mkdir -p "$tests_tmpdir"; then
+    printf 'Failed to create: %s\n' "$tests_tmpdir" >&2
+    exit 1
   fi
 
   BATS_TEST_TMPDIR="$tests_tmpdir/$BATS_SUITE_TEST_NUMBER"
