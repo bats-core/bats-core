@@ -1143,3 +1143,7 @@ EOF
   [ "${lines[0]}" == "ERROR: flock/shlock is required for parallelization within files!" ]
   [ "${#lines[@]}" -eq 1 ]
 }
+
+@test "Test with a name that is waaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaay too long" {
+  skip "This test should only check if the long name chokes bats' internals during execution"
+}

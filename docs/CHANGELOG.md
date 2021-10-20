@@ -39,6 +39,8 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
   too (#495, #145)
 * abort with error on missing flock/shlock when running in parallel mode  (#496)
 * improved `set -u` test and fixed some unset variable accesses (#498, #501)
+* shorten suite/file/test temporary folder paths to leave enough space even on
+  restricted systems (#503)
 
 #### Documentation
 
