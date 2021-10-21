@@ -3,7 +3,7 @@
 }
 
 @test "failure prints output" {
-    run '=1' echo "fail hard"
+    run -1 echo "fail hard"
 }
 
 @test "empty output on failure" {

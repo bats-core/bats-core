@@ -1049,7 +1049,7 @@ EOF
 }
 
 @test "pretty formatter summary is colorized red on failure" {
-  run '=1' bats --pretty "$FIXTURE_ROOT/failing.bats"
+  run -1 bats --pretty "$FIXTURE_ROOT/failing.bats"
   
   [ "${lines[3]}" == $'\033[0m\033[31;1m' ] # TODO: avoid checking for the leading reset too
   [ "${lines[4]}" == '1 test, 1 failure' ]
@@ -1057,7 +1057,7 @@ EOF
 }
 
 @test "pretty formatter summary is colorized green on success" {
-  run '=0' bats --pretty "$FIXTURE_ROOT/passing.bats"
+  run -0 bats --pretty "$FIXTURE_ROOT/passing.bats"
 
   [ "${lines[1]}" == $'\033[0m\033[32;1m' ] # TODO: avoid checking for the leading reset too
   [ "${lines[2]}" == '1 test, 0 failures' ]
@@ -1071,7 +1071,7 @@ EOF
   # ^ no output despite --show-output-of-passing-tests, because there is no failure
   [ "${lines[2]}" == 'not ok 2 failure prints output' ]
   [ "${lines[3]}" == "# (in test file $RELATIVE_FIXTURE_ROOT/print_output_on_failure.bats, line 6)" ]
-  [ "${lines[4]}" == "#   \`run '=1' echo \"fail hard\"' failed, expected exit code 1, got 0" ]
+  [ "${lines[4]}" == "#   \`run -1 echo \"fail hard\"' failed, expected exit code 1, got 0" ]
   [ "${lines[5]}" == '# Last output:' ]
   [ "${lines[6]}" == '# fail hard' ]
   [ "${lines[7]}" == 'not ok 3 empty output on failure' ]
@@ -1081,7 +1081,7 @@ EOF
 }
 
 @test "--show-output-of-passing-tests works as expected" {
-  run '=0' bats --show-output-of-passing-tests "$FIXTURE_ROOT/show-output-of-passing-tests.bats"
+  run -0 bats --show-output-of-passing-tests "$FIXTURE_ROOT/show-output-of-passing-tests.bats"
   [ "${lines[0]}" == '1..1' ]
   [ "${lines[1]}" == 'ok 1 test' ]
   [ "${lines[2]}" == '# output' ]
@@ -1089,7 +1089,7 @@ EOF
 }
 
 @test "--verbose-run prints output" {
-  run '=1' bats --verbose-run "$FIXTURE_ROOT/verbose-run.bats"
+  run -1 bats --verbose-run "$FIXTURE_ROOT/verbose-run.bats"
   [ "${lines[0]}" == '1..1' ]
   [ "${lines[1]}" == 'not ok 1 test' ]
   [ "${lines[2]}" == "# (in test file $RELATIVE_FIXTURE_ROOT/verbose-run.bats, line 2)" ]
@@ -1099,7 +1099,7 @@ EOF
 }
 
 @test "BATS_VERBOSE_RUN=1 also prints output" {
-  run '=1' env BATS_VERBOSE_RUN=1 bats "$FIXTURE_ROOT/verbose-run.bats"
+  run -1 env BATS_VERBOSE_RUN=1 bats "$FIXTURE_ROOT/verbose-run.bats"
   [ "${lines[0]}" == '1..1' ]
   [ "${lines[1]}" == 'not ok 1 test' ]
   [ "${lines[2]}" == "# (in test file $RELATIVE_FIXTURE_ROOT/verbose-run.bats, line 2)" ]

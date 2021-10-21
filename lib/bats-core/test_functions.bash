@@ -63,19 +63,19 @@ bats_separate_lines() { # <output-array> <input-var>
   fi
 }
 
-run() { # [!|=N] [--keep-empty-lines] [--output merged|separate|stderr|stdout] [--] <command to run...>
+run() { # [!|-N] [--keep-empty-lines] [--output merged|separate|stderr|stdout] [--] <command to run...>
   trap bats_interrupt_trap_in_run INT
   local expected_rc=
   local keep_empty_lines=
   local output_case=merged
   # parse options starting with -
-  while [[ $# -gt 0 ]] && [[ $1 == -* || $1 == '!' || $1 == '='* ]]; do
+  while [[ $# -gt 0 ]] && [[ $1 == -* || $1 == '!' ]]; do
     case "$1" in
       '!')
         expected_rc=-1
       ;;
-      '='*)
-        expected_rc=${1#=}
+      -[0-9]*)
+        expected_rc=${1#-}
         if [[ $expected_rc =~ [^0-9] ]]; then
           printf "Usage error: run: '=NNN' requires numeric NNN (got: %s)\n" "$expected_rc" >&2
           return 1

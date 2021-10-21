@@ -50,7 +50,7 @@ We can then write the above more elegantly as:
 
 ```bash
 @test "invoking foo with a nonexistent file prints an error" {
-  run =1 foo nonexistent_filename
+  run -1 foo nonexistent_filename
   [ "$output" = "foo: no such file 'nonexistent_filename'" ]
 }
 ```
@@ -61,7 +61,7 @@ without any arguments prints usage information on the first line:
 
 ```bash
 @test "invoking foo without arguments prints usage" {
-  run =1 foo
+  run -1 foo
   [ "${lines[0]}" = "usage: foo <filename>" ]
 }
 ```

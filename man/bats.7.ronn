@@ -34,9 +34,7 @@ THE RUN HELPER
 Usage: run [OPTIONS] [--] <command...>
 Options:
        !        check for non zero exit code
-       =<N>     check that exit code is <N>
-       --output {merged,separate,stdout,stderr}
-                control which output is recorded
+       -<N>     check that exit code is <N>
        --keep-empty-lines
                 retain emtpy lines in `${lines[@]}`
 
@@ -52,17 +50,17 @@ passed a nonexistent filename, exits with a `1` status code and prints
 an error message.
 
     @test "invoking foo with a nonexistent file prints an error" {
-      run =1 foo nonexistent_filename
+      run -1 foo nonexistent_filename
       [ "$output" = "foo: no such file 'nonexistent_filename'" ]
     }
 
-The `=1` as first argument tells `run` to expect 1 as an exit
+The `-1` as first argument tells `run` to expect 1 as an exit
 status, and to fail if the command exits with any other value.
 On failure, both actual and expected values will be displayed,
 along with the invoked command and its output:
 
     (in test file test.bats, line 2)
-     `run =1 foo nonexistent_filename' failed, expected exit code 1, got 127
+     `run -1 foo nonexistent_filename' failed, expected exit code 1, got 127
 
 This error indicates a possible problem with the installation or
 configuration of `foo`; note that a simple `[ $status != 0 ]`
@@ -78,7 +76,7 @@ that invoking `foo` without any arguments prints usage information on
 the first line:
 
     @test "invoking foo without arguments prints usage" {
-      run =1 foo
+      run -1 foo
       [ "${lines[0]}" = "usage: foo <filename>" ]
     }
 
@@ -119,14 +117,14 @@ test you wish to skip.
 
     @test "A test I don't want to execute for now" {
       skip
-      run =0 foo
+      run -0 foo
     }
 
 Optionally, you may include a reason for skipping:
 
     @test "A test I don't want to execute for now" {
       skip "This command will return zero soon, but not now"
-      run =0 foo
+      run -0 foo
     }
 
 Or you can skip conditionally:
@@ -136,7 +134,7 @@ Or you can skip conditionally:
         skip "foo isn't bar"
       fi
 
-      run =0 foo
+      run -0 foo
     }
 
 
