@@ -50,7 +50,7 @@ We can then write the above more elegantly as:
 
 ```bash
 @test "invoking foo with a nonexistent file prints an error" {
-  run =1 foo nonexistent_filename
+  run -1 foo nonexistent_filename
   [ "$output" = "foo: no such file 'nonexistent_filename'" ]
 }
 ```
@@ -61,7 +61,7 @@ without any arguments prints usage information on the first line:
 
 ```bash
 @test "invoking foo without arguments prints usage" {
-  run =1 foo
+  run -1 foo
   [ "${lines[0]}" = "usage: foo <filename>" ]
 }
 ```
@@ -70,18 +70,11 @@ __Note:__ The `run` helper executes its argument(s) in a subshell, so if
 writing tests against environmental side-effects like a variable's value
 being changed, these changes will not persist after `run` completes.
 
-By default `run` leaves out empty lines in `${lines[@]}`. Use 
+By default `run` leaves out empty lines in `${lines[@]}`. Use
 `run --keep-empty-lines` to retain them.
 
-Additionally, you can use `run --output <mode>` to control what goes into
-`$output` and `$lines`. The available values for `<mode>` are:
-
-- `merged`: the default when `--output` is not specified, interleaves stdout and
-  stderr
-- `separate`: splits stderr off to `$stderr` and `${stderr_lines[@]}`, stdout is
-  still available as `$output` and `${lines[@]}`
-- `stderr`: discards stdout and fills '$stderr` and `${stderr_lines[@]}`
-- `stdout`: discards stdout and fills `$output` and `${lines[@]}`
+Additionally, you can use `--separate-stderr` to split stdout and stderr
+into `$output`/`$stderr` and `${lines[@]}`/`${stderr_lines[@]}`.
 
 All additional parameters to run should come before the command.
 If you want to run a command that starts with `-`, prefix it with `--` to

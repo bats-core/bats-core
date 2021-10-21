@@ -20,13 +20,13 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
     failed tests
   * `--gather-test-outputs-in <directory>`: Gather the output of failing **and**
     passing tests as files in directory
-* Experimental: add return code checks to `run` via `!`/`=N` (#367)
+* Experimental: add return code checks to `run` via `!`/`-<N>` (#367, #507)
 * `install.sh` and `uninstall.sh` take an optional second parameter for the lib
   folder name to allow for multilib install, e.g. into lib64 (#452)
 * add `run` flag `--keep-empty-lines` to retain empty lines in `${lines[@]}` (#224,
   a894fbfa)
-* add `run` flag `--output merged|separate|stderr|stdout` (default: `merged`) to
-  select how `$output` and `$lines` are filled (#47, 5c9b173d)
+* add `run` flag `--separate-stderr` which also fills `$stderr` and
+  `$stderr_lines` (#47, 5c9b173d, #507)
 
 ### Fixed
 

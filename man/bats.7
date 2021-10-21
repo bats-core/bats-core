@@ -46,7 +46,7 @@ For example, let\'s say you\'re testing that the \fBfoo\fR command, when passed 
 .nf
 
 @test "invoking foo with a nonexistent file prints an error" {
-  run =1 foo nonexistent_filename
+  run -1 foo nonexistent_filename
   [ "$output" = "foo: no such file \'nonexistent_filename\'" ]
 }
 .
@@ -62,7 +62,7 @@ The \fB=1\fR as first argument tells \fBrun\fR to expect 1 as an exit status, an
 .nf
 
 (in test file test\.bats, line 2)
- `run =1 foo nonexistent_filename\' failed, expected exit code 1, got 127
+ `run -1 foo nonexistent_filename\' failed, expected exit code 1, got 127
 .
 .fi
 .
@@ -82,7 +82,7 @@ A third special variable, the \fB$lines\fR array, is available for easily access
 .nf
 
 @test "invoking foo without arguments prints usage" {
-  run =1 foo
+  run -1 foo
   [ "${lines[0]}" = "usage: foo <filename>" ]
 }
 .
@@ -138,7 +138,7 @@ Tests can be skipped by using the \fBskip\fR command at the point in a test you 
 
 @test "A test I don\'t want to execute for now" {
   skip
-  run =0 foo
+  run -0 foo
 }
 .
 .fi
@@ -154,7 +154,7 @@ Optionally, you may include a reason for skipping:
 
 @test "A test I don\'t want to execute for now" {
   skip "This command will return zero soon, but not now"
-  run =0 foo
+  run -0 foo
 }
 .
 .fi
@@ -173,7 +173,7 @@ Or you can skip conditionally:
     skip "foo isn\'t bar"
   fi
 
-  run =0 foo
+  run -0 foo
 }
 .
 .fi
