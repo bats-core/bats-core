@@ -29,16 +29,6 @@ load() {
   source "${file}"
 }
 
-bats_suppress_stderr() {
-  "$@" 2>/dev/null
-}
-
-bats_suppress_stdout() {
-  # throw away stdout and redirect stderr into stdout
-  # shellcheck disable=SC2069
-  "$@" 2>&1 >/dev/null 
-}
-
 bats_redirect_stderr_into_file() {
   "$@" 2>>"$bats_run_separate_stderr_file" # use >> to see collisions' content
 }
@@ -63,7 +53,7 @@ bats_separate_lines() { # <output-array> <input-var>
   fi
 }
 
-run() { # [!|-N] [--keep-empty-lines] [--output merged|separate|stderr|stdout] [--] <command to run...>
+run() { # [!|-N] [--keep-empty-lines] [--separate-stderr] [--] <command to run...>
   trap bats_interrupt_trap_in_run INT
   local expected_rc=
   local keep_empty_lines=
@@ -87,10 +77,8 @@ run() { # [!|-N] [--keep-empty-lines] [--output merged|separate|stderr|stdout] [
       --keep-empty-lines)
         keep_empty_lines=1
       ;;
-      --output)
-        output_case="$2"
-        shift 2 # consume the value too!
-        continue
+      --separate-stderr)
+        output_case="separate"
       ;;
       --)
         shift # eat the -- before breaking away
@@ -110,16 +98,6 @@ run() { # [!|-N] [--keep-empty-lines] [--output merged|separate|stderr|stdout] [
       local bats_run_separate_stderr_file
       bats_run_separate_stderr_file="$(mktemp "${BATS_TEST_TMPDIR}/separate-stderr-XXXXXX")"
       pre_command=bats_redirect_stderr_into_file
-    ;;
-    stderr) # suppresses stdout and fills $stderr/$stderr_lines
-      pre_command=bats_suppress_stdout
-    ;;
-    stdout) # suppresses stderr and fills $output/$lines
-      pre_command=bats_suppress_stderr
-    ;;
-    *)
-      printf "ERROR: Unknown --output value %s" "$output_case"
-      return 1
     ;;
   esac
 
@@ -141,20 +119,11 @@ run() { # [!|-N] [--keep-empty-lines] [--output merged|separate|stderr|stdout] [
 
   bats_separate_lines lines output
 
-  case "$output_case" in
-    stderr)
-      stderr="$output"
-      # shellcheck disable=SC2034
-      stderr_lines=("${lines[@]}")
-      unset output
-      unset lines
-    ;;
-    separate)
+  if [[ "$output_case" == separate ]]; then
       # shellcheck disable=SC2034
       read -d '' -r stderr < "$bats_run_separate_stderr_file"
       bats_separate_lines stderr_lines stderr
-    ;;
-  esac
+  fi
 
   # shellcheck disable=SC2034
   BATS_RUN_COMMAND="${*}"

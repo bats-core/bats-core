@@ -48,44 +48,9 @@ print-stderr-stdout() {
     printf stderr >&2
 }
 
-@test "run --output stdout does not print stderr" {   
-    run --output stdout -- print-stderr-stdout
-    # SC does not know about $stderr* yet
-    # shellcheck disable=SC2154
-    echo "output='$output' stderr='$stderr'"
-    [ "$output" = "stdout" ]
-    [ ${#lines[@]} -eq 1 ]
-
-    # SC does not know about $stderr* yet
-    # shellcheck disable=SC2154
-    [ "${stderr-notset}" = notset ]
-    # SC does not know about $stderr* yet
-    # shellcheck disable=SC2154
-    [ ${#stderr_lines[@]} -eq 0 ]
-}
-
-@test "run --output stderr does not print stdout" {
-    run --output stderr -- print-stderr-stdout
-    echo "output='$output' stderr='$stderr'"
-    [ "${output-notset}" = notset ]
-    [ ${#lines[@]} -eq 0 ]
-
-    [ "$stderr" = stderr ]
-    [ ${#stderr_lines[@]} -eq 1 ]
-}
-
-@test "--output works without -- separator" {
-    run --output stderr print-stderr-stdout
-    echo "output='$output' stderr='$stderr'"
-    [ "${output-notset}" = notset ]
-    [ ${#lines[@]} -eq 0 ]
-
-    [ "$stderr" = stderr ]
-    [ ${#stderr_lines[@]} -eq 1 ]
-}
-
-@test "run --output separate splits output" {
-    run --output separate -- print-stderr-stdout
+@test "run --separate-stderr splits output" {
+    local stderr stderr_lines # silence shellcheck
+    run --separate-stderr -- print-stderr-stdout
     echo "output='$output' stderr='$stderr'"
     [ "$output" = stdout ]
     [ ${#lines[@]} -eq 1 ]
