@@ -109,3 +109,12 @@ or use a function to wrap the pipe in:
     }
 
     run fun_with_pipes
+
+`[[ ]]` (or `(( ))` did not fail my test
+----------------------------------------
+
+The `set -e` handling of `[[ ]]` and `(( ))` changed in Bash 4.1. Older versions, like 3.2 on MacOS,
+don't abort the test when they fail, unless they are the last command before the (test) function returns,
+making their exit code the return code.
+
+`[ ]`  does not suffer from this, but is no replacement for all `[[ ]]` usecases. Appending ` || false` will work in all cases.
