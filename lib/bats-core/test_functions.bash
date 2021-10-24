@@ -147,6 +147,7 @@ run() { # [!|-N] [--keep-empty-lines] [--separate-stderr] [--] <command to run..
       fi
     elif [ "$status" -ne "$expected_rc" ]; then
       bats_capture_stack_trace # fix backtrace
+      # shellcheck disable=SC2034
       BATS_DEBUG_LAST_STACK_TRACE_IS_VALID=true
       # shellcheck disable=SC2034
       BATS_ERROR_SUFFIX=", expected exit code $expected_rc, got $status"
