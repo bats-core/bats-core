@@ -587,8 +587,8 @@ END_OF_ERR_MSG
   [ "${lines[4]}" = '# foo' ]
   [ "${lines[5]}" = '# bar' ]
   [ "${lines[6]}" = 'not ok 2 test function returns nonzero' ]
-  [ "${lines[7]}" = "# (in test file $RELATIVE_FIXTURE_ROOT/no-final-newline.bats, line 7)" ]
-  [ "${lines[8]}" = "#   \`printf 'foo\nbar'' failed" ]
+  [ "${lines[7]}" = "# (in test file $RELATIVE_FIXTURE_ROOT/no-final-newline.bats, line 8)" ]
+  [ "${lines[8]}" = "#   \`return 1' failed" ]
   [ "${lines[9]}" = '# foo' ]
   [ "${lines[10]}" = '# bar' ]
 }
