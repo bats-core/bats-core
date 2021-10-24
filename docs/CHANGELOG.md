@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 [kac]: https://keepachangelog.com/en/1.0.0/
 [semver]: https://semver.org/
 
+## [Unreleased]
+
 ## [1.5.0] - 2021-10-22
 
 ### Added
