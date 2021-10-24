@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 
 ## [Unreleased]
 
+### Fixed
+
+* improved error trace for some broken cases (#279)
+
 ## [1.5.0] - 2021-10-22
 
 ### Added
