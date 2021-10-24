@@ -80,10 +80,6 @@ bats_run_setup_file() {
 
   exec 3<&1
 
-  BATS_STACK_TRACE=()
-  # shellcheck disable=2034
-  BATS_CURRENT_STACK_TRACE=() # used in tracing.bash
-
   # these are defined only to avoid errors when referencing undefined variables down the line
   # shellcheck disable=2034
   BATS_TEST_NAME=      # used in tracing.bash

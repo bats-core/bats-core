@@ -240,9 +240,6 @@ bats_interrupt_trap() {
 # this is used inside run()
 bats_interrupt_trap_in_run() {
   BATS_INTERRUPTED=true
-  # we don't get a second stack trace when interrupted in run, 
-  # so we have to use the first!
-  BATS_CURRENT_STACK_TRACE=("${BATS_STACK_TRACE[@]+"${BATS_STACK_TRACE[@]}"}")
   exit 130
 }
 
