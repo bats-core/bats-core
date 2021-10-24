@@ -80,10 +80,6 @@ bats_run_setup_file() {
 
   exec 3<&1
 
-  BATS_STACK_TRACE=()
-  # shellcheck disable=2034
-  BATS_CURRENT_STACK_TRACE=() # used in tracing.bash
-
   # these are defined only to avoid errors when referencing undefined variables down the line
   # shellcheck disable=2034
   BATS_TEST_NAME=      # used in tracing.bash
@@ -124,7 +120,6 @@ function bats_replace_filename() {
 bats_run_teardown_file() {
   # avoid running the therdown trap due to errors in teardown_file
   trap 'bats_file_exit_trap' EXIT
-  local status=0
   # rely on bats_error_trap to catch failures
   teardown_file >>"$BATS_OUT" 2>&1
 
@@ -132,10 +127,8 @@ bats_run_teardown_file() {
 }
 
 bats_file_teardown_trap() {
-  bats_error_trap
-  local status=0
   bats_run_teardown_file
-
+  local status=0
   bats_file_exit_trap
 }
 
@@ -155,8 +148,10 @@ bats_file_exit_trap() {
       FAILURE_REASON='unknown internal'
     fi
     printf "not ok %d %s\n" "$((test_number_in_suite + 1))" "$FAILURE_REASON failed" >&3
-    bats_print_stack_trace "${BATS_STACK_TRACE[@]}" >&3
-    bats_print_failed_command >&3
+    local stack_trace
+    bats_get_failure_stack_trace stack_trace
+    bats_print_stack_trace "${stack_trace[@]}" >&3
+    bats_print_failed_command "${stack_trace[@]}" >&3
     bats_prefix_lines_for_tap_output < "$BATS_OUT" >&3
     rm -rf "$BATS_OUT"
     status=1
@@ -325,8 +320,16 @@ fi
 bats_create_file_tempdirs
 
 bats_preprocess_source "$filename"
+
+trap bats_interrupt_trap INT
 bats_run_setup_file
+
+# during tests, we don't want to get backtraces from this level
+# just wait for the test to be interrupted and display their trace
+trap 'BATS_INTERRUPTED=true' INT
 bats_run_tests
+
+trap bats_interrupt_trap INT
 bats_run_teardown_file
 
 exit $status

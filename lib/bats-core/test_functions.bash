@@ -39,8 +39,8 @@ bats_merge_stdout_and_stderr() {
 
 # write separate lines from <input-var> into <output-array>
 bats_separate_lines() { # <output-array> <input-var>
-  output_array_name="$1"
-  input_var_name="$2"
+  local output_array_name="$1"
+  local input_var_name="$2"
   if [[ $keep_empty_lines ]]; then
     local bats_separate_lines_lines=()
     while IFS= read -r line; do
@@ -49,11 +49,14 @@ bats_separate_lines() { # <output-array> <input-var>
     eval "${output_array_name}=(\"\${bats_separate_lines_lines[@]}\")"
   else
     # shellcheck disable=SC2034,SC2206
-    IFS=$'\n' read -d '' -r -a "$output_array_name" <<<"${!input_var_name}"
+    IFS=$'\n' read -d '' -r -a "$output_array_name" <<<"${!input_var_name}" || true # don't fail due to EOF
   fi
 }
 
 run() { # [!|-N] [--keep-empty-lines] [--separate-stderr] [--] <command to run...>
+  # This has to be restored on exit from this function to avoid leaking our trap INT into surrounding code.
+  # Non zero exits won't restore under the assumption that they will fail the test before it can be aborted,
+  # which allows us to avoid duplicating the restore code on every exit path
   trap bats_interrupt_trap_in_run INT
   local expected_rc=
   local keep_empty_lines=
@@ -137,17 +140,17 @@ run() { # [!|-N] [--keep-empty-lines] [--separate-stderr] [--] <command to run..
   if [[ -n "$expected_rc" ]]; then
     if [[ "$expected_rc" = "-1" ]]; then
       if [[ "$status" -eq 0 ]]; then
-        bats_capture_stack_trace # fix backtrace
         BATS_ERROR_SUFFIX=", expected nonzero exit code!"
         return 1
       fi
     elif [ "$status" -ne "$expected_rc" ]; then
-      bats_capture_stack_trace # fix backtrace
       # shellcheck disable=SC2034
       BATS_ERROR_SUFFIX=", expected exit code $expected_rc, got $status"
       return 1
     fi
   fi
+  # don't leak our trap into surrounding code
+  trap bats_interrupt_trap INT
 }
 
 setup() {

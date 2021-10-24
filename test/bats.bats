@@ -134,6 +134,33 @@ setup() {
   [ "${lines[4]}" = "#   \`failing_helper' failed" ]
 }
 
+@test "failing bash condition logs correct line number" {
+  run bats "$FIXTURE_ROOT/failing_with_bash_cond.bats"
+  [ "$status" -eq 1 ]
+  [ "${#lines[@]}" -eq 4 ]
+  [ "${lines[1]}" = 'not ok 1 a failing test' ]
+  [ "${lines[2]}" = "# (in test file $RELATIVE_FIXTURE_ROOT/failing_with_bash_cond.bats, line 4)" ]
+  [ "${lines[3]}" = "#   \`[[ 1 == 2 ]]' failed" ]
+}
+
+@test "failing bash expression logs correct line number" {
+  run bats "$FIXTURE_ROOT/failing_with_bash_expression.bats"
+  [ "$status" -eq 1 ]
+  [ "${#lines[@]}" -eq 4 ]
+  [ "${lines[1]}" = 'not ok 1 a failing test' ]
+  [ "${lines[2]}" = "# (in test file $RELATIVE_FIXTURE_ROOT/failing_with_bash_expression.bats, line 3)" ]
+  [ "${lines[3]}" = "#   \`(( 1 == 2 ))' failed" ]
+}
+
+@test "failing negated command logs correct line number" {
+  run bats "$FIXTURE_ROOT/failing_with_negated_command.bats"
+  [ "$status" -eq 1 ]
+  [ "${#lines[@]}" -eq 4 ]
+  [ "${lines[1]}" = 'not ok 1 a failing test' ]
+  [ "${lines[2]}" = "# (in test file $RELATIVE_FIXTURE_ROOT/failing_with_negated_command.bats, line 3)" ]
+  [ "${lines[3]}" = "#   \`! true' failed" ]
+}
+
 @test "test environments are isolated" {
   run bats "$FIXTURE_ROOT/environment.bats"
   [ $status -eq 0 ]
@@ -560,8 +587,8 @@ END_OF_ERR_MSG
   [ "${lines[4]}" = '# foo' ]
   [ "${lines[5]}" = '# bar' ]
   [ "${lines[6]}" = 'not ok 2 test function returns nonzero' ]
-  [ "${lines[7]}" = "# (in test file $RELATIVE_FIXTURE_ROOT/no-final-newline.bats, line 7)" ]
-  [ "${lines[8]}" = "#   \`printf 'foo\nbar'' failed" ]
+  [ "${lines[7]}" = "# (in test file $RELATIVE_FIXTURE_ROOT/no-final-newline.bats, line 8)" ]
+  [ "${lines[8]}" = "#   \`return 1' failed" ]
   [ "${lines[9]}" = '# foo' ]
   [ "${lines[10]}" = '# bar' ]
 }
@@ -596,26 +623,31 @@ END_OF_ERR_MSG
   [ "$status" -eq 1 ]
 
   expectedNumberOfTests=12
-  linesOfOutputPerTest=3
-  [ "${#lines[@]}" -gt $((expectedNumberOfTests * linesOfOutputPerTest + 1)) ]
+  linesPerTest=5
 
   outputOffset=1
   currentErrorLine=9
-  linesPerTest=5
 
   for t in $(seq $expectedNumberOfTests); do
-    [[ "${lines[$outputOffset]}" == "not ok $t "* ]]
-    # Skip backtrace into external function if set
-    if [[ "${lines[$((outputOffset + 1))]}" == "# (from function "* ]]; then
-      outputOffset=$((outputOffset + 1))
-      parenChar=" "
-    else
-      parenChar="("
-    fi
+    # shellcheck disable=SC2076
+    [[ "${lines[$outputOffset]}" =~ "not ok $t " ]]
 
-    [ "${lines[$((outputOffset + 1))]}" = "# ${parenChar}in test file $RELATIVE_FIXTURE_ROOT/external_function_calls.bats, line $currentErrorLine)" ]
-    [[ "${lines[$((outputOffset + 2))]}" =~ " failed" ]]
-    outputOffset=$((outputOffset + 3))
+    [[ "${lines[$outputOffset]}" =~ stackdepth=([0-9]+) ]]
+    stackdepth="${BASH_REMATCH[1]}"
+    case "${stackdepth}" in
+      1)
+        [ "${lines[$((outputOffset + 1))]}" = "# (in test file $RELATIVE_FIXTURE_ROOT/external_function_calls.bats, line $currentErrorLine)" ]
+        outputOffset=$((outputOffset + 3))
+        ;;
+      2)
+        [[ "${lines[$((outputOffset + 1))]}" =~ ^'# (from function `'.*\'' in file '.*'/test_helper.bash, line '[0-9]+,$ ]]
+        [ "${lines[$((outputOffset + 2))]}" = "#  in test file $RELATIVE_FIXTURE_ROOT/external_function_calls.bats, line $currentErrorLine)" ]
+        outputOffset=$((outputOffset + 4))
+        ;;
+      *)
+        printf 'error: stackdepth=%s not implemented\n' "${stackdepth}" >&2
+        return 1
+    esac
     currentErrorLine=$((currentErrorLine + linesPerTest))
   done
 }
@@ -898,6 +930,41 @@ EOF
   [ "${lines[4]}" == "# Received SIGINT, aborting ..." ]
 }
 
+@test "CTRL-C aborts and fails after run" {
+  if [[ "$BATS_NUMBER_OF_PARALLEL_JOBS" -gt 1 ]]; then
+    skip "Aborts don't work in parallel mode"
+  fi
+
+  # shellcheck disable=SC2031,2030
+  export TEMPFILE="$BATS_TEST_TMPDIR/$BATS_TEST_NAME.log"
+
+  # guarantee that background processes get their own process group -> pid=pgid
+  set -m
+  
+  load 'concurrent-coordination'
+  # shellcheck disable=SC2031,SC2030
+  export SINGLE_USE_LATCH_DIR="${BATS_SUITE_TMPDIR}"
+  # we cannot use run for a background task, so we have to store the output for later
+  bats "$FIXTURE_ROOT/hang_after_run.bats" --tap  >"$TEMPFILE" 2>&1 & # don't block execution, or we cannot send signals
+
+  SUBPROCESS_PID=$!
+  
+  single-use-latch::wait hang_after_run 1 10
+
+  # emulate CTRL-C by sending SIGINT to the whole process group
+  kill -SIGINT -- -$SUBPROCESS_PID
+
+  # the test suite must be marked as failed!
+  wait $SUBPROCESS_PID && return 1
+
+  run cat "$TEMPFILE"
+  
+  [ "${lines[1]}" == "not ok 1 test" ]
+  [ "${lines[2]}" == "# (in test file ${RELATIVE_FIXTURE_ROOT}/hang_after_run.bats, line 8)" ]
+  [ "${lines[3]}" == "#   \`sleep 10' failed with status 130" ]
+  [ "${lines[4]}" == "# Received SIGINT, aborting ..." ]
+}
+
 @test "CTRL-C aborts and fails the current teardown" {
   if [[ "$BATS_NUMBER_OF_PARALLEL_JOBS" -gt 1 ]]; then
     skip "Aborts don't work in parallel mode"
@@ -930,7 +997,7 @@ EOF
 
   [[ "${lines[1]}" == "not ok 1 empty" ]]
   [[ "${lines[2]}" == "# (from function \`teardown' in test file ${RELATIVE_FIXTURE_ROOT}/hang_in_teardown.bats, line 4)" ]]
-  [[ "${lines[3]}" == "#   \`sleep 10' failed" ]]
+  [[ "${lines[3]}" == "#   \`sleep 10' failed with status 130" ]]
   [[ "${lines[4]}" == "# Received SIGINT, aborting ..." ]]
 }
 
