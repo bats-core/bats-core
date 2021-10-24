@@ -32,6 +32,7 @@ bats_get_failure_stack_trace() {
 	else
 		stack_trace_var=BATS_DEBUG_LASTLAST_STACK_TRACE
 	fi
+	# shellcheck disable=SC2016
 	eval "$(printf \
 		'%s=(${%s[@]+"${%s[@]}"})' \
 		"${1}" \
