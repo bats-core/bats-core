@@ -156,7 +156,7 @@ bats_file_exit_trap() {
     fi
     printf "not ok %d %s\n" "$((test_number_in_suite + 1))" "$FAILURE_REASON failed" >&3
     bats_print_stack_trace "${BATS_STACK_TRACE[@]}" >&3
-    bats_print_failed_command >&3
+    bats_print_failed_command "${BATS_STACK_TRACE[@]}" >&3
     bats_prefix_lines_for_tap_output < "$BATS_OUT" >&3
     rm -rf "$BATS_OUT"
     status=1

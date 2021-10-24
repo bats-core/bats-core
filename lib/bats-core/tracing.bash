@@ -69,10 +69,11 @@ bats_print_stack_trace() {
 }
 
 bats_print_failed_command() {
-	if [[ ${#BATS_STACK_TRACE[@]} -eq 0 ]]; then
+	local stack_trace=("${@}")
+	if [[ ${#stack_trace[@]} -eq 0 ]]; then
 		return 
 	fi
-	local frame="${BATS_STACK_TRACE[${#BATS_STACK_TRACE[@]} - 1]}"
+	local frame="${stack_trace[${#stack_trace[@]} - 1]}"
 	local filename
 	local lineno
 	local failed_line
