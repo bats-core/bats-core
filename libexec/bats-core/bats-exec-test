@@ -113,7 +113,6 @@ bats_teardown_trap() {
 source "$BATS_ROOT/lib/bats-core/common.bash"
 
 bats_exit_trap() {
-  local line
   local status
   local skipped=''
   trap - ERR EXIT
@@ -228,19 +227,6 @@ bats_perform_test() {
   BATS_TEST_COMPLETED=1
   trap 'bats_exit_trap' EXIT
   bats_teardown_trap "" # pass empty parameter to signify call outside trap
-}
-
-bats_interrupt_trap() {
-  # mark the interruption, to handle during exit
-  BATS_INTERRUPTED=true
-  exit 130
-}
-
-# keep in sync with bats_interrupt_trap
-# this is used inside run()
-bats_interrupt_trap_in_run() {
-  BATS_INTERRUPTED=true
-  exit 130
 }
 
 trap bats_interrupt_trap INT

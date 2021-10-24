@@ -962,7 +962,7 @@ EOF
 
   [[ "${lines[1]}" == "not ok 1 empty" ]]
   [[ "${lines[2]}" == "# (from function \`teardown' in test file ${RELATIVE_FIXTURE_ROOT}/hang_in_teardown.bats, line 4)" ]]
-  [[ "${lines[3]}" == "#   \`sleep 10' failed" ]]
+  [[ "${lines[3]}" == "#   \`sleep 10' failed with status 130" ]]
   [[ "${lines[4]}" == "# Received SIGINT, aborting ..." ]]
 }
 

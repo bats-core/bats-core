@@ -326,10 +326,29 @@ bats_error_trap() {
   # If necessary, undo the most recent stack trace captured by bats_debug_trap.
   # See bats_debug_trap for details.
   if [[ "${BASH_LINENO[*]}" = "${BATS_DEBUG_LAST_LINENO[*]:-}"
-     && "${BASH_SOURCE[*]}" = "${BATS_DEBUG_LAST_SOURCE[*]:-}" ]]; then
+     && "${BASH_SOURCE[*]}" = "${BATS_DEBUG_LAST_SOURCE[*]:-}" 
+	 && -z "$BATS_DEBUG_LAST_STACK_TRACE_IS_VALID" ]]; then
     BATS_DEBUG_LAST_STACK_TRACE=(
       ${BATS_DEBUG_LASTLAST_STACK_TRACE[@]+"${BATS_DEBUG_LASTLAST_STACK_TRACE[@]}"}
     )
   fi
   BATS_DEBUG_LAST_STACK_TRACE_IS_VALID=1
+}
+
+bats_interrupt_trap() {
+  # mark the interruption, to handle during exit
+  BATS_INTERRUPTED=true
+  BATS_ERROR_STATUS=130
+  # debug trap fires before interrupt trap but gets wrong linenumber (line 1)
+  # -> use last last stack trace
+  exit $BATS_ERROR_STATUS
+}
+
+# this is used inside run()
+bats_interrupt_trap_in_run() {
+  # mark the interruption, to handle during exit
+  BATS_INTERRUPTED=true
+  BATS_ERROR_STATUS=130
+  BATS_DEBUG_LAST_STACK_TRACE_IS_VALID=true
+  exit $BATS_ERROR_STATUS
 }
