@@ -140,15 +140,10 @@ run() { # [!|-N] [--keep-empty-lines] [--separate-stderr] [--] <command to run..
   if [[ -n "$expected_rc" ]]; then
     if [[ "$expected_rc" = "-1" ]]; then
       if [[ "$status" -eq 0 ]]; then
-        bats_capture_stack_trace # fix backtrace
-        BATS_DEBUG_LAST_STACK_TRACE_IS_VALID=true
         BATS_ERROR_SUFFIX=", expected nonzero exit code!"
         return 1
       fi
     elif [ "$status" -ne "$expected_rc" ]; then
-      bats_capture_stack_trace # fix backtrace
-      # shellcheck disable=SC2034
-      BATS_DEBUG_LAST_STACK_TRACE_IS_VALID=true
       # shellcheck disable=SC2034
       BATS_ERROR_SUFFIX=", expected exit code $expected_rc, got $status"
       return 1
