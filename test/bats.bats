@@ -930,6 +930,41 @@ EOF
   [ "${lines[4]}" == "# Received SIGINT, aborting ..." ]
 }
 
+@test "CTRL-C aborts and fails after run" {
+  if [[ "$BATS_NUMBER_OF_PARALLEL_JOBS" -gt 1 ]]; then
+    skip "Aborts don't work in parallel mode"
+  fi
+
+  # shellcheck disable=SC2031,2030
+  export TEMPFILE="$BATS_TEST_TMPDIR/$BATS_TEST_NAME.log"
+
+  # guarantee that background processes get their own process group -> pid=pgid
+  set -m
+  
+  load 'concurrent-coordination'
+  # shellcheck disable=SC2031,SC2030
+  export SINGLE_USE_LATCH_DIR="${BATS_SUITE_TMPDIR}"
+  # we cannot use run for a background task, so we have to store the output for later
+  bats "$FIXTURE_ROOT/hang_after_run.bats" --tap  >"$TEMPFILE" 2>&1 & # don't block execution, or we cannot send signals
+
+  SUBPROCESS_PID=$!
+  
+  single-use-latch::wait hang_after_run 1 10
+
+  # emulate CTRL-C by sending SIGINT to the whole process group
+  kill -SIGINT -- -$SUBPROCESS_PID
+
+  # the test suite must be marked as failed!
+  wait $SUBPROCESS_PID && return 1
+
+  run cat "$TEMPFILE"
+  
+  [ "${lines[1]}" == "not ok 1 test" ]
+  [ "${lines[2]}" == "# (in test file ${RELATIVE_FIXTURE_ROOT}/hang_after_run.bats, line 8)" ]
+  [ "${lines[3]}" == "#   \`sleep 10' failed with status 130" ]
+  [ "${lines[4]}" == "# Received SIGINT, aborting ..." ]
+}
+
 @test "CTRL-C aborts and fails the current teardown" {
   if [[ "$BATS_NUMBER_OF_PARALLEL_JOBS" -gt 1 ]]; then
     skip "Aborts don't work in parallel mode"
