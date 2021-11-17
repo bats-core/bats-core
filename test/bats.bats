@@ -881,7 +881,7 @@ EOF
   single-use-latch::wait hang_in_test 1 10 || (cat "$TEMPFILE"; false) # still forward output on timeout
 
   # emulate CTRL-C by sending SIGINT to the whole process group
-  kill -SIGINT -- -$SUBPROCESS_PID
+  kill -SIGINT -- -$SUBPROCESS_PID || (cat "$TEMPFILE"; false)
 
   # the test suite must be marked as failed!
   wait $SUBPROCESS_PID && return 1
@@ -889,10 +889,10 @@ EOF
   run cat "$TEMPFILE"
   echo "$output"
 
-  [[ "${lines[1]}" == "not ok 1 test" ]]
-  [[ "${lines[2]}" == "# (in test file ${RELATIVE_FIXTURE_ROOT}/hang_in_test.bats, line 7)" ]]
-  [[ "${lines[3]}" == "#   \`sleep 10' failed with status 130" ]]
-  [[ "${lines[4]}" == "# Received SIGINT, aborting ..." ]]
+  [ "${lines[1]}" == "not ok 1 test" ]
+  # due to scheduling the exact line will vary but we should exit with 130
+  [[ "${lines[3]}" == *"failed with status 130" ]] || false
+  [ "${lines[4]}" == "# Received SIGINT, aborting ..." ]
 }
 
 @test "CTRL-C aborts and fails the current run" {
@@ -917,7 +917,7 @@ EOF
   single-use-latch::wait hang_in_run 1 10
 
   # emulate CTRL-C by sending SIGINT to the whole process group
-  kill -SIGINT -- -$SUBPROCESS_PID
+  kill -SIGINT -- -$SUBPROCESS_PID || (cat "$TEMPFILE"; false)
 
   # the test suite must be marked as failed!
   wait $SUBPROCESS_PID && return 1
@@ -925,8 +925,8 @@ EOF
   run cat "$TEMPFILE"
   
   [ "${lines[1]}" == "not ok 1 test" ]
-  [ "${lines[2]}" == "# (in test file ${RELATIVE_FIXTURE_ROOT}/hang_in_run.bats, line 7)" ]
-  [ "${lines[3]}" == "#   \`run sleep 10' failed with status 130" ]
+  # due to scheduling the exact line will vary but we should exit with 130
+  [[ "${lines[3]}" == *"failed with status 130" ]] || false
   [ "${lines[4]}" == "# Received SIGINT, aborting ..." ]
 }
 
@@ -952,7 +952,7 @@ EOF
   single-use-latch::wait hang_after_run 1 10
 
   # emulate CTRL-C by sending SIGINT to the whole process group
-  kill -SIGINT -- -$SUBPROCESS_PID
+  kill -SIGINT -- -$SUBPROCESS_PID || (cat "$TEMPFILE"; false)
 
   # the test suite must be marked as failed!
   wait $SUBPROCESS_PID && return 1
@@ -960,8 +960,8 @@ EOF
   run cat "$TEMPFILE"
   
   [ "${lines[1]}" == "not ok 1 test" ]
-  [ "${lines[2]}" == "# (in test file ${RELATIVE_FIXTURE_ROOT}/hang_after_run.bats, line 8)" ]
-  [ "${lines[3]}" == "#   \`sleep 10' failed with status 130" ]
+  # due to scheduling the exact line will vary but we should exit with 130
+  [[ "${lines[3]}" == *"failed with status 130" ]] || false
   [ "${lines[4]}" == "# Received SIGINT, aborting ..." ]
 }
 
@@ -987,7 +987,7 @@ EOF
   single-use-latch::wait hang_in_teardown 1 10
 
   # emulate CTRL-C by sending SIGINT to the whole process group
-  kill -SIGINT -- -$SUBPROCESS_PID
+  kill -SIGINT -- -$SUBPROCESS_PID || (cat "$TEMPFILE"; false)
 
   # the test suite must be marked as failed!
   wait $SUBPROCESS_PID && return 1
@@ -995,10 +995,10 @@ EOF
   run cat "$TEMPFILE"
   echo "$output"
 
-  [[ "${lines[1]}" == "not ok 1 empty" ]]
-  [[ "${lines[2]}" == "# (from function \`teardown' in test file ${RELATIVE_FIXTURE_ROOT}/hang_in_teardown.bats, line 4)" ]]
-  [[ "${lines[3]}" == "#   \`sleep 10' failed with status 130" ]]
-  [[ "${lines[4]}" == "# Received SIGINT, aborting ..." ]]
+  [ "${lines[1]}" == "not ok 1 empty" ]
+  # due to scheduling the exact line will vary but we should exit with 130
+  [[ "${lines[3]}" == *"failed with status 130" ]] || false
+  [ "${lines[4]}" == "# Received SIGINT, aborting ..." ]
 }
 
 @test "CTRL-C aborts and fails the current setup_file" {
@@ -1023,7 +1023,7 @@ EOF
   single-use-latch::wait hang_in_setup_file 1 10
 
   # emulate CTRL-C by sending SIGINT to the whole process group
-  kill -SIGINT -- -$SUBPROCESS_PID
+  kill -SIGINT -- -$SUBPROCESS_PID || (cat "$TEMPFILE"; false)
 
   # the test suite must be marked as failed!
   wait $SUBPROCESS_PID && return 1
@@ -1031,10 +1031,10 @@ EOF
   run cat "$TEMPFILE"
   echo "$output"
 
-  [[ "${lines[1]}" == "not ok 1 setup_file failed" ]]
-  [[ "${lines[2]}" == "# (from function \`setup_file' in test file ${RELATIVE_FIXTURE_ROOT}/hang_in_setup_file.bats, line 4)" ]]
-  [[ "${lines[3]}" == "#   \`sleep 10' failed with status 130" ]]
-  [[ "${lines[4]}" == "# Received SIGINT, aborting ..." ]]
+  [ "${lines[1]}" == "not ok 1 setup_file failed" ]
+  # due to scheduling the exact line will vary but we should exit with 130
+  [[ "${lines[3]}" == *"failed with status 130" ]] || false
+  [ "${lines[4]}" == "# Received SIGINT, aborting ..." ]
 }
 
 @test "CTRL-C aborts and fails the current teardown_file" {
@@ -1058,7 +1058,7 @@ EOF
   single-use-latch::wait hang_in_teardown_file 1 10
 
   # emulate CTRL-C by sending SIGINT to the whole process group
-  kill -SIGINT -- -$SUBPROCESS_PID
+  kill -SIGINT -- -$SUBPROCESS_PID || (cat "$TEMPFILE"; false)
 
   # the test suite must be marked as failed!
   wait $SUBPROCESS_PID && return 1
@@ -1066,13 +1066,13 @@ EOF
   run cat "$TEMPFILE"
   echo "$output"
 
-  [[ "${lines[0]}" == "1..1" ]]
-  [[ "${lines[1]}" == "ok 1 empty" ]]
-  [[ "${lines[2]}" == "not ok 2 teardown_file failed" ]]
-  [[ "${lines[3]}" == "# (from function \`teardown_file' in test file ${RELATIVE_FIXTURE_ROOT}/hang_in_teardown_file.bats, line 4)" ]]
-  [[ "${lines[4]}" == "#   \`sleep 10' failed with status 130" ]]
-  [[ "${lines[5]}" == "# Received SIGINT, aborting ..." ]]
-  [[ "${lines[6]}" == "# bats warning: Executed 2 instead of expected 1 tests" ]]
+  [ "${lines[0]}" == "1..1" ]
+  [ "${lines[1]}" == "ok 1 empty" ]
+  [ "${lines[2]}" == "not ok 2 teardown_file failed" ]
+  # due to scheduling the exact line will vary but we should exit with 130
+  [[ "${lines[4]}" == *"failed with status 130" ]] || false
+  [ "${lines[5]}" == "# Received SIGINT, aborting ..." ]
+  [ "${lines[6]}" == "# bats warning: Executed 2 instead of expected 1 tests" ]
 }
 
 

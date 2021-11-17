@@ -78,7 +78,7 @@ jobs:
       - uses: actions/setup-node@v2
       - run: npm pack ./
       - run: npm install -g (get-item .\bats-*.tgz).FullName
-      - run: bats test        
+      - run: bats  -T --print-output-on-failure test        
 
   macos:
     strategy:

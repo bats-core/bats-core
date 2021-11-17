@@ -58,7 +58,6 @@ single-use-latch::signal() { # <latch-name>
     # mark our passing
     # concurrent process might interleave but will still post their newline
     echo "passed-$$" >> "$LATCH_FILE"
-    echo "passed-$$ >> $LATCH_FILE" >> /tmp/latch
 }
 
 single-use-latch::_filename() { # <latch-name> 
