@@ -57,8 +57,7 @@ CONTRIBUTING.md file][atom].
 
 ## Quick links &#x1f517;
 
-- [Gitter channel →][gitterurl]: These messages sync with the IRC channel
-- [IRC Channel (#bats on freenode) →][ircurl]: These messages sync with Gitter
+- [Gitter channel →][gitterurl]: Feel free to come chat with us on Gitter
 - [README →][README]
 - [Code of conduct →][CODE_OF_CONDUCT]
 - [License information →][LICENSE]
@@ -101,7 +100,7 @@ specifics, see the [CODE_OF_CONDUCT][] file.
 Please check the [README][] or existing [issues][repoissues] first.
 
 If you cannot find an answer to your question, please feel free to hop on our 
-[gitter][gitterurl] [![Gitter](https://badges.gitter.im/bats-core/bats-core.svg)](https://gitter.im/bats-core/bats-core?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge) or [via IRC (#bats on freenode)][ircurl].
+[Gitter][gitterurl]. [![Gitter](https://badges.gitter.im/bats-core/bats-core.svg)](https://gitter.im/bats-core/bats-core)
 
 ### Reporting issues
 
@@ -391,4 +390,3 @@ by the [Free Software Foundation](https://www.fsf.org/), 2016 under the [Free Ar
 [osmit]:          https://opensource.org/licenses/MIT
 
 [gitterurl]:      https://gitter.im/bats-core/bats-core
-[ircurl]:         https://kiwiirc.com/client/irc.freenode.net:+6697/#bats
