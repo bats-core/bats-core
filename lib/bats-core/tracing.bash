@@ -96,7 +96,7 @@ bats_print_failed_command() {
 	bats_strip_string "$failed_line" 'failed_command'
 	local quoted_failed_command
 	bats_quote_code quoted_failed_command "$failed_command"
-	printf '#   %s' "${quoted_failed_command}"
+	printf '#   %s ' "${quoted_failed_command}"
 
 	if [[ "$BATS_ERROR_STATUS" -eq 1 ]]; then
 		printf 'failed%s\n' "$BATS_ERROR_SUFFIX"
