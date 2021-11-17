@@ -29,6 +29,10 @@ HELP_TEXT_HEADER
   containing Bats test files (ending with ".bats")
 
   -c, --count               Count test cases without running any tests
+  --code-quote-style <style>
+                            A two character string of code quote delimiters
+                            or 'custom' which requires setting $BATS_BEGIN_CODE_QUOTE and 
+                            $BATS_END_CODE_QUOTE. Can also be set via $BATS_CODE_QUOTE_STYLE
   -f, --filter <regex>      Only run tests that match the regular expression
   -F, --formatter <type>    Switch between formatters: pretty (default),
                               tap (default w/o term), tap13, junit
@@ -220,6 +224,10 @@ while [[ "$#" -ne 0 ]]; do
     fi
     flags+=(--gather-test-outputs-in "$output_dir")
     ;;
+  --code-quote-style)
+    shift
+    BATS_CODE_QUOTE_STYLE="$1"
+  ;;
   -*)
     abort "Bad command line option '$1'"
     ;;

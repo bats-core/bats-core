@@ -49,6 +49,11 @@ OPTIONS
 
   * `-c`, `--count`:
     Count the number of test cases without running any tests
+  * `--code-quote-style <style>`:
+    A two character string of code quote delimiters or `custom`
+    which requires setting `$BATS_BEGIN_CODE_QUOTE` and 
+    `$BATS_END_CODE_QUOTE`. 
+    Can also be set via `$BATS_CODE_QUOTE_STYLE`.
   * `-f`, `--filter <regex>`:
     Filter test cases by names matching the regular expression
   * `-F`, `--formatter <type>`:
@@ -87,7 +92,6 @@ OPTIONS
     Make `run` print `$output` by default
   * `-v`, `--version`:
     Display the version number
-
 
 OUTPUT
 ------
