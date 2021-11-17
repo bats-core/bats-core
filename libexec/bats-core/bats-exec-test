@@ -188,7 +188,9 @@ get_mills_since_epoch() {
 
 bats_perform_test() {
   if ! declare -F "$BATS_TEST_NAME" &>/dev/null; then
-    printf "bats: unknown test name \`%s'\n" "$BATS_TEST_NAME" >&2
+    local quoted_test_name
+    bats_quote_code quoted_test_name "$BATS_TEST_NAME"
+    printf "bats: unknown test name %s\n" "$quoted_test_name" >&2
     exit 1
   fi
 

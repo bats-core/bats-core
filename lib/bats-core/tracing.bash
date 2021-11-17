@@ -64,7 +64,9 @@ bats_print_stack_trace() {
 			# don't print "from function `source'"",
 			# when failing in free code during `source $test_file` from bats-exec-file
 			! [[ "$fn" == 'source' &&  $index -eq $count ]]; then 
-			printf "from function \`%s' " "$fn"
+			local quoted_fn
+			bats_quote_code quoted_fn "$fn"
+			printf "from function %s " "$quoted_fn"
 		fi
 
 		if [[ $index -eq $count ]]; then
@@ -92,7 +94,9 @@ bats_print_failed_command() {
 	bats_frame_lineno "$frame" 'lineno'
 	bats_extract_line "$filename" "$lineno" 'failed_line'
 	bats_strip_string "$failed_line" 'failed_command'
-	printf '%s' "#   \`${failed_command}' "
+	local quoted_failed_command
+	bats_quote_code quoted_failed_command "$failed_command"
+	printf '#   %s ' "${quoted_failed_command}"
 
 	if [[ "$BATS_ERROR_STATUS" -eq 1 ]]; then
 		printf 'failed%s\n' "$BATS_ERROR_SUFFIX"

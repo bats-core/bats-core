@@ -1214,3 +1214,46 @@ EOF
 @test "Test with a name that is waaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaay too long" {
   skip "This test should only check if the long name chokes bats' internals during execution"
 }
+
+@test "BATS_CODE_QUOTE_STYLE works with any two characters (even unicode)" {
+  BATS_CODE_QUOTE_STYLE='``' run -1 bats --tap "${FIXTURE_ROOT}/failing.bats"
+  # shellcheck disable=SC2016
+  [ "${lines[3]}" == '#   `eval "( exit ${STATUS:-1} )"` failed' ]
+
+  
+  export BATS_CODE_QUOTE_STYLE='😁😂'
+  if [[ ${#BATS_CODE_QUOTE_STYLE} -ne 2 ]]; then
+    # for example, this happens on windows!
+    skip 'Unicode chars are not counted as one char in this system'
+  fi
+  run -1 bats --tap "${FIXTURE_ROOT}/failing.bats"
+  # shellcheck disable=SC2016
+  [ "${lines[3]}" == '#   😁eval "( exit ${STATUS:-1} )"😂 failed' ]
+}
+
+@test "BATS_CODE_QUOTE_STYLE=custom requires BATS_CODE_QUOTE_BEGIN/END" {
+  # unset because they are set in the surrounding scope
+  unset BATS_BEGIN_CODE_QUOTE BATS_END_CODE_QUOTE
+
+  BATS_CODE_QUOTE_STYLE=custom run -1 bats --tap "${FIXTURE_ROOT}/passing.bats"
+  [ "${lines[0]}" == 'ERROR: BATS_CODE_QUOTE_STYLE=custom requires BATS_BEGIN_CODE_QUOTE and BATS_END_CODE_QUOTE to be set' ]
+
+  # shellcheck disable=SC2016
+  BATS_CODE_QUOTE_STYLE=custom \
+  BATS_BEGIN_CODE_QUOTE='$(' \
+  BATS_END_CODE_QUOTE=')' \
+    run -1 bats --tap "${FIXTURE_ROOT}/failing.bats"
+  # shellcheck disable=SC2016
+  [ "${lines[3]}" == '#   $(eval "( exit ${STATUS:-1} )") failed' ]
+}
+
+@test "Warn about invalid BATS_CODE_QUOTE_STYLE" {
+  BATS_CODE_QUOTE_STYLE='' run -1 bats --tap "${FIXTURE_ROOT}/passing.bats"
+  [ "${lines[0]}" == 'ERROR: Unknown BATS_CODE_QUOTE_STYLE: ' ]
+
+  BATS_CODE_QUOTE_STYLE='1' run -1 bats --tap "${FIXTURE_ROOT}/passing.bats"
+  [ "${lines[0]}" == 'ERROR: Unknown BATS_CODE_QUOTE_STYLE: 1' ]
+
+  BATS_CODE_QUOTE_STYLE='three' run -1 bats --tap "${FIXTURE_ROOT}/passing.bats"
+  [ "${lines[0]}" == 'ERROR: Unknown BATS_CODE_QUOTE_STYLE: three' ]
+}

@@ -1,7 +1,7 @@
 .\" generated with Ronn/v0.7.3
 .\" http://github.com/rtomayko/ronn/tree/0.7.3
 .
-.TH "BATS" "1" "August 2021" "bats-core" "Bash Automated Testing System"
+.TH "BATS" "1" "November 2021" "bats-core" "Bash Automated Testing System"
 .
 .SH "NAME"
 \fBbats\fR \- Bash Automated Testing System
@@ -34,6 +34,9 @@ You can invoke the \fBbats\fR interpreter with multiple test file arguments, or 
 .
 .IP "\(bu" 4
 \fB\-c\fR, \fB\-\-count\fR: Count the number of test cases without running any tests
+.
+.IP "\(bu" 4
+\fB\-\-code\-quote\-style <style>\fR: A two character string of code quote delimiters or \fBcustom\fR which requires setting \fB$BATS_BEGIN_CODE_QUOTE\fR and \fB$BATS_END_CODE_QUOTE\fR\. Can also be set via \fB$BATS_CODE_QUOTE_STYLE\fR\.
 .
 .IP "\(bu" 4
 \fB\-f\fR, \fB\-\-filter <regex>\fR: Filter test cases by names matching the regular expression

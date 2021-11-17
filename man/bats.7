@@ -1,7 +1,7 @@
 .\" generated with Ronn/v0.7.3
 .\" http://github.com/rtomayko/ronn/tree/0.7.3
 .
-.TH "BATS" "7" "August 2021" "bats-core" "Bash Automated Testing System"
+.TH "BATS" "7" "November 2021" "bats-core" "Bash Automated Testing System"
 .
 .SH "NAME"
 \fBbats\fR \- Bats test file format
@@ -33,7 +33,7 @@ A Bats test file is a Bash script with special syntax for defining test cases\. 
 Each Bats test file is evaluated n+1 times, where \fIn\fR is the number of test cases in the file\. The first run counts the number of test cases, then iterates over the test cases and executes each one in its own process\.
 .
 .SH "THE RUN HELPER"
-Usage: run [OPTIONS] [\-\-] <command\.\.\.> Options: ! check for non zero exit code =\fIN\fR check that exit code is \fIN\fR \-\-output {merged,separate,stdout,stderr} control which output is recorded \-\-keep\-empty\-lines retain emtpy lines in \fB${lines[@]}\fR
+Usage: run [OPTIONS] [\-\-] <command\.\.\.> Options: ! check for non zero exit code \-\fIN\fR check that exit code is \fIN\fR \-\-separate\-stderr split stderr and stdout \-\-keep\-empty\-lines retain emtpy lines in \fB${lines[@]}\fR/\fB${stderr_lines[@]}\fR
 .
 .P
 Many Bats tests need to run a command and then make assertions about its exit status and output\. Bats includes a \fBrun\fR helper that invokes its arguments as a command, saves the exit status and output into special global variables, and (optionally) checks exit status against a given expected value\. If successful, \fBrun\fR returns with a \fB0\fR status code so you can continue to make assertions in your test case\.
@@ -46,7 +46,7 @@ For example, let\'s say you\'re testing that the \fBfoo\fR command, when passed 
 .nf
 
 @test "invoking foo with a nonexistent file prints an error" {
-  run -1 foo nonexistent_filename
+  run \-1 foo nonexistent_filename
   [ "$output" = "foo: no such file \'nonexistent_filename\'" ]
 }
 .
@@ -55,14 +55,14 @@ For example, let\'s say you\'re testing that the \fBfoo\fR command, when passed 
 .IP "" 0
 .
 .P
-The \fB=1\fR as first argument tells \fBrun\fR to expect 1 as an exit status, and to fail if the command exits with any other value\. On failure, both actual and expected values will be displayed, along with the invoked command and its output:
+The \fB\-1\fR as first argument tells \fBrun\fR to expect 1 as an exit status, and to fail if the command exits with any other value\. On failure, both actual and expected values will be displayed, along with the invoked command and its output:
 .
 .IP "" 4
 .
 .nf
 
 (in test file test\.bats, line 2)
- `run -1 foo nonexistent_filename\' failed, expected exit code 1, got 127
+ `run \-1 foo nonexistent_filename\' failed, expected exit code 1, got 127
 .
 .fi
 .
@@ -82,7 +82,7 @@ A third special variable, the \fB$lines\fR array, is available for easily access
 .nf
 
 @test "invoking foo without arguments prints usage" {
-  run -1 foo
+  run \-1 foo
   [ "${lines[0]}" = "usage: foo <filename>" ]
 }
 .
@@ -94,21 +94,7 @@ A third special variable, the \fB$lines\fR array, is available for easily access
 By default \fBrun\fR leaves out empty lines in \fB${lines[@]}\fR\. Use \fBrun \-\-keep\-empty\-lines\fR to retain them\.
 .
 .P
-Additionally, you can use \fBrun \-\-output <mode>\fR to control what goes into \fB$output\fR and \fB$lines\fR\. The available values for \fB<mode>\fR are:
-.
-.IP "\(bu" 4
-\fBmerged\fR: the default when \fB\-\-output\fR is not specified, interleaves stdout and stderr
-.
-.IP "\(bu" 4
-\fBseparate\fR: splits stderr off to \fB$stderr\fR and \fB${stderr_lines[@]}\fR, stdout is still available as \fB$output\fR and \fB${lines[@]}\fR
-.
-.IP "\(bu" 4
-\fBstderr\fR: discards stdout and fills \'$stderr\fBand\fR${stderr_lines[@]}`
-.
-.IP "\(bu" 4
-\fBstdout\fR: discards stdout and fills \fB$output\fR and \fB${lines[@]}\fR
-.
-.IP "" 0
+Additionally, you can use \fB\-\-separate\-stderr\fR to split stdout and stderr into \fB$output\fR/\fB$stderr\fR and \fB${lines[@]}\fR/\fB${stderr_lines[@]}\fR\.
 .
 .P
 All additional parameters to run should come before the command\. If you want to run a command that starts with \fB\-\fR, prefix it with \fB\-\-\fR to prevent \fBrun\fR from parsing it as an option\.
@@ -138,7 +124,7 @@ Tests can be skipped by using the \fBskip\fR command at the point in a test you 
 
 @test "A test I don\'t want to execute for now" {
   skip
-  run -0 foo
+  run \-0 foo
 }
 .
 .fi
@@ -154,7 +140,7 @@ Optionally, you may include a reason for skipping:
 
 @test "A test I don\'t want to execute for now" {
   skip "This command will return zero soon, but not now"
-  run -0 foo
+  run \-0 foo
 }
 .
 .fi
@@ -173,7 +159,7 @@ Or you can skip conditionally:
     skip "foo isn\'t bar"
   fi
 
-  run -0 foo
+  run \-0 foo
 }
 .
 .fi

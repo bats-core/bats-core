@@ -10,6 +10,11 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 
 ## [Unreleased]
 
+### Added
+
+* new flag `--code-quote-style` (and `$BATS_CODE_QUOTE_STYLE`) to customize
+quotes around code blocks in error output (#506)
+
 ### Fixed
 
 * improved error trace for some broken cases (#279)

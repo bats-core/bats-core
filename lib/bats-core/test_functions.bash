@@ -87,6 +87,10 @@ run() { # [!|-N] [--keep-empty-lines] [--separate-stderr] [--] <command to run..
         shift # eat the -- before breaking away
         break
       ;;
+      *)
+        printf "Usage error: unknown flag '%s'" "$1" >&2
+        return 1
+      ;;
     esac
     shift
   done
