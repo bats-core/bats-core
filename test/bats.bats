@@ -1220,7 +1220,13 @@ EOF
   # shellcheck disable=SC2016
   [ "${lines[3]}" == '#   `eval "( exit ${STATUS:-1} )"` failed' ]
 
-  BATS_CODE_QUOTE_STYLE='😁😂' run -1 bats --tap "${FIXTURE_ROOT}/failing.bats"
+  
+  export BATS_CODE_QUOTE_STYLE='😁😂'
+  if [[ ${#BATS_CODE_QUOTE_STYLE} -ne 2 ]]; then
+    # for example, this happens on windows!
+    skip 'Unicode chars are not counted as one char in this system'
+  fi
+  run -1 bats --tap "${FIXTURE_ROOT}/failing.bats"
   # shellcheck disable=SC2016
   [ "${lines[3]}" == '#   😁eval "( exit ${STATUS:-1} )"😂 failed' ]
 }
