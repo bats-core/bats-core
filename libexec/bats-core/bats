@@ -298,7 +298,11 @@ if [[ -n "$report_formatter" ]]; then
   esac
 fi
 
-case "${BATS_CODE_QUOTE_STYLE-"\`'"}" in
+if [[ "${BATS_CODE_QUOTE_STYLE-BATS_CODE_QUOTE_STYLE_UNSET}" == BATS_CODE_QUOTE_STYLE_UNSET ]]; then
+  BATS_CODE_QUOTE_STYLE="\`'"
+fi
+
+case "${BATS_CODE_QUOTE_STYLE}" in
   ??)
     BATS_BEGIN_CODE_QUOTE="${BATS_CODE_QUOTE_STYLE::1}"
     BATS_END_CODE_QUOTE="${BATS_CODE_QUOTE_STYLE:1:1}"
