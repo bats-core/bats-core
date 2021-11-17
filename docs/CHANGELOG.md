@@ -13,6 +13,9 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 ### Fixed
 
 * improved error trace for some broken cases (#279)
+* removed leftover debug file `/tmp/latch` in selftest suite
+  (single use latch) (#516)
+* fix recurring errors on CTRL+C tests with NPM on Windows in selftest suite (#516)
 
 ## [1.5.0] - 2021-10-22
 
