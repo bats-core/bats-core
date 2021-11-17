@@ -17,6 +17,10 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
   (single use latch) (#516)
 * fix recurring errors on CTRL+C tests with NPM on Windows in selftest suite (#516)
 
+#### Documentation
+
+* remove links to defunct freenode IRC channel (#515)
+
 ## [1.5.0] - 2021-10-22
 
 ### Added
