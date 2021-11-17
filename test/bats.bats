@@ -881,7 +881,7 @@ EOF
   single-use-latch::wait hang_in_test 1 10 || (cat "$TEMPFILE"; false) # still forward output on timeout
 
   # emulate CTRL-C by sending SIGINT to the whole process group
-  kill -SIGINT -- -$SUBPROCESS_PID
+  kill -SIGINT -- -$SUBPROCESS_PID || (cat "$TEMPFILE"; false)
 
   # the test suite must be marked as failed!
   wait $SUBPROCESS_PID && return 1
@@ -917,7 +917,7 @@ EOF
   single-use-latch::wait hang_in_run 1 10
 
   # emulate CTRL-C by sending SIGINT to the whole process group
-  kill -SIGINT -- -$SUBPROCESS_PID
+  kill -SIGINT -- -$SUBPROCESS_PID || (cat "$TEMPFILE"; false)
 
   # the test suite must be marked as failed!
   wait $SUBPROCESS_PID && return 1
@@ -952,7 +952,7 @@ EOF
   single-use-latch::wait hang_after_run 1 10
 
   # emulate CTRL-C by sending SIGINT to the whole process group
-  kill -SIGINT -- -$SUBPROCESS_PID
+  kill -SIGINT -- -$SUBPROCESS_PID || (cat "$TEMPFILE"; false)
 
   # the test suite must be marked as failed!
   wait $SUBPROCESS_PID && return 1
@@ -987,7 +987,7 @@ EOF
   single-use-latch::wait hang_in_teardown 1 10
 
   # emulate CTRL-C by sending SIGINT to the whole process group
-  kill -SIGINT -- -$SUBPROCESS_PID
+  kill -SIGINT -- -$SUBPROCESS_PID || (cat "$TEMPFILE"; false)
 
   # the test suite must be marked as failed!
   wait $SUBPROCESS_PID && return 1
@@ -1023,7 +1023,7 @@ EOF
   single-use-latch::wait hang_in_setup_file 1 10
 
   # emulate CTRL-C by sending SIGINT to the whole process group
-  kill -SIGINT -- -$SUBPROCESS_PID
+  kill -SIGINT -- -$SUBPROCESS_PID || (cat "$TEMPFILE"; false)
 
   # the test suite must be marked as failed!
   wait $SUBPROCESS_PID && return 1
@@ -1058,7 +1058,7 @@ EOF
   single-use-latch::wait hang_in_teardown_file 1 10
 
   # emulate CTRL-C by sending SIGINT to the whole process group
-  kill -SIGINT -- -$SUBPROCESS_PID
+  kill -SIGINT -- -$SUBPROCESS_PID || (cat "$TEMPFILE"; false)
 
   # the test suite must be marked as failed!
   wait $SUBPROCESS_PID && return 1
