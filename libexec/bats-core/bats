@@ -298,6 +298,29 @@ if [[ -n "$report_formatter" ]]; then
   esac
 fi
 
+case ${BATS_CODE_QUOTE_STYLE:-'`'} in
+	"\`'")
+		BATS_BEGIN_CODE_QUOTE='`'
+		BATS_END_CODE_QUOTE="'"
+	;;
+	'``')
+		BATS_BEGIN_CODE_QUOTE='`'
+		BATS_END_CODE_QUOTE='`'
+	;;
+	custom)
+		if [[ ${BATS_BEGIN_CODE_QUOTE-UNSET} == unset
+			|| ${BATS_END_CODE_QUOTE-UNSET} == unset ]]; then
+			printf "ERROR: BATS_CODE_QUOTE_STYLE=custom requires BATS_BEGIN_CODE_QUOTE and BATS_END_CODE_QUOTE to be set\n"
+			exit 1
+		fi
+	;;
+	*)
+		printf "ERROR: Unknown BATS_CODE_QUOTE_STYLE: %s\n" "$BATS_CODE_QUOTE_STYLE"
+		exit 1
+	;;
+esac
+export BATS_BEGIN_CODE_QUOTE BATS_END_CODE_QUOTE
+
 if [[ -n "$output" ]]; then
   if [[ ! -w "${output}" ]]; then
     abort "Output path ${output} is not writeable"
