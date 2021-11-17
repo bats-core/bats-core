@@ -1217,9 +1217,11 @@ EOF
 
 @test "BATS_CODE_QUOTE_STYLE works with any two characters (even unicode)" {
   BATS_CODE_QUOTE_STYLE='``' run -1 bats --tap "${FIXTURE_ROOT}/failing.bats"
+  # shellcheck disable=SC2016
   [ "${lines[3]}" == '#   `eval "( exit ${STATUS:-1} )"` failed' ]
 
   BATS_CODE_QUOTE_STYLE='😁😂' run -1 bats --tap "${FIXTURE_ROOT}/failing.bats"
+  # shellcheck disable=SC2016
   [ "${lines[3]}" == '#   😁eval "( exit ${STATUS:-1} )"😂 failed' ]
 }
 
@@ -1230,10 +1232,12 @@ EOF
   BATS_CODE_QUOTE_STYLE=custom run -1 bats --tap "${FIXTURE_ROOT}/passing.bats"
   [ "${lines[0]}" == 'ERROR: BATS_CODE_QUOTE_STYLE=custom requires BATS_BEGIN_CODE_QUOTE and BATS_END_CODE_QUOTE to be set' ]
 
+  # shellcheck disable=SC2016
   BATS_CODE_QUOTE_STYLE=custom \
   BATS_BEGIN_CODE_QUOTE='$(' \
   BATS_END_CODE_QUOTE=')' \
     run -1 bats --tap "${FIXTURE_ROOT}/failing.bats"
+  # shellcheck disable=SC2016
   [ "${lines[3]}" == '#   $(eval "( exit ${STATUS:-1} )") failed' ]
 }
 
