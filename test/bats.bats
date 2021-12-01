@@ -1257,3 +1257,30 @@ EOF
   BATS_CODE_QUOTE_STYLE='three' run -1 bats --tap "${FIXTURE_ROOT}/passing.bats"
   [ "${lines[0]}" == 'ERROR: Unknown BATS_CODE_QUOTE_STYLE: three' ]
 }
+
+@test "Debug trap must only override variables that are prefixed with bats_ (issue S#519)" {
+  # use declare -p to gather variables in pristine bash and bats @test environment
+  # then compare which ones are introduced in @test compared to bash
+
+  # make declare's output more readable and suitable for `comm`
+  normalize_variable_list() {
+    while IFS=' =' read -r _declare flags variable value; do
+        if [[ "$_declare" == declare ]]; then # skip multiline variables' values
+          printf "%s\n" "$variable"
+        fi
+    done | sort
+  }
+  # get the bash baseline (add variables that should be ignored (e.g. PIPESTATUS) here)
+  BASH_DECLARED_VARIABLES=$(env -i PIPESTATUS= bash -c "declare -p")
+  local BATS_DECLARED_VARIABLES_FILE="${BATS_TEST_TMPDIR}/variables.log"
+  # now capture bats @test environment
+  run -0 env -i BATS_DECLARED_VARIABLES_FILE="$BATS_DECLARED_VARIABLES_FILE"  "${BATS_ROOT}/bin/bats" "${FIXTURE_ROOT}/issue-519.bats"
+  # use function to allow failing via !, run is a bit unwiedly with the pipe and subshells
+  check_no_new_variables() {
+    # -23 -> only look at additions on the bats list
+    ! comm -23 <(normalize_variable_list <"$BATS_DECLARED_VARIABLES_FILE") \
+               <(normalize_variable_list <<< "$BASH_DECLARED_VARIABLES" ) \
+               | grep -v '^BATS_' # variables that are prefixed with BATS_ don't count
+  }
+  check_no_new_variables
+}
