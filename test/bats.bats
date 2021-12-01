@@ -1264,17 +1264,18 @@ EOF
 
   # make declare's output more readable and suitable for `comm`
   normalize_variable_list() {
-    while IFS=' =' read -r _declare flags variable value; do
+    # `declare -p`: declare -X VAR_NAME="VALUE"
+    while IFS=' =' read -r _declare _ variable _; do
         if [[ "$_declare" == declare ]]; then # skip multiline variables' values
           printf "%s\n" "$variable"
         fi
     done | sort
   }
   # get the bash baseline (add variables that should be ignored (e.g. PIPESTATUS) here)
-  BASH_DECLARED_VARIABLES=$(env -i PIPESTATUS= bash -c "declare -p")
+  BASH_DECLARED_VARIABLES=$(env -i PIPESTATUS= "$BASH" -c "declare -p")
   local BATS_DECLARED_VARIABLES_FILE="${BATS_TEST_TMPDIR}/variables.log"
   # now capture bats @test environment
-  run -0 env -i BATS_DECLARED_VARIABLES_FILE="$BATS_DECLARED_VARIABLES_FILE"  "${BATS_ROOT}/bin/bats" "${FIXTURE_ROOT}/issue-519.bats"
+  run -0 env -i BATS_DECLARED_VARIABLES_FILE="$BATS_DECLARED_VARIABLES_FILE"  "$BASH" "${BATS_ROOT}/bin/bats" "${FIXTURE_ROOT}/issue-519.bats"
   # use function to allow failing via !, run is a bit unwiedly with the pipe and subshells
   check_no_new_variables() {
     # -23 -> only look at additions on the bats list
