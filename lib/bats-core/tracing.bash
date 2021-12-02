@@ -148,8 +148,10 @@ bats_trim_filename() {
 # normalize a windows path from e.g. C:/directory to /c/directory
 # The path must point to an existing/accessable directory, not a file!
 bats_normalize_windows_dir_path() { # <output-var> <path>
-	local output_var="$1"
-	local path="$2"
+	local output_var="$1" path="$2"
+	if [[ "$output_var" != NORMALIZED_INPUT ]]; then
+		local NORMALIZED_INPUT
+	fi
 	if [[ $path == ?:* ]]; then
 		NORMALIZED_INPUT="$(cd "$path" || exit 1; pwd)"
 	else
@@ -284,6 +286,7 @@ bats_add_debug_exclude_path() { # <path>
 		return 1
 	fi
 	if [[ "$OSTYPE" == cygwin || "$OSTYPE" == msys ]]; then
+		local normalized_dir
 		bats_normalize_windows_dir_path normalized_dir "$1"
 		BATS_DEBUG_EXCLUDE_PATHS+=("$normalized_dir")
 	else
