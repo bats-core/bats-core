@@ -1258,20 +1258,40 @@ EOF
   [ "${lines[0]}" == 'ERROR: Unknown BATS_CODE_QUOTE_STYLE: three' ]
 }
 
-@test "Debug trap must only override variables that are prefixed with bats_ (issue S#519)" {
+@test "Debug trap must only override variables that are prefixed with bats_ (issue #519)" {
   # use declare -p to gather variables in pristine bash and bats @test environment
   # then compare which ones are introduced in @test compared to bash
 
   # make declare's output more readable and suitable for `comm`
-  normalize_variable_list() {
-    # `declare -p`: declare -X VAR_NAME="VALUE"
-    while IFS=' =' read -r _declare _ variable _; do
-        if [[ "$_declare" == declare ]]; then # skip multiline variables' values
-          printf "%s\n" "$variable"
+  if [[ "${BASH_VERSINFO[0]}" -eq 3 ]]; then
+    normalize_variable_list() {
+      # `declare -p`: VAR_NAME="VALUE"
+      # will also contain function definitions!
+      while read -r line; do
+        # Skip variable assignments in function definitions!
+        # (They will be indented.)
+        declare_regex='^declare -[^[:space:]]+ ([^=]+)='
+        plain_regex='^([^=[:space]]+)='
+        if [[ $line =~ $declare_regex ]]; then
+          printf "%s\n" "${BASH_REMATCH[1]}"
+        elif [[ $line =~ $plain_regex ]]; then
+          printf "%s\n" "${BASH_REMATCH[1]}"
         fi
-    done | sort
-  }
-  # get the bash baseline (add variables that should be ignored (e.g. PIPESTATUS) here)
+      done | sort
+    }
+  else
+    normalize_variable_list() {
+      # `declare -p`: declare -X VAR_NAME="VALUE"
+      while IFS=' =' read -r _declare _ variable _; do
+          if [[ "$_declare" == declare ]]; then # skip multiline variables' values
+            printf "%s\n" "$variable"
+          fi
+      done | sort
+    }
+  fi
+
+  # get the bash baseline
+  # add variables that should be ignored like PIPESTATUS here
   BASH_DECLARED_VARIABLES=$(env -i PIPESTATUS= "$BASH" -c "declare -p")
   local BATS_DECLARED_VARIABLES_FILE="${BATS_TEST_TMPDIR}/variables.log"
   # now capture bats @test environment
