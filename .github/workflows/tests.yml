@@ -151,7 +151,7 @@ jobs:
           time docker run -it -v $PWD:/opt/bats alpine sh -c "apk add bash ncurses; /opt/bats/bin/bats  --print-output-on-failure --tap /opt/bats/test"
 
   freebsd:
-    runs-on: macos-latest
+    runs-on: macos-10.15
     strategy:
       matrix:
         packages:
