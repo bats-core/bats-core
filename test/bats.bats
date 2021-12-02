@@ -1295,7 +1295,7 @@ EOF
   BASH_DECLARED_VARIABLES=$(env -i PIPESTATUS= "$BASH" -c "declare -p")
   local BATS_DECLARED_VARIABLES_FILE="${BATS_TEST_TMPDIR}/variables.log"
   # now capture bats @test environment
-  run -0 env -i BATS_DECLARED_VARIABLES_FILE="$BATS_DECLARED_VARIABLES_FILE"  "$BASH" "${BATS_ROOT}/bin/bats" "${FIXTURE_ROOT}/issue-519.bats"
+  run -0 env -i PATH="$PATH" BATS_DECLARED_VARIABLES_FILE="$BATS_DECLARED_VARIABLES_FILE"  bash "${BATS_ROOT}/bin/bats" "${FIXTURE_ROOT}/issue-519.bats"
   # use function to allow failing via !, run is a bit unwiedly with the pipe and subshells
   check_no_new_variables() {
     # -23 -> only look at additions on the bats list
