@@ -21,6 +21,7 @@ quotes around code blocks in error output (#506)
 * removed leftover debug file `/tmp/latch` in selftest suite
   (single use latch) (#516)
 * fix recurring errors on CTRL+C tests with NPM on Windows in selftest suite (#516)
+* fixed leaking of local variables from debug trap (#520)
 
 #### Documentation
 

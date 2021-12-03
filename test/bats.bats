@@ -1257,3 +1257,51 @@ EOF
   BATS_CODE_QUOTE_STYLE='three' run -1 bats --tap "${FIXTURE_ROOT}/passing.bats"
   [ "${lines[0]}" == 'ERROR: Unknown BATS_CODE_QUOTE_STYLE: three' ]
 }
+
+@test "Debug trap must only override variables that are prefixed with bats_ (issue #519)" {
+  # use declare -p to gather variables in pristine bash and bats @test environment
+  # then compare which ones are introduced in @test compared to bash
+
+  # make declare's output more readable and suitable for `comm`
+  if [[ "${BASH_VERSINFO[0]}" -eq 3 ]]; then
+    normalize_variable_list() {
+      # `declare -p`: VAR_NAME="VALUE"
+      # will also contain function definitions!
+      while read -r line; do
+        # Skip variable assignments in function definitions!
+        # (They will be indented.)
+        declare_regex='^declare -[^[:space:]]+ ([^=]+)='
+        plain_regex='^([^=[:space]]+)='
+        if [[ $line =~ $declare_regex ]]; then
+          printf "%s\n" "${BASH_REMATCH[1]}"
+        elif [[ $line =~ $plain_regex ]]; then
+          printf "%s\n" "${BASH_REMATCH[1]}"
+        fi
+      done | sort
+    }
+  else
+    normalize_variable_list() {
+      # `declare -p`: declare -X VAR_NAME="VALUE"
+      while IFS=' =' read -r _declare _ variable _; do
+          if [[ "$_declare" == declare ]]; then # skip multiline variables' values
+            printf "%s\n" "$variable"
+          fi
+      done | sort
+    }
+  fi
+
+  # get the bash baseline
+  # add variables that should be ignored like PIPESTATUS here
+  BASH_DECLARED_VARIABLES=$(env -i PIPESTATUS= "$BASH" -c "declare -p")
+  local BATS_DECLARED_VARIABLES_FILE="${BATS_TEST_TMPDIR}/variables.log"
+  # now capture bats @test environment
+  run -0 env -i PATH="$PATH" BATS_DECLARED_VARIABLES_FILE="$BATS_DECLARED_VARIABLES_FILE"  bash "${BATS_ROOT}/bin/bats" "${FIXTURE_ROOT}/issue-519.bats"
+  # use function to allow failing via !, run is a bit unwiedly with the pipe and subshells
+  check_no_new_variables() {
+    # -23 -> only look at additions on the bats list
+    ! comm -23 <(normalize_variable_list <"$BATS_DECLARED_VARIABLES_FILE") \
+               <(normalize_variable_list <<< "$BASH_DECLARED_VARIABLES" ) \
+               | grep -v '^BATS_' # variables that are prefixed with BATS_ don't count
+  }
+  check_no_new_variables
+}

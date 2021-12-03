@@ -148,8 +148,10 @@ bats_trim_filename() {
 # normalize a windows path from e.g. C:/directory to /c/directory
 # The path must point to an existing/accessable directory, not a file!
 bats_normalize_windows_dir_path() { # <output-var> <path>
-	local output_var="$1"
-	local path="$2"
+	local output_var="$1" path="$2"
+	if [[ "$output_var" != NORMALIZED_INPUT ]]; then
+		local NORMALIZED_INPUT
+	fi
 	if [[ $path == ?:* ]]; then
 		NORMALIZED_INPUT="$(cd "$path" || exit 1; pwd)"
 	else
@@ -236,7 +238,7 @@ bats_debug_trap() {
 	local NORMALIZED_INPUT
 	bats_normalize_windows_dir_path NORMALIZED_INPUT "${1%/*}"
 	local file_excluded='' path
-	for path in "${_BATS_DEBUG_EXCLUDE_PATHS[@]}"; do
+	for path in "${BATS_DEBUG_EXCLUDE_PATHS[@]}"; do
 		if [[ "$NORMALIZED_INPUT" == "$path"* ]]; then
 			file_excluded=1
 			break
@@ -284,15 +286,16 @@ bats_add_debug_exclude_path() { # <path>
 		return 1
 	fi
 	if [[ "$OSTYPE" == cygwin || "$OSTYPE" == msys ]]; then
+		local normalized_dir
 		bats_normalize_windows_dir_path normalized_dir "$1"
-		_BATS_DEBUG_EXCLUDE_PATHS+=("$normalized_dir")
+		BATS_DEBUG_EXCLUDE_PATHS+=("$normalized_dir")
 	else
-		_BATS_DEBUG_EXCLUDE_PATHS+=("$1")
+		BATS_DEBUG_EXCLUDE_PATHS+=("$1")
 	fi
 }
 
 bats_setup_tracing() {
-	_BATS_DEBUG_EXCLUDE_PATHS=()
+	BATS_DEBUG_EXCLUDE_PATHS=()
 	# exclude some paths by default
 	bats_add_debug_exclude_path "$BATS_ROOT/lib/"
 	bats_add_debug_exclude_path "$BATS_ROOT/libexec/"
@@ -311,6 +314,7 @@ bats_setup_tracing() {
 		done < <(find "$PWD" -type d -name bats-assert -o -name bats-support)
 	fi
 
+	local exclude_paths path
 	# exclude user defined libraries
 	IFS=':' read -r exclude_paths <<< "${BATS_DEBUG_EXCLUDE_PATHS:-}"
 	for path in "${exclude_paths[@]}"; do
