@@ -111,17 +111,16 @@ run() { # [!|-N] [--keep-empty-lines] [--separate-stderr] [--] <command to run..
   local origFlags="$-"
   set +eET
   local origIFS="$IFS"
-  status=0
   if [[ $keep_empty_lines ]]; then
     # 'output', 'status', 'lines' are global variables available to tests.
     # preserve trailing newlines by appending . and removing it later
     # shellcheck disable=SC2034
-    output="$($pre_command "$@"; status=$?; printf .; exit $status)" || status="$?"
+    output="$($pre_command "$@"; status=$?; printf .; exit $status)" && status=0 || status=$?
     output="${output%.}"
   else
     # 'output', 'status', 'lines' are global variables available to tests.
     # shellcheck disable=SC2034
-    output="$($pre_command "$@")" || status="$?"
+    output="$($pre_command "$@")" && status=0 || status=$?
   fi
 
   bats_separate_lines lines output
