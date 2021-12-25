@@ -118,3 +118,14 @@ don't abort the test when they fail, unless they are the last command before the
 making their exit code the return code.
 
 `[ ]`  does not suffer from this, but is no replacement for all `[[ ]]` usecases. Appending ` || false` will work in all cases.
+
+Background tasks prevent the test run from terminating when finished
+--------------------------------------------------------------------
+
+When running a task in background, it will inherit the opened FDs of the process it was forked from.
+This means that the background task forked from a Bats test will hold the FD for the pipe to the formatter that prints to the terminal,
+thus keeping it open until the background task finished.
+Due to implementation internals of Bats and bash, this pipe might be held in multiple FDs which all have to be closed by the background task.
+
+You can use `close_non_std_fds from `test/fixtures/bats/issue-205.bats` in the background job to close all FDs except stdin, stdout and stderr, thus solving the problem.
+More details about the issue can be found in [#205](https://github.com/bats-core/bats-core/issues/205#issuecomment-973572596).

@@ -1305,3 +1305,10 @@ EOF
   }
   check_no_new_variables
 }
+
+@test "Don't wait for disowned background jobs to finish because of open FDs (#205)" {
+    SECONDS=0
+    run -0 bats --show-output-of-passing-tests --tap "${FIXTURE_ROOT}/issue-205.bats"
+    echo $SECONDS
+    [ $SECONDS -lt 10 ]
+}
