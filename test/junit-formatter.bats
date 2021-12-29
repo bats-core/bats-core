@@ -138,3 +138,15 @@ TESTSUITES_REGEX="<testsuites time=\"$FLOAT_REGEX\">"
   [[ "${lines[17]}" == '    </testcase>' ]]
   [[ "${lines[18]}" == '</testsuite>' ]]
 }
+
+@test "junit does not mark tests with FD 3 output in teardown_file as failed (issue #531)" {
+  run -0 bats --formatter junit "$FIXTURE_ROOT/issue_531.bats"
+
+  [[ "${lines[2]}" == '<testsuite name="issue_531.bats" '*'>' ]]
+  [[ "${lines[3]}" == '    <testcase classname="issue_531.bats" '*'>' ]]
+  # only the outputs on FD3 should be visible on a successful test
+  [[ "${lines[4]}" == '        <system-out>test fd3' ]]
+  [[ "${lines[5]}" == 'teardown_file fd3</system-out>' ]]
+  [[ "${lines[6]}" == '    </testcase>' ]]
+  [[ "${lines[7]}" == '</testsuite>' ]]
+}
