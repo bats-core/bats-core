@@ -24,6 +24,7 @@ quotes around code blocks in error output (#506)
   (single use latch) (#516)
 * fix recurring errors on CTRL+C tests with NPM on Windows in selftest suite (#516)
 * fixed leaking of local variables from debug trap (#520)
+* don't mark FD3 output from `teardown_file` as `<failure>` in junit output (#532)
 
 #### Documentation
 

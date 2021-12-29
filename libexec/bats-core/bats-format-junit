@@ -220,13 +220,21 @@ bats_tap_stream_not_ok() { # [--duration <milliseconds>] <test index> <test name
 }
 
 bats_tap_stream_comment() { # <comment text without leading '# '> <scope>
-  if [[ "$2" == begin ]]; then
-    # everything that happens between begin and [not] ok is FD3 output from the test
-    log_system_out "$1"
-  else
-    # everything else is considered error output
-    log "$1"
-  fi
+  local comment="$1" scope="$2"
+  case "$scope" in
+    begin)
+      # everything that happens between begin and [not] ok is FD3 output from the test
+      log_system_out "$comment"
+    ;;
+    ok)
+      # non failed tests can produce FD3 output
+      log_system_out "$comment"
+    ;;
+    *)
+      # everything else is considered error output
+      log "$1"
+    ;;
+  esac
 }
 
 bats_tap_stream_suite() { # <file name>
