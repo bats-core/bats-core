@@ -2,10 +2,10 @@
 
 function bgfunc {
     get_open_fds
-    echo "${FUNCNAME[1]} fds before: ${open_fds[*]}" >>"${LOG_FILE}"
+    echo "${FUNCNAME[1]} fds before: (${open_fds[*]})" >>"${LOG_FILE}"
     close_non_std_fds
     get_open_fds
-    echo "${FUNCNAME[1]} fds after: ${open_fds[*]}" >>"${LOG_FILE}"
+    echo "${FUNCNAME[1]} fds after: (${open_fds[*]})" >>"${LOG_FILE}"
     sleep 10
     echo "bgfunc done"
     return 0

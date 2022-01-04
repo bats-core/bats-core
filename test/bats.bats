@@ -1311,9 +1311,9 @@ EOF
     export LOG_FILE="$BATS_TEST_TMPDIR/fds.log"
     run -0 bats --show-output-of-passing-tests --tap "${FIXTURE_ROOT}/issue-205.bats"
     echo "Whole suite took: $SECONDS seconds"
-    cat "$LOG_FILE"
+    FDS_LOG=$(<"$LOG_FILE")
+    echo "$FDS_LOG"
     [ $SECONDS -lt 10 ]
-    IFS=$'\n' read -d '' -ra lines < "$LOG_FILE" || true # reading until EOF will always return nonzero
-    [[ "${lines[2]}" == *"fds after: 0 1 2" ]] || false
-    [[ "${lines[3]}" == *"fds after: 0 1 2" ]] || false
+    [[ $FDS_LOG == *'otherfunc fds after: (0 1 2)'* ]] || false
+    [[ $FDS_LOG == *'setup_file fds after: (0 1 2)'* ]] || false
 }
