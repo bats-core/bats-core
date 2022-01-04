@@ -12,17 +12,20 @@ function bgfunc {
 }
 
 function get_open_fds() {
-    local PID=${BASHPID:-$$}
+    if [[ ${BASH_VERSINFO[0]} == 3 ]]; then
+        local BASHPID
+        BASHPID=$(bash -c 'echo $PPID')
+    fi
     local tmpfile
     tmpfile=$(mktemp "$BATS_SUITE_TMPDIR/fds-XXXXXX")
     # Avoid opening a new fd to read fds: Don't use <(), glob expansion.
     # Instead, redirect stdout to file which does not create an extra FD.
-    if [[ -d /proc/$PID/fd ]]; then # Linux
-        ls -1 /proc/$PID/fd > "$tmpfile"
+    if [[ -d /proc/$BASHPID/fd ]]; then # Linux
+        ls -1 "/proc/$BASHPID/fd" > "$tmpfile"
         IFS=$'\n' read -d '' -ra open_fds <"$tmpfile" || true
     elif command -v lsof >/dev/null ; then # MacOS
         local -a fds
-        lsof -F f -p $$ >"$tmpfile"
+        lsof -F f -p "$BASHPID" >"$tmpfile"
         IFS=$'\n' read -d '' -ra fds < "$tmpfile" || true
         open_fds=()
         for fd in "${fds[@]}"; do
@@ -34,7 +37,7 @@ function get_open_fds() {
         done
     elif command -v procstat >/dev/null ; then # BSDs
         local -a columns header
-        procstat fds $$ > "$tmpfile"
+        procstat fds "$BASHPID" > "$tmpfile"
         {
             read -r -a header
             local fd_column_index=-1
