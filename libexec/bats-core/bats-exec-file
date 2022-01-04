@@ -98,11 +98,11 @@ bats_run_setup_file() {
   local status=0
   # get the setup_file/teardown_file functions for this file (if it has them)
   # shellcheck disable=SC1090
-  source "$BATS_TEST_SOURCE"  >  >(bats_replace_filename) 2>&1
+  source "$BATS_TEST_SOURCE"  >>"$BATS_OUT" 2>&1
 
   BATS_SOURCE_FILE_COMPLETED=1
 
-  setup_file > >(bats_replace_filename >>"$BATS_OUT") 2>&1
+  setup_file >>"$BATS_OUT" 2>&1
 
   BATS_SETUP_FILE_COMPLETED=1
 }
@@ -152,7 +152,7 @@ bats_file_exit_trap() {
     bats_get_failure_stack_trace stack_trace
     bats_print_stack_trace "${stack_trace[@]}" >&3
     bats_print_failed_command "${stack_trace[@]}" >&3
-    bats_prefix_lines_for_tap_output < "$BATS_OUT" >&3
+    bats_prefix_lines_for_tap_output < "$BATS_OUT" | bats_replace_filename >&3
     rm -rf "$BATS_OUT"
     status=1
   fi

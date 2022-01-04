@@ -1308,7 +1308,12 @@ EOF
 
 @test "Don't wait for disowned background jobs to finish because of open FDs (#205)" {
     SECONDS=0
+    export LOG_FILE="$BATS_TEST_TMPDIR/fds.log"
     run -0 bats --show-output-of-passing-tests --tap "${FIXTURE_ROOT}/issue-205.bats"
-    echo $SECONDS
+    echo "Whole suite took: $SECONDS seconds"
+    FDS_LOG=$(<"$LOG_FILE")
+    echo "$FDS_LOG"
     [ $SECONDS -lt 10 ]
+    [[ $FDS_LOG == *'otherfunc fds after: (0 1 2)'* ]] || false
+    [[ $FDS_LOG == *'setup_file fds after: (0 1 2)'* ]] || false
 }
