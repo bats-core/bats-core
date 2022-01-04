@@ -6,7 +6,7 @@ How do I set the working directory?
 
 The working directory is simply the directory where you started when executing bats.
 If you want to enforce a specific directory, you can use `cd` in the `setup_file`/`setup` functions.
-However, be aware that code outside any function will run before any of these setup functions and my interfere with bats' internals.
+However, be aware that code outside any function will run before any of these setup functions and might interfere with bats' internals.
 
 
 How do I see the output of the command under `run` when a test fails?
