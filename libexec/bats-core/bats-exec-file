@@ -102,7 +102,7 @@ bats_run_setup_file() {
 
   BATS_SOURCE_FILE_COMPLETED=1
 
-  setup_file >>$BATS_OUT 2>&1
+  setup_file >>"$BATS_OUT" 2>&1
 
   BATS_SETUP_FILE_COMPLETED=1
 }
