@@ -69,6 +69,10 @@ function otherfunc {
     return 0
 }
 
+setup_file (){ # see issue #530
+    bgfunc &
+}
+
 @test "min bg" {
     echo "sec: $SECONDS"
     otherfunc
