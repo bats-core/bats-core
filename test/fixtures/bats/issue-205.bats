@@ -12,11 +12,18 @@ function bgfunc {
 }
 
 function get_open_fds() {
-    if [[ -d /proc/$$/fd ]]; then # Linux
-        read -d '' -ra open_fds < <(ls -1 /proc/$$/fd) || true
+    local PID=${BASHPID:-$$}
+    local tmpfile
+    tmpfile=$(mktemp "$BATS_SUITE_TMPDIR/fds-XXXXX")
+    # Avoid opening a new fd to read fds: Don't use <(), glob expansion.
+    # Instead, redirect stdout to file which does not create an extra FD.
+    if [[ -d /proc/$PID/fd ]]; then # Linux
+        ls -1 /proc/$PID/fd > "$tmpfile"
+        IFS=$'\n' read -d '' -ra open_fds <"$tmpfile" || true
     elif command -v lsof >/dev/null ; then # MacOS
         local -a fds
-        IFS=$'\n' read -d '' -ra fds < <(lsof -F f -p $$) || true
+        lsof -F f -p $$ >"$tmpfile"
+        IFS=$'\n' read -d '' -ra fds < "$tmpfile" || true
         open_fds=()
         for fd in "${fds[@]}"; do
             case $fd in 
@@ -27,6 +34,7 @@ function get_open_fds() {
         done
     elif command -v procstat >/dev/null ; then # BSDs
         local -a columns header
+        procstat fds $$ > "$tmpfile"
         {
             read -r -a header
             local fd_column_index=-1
@@ -46,7 +54,7 @@ function get_open_fds() {
                     open_fds+=("$fd")
                 fi
             done
-        } < <(procstat fds $$)
+        } < "$tmpfile"
     else
         # TODO: MSYS (Windows)
         printf "Neither FD discovery mechanism available\n" >&2
