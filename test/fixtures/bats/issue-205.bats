@@ -11,7 +11,9 @@ function bgfunc {
     return 0
 }
 
+# store the list of open FDs in array open_fds
 function get_open_fds() {
+    open_fds=() # reset output array in case it was already set
     if [[ ${BASH_VERSINFO[0]} == 3 ]]; then
         local BASHPID
         BASHPID=$(bash -c 'echo $PPID')
@@ -27,7 +29,6 @@ function get_open_fds() {
         local -a fds
         lsof -F f -p "$BASHPID" >"$tmpfile"
         IFS=$'\n' read -d '' -ra fds < "$tmpfile" || true
-        open_fds=()
         for fd in "${fds[@]}"; do
             case $fd in 
                 f[0-9]*) # filter non fd entries (mainly pid?)
