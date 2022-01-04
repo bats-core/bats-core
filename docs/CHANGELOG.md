@@ -15,7 +15,7 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 * new flag `--code-quote-style` (and `$BATS_CODE_QUOTE_STYLE`) to customize
 quotes around code blocks in error output (#506)
 * an example/regression test for running background tasks without blocking the
-  test run (#525)
+  test run (#525, #535)
 
 ### Fixed
 
