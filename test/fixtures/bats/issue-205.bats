@@ -14,7 +14,7 @@ function bgfunc {
 function get_open_fds() {
     local PID=${BASHPID:-$$}
     local tmpfile
-    tmpfile=$(mktemp "$BATS_SUITE_TMPDIR/fds-XXXXX")
+    tmpfile=$(mktemp "$BATS_SUITE_TMPDIR/fds-XXXXXX")
     # Avoid opening a new fd to read fds: Don't use <(), glob expansion.
     # Instead, redirect stdout to file which does not create an extra FD.
     if [[ -d /proc/$PID/fd ]]; then # Linux
