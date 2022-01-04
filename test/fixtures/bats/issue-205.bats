@@ -1,7 +1,11 @@
 #!/usr/bin/env bats
 
 function bgfunc {
+    get_open_fds
+    echo "${FUNCNAME[1]} fds before: ${open_fds[*]}" >>"${LOG_FILE}"
     close_non_std_fds
+    get_open_fds
+    echo "${FUNCNAME[1]} fds after: ${open_fds[*]}" >>"${LOG_FILE}"
     sleep 10
     echo "bgfunc done"
     return 0
@@ -51,14 +55,19 @@ function get_open_fds() {
 }
 
 function close_non_std_fds() {
+    local open_fds non_std_fds=()
     get_open_fds
     for fd in "${open_fds[@]}"; do
         if [[ $fd -gt 2 ]]; then
-            printf "Close %d\n" "$fd"
-            eval "exec $fd>&-"
-        else
-            printf "Retain %d\n" "$fd"
+            non_std_fds+=("$fd")
         fi
+    done
+    close_fds "${non_std_fds[@]}"
+}
+
+function close_fds() { # <fds...>
+    for fd in "$@"; do
+            eval "exec $fd>&-"
     done
 }
 
