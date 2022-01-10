@@ -53,7 +53,7 @@ find_library_load_path() {
 find_in_bats_lib_path() {
   local library_name="${1:?}"
 
-  local bats_lib_path="$BATS_LIB_PATH"
+  local bats_lib_path="${BATS_LIB_PATH:-}"
   if [[ -z "$bats_lib_path" ]]; then
     bats_lib_path="$HOME/.bats/lib:/usr/lib/bats"
   fi
