@@ -95,6 +95,7 @@ _load() {
 
   # library_load_path is a library loader
   if [[ -f "$library_load_path" ]]; then
+      # shellcheck disable=SC1090
       if ! source "$library_load_path"; then
           printf "Error while sourcing library loader at '%s'\n" "$library_load_path" >&2
           return 1
@@ -108,7 +109,7 @@ _load() {
 
       # Skip over directories
       [[ -d "$library_file" ]] && continue
-
+      # shellcheck disable=SC1090
       if ! source "$library_file"; then
         printf "Error while sourcing library file '%s'\n" "$library_file" >&2
         return 1
@@ -142,13 +143,13 @@ _load() {
 # If no library load path can be found load_safe prints an error message
 # and returns 1.
 load_safe() {
-  local slug="${1:?}"
+  local slug="${1:?}" library_path
 
   # Check if slug is an absolute path
   if [[ "${slug:0:1}" == / ]]; then
 
     # Check for library load paths
-    local library_path="$(find_library_load_path "$slug")"
+    library_path="$(find_library_load_path "$slug")"
     if [[ -n "$library_path" ]]; then
       # A library load path was found, load it
       _load "$library_path"
@@ -161,7 +162,7 @@ load_safe() {
   fi
 
   # Check for library load paths in BATS_TEST_DIRNAME and BATS_LIB_PATH
-  local library_path="$(find_in_bats_lib_path "$slug")"
+  library_path="$(find_in_bats_lib_path "$slug")"
   if [[ -z "$library_path" ]]; then
     printf "Could not find library '%s' relative to test file or in BATS_LIB_PATH\n" "$slug" >&2
     return 1

@@ -229,7 +229,7 @@ setup() {
 
   run find_library_load_path "$lib_dir/test_helper"
   [ $status -eq 0 ]
-  [ ${lines[0]} = "$lib_dir/test_helper.bash" ]
+  [ "${lines[0]}" = "$lib_dir/test_helper.bash" ]
 }
 
 @test "find_library_load_path finds single-file libraries without a suffix" {
@@ -239,7 +239,7 @@ setup() {
 
   run find_library_load_path "$lib_dir/test_helper"
   [ $status -eq 0 ]
-  [ ${lines[0]} = "$lib_dir/test_helper" ]
+  [ "${lines[0]}" = "$lib_dir/test_helper" ]
 }
 
 @test "find_library_load_path finds directory libraries with a load.bash loader" {
@@ -249,7 +249,7 @@ setup() {
 
   run find_library_load_path "$lib_dir/test_helper"
   [ $status -eq 0 ]
-  [ ${lines[0]} = "$lib_dir/test_helper/load.bash" ]
+  [ "${lines[0]}" = "$lib_dir/test_helper/load.bash" ]
 }
 
 @test "find_library_load_path finds directory libraries with a load loader" {
@@ -259,7 +259,7 @@ setup() {
 
   run find_library_load_path "$lib_dir/test_helper"
   [ $status -eq 0 ]
-  [ ${lines[0]} = "$lib_dir/test_helper/load" ]
+  [ "${lines[0]}" = "$lib_dir/test_helper/load" ]
 }
 
 @test "find_library_load_path finds directory libraries without a loader" {
@@ -269,7 +269,7 @@ setup() {
 
   run find_library_load_path "$lib_dir/test_helper"
   [ $status -eq 0 ]
-  [ ${lines[0]} = "$lib_dir/test_helper" ]
+  [ "${lines[0]}" = "$lib_dir/test_helper" ]
 }
 
 @test "find_library_load_path returns 1 if no library load path is found" {
