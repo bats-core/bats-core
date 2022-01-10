@@ -223,7 +223,7 @@ setup() {
 }
 
 @test "find_library_load_path finds single-file libraries with the suffix .bash" {
-  lib_dir="$BATS_TMPNAME/find_library_path/single_file_suffix"
+  lib_dir="$BATS_TEST_TMPDIR/find_library_path/single_file_suffix"
   mkdir -p "$lib_dir"
   cp "${FIXTURE_ROOT}/test_helper.bash" "${lib_dir}/test_helper.bash"
 
@@ -233,7 +233,7 @@ setup() {
 }
 
 @test "find_library_load_path finds single-file libraries without a suffix" {
-  lib_dir="$BATS_TMPNAME/find_library_path/single_file_no_suffix"
+  lib_dir="$BATS_TEST_TMPDIR/find_library_path/single_file_no_suffix"
   mkdir -p "$lib_dir"
   cp "${FIXTURE_ROOT}/test_helper.bash" "${lib_dir}/test_helper"
 
@@ -243,7 +243,7 @@ setup() {
 }
 
 @test "find_library_load_path finds directory libraries with a load.bash loader" {
-  lib_dir="$BATS_TMPNAME/find_library_path/directory_loader_suffix"
+  lib_dir="$BATS_TEST_TMPDIR/find_library_path/directory_loader_suffix"
   mkdir -p "$lib_dir/test_helper"
   cp "${FIXTURE_ROOT}/test_helper.bash" "${lib_dir}/test_helper/load.bash"
 
@@ -253,7 +253,7 @@ setup() {
 }
 
 @test "find_library_load_path finds directory libraries with a load loader" {
-  lib_dir="$BATS_TMPNAME/find_library_path/directory_loader_no_suffix"
+  lib_dir="$BATS_TEST_TMPDIR/find_library_path/directory_loader_no_suffix"
   mkdir -p "$lib_dir/test_helper"
   cp "${FIXTURE_ROOT}/test_helper.bash" "${lib_dir}/test_helper/load"
 
@@ -263,7 +263,7 @@ setup() {
 }
 
 @test "find_library_load_path finds directory libraries without a loader" {
-  lib_dir="$BATS_TMPNAME/find_library_path/directory_no_loader"
+  lib_dir="$BATS_TEST_TMPDIR/find_library_path/directory_no_loader"
   mkdir -p "$lib_dir/test_helper"
   cp "${FIXTURE_ROOT}/test_helper.bash" "${lib_dir}/test_helper/not_a_loader.bash"
 
@@ -273,7 +273,7 @@ setup() {
 }
 
 @test "find_library_load_path returns 1 if no library load path is found" {
-  lib_dir="$BATS_TMPNAME/find_library_path/return1"
+  lib_dir="$BATS_TEST_TMPDIR/find_library_path/return1"
   mkdir -p "$lib_dir/test_helper"
   cp "${FIXTURE_ROOT}/test_helper.bash" "${lib_dir}/test_helper/not_a_loader.bash"
 
@@ -283,7 +283,7 @@ setup() {
 }
 
 @test "find_in_bats_lib_path recognizes files relative to test file" {
-  test_dir="$BATS_TMPNAME/find_in_bats_lib_path/bats_test_dirname_priorty"
+  test_dir="$BATS_TEST_TMPDIR/find_in_bats_lib_path/bats_test_dirname_priorty"
   mkdir -p "$test_dir"
   cp "$FIXTURE_ROOT/test_helper.bash" "$test_dir/"
   cp "$FIXTURE_ROOT/find_library_helper.bats" "$test_dir"
@@ -292,7 +292,7 @@ setup() {
 }
 
 @test "find_in_bats_lib_path recognizes files in BATS_LIB_PATH" {
-  test_dir="$BATS_TMPNAME/find_in_bats_lib_path/bats_test_dirname_priorty"
+  test_dir="$BATS_TEST_TMPDIR/find_in_bats_lib_path/bats_test_dirname_priorty"
   mkdir -p "$test_dir"
   cp "$FIXTURE_ROOT/test_helper.bash" "$test_dir/"
 
@@ -300,7 +300,7 @@ setup() {
 }
 
 @test "find_in_bats_lib_path returns 1 if no load path is found" {
-  test_dir="$BATS_TMPNAME/find_in_bats_lib_path/no_load_path_found"
+  test_dir="$BATS_TEST_TMPDIR/find_in_bats_lib_path/no_load_path_found"
   mkdir -p "$test_dir"
   cp "$FIXTURE_ROOT/test_helper.bash" "$test_dir/"
 
@@ -308,7 +308,7 @@ setup() {
 }
 
 @test "find_in_bats_lib_path follows the priority of BATS_LIB_PATH" {
-  test_dir="$BATS_TMPNAME/find_in_bats_lib_path/follows_priority"
+  test_dir="$BATS_TEST_TMPDIR/find_in_bats_lib_path/follows_priority"
 
   first_dir="$test_dir/first"
   mkdir -p "$first_dir"
@@ -352,7 +352,7 @@ setup() {
 }
 
 @test "load loads scripts on the BATS_LIB_PATH" {
-  path_dir="$BATS_TMPNAME/path"
+  path_dir="$BATS_TEST_TMPDIR/path"
   mkdir -p "$path_dir"
   cp "${FIXTURE_ROOT}/test_helper.bash" "${path_dir}/on_path"
   BATS_LIB_PATH="${path_dir}"  HELPER_NAME="on_path" run bats "$FIXTURE_ROOT/load.bats"
@@ -397,15 +397,15 @@ setup() {
 }
 
 @test "load supports libraries with loaders on the BATS_LIB_PATH" {
-  path_dir="$BATS_TMPNAME/libraries/test_helper"
+  path_dir="$BATS_TEST_TMPDIR/libraries/test_helper"
   mkdir -p "$path_dir"
   cp "${FIXTURE_ROOT}/test_helper.bash" "${path_dir}/load.bash"
   cp "${FIXTURE_ROOT}/exit1.bash" "${path_dir}/exit1.bash"
-  BATS_LIB_PATH="${BATS_TMPNAME}/libraries" HELPER_NAME="test_helper" run bats "$FIXTURE_ROOT/load.bats"
+  BATS_LIB_PATH="${BATS_TEST_TMPDIR}/libraries" HELPER_NAME="test_helper" run bats "$FIXTURE_ROOT/load.bats"
 }
 
 @test "load supports libraries with loaders on the BATS_LIB_PATH with multiple libraries" {
-  path_dir="$BATS_TMPNAME/libraries2/"
+  path_dir="$BATS_TEST_TMPDIR/libraries2/"
   for lib in liba libb libc; do
       mkdir -p "$path_dir/$lib"
       cp "${FIXTURE_ROOT}/exit1.bash" "$path_dir/$lib/load.bash"
@@ -416,14 +416,14 @@ setup() {
 }
 
 @test "load supports libraries without loaders on the BATS_LIB_PATH" {
-  path_dir="$BATS_TMPNAME/libraries/test_helper"
+  path_dir="$BATS_TEST_TMPDIR/libraries/test_helper"
   mkdir -p "$path_dir"
   cp "${FIXTURE_ROOT}/test_helper.bash" "${path_dir}/test_helper.bash"
-  BATS_LIB_PATH="${BATS_TMPNAME}/libraries" HELPER_NAME="test_helper" run bats "$FIXTURE_ROOT/load.bats"
+  BATS_LIB_PATH="${BATS_TEST_TMPDIR}/libraries" HELPER_NAME="test_helper" run bats "$FIXTURE_ROOT/load.bats"
 }
 
 @test "load can handle whitespaces in BATS_LIB_PATH" {
-  path_dir="$BATS_TMPNAME/libraries with spaces/"
+  path_dir="$BATS_TEST_TMPDIR/libraries with spaces/"
   for lib in liba libb libc; do
       mkdir -p "$path_dir/$lib"
       cp "${FIXTURE_ROOT}/exit1.bash" "$path_dir/$lib/load.bash"
@@ -434,7 +434,7 @@ setup() {
 }
 
 @test "bats errors when a library errors while sourcing" {
-  path_dir="$BATS_TMPNAME/libraries_err_sourcing/"
+  path_dir="$BATS_TEST_TMPDIR/libraries_err_sourcing/"
   mkdir -p "$path_dir/return1"
   cp "${FIXTURE_ROOT}/return1.bash" "$path_dir/return1/load.bash"
 
@@ -443,7 +443,7 @@ setup() {
 }
 
 @test "bats skips directories when sourcing .bash files in library" {
-  path_dir="$BATS_TMPNAME/libraries_skip_dir/"
+  path_dir="$BATS_TEST_TMPDIR/libraries_skip_dir/"
   mkdir -p "$path_dir/target_lib/adir.bash"
   cp "${FIXTURE_ROOT}/test_helper.bash" "$path_dir/target_lib/test_helper.bash"
   BATS_LIB_PATH="$path_dir" HELPER_NAME="target_lib" run bats "$FIXTURE_ROOT/load.bats"
