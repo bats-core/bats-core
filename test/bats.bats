@@ -252,11 +252,11 @@ setup() {
   [ $status -eq 0 ]
 }
 
-@test "load supports scripts on the PATH" {
+@test "load supports scripts on the BATS_LIB_PATH" {
   path_dir="$BATS_TMPNAME/path"
   mkdir -p "$path_dir"
   cp "${FIXTURE_ROOT}/test_helper.bash" "${path_dir}/on_path"
-  PATH="${path_dir}:$PATH"  HELPER_NAME="on_path" run bats "$FIXTURE_ROOT/load.bats"
+  BATS_LIB_PATH="${path_dir}"  HELPER_NAME="on_path" run bats "$FIXTURE_ROOT/load.bats"
   [ $status -eq 0 ]
 }
 
@@ -295,6 +295,52 @@ setup() {
   [ "${exported_variable:-}" != 'value of exported variable' ]
 
   rm "${helper}"
+}
+
+@test "load supports libraries with loaders on the BATS_LIB_PATH" {
+  path_dir="$BATS_TMPNAME/libraries/test_helper"
+  mkdir -p "$path_dir"
+  cp "${FIXTURE_ROOT}/test_helper.bash" "${path_dir}/load.bash"
+  cp "${FIXTURE_ROOT}/exit1.bash" "${path_dir}/exit1.bash"
+  BATS_LIB_PATH="${BATS_TMPNAME}/libraries" HELPER_NAME="test_helper" run bats "$FIXTURE_ROOT/load.bats"
+}
+
+@test "load supports libraries with loaders on the BATS_LIB_PATH with multiple libraries" {
+  path_dir="$BATS_TMPNAME/libraries2/"
+  for lib in liba libb libc; do
+      mkdir -p "$path_dir/$lib"
+      cp "${FIXTURE_ROOT}/exit1.bash" "$path_dir/$lib/load.bash"
+  done
+  mkdir -p "$path_dir/test_helper"
+  cp "${FIXTURE_ROOT}/test_helper.bash" "$path_dir/test_helper/load.bash"
+  BATS_LIB_PATH="$path_dir" HELPER_NAME="test_helper" run bats "$FIXTURE_ROOT/load.bats"
+}
+
+@test "load supports libraries without loaders on the BATS_LIB_PATH" {
+  path_dir="$BATS_TMPNAME/libraries/test_helper"
+  mkdir -p "$path_dir"
+  cp "${FIXTURE_ROOT}/test_helper.bash" "${path_dir}/test_helper.bash"
+  BATS_LIB_PATH="${BATS_TMPNAME}/libraries" HELPER_NAME="test_helper" run bats "$FIXTURE_ROOT/load.bats"
+}
+
+@test "load can handle whitespaces in BATS_LIB_PATH" {
+  path_dir="$BATS_TMPNAME/libraries with spaces/"
+  for lib in liba libb libc; do
+      mkdir -p "$path_dir/$lib"
+      cp "${FIXTURE_ROOT}/exit1.bash" "$path_dir/$lib/load.bash"
+  done
+  mkdir -p "$path_dir/test_helper"
+  cp "${FIXTURE_ROOT}/test_helper.bash" "$path_dir/test_helper/load.bash"
+  BATS_LIB_PATH="$path_dir" HELPER_NAME="test_helper" run bats "$FIXTURE_ROOT/load.bats"
+}
+
+@test "bats errors when a library errors while sourcing" {
+  path_dir="$BATS_TMPNAME/libraries_err_sourcing/"
+  mkdir -p "$path_dir/return1"
+  cp "${FIXTURE_ROOT}/return1.bash" "$path_dir/return1/load.bash"
+
+  BATS_LIB_PATH="$path_dir" run bats "$FIXTURE_ROOT/failing_load.bats"
+  [ $status -eq 1 ]
 }
 
 @test "output is discarded for passing tests and printed for failing tests" {
