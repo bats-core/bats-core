@@ -107,16 +107,6 @@ bats_run_setup_file() {
   BATS_SETUP_FILE_COMPLETED=1
 }
 
-function bats_replace_filename() {
-  local line
-  while read -r line; do
-    printf "%s\n" "${line//$BATS_TEST_SOURCE/$filename}"
-  done
-  if [[ -n "$line" ]]; then
-    printf "%s\n" "${line//$BATS_TEST_SOURCE/$filename}"
-  fi
-}
-
 bats_run_teardown_file() {
   # avoid running the therdown trap due to errors in teardown_file
   trap 'bats_file_exit_trap' EXIT
