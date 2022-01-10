@@ -123,26 +123,26 @@ _load() {
   return 1
 }
 
-# load_safe accepts an argument called 'slug' and attempts to find and
+# bats_load_safe accepts an argument called 'slug' and attempts to find and
 # source a library based on the slug.
 #
 # A slug can be an absolute path, a library name or a relative path.
 #
-# If the slug is an absolute path load_safe attempts to find the library
+# If the slug is an absolute path bats_load_safe attempts to find the library
 # load path using find_library_load_path.
 # What is considered a library load path is documented in the
 # documentation for find_library_load_path.
 #
 # If the slug is not an absolute path it is considered a library name or
-# relative path. load_safe attempts to find the library load path using
+# relative path. bats_load_safe attempts to find the library load path using
 # find_in_bats_lib_path.
 #
-# If load_safe can find a library load path it is passed to _load.
-# If _load fails load_safe returns 1.
+# If bats_load_safe can find a library load path it is passed to _load.
+# If _load fails bats_load_safe returns 1.
 #
-# If no library load path can be found load_safe prints an error message
+# If no library load path can be found bats_load_safe prints an error message
 # and returns 1.
-load_safe() {
+bats_load_safe() {
   local slug="${1:?}" library_path
 
   # Check if slug is an absolute path
@@ -172,9 +172,9 @@ load_safe() {
   return $?
 }
 
-# load acts like load_safe but exits the shell instead of returning 1.
+# load acts like bats_load_safe but exits the shell instead of returning 1.
 load() {
-    if ! load_safe "$@"; then
+    if ! bats_load_safe "$@"; then
         exit 1
     fi
 }
