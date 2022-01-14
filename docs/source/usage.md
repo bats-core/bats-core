@@ -32,7 +32,7 @@ $ bats addition.bats
 
 If Bats is not connected to a terminal—in other words, if you run it from a
 continuous integration system, or redirect its output to a file—the results are
-displayed in human-readable, machine-parsable [TAP format][TAP].
+displayed in human-readable, machine-parsable [TAP format][https://testanything.org].
 
 You can force TAP output from a terminal by invoking Bats with the `--formatter tap`
 option.

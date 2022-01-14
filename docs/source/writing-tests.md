@@ -225,7 +225,7 @@ that may launch long-running child processes**, e.g. `command_name 3>&-` .
 
 ## Printing to the terminal
 
-Bats produces output compliant with [version 12 of the TAP protocol][TAP]. The
+Bats produces output compliant with [version 12 of the TAP protocol](https://testanything.org/tap-specification.html). The
 produced TAP stream is by default piped to a pretty formatter for human
 consumption, but if Bats is called with the `-t` flag, then the TAP stream is
 directly printed to the console.
