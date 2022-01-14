@@ -30,6 +30,7 @@ quotes around code blocks in error output (#506)
 
 * remove links to defunct freenode IRC channel (#515)
 * improved grammar (#534)
+* fixed link to TAP spec (#537)
 
 ## [1.5.0] - 2021-10-22
 
