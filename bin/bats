@@ -54,6 +54,11 @@ if ! BATS_PATH=$(bats_readlinkf "${BASH_SOURCE[0]}" 2>/dev/null); then
   BATS_PATH=$(bats_readlinkf "${BASH_SOURCE[0]}")
 fi
 
-export BATS_ROOT=${BATS_PATH%/*/*}
+# In most execution environments, the bats binary will be located in
+# ${BATS_ROOT}/bin/bats.  However, in the bazel environment, sometimes the bats
+# binary produced by a sh_binary rule ends up in ${BATS_ROOT]/bats.  Let's
+# be flexible to handle both cases:
+export BATS_ROOT="${BATS_PATH%/bats}"
+export BATS_ROOT="${BATS_ROOT%/bin}"
 export -f bats_readlinkf
 exec env BATS_ROOT="$BATS_ROOT" "$BATS_ROOT/libexec/bats-core/bats" "$@"
