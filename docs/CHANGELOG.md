@@ -16,7 +16,7 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 quotes around code blocks in error output (#506)
 * an example/regression test for running background tasks without blocking the
   test run (#525, #535)
-* Added support for bazel (BUILD.bazel file, and bats.bzl) (#515)
+* Added support for bazel (BUILD.bazel file, and bats.bzl) (#545)
 
 ### Fixed
 
