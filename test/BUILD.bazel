@@ -1,0 +1,32 @@
+load("//:bats.bzl", "bats_test")
+
+bats_test(
+    name = "bats_test_suite",
+    srcs = ["bats.bats"],
+    deps = [
+        "concurrent-coordination.bash",
+        "file_setup_teardown.bats",
+        "install.bats",
+        "junit-formatter.bats",
+        "parallel.bats",
+        "pretty-formatter.bats",
+        "root.bats",
+        "run.bats",
+        "suite.bats",
+        "test_helper.bash",
+        "trace.bats",
+        # Because of a space in a filename, this directory must be handled
+        # specially (like this, instead of a glob):
+        "fixtures/bats/.",
+    ] + glob([
+        "fixtures/*",
+        "fixtures/bats/evaluation_count/**",
+        "fixtures/bats/issue-433/**",
+        "fixtures/file_setup_teardown/**",
+        "fixtures/junit-formatter/**",
+        "fixtures/parallel/**",
+        "fixtures/run/**",
+        "fixtures/suite/**",
+        "fixtures/trace/**",
+    ]),
+)
