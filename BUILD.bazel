@@ -10,8 +10,8 @@ sh_library(
 sh_binary(
     name = "bats",
     srcs = ["bin/bats"],
+    visibility = ["//visibility:public"],
     deps = [
         ":bats_lib",
     ],
-    visibility = ["//visibility:public"],
 )
