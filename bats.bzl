@@ -36,8 +36,6 @@ def _exec_test_impl(ctx):
 bats_test = rule(
     doc = """
       Runs a bats (Bash Automated Test System) test.
-
-      bats-support and bats-assert extensions are available by default.
     """,
     attrs = {
         "srcs": attr.label_list(
@@ -48,7 +46,7 @@ bats_test = rule(
             doc = "Extra arguments to pass to the command.",
         ),
         "deps": attr.label_list(
-            doc = "Extra dependencies to make available when test runs.",
+            doc = "Extra dependencies (other bats libraries?) to make available when test runs.",
             allow_files = True,
         ),
         "_command": attr.label(
