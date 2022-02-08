@@ -7,17 +7,11 @@ bats_test(
         # Because of a space in a filename, this directory must be handled
         # specially (like this, instead of a glob):
         "fixtures/bats/.",
-    ] + glob([
-        "*.bats",
-        "*.bash",
-        "fixtures/*",
-        "fixtures/bats/evaluation_count/**",
-        "fixtures/bats/issue-433/**",
-        "fixtures/file_setup_teardown/**",
-        "fixtures/junit-formatter/**",
-        "fixtures/parallel/**",
-        "fixtures/run/**",
-        "fixtures/suite/**",
-        "fixtures/trace/**",
-    ]),
+    ] + glob(
+        ["**"],
+        exclude = [
+            "BUILD.bazel",
+            "fixtures/bats/*",
+        ],
+    ),
 )
