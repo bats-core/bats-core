@@ -535,12 +535,12 @@ END_OF_ERR_MSG
   [ "${lines[2]}" = "# (in test file $RELATIVE_FIXTURE_ROOT/unbound_variable.bats, line 9)" ]
   [ "${lines[3]}" = "#   \`foo=\$unset_variable' failed" ]
   # shellcheck disable=SC2076
-  [[ "${lines[4]}" =~ ".src: line 9:" ]]
+  [[ "${lines[4]}" =~ ".bats: line 9:" ]]
   [ "${lines[5]}" = 'not ok 2 access second unbound variable' ]
   [ "${lines[6]}" = "# (in test file $RELATIVE_FIXTURE_ROOT/unbound_variable.bats, line 15)" ]
   [ "${lines[7]}" = "#   \`foo=\$second_unset_variable' failed" ]
   # shellcheck disable=SC2076
-  [[ "${lines[8]}" =~ ".src: line 15:" ]]
+  [[ "${lines[8]}" =~ ".bats: line 15:" ]]
 }
 
 @test "report correct line on external function calls" {
