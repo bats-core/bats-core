@@ -1,4 +1,16 @@
 # Bazel rules for running bats tests.
+#
+# Example of use, assuming bats_core is loaded in the @bats_core workspace:
+#
+# load("@bats_core//:bats.bzl", "bats_test")
+#
+# bats_test(
+#   name = "my_simple_test",
+#   srcs = ["my_simple_test.bats"],
+#   deps = [
+#     ":some_other_sh_library",
+#   ],
+# )
 
 load("@bazel_skylib//lib:shell.bzl", "shell")
 
