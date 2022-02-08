@@ -78,6 +78,7 @@ setup() {
   path_dir="$BATS_TEST_TMPDIR/path"
   mkdir -p "$path_dir/on_path"
   cp "${FIXTURE_ROOT}/test_helper.bash" "${path_dir}/on_path/load.bash"
+  # shellcheck disable=SC2030,SC2031
   export BATS_LIB_PATH="${path_dir}"  HELPER_NAME="on_path" 
   run ! bats "$FIXTURE_ROOT/load.bats"
   BATS_LOAD_FALLBACK_TO_LOAD_LIBRARY=1 run -0 bats "$FIXTURE_ROOT/load.bats"
@@ -125,6 +126,7 @@ setup() {
   mkdir -p "$path_dir"
   cp "${FIXTURE_ROOT}/test_helper.bash" "${path_dir}/load.bash"
   cp "${FIXTURE_ROOT}/exit1.bash" "${path_dir}/exit1.bash"
+  # shellcheck disable=SC2030,SC2031
   export BATS_LIB_PATH="${BATS_TEST_TMPDIR}/libraries" HELPER_NAME="$BATS_TEST_NAME"
   run -0 bats "$FIXTURE_ROOT/bats_load_library.bats"
   run ! bats "$FIXTURE_ROOT/bats_load.bats" # load does not use BATS_LIB_PATH!
@@ -138,6 +140,7 @@ setup() {
   done
   mkdir -p "$path_dir/$BATS_TEST_NAME"
   cp "${FIXTURE_ROOT}/test_helper.bash" "$path_dir/$BATS_TEST_NAME/load.bash"
+  # shellcheck disable=SC2030,SC2031
   export BATS_LIB_PATH="$path_dir" HELPER_NAME="$BATS_TEST_NAME"
   run -0 bats "$FIXTURE_ROOT/bats_load_library.bats"
   run ! bats "$FIXTURE_ROOT/load.bats" # load does not use BATS_LIB_PATH!
@@ -151,6 +154,7 @@ setup() {
   done
   mkdir -p "$path_dir/$BATS_TEST_NAME"
   cp "${FIXTURE_ROOT}/test_helper.bash" "$path_dir/$BATS_TEST_NAME/load.bash"
+  # shellcheck disable=SC2030,SC2031
   export BATS_LIB_PATH="$path_dir" HELPER_NAME="$BATS_TEST_NAME"
   run -0 bats "$FIXTURE_ROOT/bats_load_library.bats"
 }
@@ -160,6 +164,7 @@ setup() {
   mkdir -p "$path_dir/return1"
   cp "${FIXTURE_ROOT}/return1.bash" "$path_dir/return1/load.bash"
 
+  # shellcheck disable=SC2030,SC2031
   export BATS_LIB_PATH="$path_dir"
   run -1 bats "$FIXTURE_ROOT/failing_bats_load_library.bats"
 }
