@@ -12,6 +12,23 @@ For sample test files, see [examples](https://github.com/bats-core/bats-core/tre
 
 [bats-eval]: https://github.com/bats-core/bats-core/wiki/Bats-Evaluation-Process
 
+## Comment syntax
+
+External tools (like `shellcheck`, `shfmt`, and various IDE's) may not support
+the standard `.bats` syntax.  Because of this, we provide a valid `bash`
+alternative:
+
+```bash
+function invoking_foo_without_arguments_prints_usage { #@test
+  run foo
+  [ "$status" -eq 1 ]
+  [ "${lines[0]}" = "usage: foo <filename>" ]
+}
+```
+
+When using this syntax, the function name will be the title in the result output
+and the value checked when using `--filter`.
+
 ## `run`: Test other commands
 
 Many Bats tests need to run a command and then make assertions about its exit
@@ -80,24 +97,7 @@ All additional parameters to run should come before the command.
 If you want to run a command that starts with `-`, prefix it with `--` to
 prevent `run` from parsing it as an option.
 
-## Comment syntax
-
-External tools (like `shellcheck`, `shfmt`, and various IDE's) may not support
-the standard `.bats` syntax.  Because of this, we provide a valid `bash`
-alternative:
-
-```bash
-function invoking_foo_without_arguments_prints_usage { #@test
-  run foo
-  [ "$status" -eq 1 ]
-  [ "${lines[0]}" = "usage: foo <filename>" ]
-}
-```
-
-When using this syntax, the function name will be the title in the result output
-and the value checked when using `--filter`.
-
-### `load`: Share common code
+## `load`: Share common code
 
 You may want to share common code across multiple test files. Bats
 includes a convenient `load` command for sourcing a Bash source files
@@ -129,7 +129,7 @@ using the `declare` builtin restricts scope of a variable. Thus, since actual
 `source`-ing is performed in context of the `load` function, `declare`d symbols
 will _not_ be made available to callers of `load`.
 
-#### `load` argument resolution
+### `load` argument resolution
 
 `load` supports the following arguments:
 
