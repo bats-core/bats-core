@@ -104,6 +104,7 @@ bats_load_safe() {
 
   # loading from PATH (retained for backwards compatibility)
   if [[ ! -f "$1" ]] && type -P "$1" >/dev/null; then
+    # shellcheck disable=SC1090
     source "$1"
     return
   fi
