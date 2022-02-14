@@ -102,8 +102,9 @@ bats_load_safe() {
     return
   fi
 
-  if [[ -n "${BATS_LOAD_FALLBACK_TO_LOAD_LIBRARY:-}" ]]; then
-    bats_load_library "$1"
+  # loading from PATH (retained for backwards compatibility)
+  if [[ ! -f "$1" ]] && type -P "$1" >/dev/null; then
+    source "$1"
     return
   fi
 

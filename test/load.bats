@@ -74,14 +74,14 @@ setup() {
   [ $status -eq 0 ]
 }
 
-@test "load loads libraries on the BATS_LIB_PATH only with BATS_LOAD_FALLBACK_TO_LOAD_LIBRARY" {
+@test "load does not use the BATS_LIB_PATH" {
   path_dir="$BATS_TEST_TMPDIR/path"
   mkdir -p "$path_dir/on_path"
   cp "${FIXTURE_ROOT}/test_helper.bash" "${path_dir}/on_path/load.bash"
   # shellcheck disable=SC2030,SC2031
   export BATS_LIB_PATH="${path_dir}"  HELPER_NAME="on_path" 
   run ! bats "$FIXTURE_ROOT/load.bats"
-  BATS_LOAD_FALLBACK_TO_LOAD_LIBRARY=1 run -0 bats "$FIXTURE_ROOT/load.bats"
+  run -0 bats "$FIXTURE_ROOT/bats_load_library.bats"
 }
 
 @test "load supports plain symbols" {
@@ -119,6 +119,15 @@ setup() {
   [ "${exported_variable:-}" != 'value of exported variable' ]
 
   rm "${helper}"
+}
+
+@test "load supports scripts on the PATH" {
+  path_dir="$BATS_TEST_TMPDIR/path"
+  mkdir -p "$path_dir"
+  cp "${FIXTURE_ROOT}/test_helper.bash" "${path_dir}/on_path"
+  # shellcheck disable=SC2030,SC2031
+  export PATH="${path_dir}:$PATH"  HELPER_NAME="on_path"
+  run -0 bats "$FIXTURE_ROOT/load.bats"
 }
 
 @test "bats_load_library supports libraries with loaders on the BATS_LIB_PATH" {
