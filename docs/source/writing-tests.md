@@ -101,8 +101,7 @@ prevent `run` from parsing it as an option.
 
 You may want to share common code across multiple test files. Bats
 includes a convenient `load` command for sourcing a Bash source files
-relative to the current test file, from absolute paths and from
-`BATS_LIB_PATH`, a `PATH`-like colon-delimited variable.
+relative to the current test file and from absolute paths.
 
 For example, if you have a Bats test in `test/foo.bats`, the command
 
@@ -136,8 +135,6 @@ will _not_ be made available to callers of `load`.
 - absolute paths
 - relative paths (to the current test file)
 
-with `--library` it expects a library name.
-
 > For backwards compatibility `load` first searches for a file ending in
 > `.bash` (e.g. `load test_helper` searches for `test_helper.bash` before
 > it looks for `test_helper`). This behaviour is deprecated and subject to
@@ -149,29 +146,48 @@ path directly.
 If `argument` is a relative path or a name `load` looks for a matching
 path in the directory of the current test.
 
-With `load --library` the `BATS_LIB_PATH` will be searched instead.
+## `bats_load_library`: Load system wide libraries
+
+Some libraries are installed on the system, e.g. by `npm` or `brew`.
+These should not be `load`ed, as their path depends on the installation method.
+Instead, one should use `bats_load_library` together with setting
+`BATS_LIB_PATH`, a `PATH`-like colon-delimited variable.
+
+`bats_load_library` has two modes of resolving requests:
+
+1. by relative path from the `BATS_LIB_PATH` to a file in the library
+2. by library name, expecting libraries to have a `load.bash` entrypoint
+
 For example if your `BATS_LIB_PATH` is set to
-`~/.bats/libs:/var/lib/bats-libs`, then `load --library test_helper`
+`~/.bats/libs:/usr/lib/bats`, then `bats_load_library test_helper`
 would look for existing files with the following paths:
 
 - `~/.bats/libs/test_helper`
 - `~/.bats/libs/test_helper/load.bash`
-- `/var/lib/bats/test_helper`
-- `/var/lib/bats/test_helper/load.bash`
+- `/usr/lib/bats/test_helper`
+- `/usr/lib/bats/test_helper/load.bash`
 
 The first existing file in this list will be sourced.
-If `source` returns with an error, `load` prints a message and Bats exits.
 
-__Note:__ `BATS_LIB_PATH` defaults to `$HOME/.bats/lib:/usr/lib/bats` if
-it is empty. This default will _not_ be appended if `BATS_LIB_PATH` is
-not empty. This is done to allow full control over which files may get
-used in test suites.
+If you want to load only part of a library or the entry point is not named `load.bash`,
+you have to include it in the argument:
+`bats_load_library library_name/file_to_load` will try
+
+- `~/.bats/libs/library_name/file_to_load`
+- `~/.bats/libs/library_name/file_to_load/load.bash`
+- `/usr/lib/bats/library_name/file_to_load`
+- `/usr/lib/bats/library_name/file_to_load/load.bash`
+
+Apart from the changed lookup rules, `bats_load_library` behaves like `load`.
 
 __Note:__ As seen above `load.bash` is the entry point for libraries and
-meant to load more files from its directory or other libraries and
-should only be used when conditional setup is required - such as calling
-a different binary based on the architecture, OS or distribution.
+meant to load more files from its directory or other libraries.
 
+__Note:__ Obviously, the actual `BATS_LIB_PATH` is highly dependant on the environment.
+To maintain a uniform location across systems, (distribution) package maintainers
+are encouraged to use `/usr/lib/bats/` as the install path for libraries where possible.
+However, if the package manager has another preferred location, like `npm` or `brew`,
+you should use this instead.
 
 ## `skip`: Easily skip tests
 

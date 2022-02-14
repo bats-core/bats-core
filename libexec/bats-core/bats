@@ -88,7 +88,6 @@ export PATH="$BATS_LIBEXEC:$PATH"
 export BATS_ROOT_PID=$$
 export BATS_TMPDIR="${TMPDIR:-/tmp}"
 export BATS_RUN_TMPDIR=
-export BATS_LIB_PATH=${BATS_LIB_PATH:-"$HOME/.bats/lib:/usr/lib/bats"} # TODO /usr/lib/bats? what about bats-core? how to separate libs from core?
 
 if [[ ! -d "${BATS_TMPDIR}" ]];then
   printf "Error: BATS_TMPDIR (%s) does not exist or is not a directory" "${BATS_TMPDIR}" >&2
