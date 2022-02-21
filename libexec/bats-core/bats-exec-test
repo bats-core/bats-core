@@ -30,6 +30,8 @@ while [[ "$#" -ne 0 ]]; do
     # shellcheck disable=SC2034
     BATS_EXTENDED_SYNTAX='-x'
     ;;
+  --dummy-flag)
+    ;;
   --trace)
     (( ++BATS_TRACE_LEVEL )) # avoid returning 0
     ;;

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -eET
 
-export flags=()
+export flags=('--dummy-flag')
 num_jobs=1
 filter=''
 extended_syntax=''
