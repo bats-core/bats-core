@@ -371,10 +371,24 @@ setup() {
 @test 'ensure compatibility with unofficial Bash strict mode' {
   local expected='ok 1 unofficial Bash strict mode conditions met'
 
+  if [[ -n "$BATS_NUMBER_OF_PARALLEL_JOBS" ]]; then
+    if [[ -z "$BATS_NO_PARALLELIZE_ACROSS_FILES" ]]; then
+      type -p parallel &>/dev/null || skip "Don't check file parallelized without GNU parallel"
+    fi
+    (type -p flock &>/dev/null || type -p shlock &>/dev/null) || skip "Don't check parallelized without flock/shlock "
+  fi
+
+  # PATH required for windows
+  # HOME required to avoid error from GNU Parallel
   # Run Bats under SHELLOPTS=nounset (recursive `set -u`) to catch 
   # as many unset variable accesses as possible.
-  run run_under_clean_bats_env env SHELLOPTS=nounset \
-    "${BATS_ROOT}/bin/bats" "$FIXTURE_ROOT/unofficial_bash_strict_mode.bats"
+  run env - \
+          "PATH=$PATH" \
+          "HOME=$HOME" \
+          "BATS_NO_PARALLELIZE_ACROSS_FILES=$BATS_NO_PARALLELIZE_ACROSS_FILES" \
+          "BATS_NUMBER_OF_PARALLEL_JOBS=$BATS_NUMBER_OF_PARALLEL_JOBS" \
+          SHELLOPTS=nounset \
+      "${BATS_ROOT}/bin/bats" "$FIXTURE_ROOT/unofficial_bash_strict_mode.bats"
   if [[ "$status" -ne 0 || "${lines[1]}" != "$expected" ]]; then
     cat <<END_OF_ERR_MSG
 

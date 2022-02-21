@@ -3,7 +3,7 @@ set -e
 
 count_only_flag=''
 filter=''
-num_jobs=${BATS_NUMBER_OF_PARALLEL_JOBS-1}
+num_jobs=${BATS_NUMBER_OF_PARALLEL_JOBS:-1}
 bats_no_parallelize_across_files=${BATS_NO_PARALLELIZE_ACROSS_FILES-}
 bats_no_parallelize_within_files=
 flags=('--dummy-flag') # add a dummy flag to prevent unset varialeb errors on empty array expansion in old bash versions

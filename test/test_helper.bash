@@ -27,10 +27,3 @@ emit_debug_output() {
   # shellcheck disable=SC2154
   printf '%s\n' 'output:' "$output" >&2
 }
-
-run_under_clean_bats_env() {
-  # we want the variable names to be separate
-  # shellcheck disable=SC2086
-  unset ${!BATS_@}
-  "$@"
-}
