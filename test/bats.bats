@@ -222,81 +222,6 @@ setup() {
   [ "${lines[2]}" = "# (in test file $FIXTURE_ROOT/failing.bats, line 4)" ]
 }
 
-@test "load sources scripts relative to the current test file" {
-  run bats "$FIXTURE_ROOT/load.bats"
-  [ $status -eq 0 ]
-}
-
-@test "load sources relative scripts with filename extension" {
-  HELPER_NAME="test_helper.bash" run bats "$FIXTURE_ROOT/load.bats"
-  [ $status -eq 0 ]
-}
-
-@test "load aborts if the specified script does not exist" {
-  HELPER_NAME="nonexistent" run bats "$FIXTURE_ROOT/load.bats"
-  [ $status -eq 1 ]
-}
-
-@test "load sources scripts by absolute path" {
-  HELPER_NAME="${FIXTURE_ROOT}/test_helper.bash" run bats "$FIXTURE_ROOT/load.bats"
-  [ $status -eq 0 ]
-}
-
-@test "load aborts if the script, specified by an absolute path, does not exist" {
-  HELPER_NAME="${FIXTURE_ROOT}/nonexistent" run bats "$FIXTURE_ROOT/load.bats"
-  [ $status -eq 1 ]
-}
-
-@test "load relative script with ambiguous name" {
-  HELPER_NAME="ambiguous" run bats "$FIXTURE_ROOT/load.bats"
-  [ $status -eq 0 ]
-}
-
-@test "load supports scripts on the PATH" {
-  path_dir="$BATS_TMPNAME/path"
-  mkdir -p "$path_dir"
-  cp "${FIXTURE_ROOT}/test_helper.bash" "${path_dir}/on_path"
-  PATH="${path_dir}:$PATH"  HELPER_NAME="on_path" run bats "$FIXTURE_ROOT/load.bats"
-  [ $status -eq 0 ]
-}
-
-@test "load supports plain symbols" {
-  local -r helper="${BATS_TEST_TMPDIR}/load_helper_plain"
-  {
-    echo "plain_variable='value of plain variable'"
-    echo "plain_array=(test me hard)"
-  } > "${helper}"
-
-  load "${helper}"
-  # shellcheck disable=SC2154
-  [ "${plain_variable}" = 'value of plain variable' ]
-  # shellcheck disable=SC2154
-  [ "${plain_array[2]}" = 'hard' ]
-
-  rm "${helper}"
-}
-
-@test "load doesn't support _declare_d symbols" {
-  local -r helper="${BATS_TEST_TMPDIR}/load_helper_declared"
-  {
-    echo "declare declared_variable='value of declared variable'"
-    echo "declare -r a_constant='constant value'"
-    echo "declare -i an_integer=0x7e4"
-    echo "declare -a an_array=(test me hard)"
-    echo "declare -x exported_variable='value of exported variable'"
-  } > "${helper}"
-
-  load "${helper}"
-
-  [ "${declared_variable:-}" != 'value of declared variable' ]
-  [ "${a_constant:-}" != 'constant value' ]
-  (( "${an_integer:-2019}" != 2020 ))
-  [ "${an_array[2]:-}" != 'hard' ]
-  [ "${exported_variable:-}" != 'value of exported variable' ]
-
-  rm "${helper}"
-}
-
 @test "output is discarded for passing tests and printed for failing tests" {
   run bats "$FIXTURE_ROOT/output.bats"
   [ $status -eq 1 ]
@@ -610,12 +535,12 @@ END_OF_ERR_MSG
   [ "${lines[2]}" = "# (in test file $RELATIVE_FIXTURE_ROOT/unbound_variable.bats, line 9)" ]
   [ "${lines[3]}" = "#   \`foo=\$unset_variable' failed" ]
   # shellcheck disable=SC2076
-  [[ "${lines[4]}" =~ ".src: line 9:" ]]
+  [[ "${lines[4]}" =~ ".bats: line 9:" ]]
   [ "${lines[5]}" = 'not ok 2 access second unbound variable' ]
   [ "${lines[6]}" = "# (in test file $RELATIVE_FIXTURE_ROOT/unbound_variable.bats, line 15)" ]
   [ "${lines[7]}" = "#   \`foo=\$second_unset_variable' failed" ]
   # shellcheck disable=SC2076
-  [[ "${lines[8]}" =~ ".src: line 15:" ]]
+  [[ "${lines[8]}" =~ ".bats: line 15:" ]]
 }
 
 @test "report correct line on external function calls" {

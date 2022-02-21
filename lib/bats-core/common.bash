@@ -9,6 +9,16 @@ bats_prefix_lines_for_tap_output() {
     fi
 }
 
+function bats_replace_filename() {
+  local line
+  while read -r line; do
+    printf "%s\n" "${line//$BATS_TEST_SOURCE/$BATS_TEST_FILENAME}"
+  done
+  if [[ -n "$line" ]]; then
+    printf "%s\n" "${line//$BATS_TEST_SOURCE/$BATS_TEST_FILENAME}"
+  fi
+}
+
 bats_quote_code() { # <var> <code>
 	printf -v "$1" -- "%s%s%s" "$BATS_BEGIN_CODE_QUOTE" "$2" "$BATS_END_CODE_QUOTE"
 }

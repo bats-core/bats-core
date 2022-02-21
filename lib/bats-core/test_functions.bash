@@ -3,30 +3,162 @@
 BATS_TEST_DIRNAME="${BATS_TEST_FILENAME%/*}"
 BATS_TEST_NAMES=()
 
-# Shorthand for source-ing files relative to the BATS_TEST_DIRNAME,
-# optionally with a .bash suffix appended. If the argument doesn't
-# resolve relative to BATS_TEST_DIRNAME it is sourced as-is.
-load() {
-  local file="${1:?}"
+# find_in_bats_lib_path echoes the first recognized load path to
+# a library in BATS_LIB_PATH or relative to BATS_TEST_DIRNAME.
+#
+# Libraries relative to BATS_TEST_DIRNAME take precedence over
+# BATS_LIB_PATH.
+#
+# Library load paths are recognized using find_library_load_path.
+#
+# If no library is found find_in_bats_lib_path returns 1.
+find_in_bats_lib_path() { # <return-var> <library-name>
+  local return_var="${1:?}"
+  local library_name="${2:?}"
 
-  # For backwards-compatibility first look for a .bash-suffixed file.
-  # TODO consider flipping the order here; it would be more consistent
-  # and less surprising to look for an exact-match first.
-  if [[ -f "${BATS_TEST_DIRNAME}/${file}.bash" ]]; then
-    file="${BATS_TEST_DIRNAME}/${file}.bash"
-  elif [[ -f "${BATS_TEST_DIRNAME}/${file}" ]]; then
-    file="${BATS_TEST_DIRNAME}/${file}"
+  local -a bats_lib_paths
+  IFS=: read -ra bats_lib_paths <<< "$BATS_LIB_PATH"
+
+  for path in "${bats_lib_paths[@]}"; do
+    if [[ -f "$path/$library_name" ]]; then
+      printf -v "$return_var" "%s" "$path/$library_name" 
+      # A library load path was found, return
+      return
+    elif [[ -f "$path/$library_name/load.bash" ]]; then
+      printf -v "$return_var" "%s" "$path/$library_name/load.bash" 
+      # A library load path was found, return
+      return
+    fi
+  done
+
+  return 1
+}
+
+# bats_internal_load expects an absolute path that is a library load path.
+#
+# If the library load path points to a file (a library loader) it is
+# sourced.
+#
+# If it points to a directory all files ending in .bash inside of the
+# directory are sourced.
+#
+# If the sourcing of the library loader or of a file in a library
+# directory fails bats_internal_load prints an error message and returns 1.
+#
+# If the passed library load path is not absolute or is not a valid file
+# or directory bats_internal_load prints an error message and returns 1.
+bats_internal_load() {
+  local library_load_path="${1:?}"
+
+  if [[ "${library_load_path:0:1}" != / ]]; then
+    printf "Passed library load path is not an absolute path: %s\n" "$library_load_path" >&2
+    return 1
   fi
 
-  if [[ ! -f "$file" ]] && ! type -P "$file" >/dev/null; then
-    printf 'bats: %s does not exist\n' "$file" >&2
+  # library_load_path is a library loader
+  if [[ -f "$library_load_path" ]]; then
+      # shellcheck disable=SC1090
+      if ! source "$library_load_path"; then
+          printf "Error while sourcing library loader at '%s'\n" "$library_load_path" >&2
+          return 1
+      fi
+      return
+  fi
+
+  printf "Passed library load path is neither a library loader nor library directory: %s\n" "$library_load_path" >&2
+  return 1
+}
+
+# bats_load_safe accepts an argument called 'slug' and attempts to find and
+# source a library based on the slug.
+#
+# A slug can be an absolute path, a library name or a relative path.
+#
+# If the slug is an absolute path bats_load_safe attempts to find the library
+# load path using find_library_load_path.
+# What is considered a library load path is documented in the
+# documentation for find_library_load_path.
+#
+# If the slug is not an absolute path it is considered a library name or
+# relative path. bats_load_safe attempts to find the library load path using
+# find_in_bats_lib_path.
+#
+# If bats_load_safe can find a library load path it is passed to bats_internal_load.
+# If bats_internal_load fails bats_load_safe returns 1.
+#
+# If no library load path can be found bats_load_safe prints an error message
+# and returns 1.
+bats_load_safe() {
+  local slug="${1:?}"
+  if [[ ${slug:0:1} != / ]]; then # relative paths are relative to BATS_TEST_DIRNAME
+    slug="$BATS_TEST_DIRNAME/$slug"
+  fi
+
+  if [[ -f "$slug.bash" ]]; then
+    bats_internal_load "$slug.bash"
+    return 
+  elif [[ -f "$slug" ]]; then
+    bats_internal_load "$slug"
+    return
+  fi
+
+  # loading from PATH (retained for backwards compatibility)
+  if [[ ! -f "$1" ]] && type -P "$1" >/dev/null; then
+    # shellcheck disable=SC1090
+    source "$1"
+    return
+  fi
+
+  # No library load path can be found
+  printf "bats_load_safe: Could not find '%s'[.bash]\n" "$slug" >&2
+  return 1
+}
+
+bats_require_lib_path() {
+  if [[ -z "${BATS_LIB_PATH:-}" ]]; then
+    printf "%s: requires BATS_LIB_PATH to be set!\n" "${FUNCNAME[1]}" >&2
     exit 1
   fi
+}
 
-  # Dynamically loaded user file provided outside of Bats.
-  # Note: 'source "$file" || exit' doesn't work on bash3.2.
-  # shellcheck disable=SC1090
-  source "${file}"
+bats_load_library_safe() { # <slug>
+  local slug="${1:?}" library_path
+
+  bats_require_lib_path
+
+  # Check for library load paths in BATS_TEST_DIRNAME and BATS_LIB_PATH
+  if [[ ${slug:0:1} != / ]]; then
+    find_in_bats_lib_path library_path "$slug"
+    if [[ -z "$library_path" ]]; then
+      printf "Could not find library '%s' relative to test file or in BATS_LIB_PATH\n" "$slug" >&2
+      return 1
+    fi
+  else
+    # absolute paths are taken as is
+    library_path="$slug"
+    if [[ ! -f "$library_path" ]]; then
+      printf "Could not find library on absolute path '%s'\n" "$library_path" >&2
+      return 1
+    fi
+  fi
+
+  bats_internal_load "$library_path"
+  return $?
+}
+
+# immediately exit on error, use bats_load_library_safe to catch and handle errors
+bats_load_library() { # <slug>
+  bats_require_lib_path
+  if ! bats_load_library_safe "$@"; then
+    exit 1
+  fi
+}
+
+# load acts like bats_load_safe but exits the shell instead of returning 1.
+load() {
+    if ! bats_load_safe "$@"; then
+        exit 1
+    fi
 }
 
 bats_redirect_stderr_into_file() {
