@@ -647,6 +647,9 @@ END_OF_ERR_MSG
 }
 
 @test "Don't hang on CTRL-C (issue #353)" {
+  if [[ "$BATS_NUMBER_OF_PARALLEL_JOBS" -gt 1 ]]; then
+    skip "Aborts don't work in parallel mode"
+  fi
   load 'concurrent-coordination'
   # shellcheck disable=SC2031,SC2030
   export SINGLE_USE_LATCH_DIR="${BATS_TEST_TMPDIR}"

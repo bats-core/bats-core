@@ -94,6 +94,9 @@ not ok 1 failing test
 }
 
 @test "teardown_file should run even after user abort via CTRL-C" {
+  if [[ "$BATS_NUMBER_OF_PARALLEL_JOBS" -gt 1 ]]; then
+    skip "Aborts don't work in parallel mode"
+  fi
   # shellcheck disable=SC2031,SC2030
   export LOG="$BATS_TEST_TMPDIR/teardown_file_abort.log"
   # guarantee that background processes get their own process group -> pid=pgid
