@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 
 ## [Unreleased]
 
+## [1.6.0] - 2022-02-24
+
 ### Added
 
 * new flag `--code-quote-style` (and `$BATS_CODE_QUOTE_STYLE`) to customize
