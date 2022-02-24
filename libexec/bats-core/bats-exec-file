@@ -6,6 +6,7 @@ num_jobs=${BATS_NUMBER_OF_PARALLEL_JOBS:-1}
 filter=''
 extended_syntax=''
 BATS_TRACE_LEVEL="${BATS_TRACE_LEVEL:-0}"
+bats_rerun_failed=''
 
 while [[ "$#" -ne 0 ]]; do
   case "$1" in
@@ -30,6 +31,9 @@ while [[ "$#" -ne 0 ]]; do
   --no-parallelize-within-files)
     # use singular to allow for users to override in file
     BATS_NO_PARALLELIZE_WITHIN_FILE=1
+    ;;
+  --rerun-failed)
+    flags+=(--rerun-failed)
     ;;
   --dummy-flag)
     ;;

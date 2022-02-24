@@ -1233,3 +1233,62 @@ END_OF_ERR_MSG
 @test "BATS_* variables don't contain double slashes" {
   TMPDIR=/tmp/ bats "$FIXTURE_ROOT/BATS_variables_dont_contain_double_slashes.bats"
 }
+
+@test "Without previous recording --rerun-failed runs all tests and then reruns only failed tests" {
+  cd "$BATS_TEST_TMPDIR" # don't pollute the source folder
+  run -1 bats --rerun-failed "$FIXTURE_ROOT/passing_and_failing.bats"
+  # without previous recording, all tests should be run
+  [ "${lines[0]}" == 'No recording of previos runs found. Running all tests!' ]
+  [ "${lines[1]}" == '1..2' ]
+  [ "${lines[2]}" == 'ok 1 a passing test' ]
+  [ "${lines[3]}" == 'not ok 2 a failing test' ]
+
+  run -1 bats --tap --rerun-failed "$FIXTURE_ROOT/passing_and_failing.bats"
+  # now we should only run the failing test
+  [ "${lines[0]}" == 1..1 ]
+  [ "${lines[1]}" == "not ok 1 a failing test" ]
+}
+
+@test "--rerun-failed gives warning on empty failed test list" {
+  cd "$BATS_TEST_TMPDIR" # don't pollute the source folder
+  # have no failing tests
+  run -0 bats --rerun-failed "$FIXTURE_ROOT/passing.bats"
+  # try to rerun the empty list of failing tests
+  run -0 bats --rerun-failed "$FIXTURE_ROOT/passing.bats"
+  [ "${lines[0]}" == "There where no failed tests in the last recorded run." ]
+  [ "${lines[1]}" == "Delete the file '.bats/rerun-failed-tests.list' to run all tests again." ]
+  [ "${lines[2]}" == "1..0" ]
+  [ "${#lines[@]}" -eq 3 ]
+}
+
+enforce_own_process_group() {
+    set -m
+    "$@"
+  }
+
+@test "--rerun-failed does not update list when run is aborted" {
+  if [[ "$BATS_NUMBER_OF_PARALLEL_JOBS" -gt 1 ]]; then
+    skip "Aborts don't work in parallel mode"
+  fi
+
+  cd "$BATS_TEST_TMPDIR" # don't pollute the source folder
+  local RERUN_FILE=".bats/rerun-failed-tests.list"
+
+  # don't hang yet, so we get a useful rerun file
+  run -1 env bats --rerun-failed "$FIXTURE_ROOT/sigint_in_failing_test.bats"
+
+  orig_date=$(date -r "$RERUN_FILE")
+
+  # check that we have something to rerun
+  [ -s "$RERUN_FILE" ]
+
+  sleep 1 # ensure we would get different timestamps for each run
+
+  # now rerun but abort midrun
+  run -1 enforce_own_process_group bats --rerun-failed "$FIXTURE_ROOT/sigint_in_failing_test.bats"
+
+  new_date=$(date -r "$RERUN_FILE")
+  echo "$orig_date"
+  echo "$new_date"
+  [ "$orig_date" == "$new_date" ]
+}
