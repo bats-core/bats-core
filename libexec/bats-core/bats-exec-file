@@ -264,12 +264,7 @@ bats_run_tests() {
       if [[ $test_name ]]; then
         ((++test_number_in_suite))
         ((++test_number_in_file))
-        # deal with empty flags to avoid spurious "unbound variable" errors on Bash 4.3 and lower
-        if [[ "${#flags[@]}" -gt 0 ]]; then
-          "$BATS_LIBEXEC/bats-exec-test" "${flags[@]}" "$filename" "$test_name" "$test_number_in_suite" "$test_number_in_file" || bats_exec_file_status=1
-        else
-          "$BATS_LIBEXEC/bats-exec-test" "$filename" "$test_name" "$test_number_in_suite" "$test_number_in_file" || bats_exec_file_status=1
-        fi
+        "$BATS_LIBEXEC/bats-exec-test" "${flags[@]}" "$filename" "$test_name" "$test_number_in_suite" "$test_number_in_file" || bats_exec_file_status=1
       fi
     done
   fi
