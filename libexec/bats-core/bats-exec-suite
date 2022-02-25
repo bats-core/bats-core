@@ -24,7 +24,6 @@ while [[ "$#" -ne 0 ]]; do
   -f)
     shift
     filter="$1"
-    flags+=('-f' "$filter")
     ;;
   -j)
     shift
