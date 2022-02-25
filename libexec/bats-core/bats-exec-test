@@ -10,7 +10,7 @@ BATS_SHOW_OUTPUT_OF_SUCCEEDING_TESTS="${BATS_SHOW_OUTPUT_OF_SUCCEEDING_TESTS:-}"
 BATS_VERBOSE_RUN="${BATS_VERBOSE_RUN:-}"
 BATS_GATHER_TEST_OUTPUTS_IN="${BATS_GATHER_TEST_OUTPUTS_IN:-}"
 BATS_TEST_NAME_PREFIX="${BATS_TEST_NAME_PREFIX:-}"
-bats_rerun_failed=
+BATS_RERUN_FAILED=
 
 while [[ "$#" -ne 0 ]]; do
   case "$1" in
@@ -40,7 +40,7 @@ while [[ "$#" -ne 0 ]]; do
     BATS_GATHER_TEST_OUTPUTS_IN="$1"
     ;;
   --rerun-failed)
-    bats_rerun_failed=1
+    BATS_RERUN_FAILED=1
     ;;
   *)
     break
@@ -128,7 +128,7 @@ bats_exit_trap() {
   local print_bats_out="${BATS_SHOW_OUTPUT_OF_SUCCEEDING_TESTS}"
 
   if [[ -z "$BATS_TEST_COMPLETED" || -z "$BATS_TEARDOWN_COMPLETED" || "${BATS_INTERRUPTED-NOTSET}" != NOTSET ]]; then
-    if [[ -n "$bats_rerun_failed" ]]; then
+    if [[ -n "$BATS_RERUN_FAILED" ]]; then
       printf "%s\t%s\n" "$BATS_TEST_FILENAME" "$BATS_TEST_NAME" >> "${BATS_RERUN_FAILED_TMPFILE}"
     fi
     if [[ "$BATS_ERROR_STATUS" -eq 0 ]]; then

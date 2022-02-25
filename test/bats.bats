@@ -1139,7 +1139,7 @@ END_OF_ERR_MSG
   [ "${lines[0]}" == 'ERROR: Unknown BATS_CODE_QUOTE_STYLE: three' ]
 }
 
-@test "Debug trap must only override variables that are prefixed with bats_ (issue #519)" {
+@test "Debug trap must only override variables that are prefixed with BATS_ (issue #519)" {
   # use declare -p to gather variables in pristine bash and bats @test environment
   # then compare which ones are introduced in @test compared to bash
 
