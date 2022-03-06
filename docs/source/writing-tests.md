@@ -358,6 +358,7 @@ There are several global variables you can use to introspect on Bats tests:
   Could be used to create files required by multiple tests in the same test file.
 - `$BATS_TEST_TMPDIR` is a temporary directory unique for each test.
   Could be used to create files required only for specific tests.
+- `$BATS_VERSION` is the version of Bats running the test.
 
 ## Libraries and Add-ons
 
