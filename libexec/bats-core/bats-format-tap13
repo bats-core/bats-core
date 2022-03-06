@@ -40,13 +40,15 @@ close_previous_yaml_block() {
 
 trap '' INT
 
+number_of_printed_log_lines_for_this_test_so_far=0
+
 while IFS= read -r line; do
   case "$line" in
   'begin '*) ;;
   'ok '*)
     close_previous_yaml_block
     number_of_printed_log_lines_for_this_test_so_far=0
-    if [[ -n "$BATS_ENABLE_TIMING" ]]; then
+    if [[ -n "${BATS_ENABLE_TIMING-}" ]]; then
       timing_expr="(ok [0-9]+ .+) in ([0-9]+)ms$"
       if [[ "$line" =~ $timing_expr ]]; then
         printf "%s\n" "${BASH_REMATCH[1]}"
@@ -63,7 +65,7 @@ while IFS= read -r line; do
     close_previous_yaml_block
     number_of_printed_log_lines_for_this_test_so_far=0
     timing_expr="not ok [0-9]+ (.)+ in ([0-9])+ms$"
-    if [[ -n "$BATS_ENABLE_TIMING" ]]; then
+    if [[ -n "${BATS_ENABLE_TIMING-}" ]]; then
       if [[ "$line" =~ $timing_expr ]]; then
         printf "%s\n" "${BATS_REMATCH[1]}"
         add_yaml_entry "duration_ms" "${BASH_REMATCH[2]}"
