@@ -10,6 +10,12 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 
 ## [Unreleased]
 
+### Added
+
+#### Documentation
+
+* document `$BATS_VERSION` (#557)
+
 ## [1.6.0] - 2022-02-24
 
 ### Added
