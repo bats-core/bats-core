@@ -45,10 +45,12 @@ count=0
 screen_width=80
 update_count_column_width
 update_screen_width
+test_result=
 
 trap update_screen_width WINCH
 
 begin() {
+  test_result= # reset to avoid carrying over result state from previous test
   line_backoff_count=0
   go_to_column 0
   update_count_column_width
@@ -98,7 +100,7 @@ fail() {
 }
 
 log() {
-  case $test_result in
+  case ${test_result} in
     pass)
     clear_color
     ;;

@@ -729,10 +729,12 @@ END_OF_ERR_MSG
     tested_at_least_one_formatter=1
     echo "Formatter: ${formatter}"
     # the replay should be possible without errors
-    "$formatter" >/dev/null <<EOF
+    bash -u "$formatter" >/dev/null <<EOF
 1..1
 suite "$BATS_FIXTURE_ROOT/failing.bats"
+# output from setup_file
 begin 1 test_a_failing_test
+# fd3 output from test
 not ok 1 a failing test
 # (in test file test/fixtures/bats/failing.bats, line 4)
 #   \`eval "( exit ${STATUS:-1} )"' failed
