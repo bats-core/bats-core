@@ -16,6 +16,10 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 
 * document `$BATS_VERSION` (#557)
 
+### Fixed
+
+* unbound variable errors in formatters when using `SHELLOPTS=nounset` (`-u`) (#558)
+
 ## [1.6.0] - 2022-02-24
 
 ### Added
