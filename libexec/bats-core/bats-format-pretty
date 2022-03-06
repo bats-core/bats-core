@@ -98,7 +98,7 @@ fail() {
 }
 
 log() {
-  case $test_result in
+  case ${test_result:-} in
     pass)
     clear_color
     ;;
