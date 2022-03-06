@@ -167,6 +167,7 @@ setup() {
 }
 
 @test "setup is run once before each test" {
+  unset BATS_NUMBER_OF_PARALLEL_JOBS BATS_NO_PARALLELIZE_ACROSS_FILES
   # shellcheck disable=SC2031,SC2030
   export BATS_TEST_SUITE_TMPDIR="${BATS_TEST_TMPDIR}"
   run bats "$FIXTURE_ROOT/setup.bats"
@@ -176,6 +177,7 @@ setup() {
 }
 
 @test "teardown is run once after each test, even if it fails" {
+  unset BATS_NUMBER_OF_PARALLEL_JOBS BATS_NO_PARALLELIZE_ACROSS_FILES
   # shellcheck disable=SC2031,SC2030
   export BATS_TEST_SUITE_TMPDIR="${BATS_TEST_TMPDIR}"
   run bats "$FIXTURE_ROOT/teardown.bats"
