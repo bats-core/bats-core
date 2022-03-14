@@ -95,7 +95,7 @@ check_parallel_tests() { # <expected maximum parallelity>
   #shellcheck disable=SC2031
   export FILE_MARKER
   FILE_MARKER=$(mktemp "${BATS_RUN_TMPDIR}/file_marker.XXXXXX")
-  #shellcheck disable=SC2031
+  #shellcheck disable=SC2031,SC2030
   export PARALLELITY=2
 
   # file parallelization is needed for this test!
@@ -125,17 +125,29 @@ check_parallel_tests() { # <expected maximum parallelity>
 }
 
 @test "parallelity factor is met exactly" {
-  parallelity=5 # run the 10 tests in 2 batches with 5 test each
-  bats --jobs $parallelity "$FIXTURE_ROOT/parallel_factor.bats" & # run in background to avoid blocking
-  # give it some time to start the tests
-  sleep 2
-  # find how many semaphores are started in parallel; don't count grep itself
-  run bash -c "ps -ef | grep bats-exec-test | grep parallel/parallel_factor.bats | grep -v grep"
-  echo "$output"
+  # shellcheck disable=SC2031
+  export MARKER_FILE="${BATS_TEST_TMPDIR}/marker" PARALLELITY=5 # run the 10 tests in 2 batches with 5 test each
+  bats --jobs $PARALLELITY "$FIXTURE_ROOT/parallel_factor.bats"
+  local current_parallel_count=0 maximum_parallel_count=0 total_count=0
+  while read -r line; do
+    case "$line" in 
+      setup*)
+        ((++current_parallel_count))
+        ((++total_count))
+      ;;
+      teardown*)
+        ((current_parallel_count--))
+      ;; 
+    esac
+    if (( current_parallel_count > maximum_parallel_count )); then
+      maximum_parallel_count=$current_parallel_count
+    fi
+  done < "$MARKER_FILE"
   
-  # This might fail spuriously if we got bad luck with the scheduler
-  # and hit the transition between the first and second batch of tests.
-  [[ "${#lines[@]}" -eq $parallelity  ]]
+  cat "$MARKER_FILE" # for debugging purposes
+  [[ "$maximum_parallel_count" -eq $PARALLELITY ]]
+  [[ "$current_parallel_count" -eq 0 ]]
+  [[ "$total_count" -eq 10 ]]
 }
 
 @test "parallel mode correctly forwards failure return code" {
