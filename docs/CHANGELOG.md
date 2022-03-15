@@ -19,6 +19,7 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 ### Fixed
 
 * unbound variable errors in formatters when using `SHELLOPTS=nounset` (`-u`) (#558)
+* don't require `flock` *and* `shlock` for parallel mode test (#554)
 
 ## [1.6.0] - 2022-02-24
 
