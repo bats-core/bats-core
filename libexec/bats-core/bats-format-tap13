@@ -82,7 +82,7 @@ while IFS= read -r line; do
       add_yaml_entry "message" "|" # use a multiline string for this entry
     fi
     ((++number_of_printed_log_lines_for_this_test_so_far))
-    printf "    %s\n" "$(echo "\"${line}\"" | cut -b 3-)"
+    printf "    %s\n" "${line:2}"
     ;;
   'suite '*) ;;
   esac

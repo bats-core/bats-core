@@ -1,5 +1,5 @@
 load 'test_helper'
-fixtures bats
+fixtures bats # reuse bats fixtures
 
 @test "passing test" {
     run bats --formatter tap13 "${FIXTURE_ROOT}/passing.bats"
@@ -18,8 +18,8 @@ fixtures bats
     [ "${lines[2]}" == 'not ok 1 a failing test' ]
     [ "${lines[3]}" == '  ---' ]
     [ "${lines[4]}" == '  message: |' ]
-    [ "${lines[5]}" == '     (in test file test/fixtures/bats/failing.bats, line 4)"' ]
-    [ "${lines[6]}" == "       \`eval \"( exit \${STATUS:-1} )\"' failed\"" ]
+    [ "${lines[5]}" == "    (in test file ${RELATIVE_FIXTURE_ROOT}/failing.bats, line 4)" ]
+    [ "${lines[6]}" == "      \`eval \"( exit \${STATUS:-1} )\"' failed" ]
     [ "${lines[7]}" == '  ...' ]
     [ "${#lines[@]}" -eq 8 ]
 }
@@ -46,8 +46,8 @@ fixtures bats
     [ "${lines[3]}" == '  ---' ]
     [ "${lines[4]::15}" == '  duration_ms: ' ]
     [ "${lines[5]}" == '  message: |' ]
-    [ "${lines[6]}" == '     (in test file test/fixtures/bats/failing.bats, line 4)"' ]
-    [ "${lines[7]}" == "       \`eval \"( exit \${STATUS:-1} )\"' failed\"" ]
+    [ "${lines[6]}" == "    (in test file ${RELATIVE_FIXTURE_ROOT}/failing.bats, line 4)" ]
+    [ "${lines[7]}" == "      \`eval \"( exit \${STATUS:-1} )\"' failed" ]
     [ "${lines[8]}" == '  ...' ]
     [ "${#lines[@]}" -eq 9 ]
 }
