@@ -64,10 +64,10 @@ while IFS= read -r line; do
   'not ok '*)
     close_previous_yaml_block
     number_of_printed_log_lines_for_this_test_so_far=0
-    timing_expr="not ok [0-9]+ (.)+ in ([0-9])+ms$"
+    timing_expr="(not ok [0-9]+ .+) in ([0-9])+ms$"
     if [[ -n "${BATS_ENABLE_TIMING-}" ]]; then
       if [[ "$line" =~ $timing_expr ]]; then
-        printf "%s\n" "${BATS_REMATCH[1]}"
+        printf "%s\n" "${BASH_REMATCH[1]}"
         add_yaml_entry "duration_ms" "${BASH_REMATCH[2]}"
       else
         echo "Could not match failure line to timing regex: $line" >&2
@@ -82,7 +82,7 @@ while IFS= read -r line; do
       add_yaml_entry "message" "|" # use a multiline string for this entry
     fi
     ((++number_of_printed_log_lines_for_this_test_so_far))
-    printf "    %s\n" "$(echo "\"${line}\"" | cut -b 3-)"
+    printf "    %s\n" "${line:2}"
     ;;
   'suite '*) ;;
   esac
