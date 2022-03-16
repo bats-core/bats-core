@@ -164,4 +164,11 @@ jobs:
           prepare: pkg install -y bash parallel ${{ matrix.packages }}
           run: |
             time ./bin/bats --print-output-on-failure test/
+
+  find_broken_symlinks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      # list symlinks that are broken and force non-zero exit if there are any
+      - run: "! find . -xtype l | grep ."
     
