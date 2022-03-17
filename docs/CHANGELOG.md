@@ -21,6 +21,7 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 * unbound variable errors in formatters when using `SHELLOPTS=nounset` (`-u`) (#558)
 * don't require `flock` *and* `shlock` for parallel mode test (#554)
 * print name of failing test when using TAP13 with timing information (#559, #555)
+* removed broken symlink, added regression test (#560)
 
 ## [1.6.0] - 2022-02-24
 
