@@ -293,7 +293,11 @@ bats_tap_stream_suite() {
   line_backoff_count=0
   index=
   # indicate filename for failures
-  name="File $(remove_prefix "$BASE_PATH" "$1")"
+  local file_name="${1/$BASE_PATH}"
+  name="File $file_name"
+  set_color 4 bold
+  buffer "%s\n" "$file_name"
+  clear_color
 }
 
 line_backoff_count=0

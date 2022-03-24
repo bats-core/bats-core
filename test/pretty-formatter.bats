@@ -10,5 +10,5 @@ HERE
     }
     run format_example_stream
     echo "$output"
-    [[ "${lines[0]}" == *'[123]'* ]]
+    [[ "${lines[1]}" == *'[123]'* ]]
 }
