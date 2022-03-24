@@ -1263,3 +1263,8 @@ EOF
     [[ $FDS_LOG == *'otherfunc fds after: (0 1 2)'* ]] || false
     [[ $FDS_LOG == *'setup_file fds after: (0 1 2)'* ]] || false
 }
+
+@test "Allow for prefixing tests' names with BATS_TEST_NAME_PREFIX" {
+  BATS_TEST_NAME_PREFIX='PREFIX: ' run bats "${FIXTURE_ROOT}/passing.bats"
+  [ "${lines[1]}" == "ok 1 PREFIX: a passing test" ]
+}

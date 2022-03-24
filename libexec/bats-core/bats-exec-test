@@ -11,6 +11,7 @@ BATS_PRINT_OUTPUT_ON_FAILURE="${BATS_PRINT_OUTPUT_ON_FAILURE:-}"
 BATS_SHOW_OUTPUT_OF_SUCCEEDING_TESTS="${BATS_SHOW_OUTPUT_OF_SUCCEEDING_TESTS:-}"
 BATS_VERBOSE_RUN="${BATS_VERBOSE_RUN:-}"
 BATS_GATHER_TEST_OUTPUTS_IN="${BATS_GATHER_TEST_OUTPUTS_IN:-}"
+BATS_TEST_NAME_PREFIX="${BATS_TEST_NAME_PREFIX:-}"
 
 while [[ "$#" -ne 0 ]]; do
   case "$1" in
@@ -146,7 +147,7 @@ bats_exit_trap() {
       # output, since there's no way to reach the `bats_exit_trap` call.
       BATS_ERROR_STATUS=1
     fi
-    printf 'not ok %d %s\n' "$BATS_SUITE_TEST_NUMBER" "${BATS_TEST_DESCRIPTION}${BATS_TEST_TIME}" >&3
+    printf 'not ok %d %s\n' "$BATS_SUITE_TEST_NUMBER" "${BATS_TEST_NAME_PREFIX:-}${BATS_TEST_DESCRIPTION}${BATS_TEST_TIME}" >&3
     local stack_trace
     bats_get_failure_stack_trace stack_trace
     bats_print_stack_trace "${stack_trace[@]}" >&3
@@ -159,7 +160,7 @@ bats_exit_trap() {
     print_bats_out=1
     status=1
   else
-    printf 'ok %d %s%s\n' "$BATS_SUITE_TEST_NUMBER" "${BATS_TEST_DESCRIPTION}${BATS_TEST_TIME}" \
+    printf 'ok %d %s%s\n' "$BATS_SUITE_TEST_NUMBER" "${BATS_TEST_NAME_PREFIX:-}${BATS_TEST_DESCRIPTION}${BATS_TEST_TIME}" \
       "$skipped" >&3
     status=0
   fi
