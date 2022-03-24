@@ -83,6 +83,9 @@ function bats_parse_internal_extended_tap() {
         '# '*)
             bats_tap_stream_comment "${line:2}" "$scope"
             ;;
+        '#')
+            bats_tap_stream_comment "" "$scope"
+            ;;
         'suite '*) 
             scope=suite
             # pass on the
