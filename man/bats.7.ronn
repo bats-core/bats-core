@@ -167,6 +167,8 @@ located.
 * `$BATS_TEST_NAMES` is an array of function names for each test case.
 * `$BATS_TEST_NAME` is the name of the function containing the current
 test case.
+* `BATS_TEST_NAME_PREFIX` will be prepended to the description of each test
+on stdout and in reports.
 * `$BATS_TEST_DESCRIPTION` is the description of the current test
 case.
 * `$BATS_TEST_NUMBER` is the (1-based) index of the current test case

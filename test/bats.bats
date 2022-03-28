@@ -54,13 +54,13 @@ setup() {
   run filter_control_sequences bats -p "$FIXTURE_ROOT/passing.bats"
   echo "$output"
   [ $status -eq 0 ]
-  [ "${lines[1]}" = "1 test, 0 failures" ]
+  [ "${lines[2]}" = "1 test, 0 failures" ]
 }
 
 @test "summary passing and skipping tests" {
   run filter_control_sequences bats -p "$FIXTURE_ROOT/passing_and_skipping.bats"
   [ $status -eq 0 ]
-  [ "${lines[3]}" = "3 tests, 0 failures, 2 skipped" ]
+  [ "${lines[4]}" = "3 tests, 0 failures, 2 skipped" ]
 }
 
 @test "tap passing and skipping tests" {
@@ -75,13 +75,13 @@ setup() {
 @test "summary passing and failing tests" {
   run filter_control_sequences bats -p "$FIXTURE_ROOT/failing_and_passing.bats"
   [ $status -eq 0 ]
-  [ "${lines[4]}" = "2 tests, 1 failure" ]
+  [ "${lines[5]}" = "2 tests, 1 failure" ]
 }
 
 @test "summary passing, failing and skipping tests" {
   run filter_control_sequences bats -p "$FIXTURE_ROOT/passing_failing_and_skipping.bats"
   [ $status -eq 0 ]
-  [ "${lines[5]}" = "3 tests, 1 failure, 1 skipped" ]
+  [ "${lines[6]}" = "3 tests, 1 failure, 1 skipped" ]
 }
 
 @test "tap passing, failing and skipping tests" {
@@ -1064,17 +1064,17 @@ EOF
 @test "pretty formatter summary is colorized red on failure" {
   run -1 bats --pretty "$FIXTURE_ROOT/failing.bats"
   
-  [ "${lines[3]}" == $'\033[0m\033[31;1m' ] # TODO: avoid checking for the leading reset too
-  [ "${lines[4]}" == '1 test, 1 failure' ]
-  [ "${lines[5]}" == $'\033[0m' ]
+  [ "${lines[4]}" == $'\033[0m\033[31;1m' ] # TODO: avoid checking for the leading reset too
+  [ "${lines[5]}" == '1 test, 1 failure' ]
+  [ "${lines[6]}" == $'\033[0m' ]
 }
 
 @test "pretty formatter summary is colorized green on success" {
   run -0 bats --pretty "$FIXTURE_ROOT/passing.bats"
 
-  [ "${lines[1]}" == $'\033[0m\033[32;1m' ] # TODO: avoid checking for the leading reset too
-  [ "${lines[2]}" == '1 test, 0 failures' ]
-  [ "${lines[3]}" == $'\033[0m' ]
+  [ "${lines[2]}" == $'\033[0m\033[32;1m' ] # TODO: avoid checking for the leading reset too
+  [ "${lines[3]}" == '1 test, 0 failures' ]
+  [ "${lines[4]}" == $'\033[0m' ]
 }
 
 @test "--print-output-on-failure works as expected" {
@@ -1262,4 +1262,9 @@ EOF
     [ $SECONDS -lt 10 ]
     [[ $FDS_LOG == *'otherfunc fds after: (0 1 2)'* ]] || false
     [[ $FDS_LOG == *'setup_file fds after: (0 1 2)'* ]] || false
+}
+
+@test "Allow for prefixing tests' names with BATS_TEST_NAME_PREFIX" {
+  BATS_TEST_NAME_PREFIX='PREFIX: ' run bats "${FIXTURE_ROOT}/passing.bats"
+  [ "${lines[1]}" == "ok 1 PREFIX: a passing test" ]
 }

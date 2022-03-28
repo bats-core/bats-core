@@ -83,6 +83,9 @@ function bats_parse_internal_extended_tap() {
         '# '*)
             bats_tap_stream_comment "${line:2}" "$scope"
             ;;
+        '#')
+            bats_tap_stream_comment "" "$scope"
+            ;;
         'suite '*) 
             scope=suite
             # pass on the
@@ -93,22 +96,6 @@ function bats_parse_internal_extended_tap() {
         ;;
         esac
     done
-}
-
-# given a prefix and a path, remove the prefix if the path starts with it
-# e.g. 
-# remove_prefix /usr/bin /usr/bin/bash -> bash
-# remove_prefix /usr /usr/lib/bash -> lib/bash
-# remove_prefix /usr/bin /usr/local/bin/bash -> /usr/local/bin/bash
-remove_prefix() {
-  base_path="$1"
-  path="$2"
-  if [[ "$path" == "$base_path"* ]]; then
-    # cut off the common prefix
-    printf "%s" "${path:${#base_path}}"
-  else
-    printf "%s" "$path"
-  fi
 }
 
 normalize_base_path() { # <target variable> <base path>

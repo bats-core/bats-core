@@ -249,29 +249,36 @@ bats_tap_stream_begin() {
 }
 
 bats_tap_stream_ok() {
-  index="$1"
-  ((++passed))
+  local duration=
   if [[ "$1" == "--duration" ]]; then
-    pass "$2"
-  else
-    pass
+    duration="$2"
+    shift 2
   fi
+  index="$1"
+  name="$2"
+  ((++passed))
+  
+  pass "$duration"
 }
 
 bats_tap_stream_skipped() {
   index="$1"
+  name="$2"
   ((++skipped))
   skip "$3"
 }
 
 bats_tap_stream_not_ok() {
-  index="$1"
-  ((++failures))
+  local duration=
   if [[ "$1" == "--duration" ]]; then
-    fail "$2"
-  else
-    fail
+    duration="$2"
+    shift 2
   fi
+  index="$1"
+  name="$2"
+  ((++failures))
+  
+  fail "$duration"
 }
 
 bats_tap_stream_comment() { # <comment> <scope>
@@ -293,7 +300,11 @@ bats_tap_stream_suite() {
   line_backoff_count=0
   index=
   # indicate filename for failures
-  name="File $(remove_prefix "$BASE_PATH" "$1")"
+  local file_name="${1/$BASE_PATH}"
+  name="File $file_name"
+  set_color 4 bold
+  buffer "%s\n" "$file_name"
+  clear_color
 }
 
 line_backoff_count=0

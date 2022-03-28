@@ -241,7 +241,7 @@ bats_tap_stream_suite() { # <file name>
   flush_log
   suite_buffer finish_file
   init_file
-  class="$(remove_prefix "$BASE_PATH" "$1")"
+  class="${1/$BASE_PATH}"
 }
 
 bats_tap_stream_unknown() { # <full line>
