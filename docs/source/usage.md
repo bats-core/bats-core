@@ -32,7 +32,7 @@ $ bats addition.bats
 
 If Bats is not connected to a terminal—in other words, if you run it from a
 continuous integration system, or redirect its output to a file—the results are
-displayed in human-readable, machine-parsable [TAP format][https://testanything.org].
+displayed in human-readable, machine-parsable [TAP format][tap-format].
 
 You can force TAP output from a terminal by invoking Bats with the `--formatter tap`
 option.
@@ -91,4 +91,5 @@ If you have files where tests within the file would interfere with each other, y
 If you want more finegrained control, you can `export BATS_NO_PARALLELIZE_WITHIN_FILE=true` in `setup_file()`
 or outside any function to disable parallelization only within the containing file.
 
+[tap-format]: https://testanything.org
 [gnu-parallel]: https://www.gnu.org/software/parallel/

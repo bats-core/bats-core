@@ -18,7 +18,6 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 #### Documentation
 
 * document `$BATS_VERSION` (#557)
-* remove 2018 in title, update copyright dates in README.md (#567)
 
 ### Fixed
 
@@ -27,6 +26,11 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 * print name of failing test when using TAP13 with timing information (#559, #555)
 * removed broken symlink, added regression test (#560)
 * don't show empty lines as `#` with pretty formatter  (#561)
+
+#### Documentation
+
+* remove 2018 in title, update copyright dates in README.md (#567)
+* fix broken links (#568)
 
 ## [1.6.0] - 2022-02-24
 
