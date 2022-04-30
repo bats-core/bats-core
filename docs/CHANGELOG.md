@@ -18,6 +18,7 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 #### Documentation
 
 * document `$BATS_VERSION` (#557)
+* remove 2018 in title, update copyright dates in README.md (#567)
 
 ### Fixed
 
