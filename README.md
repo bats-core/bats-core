@@ -1,4 +1,4 @@
-# Bats-core: Bash Automated Testing System (2018)
+# Bats-core: Bash Automated Testing System
 
 [![Latest release](https://img.shields.io/github/release/bats-core/bats-core.svg)](https://github.com/bats-core/bats-core/releases/latest)
 [![npm package](https://img.shields.io/npm/v/bats.svg)](https://www.npmjs.com/package/bats)
@@ -115,7 +115,7 @@ There was an initial [call for maintainers][call-maintain] for the original Bats
 
 ## Copyright
 
-© 2017-2021 bats-core organization
+© 2017-2022 bats-core organization
 
 © 2011-2016 Sam Stephenson
 
