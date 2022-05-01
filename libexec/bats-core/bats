@@ -124,6 +124,7 @@ formatter_flags=('--dummy-flag') # add a dummy flag to prevent unset variable er
 formatter='tap'
 report_formatter=''
 recursive=
+setup_suite_file=''
 export BATS_TEMPDIR_CLEANUP=1
 output=
 if [[ -z "${CI:-}" && -t 0 && -t 1 ]] && command -v tput >/dev/null; then
@@ -223,6 +224,10 @@ while [[ "$#" -ne 0 ]]; do
       abort "Could not create $output_dir for --gather-test-outputs-in"
     fi
     flags+=(--gather-test-outputs-in "$output_dir")
+    ;;
+  --setup-suite-file)
+    shift
+    setup_suite_file="$1"
     ;;
   --code-quote-style)
     shift
@@ -336,9 +341,25 @@ if [[ -n "$output" ]]; then
   export BATS_REPORT_OUTPUT_PATH="$output"
 fi
 
+if [[ -n "$setup_suite_file" && ! -f "$setup_suite_file" ]]; then
+  abort "--setup-suite-file $setup_suite_file does not exist!"
+fi
+
 filenames=()
 for filename in "${arguments[@]}"; do
   expand_path "$filename" 'filename'
+
+  if [[ -z "$setup_suite_file" ]]; then
+    if [[ -d "$filename" ]]; then
+      dirname="$filename"
+    else
+      dirname="${filename%/*}"
+    fi
+    potential_setup_suite_file="$dirname/setup_suite.bash"
+    if [[ -e "$potential_setup_suite_file" ]]; then
+      setup_suite_file="$potential_setup_suite_file"
+    fi
+  fi
 
   if [[ -d "$filename" ]]; then
     shopt -s nullglob
@@ -356,6 +377,10 @@ for filename in "${arguments[@]}"; do
     filenames+=("$filename")
   fi
 done
+
+if [[ -n "$setup_suite_file" ]]; then
+  flags+=("--setup-suite-file" "$setup_suite_file")
+fi
 
 # shellcheck source=lib/bats-core/validator.bash
 source "$BATS_ROOT/lib/bats-core/validator.bash"

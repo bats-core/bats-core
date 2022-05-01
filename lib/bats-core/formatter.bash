@@ -38,7 +38,7 @@ function bats_parse_internal_extended_tap() {
         'begin '*) # this might only be called in extended tap output
             ((++begin_index))
             scope=begin
-            test_name="${line#* $begin_index }"
+            test_name="${line#* "$begin_index" }"
             bats_tap_stream_begin "$begin_index" "$test_name"
             ;;
         'ok '*)

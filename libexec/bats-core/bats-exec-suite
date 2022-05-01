@@ -7,6 +7,7 @@ num_jobs=${BATS_NUMBER_OF_PARALLEL_JOBS:-1}
 bats_no_parallelize_across_files=${BATS_NO_PARALLELIZE_ACROSS_FILES-}
 bats_no_parallelize_within_files=
 flags=('--dummy-flag') # add a dummy flag to prevent unset varialeb errors on empty array expansion in old bash versions
+setup_suite_file=''
 
 abort() {
   printf 'Error: %s\n' "$1" >&2
@@ -58,6 +59,10 @@ while [[ "$#" -ne 0 ]]; do
   --gather-test-outputs-in)
     shift
     flags+=(--gather-test-outputs-in "$1")
+    ;;
+  --setup-suite-file)
+    shift
+    setup_suite_file="$1"
     ;;
   *)
     break
@@ -158,6 +163,20 @@ fi
 # Thus, it suffices to bats-exec-file it once to run all repeated tests on it.
 IFS=$'\n' read -d '' -r -a  BATS_UNIQUE_TEST_FILENAMES < <(printf "%s\n" "$@"| nl | sort -k 2 | uniq -f 1 | sort -n | cut -f 2-) || true
 
+if [[ -n "$setup_suite_file" ]]; then
+  setup_suite() {
+    printf "%s does not define \`setup_suite()\`\n" "$setup_suite_file" >&2
+    exit 1
+  }
+
+  teardown_suite() {
+    : 
+  }
+  # shellcheck disable=SC1090
+  source "$setup_suite_file"
+  setup_suite
+fi
+
 if [[ "$num_jobs" -gt 1 ]] && [[ -z "$bats_no_parallelize_across_files" ]]; then
   # run files in parallel to get the maximum pool of parallel tasks
   # shellcheck disable=SC2086,SC2068
@@ -172,6 +191,10 @@ else
     fi
     bats-exec-file "${flags[@]}" "$filename" "${TESTS_LIST_FILE}" || status=1
   done
+fi
+
+if [[ -n "$setup_suite_file" ]]; then
+  teardown_suite
 fi
 
 exit "$status"
