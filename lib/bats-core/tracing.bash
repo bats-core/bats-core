@@ -142,7 +142,7 @@ bats_strip_string() {
 }
 
 bats_trim_filename() {
-	printf -v "$2" '%s' "${1#$BATS_CWD/}"
+	printf -v "$2" '%s' "${1#"$BATS_CWD"/}"
 }
 
 # normalize a windows path from e.g. C:/directory to /c/directory

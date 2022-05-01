@@ -9,7 +9,7 @@ emulate_bats_env() {
 fixtures() {
   FIXTURE_ROOT="$BATS_TEST_DIRNAME/fixtures/$1"
   # shellcheck disable=SC2034
-  RELATIVE_FIXTURE_ROOT="${FIXTURE_ROOT#$BATS_CWD/}"
+  RELATIVE_FIXTURE_ROOT="${FIXTURE_ROOT#"$BATS_CWD"/}"
 }
 
 filter_control_sequences() {

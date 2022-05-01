@@ -172,6 +172,7 @@ if [[ -n "$setup_suite_file" ]]; then
   teardown_suite() {
     : 
   }
+  # shellcheck disable=SC1090
   source "$setup_suite_file"
   setup_suite
 fi

@@ -6,7 +6,7 @@ setup() {
 }
 
 @test "setup_suite.bash is picked up in toplevel folder of suite" {
-    run -0 bats "$FIXTURE_ROOT/pick_up_toplevel"
+    run -0 bats -r "$FIXTURE_ROOT/pick_up_toplevel"
     run cat "$LOGFILE"
 
     [ "${lines[0]}" = "$FIXTURE_ROOT/pick_up_toplevel/setup_suite.bash setup_suite" ]
@@ -14,7 +14,7 @@ setup() {
 }
 
 @test "setup_suite.bash is picked up in folder of first test file" {
-    run -0 bats "$FIXTURE_ROOT/pick_up_toplevel/folder1/test.bats" "$FIXTURE_ROOT/pick_up_toplevel/test.bats"
+    run -0 bats "$FIXTURE_ROOT/pick_up_toplevel/folder1/test.bats" "$FIXTURE_ROOT/pick_up_toplevel/folder2/test.bats"
     run cat "$LOGFILE"
 
     [ "${lines[0]}" = "$FIXTURE_ROOT/pick_up_toplevel/folder1/setup_suite.bash setup_suite" ]
