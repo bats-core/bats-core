@@ -206,29 +206,8 @@ elif [[ ! -w "${BATS_TMPDIR}" ]];then
   exit 1
 fi
 
-arguments=()
-
-# Unpack single-character options bundled together, e.g. -cr, -pr.
-for arg in "$@"; do
-  if [[ "$arg" =~ ^-[^-]. ]]; then
-  #if [[ "$arg" =~ ^-[-]?. ]]; then
-    index=1
-    while option="${arg:$((index++)):1}"; do
-      if [[ -z "$option" ]]; then
-        break
-      fi
-      arguments+=("-$option")
-    done
-  else
-    arguments+=("$arg")
-  fi
-  shift
-done
-
-set -- "${arguments[@]}"
-arguments=()
-
 unset flags recursive formatter_flags
+arguments=()
 flags=('--dummy-flag') # add a dummy flag to prevent unset variable errors on empty array expansion in old bash versions
 formatter_flags=('--dummy-flag') # add a dummy flag to prevent unset variable errors on empty array expansion in old bash versions
 formatter='tap'
@@ -295,7 +274,7 @@ while [[ "$#" -ne 0 ]]; do
     flags+=('-j' "$1")
     ;;
   -r | --recursive)
-    recursive=1
+    recursive=0
     ;;
   -t | --tap)
     formatter='tap'
@@ -530,7 +509,7 @@ for filename in "${arguments[@]}"; do
 
   if [[ -d "$filename" ]]; then
     shopt -s nullglob
-    if [[ "$recursive" -eq 1 ]]; then
+    if [[ "$recursive" == "0" ]]; then
       build_find_command_string "find_command"
 
       # shellcheck disable=SC2154 
