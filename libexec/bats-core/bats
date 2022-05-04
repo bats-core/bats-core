@@ -138,6 +138,7 @@ _build_multi_exclude_pattern() {
   # given performance concerns we concatenate and loop in a native c-style manner
   local exclude_pattern
   _build_exclude_pattern "${EXCLUDE_FILES[0]}" "excl_pattern"
+  # shellcheck disable=SC2154
   exclude_pattern="-path $excl_pattern"
   local files_length=${#EXCLUDE_FILES[@]}
   for ((i=1;i<files_length;i++))
@@ -170,6 +171,7 @@ build_find_command_string() {
   # over one liners with grep, sed/awk etc.
   read -ra EXCLUDE_FILES <<< "$exclude_files"
 
+  # shellcheck disable=SC2154
   if [[ ${#EXCLUDE_FILES[@]} -eq 1 ]]; then
     _build_exclude_pattern """${EXCLUDE_FILES[0]}""" 'excl_pattern'
     printf -v "$result" %s \
@@ -531,11 +533,13 @@ for filename in "${arguments[@]}"; do
     if [[ "$recursive" -eq 1 ]]; then
       build_find_command_string "find_command"
 
+      # shellcheck disable=SC2154 
       while IFS= read -r -d $'\0' file; do
-        filenames+=("$file")    
-        # process substitution and redirecting in use; 
-        # => pipe [<(..)] and redirect [<] '$find_command' to standard input
-        # for `read` using C-Style string termination '\0' [-print0]
+        filenames+=("$file")   
+        # performance boost through piping by /dev/fd/63 instead of
+        # creating a temporary file for find's results.
+        # => pipe [<(..)] and redirect [<] '$find_command' to standard input.
+        # for `read` using c-style string termination '\0' [-print0]
         # eval is a built-in command, no performance issue's expected
       done < <(eval "$find_command" -print0 | sort -z)
     else
