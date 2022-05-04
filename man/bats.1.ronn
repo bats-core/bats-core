@@ -54,6 +54,10 @@ OPTIONS
     which requires setting `$BATS_BEGIN_CODE_QUOTE` and 
     `$BATS_END_CODE_QUOTE`. 
     Can also be set via `$BATS_CODE_QUOTE_STYLE`.
+  * `-e`, `--exclude <files>`:
+     Exclude file(s) from processing. File can also be a directory itself.
+     <files> are separated by space and enclosed in quotes, 
+     e.g. `--exclude 'foo.bats bar baz qux.bats'` 
   * `-f`, `--filter <regex>`:
     Filter test cases by names matching the regular expression
   * `-F`, `--formatter <type>`:
