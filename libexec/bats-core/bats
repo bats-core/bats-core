@@ -40,6 +40,9 @@ HELP_TEXT_HEADER
                             A two character string of code quote delimiters
                             or 'custom' which requires setting $BATS_BEGIN_CODE_QUOTE and 
                             $BATS_END_CODE_QUOTE. Can also be set via $BATS_CODE_QUOTE_STYLE
+  -e, --exclude <files>     Exclude file(s) from processing. File can also be a directory itself.
+                            <files> are separated by space and enclosed in quotes, 
+                            e.g. `bats --exclude 'foo.bats bar baz qux.bats' [OPTIONS] <tests>`
   -f, --filter <regex>      Only run tests that match the regular expression
   --filter-status <status>  Only run tests with the given status in the last completed (no CTRL+C/SIGINT) run.
                             Valid <status> values are:
@@ -137,6 +140,7 @@ formatter_flags=('--dummy-flag') # add a dummy flag to prevent unset variable er
 formatter='tap'
 report_formatter=''
 recursive=
+exclude_files=
 setup_suite_file=''
 export BATS_TEMPDIR_CLEANUP=1
 output=
@@ -157,6 +161,10 @@ while [[ "$#" -ne 0 ]]; do
     ;;
   -c | --count)
     flags+=('-c')
+    ;;
+  -e | --exclude)
+    shift
+    exclude_files="$1"
     ;;
   -f | --filter)
     shift
@@ -410,6 +418,88 @@ if [[ -n "$setup_suite_file" && ! -f "$setup_suite_file" ]]; then
   abort "--setup-suite-file $setup_suite_file does not exist!"
 fi
 
+# builds and returns specific `find` command as string literal 
+# according given user input to the bat command.
+# 
+# internals: performance over fancy code,
+# use of sub process limited to the absolute minimum.
+#
+_build_find_string() {
+  if [[ -z "$exclude_files" ]]; then
+    printf %s "find -L $filename -type f -name ""*.${BATS_FILE_EXTENSION:-bats}"" -print0"
+    return 0
+  fi
+
+  # parsing procedure in terms of performance:
+  # choose `read -a` combined with looping over one liners with grep, sed/awk etc.
+  read -ra EXCLUDE_FILES <<< "$exclude_files"
+
+  if [[ ${#EXCLUDE_FILES[@]} -eq 1 ]]; then
+    # no additional variable (additional string concatenation), 
+    # make it in once and return immediately!
+    printf %s \
+      "find -L ""$filename"" -type f,d \
+        \( -path $(__build_exclude_pattern "${EXCLUDE_FILES[0]}") \) \
+        -prune -o -name "*."${BATS_FILE_EXTENSION:-bats}"" -print -print0"
+    return 0
+  else
+    printf %s \
+      "find -L ""$filename"" -type f,d \
+        \( $(__build_multi_exclude_pattern "${EXCLUDE_FILES[@]}") \) \
+        -prune -o -name "*."${BATS_FILE_EXTENSION:-bats}"" -print -print0"
+    return 0
+  fi
+}
+
+# argument: exclude_literal
+__is_bats_file() {
+  [[ "$1" == *".bats"* ]]
+}
+
+# argument suite_filename
+_is_excluded() {
+  if [[ -z "$exclude_files" ]]; then
+    return 1
+  fi
+  
+  local suite_filename="$1"
+  read -ra EXCLUDE_FILES <<< "$exclude_files"
+
+  for exclude_file in "${EXCLUDE_FILES[@]}"
+  do
+    # 'double check' needed: $exclude_file can contain dir or file filter
+    if __is_bats_file "$exclude_file"; then
+      if [[ "$suite_filename" == *"$exclude_file"* ]]; then
+        return 0
+      fi
+    fi
+  done
+
+  return 1
+}
+
+# argument: exclude_literal
+__build_exclude_pattern() {
+  if __is_bats_file "$1" ; then
+    printf %s "*$1" # file matching pattern
+  else
+    printf %s "*/$1/*" # directory matching pattern
+  fi
+}
+
+# argument: EXCLUDE_FILES
+__build_multi_exclude_pattern() {
+  # given performance concerns we concatenate and loop in a native c-style manner
+  local exclude_pattern
+  exclude_pattern="-path $(__build_exclude_pattern "${EXCLUDE_FILES[0]}")"
+  local files_length=${#EXCLUDE_FILES[@]}
+  for ((i=1;i<files_length;i++))
+  do
+    exclude_pattern="${exclude_pattern} -o -path $(__build_exclude_pattern "${EXCLUDE_FILES[i]}")"
+  done
+  echo "$exclude_pattern"
+}
+
 filenames=()
 for filename in "${arguments[@]}"; do
   expand_path "$filename" 'filename'
@@ -431,10 +521,12 @@ for filename in "${arguments[@]}"; do
     if [[ "$recursive" -eq 1 ]]; then
       while IFS= read -r -d $'\0' file; do
         filenames+=("$file")
-      done < <(find -L "$filename" -type f -name "*.${BATS_FILE_EXTENSION:-bats}" -print0 | sort -z)
+      done < <(eval "$(_build_find_string)" | sort -z)
     else
       for suite_filename in "$filename"/*."${BATS_FILE_EXTENSION:-bats}"; do
-        filenames+=("$suite_filename")
+        if ! _is_excluded "$suite_filename" ; then
+          filenames+=("$suite_filename")
+        fi
       done
     fi
     shopt -u nullglob
