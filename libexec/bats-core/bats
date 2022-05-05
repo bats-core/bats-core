@@ -206,6 +206,27 @@ elif [[ ! -w "${BATS_TMPDIR}" ]];then
   exit 1
 fi
 
+arguments=()
+
+# Unpack single-character options bundled together, e.g. -cr, -pr.
+for arg in "$@"; do
+  if [[ "$arg" =~ ^-[^-]. ]]; then
+    index=1
+    while option="${arg:$((index++)):1}"; do
+      if [[ -z "$option" ]]; then
+        break
+      fi
+      arguments+=("-$option")
+    done
+  else
+    arguments+=("$arg")
+  fi
+  shift
+done
+
+set -- "${arguments[@]}"
+arguments=()
+
 unset flags recursive formatter_flags
 arguments=()
 flags=('--dummy-flag') # add a dummy flag to prevent unset variable errors on empty array expansion in old bash versions
