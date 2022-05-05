@@ -228,7 +228,6 @@ set -- "${arguments[@]}"
 arguments=()
 
 unset flags recursive formatter_flags
-arguments=()
 flags=('--dummy-flag') # add a dummy flag to prevent unset variable errors on empty array expansion in old bash versions
 formatter_flags=('--dummy-flag') # add a dummy flag to prevent unset variable errors on empty array expansion in old bash versions
 formatter='tap'
