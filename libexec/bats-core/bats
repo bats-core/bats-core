@@ -95,94 +95,111 @@ expand_path() {
   printf -v "$result" '%s/%s' "$dirname" "${path##*/}"
 }
 
-# argument: exclude_literal
+# argument: file
 is_bats_file() {
-  [[ "$1" == *".bats"* ]]
+  [[ "$1" == *"${BATS_FILE_EXTENSION:-.bats}"* ]];
 }
 
-# argument suite_filename
-is_excluded() {
-  if [[ -z "$exclude_files" ]]; then
-    return 1
-  fi
-  
-  local suite_filename="$1"
-  read -ra EXCLUDE_FILES <<< "$exclude_files"
+# arguments:
+#  filtered_suite_filenames ('out' param)
+#  exclude_files 
+#  suite_filenames
+filter_suite() {
+  local result="$1"
+  local exclude_files="$2"
+  shift 2
+  local suite_filenames=("$@")
 
-  for exclude_file in "${EXCLUDE_FILES[@]}"
-  do
-    # 'file check' needed: $exclude_file can contain dir or file filter
-    if is_bats_file "$exclude_file"; then
-      if [[ "$suite_filename" == *"$exclude_file"* ]]; then
-        return 0
+  read -ra EXCLUDE_FILES <<< "$exclude_files"
+  local file_match=
+
+  for suite_filename in "${suite_filenames[@]}"; do
+    for exclude_file in "${EXCLUDE_FILES[@]}"; do
+      file_match=1
+      # 'file check' needed: $exclude_file can contain dir or file filter
+      if is_bats_file "$exclude_file"; then
+        if [[ "$suite_filename" == *"$exclude_file"* ]]; then
+          file_match=0
+          break
+        fi
       fi
+    done
+    if [[ "$file_match" -eq 1 ]]; then
+      filtered_suite_filenames+="${suite_filename} "
     fi
   done
 
-  return 1
+  printf -v "$result" '%s' "${filtered_suite_filenames%?}"
 }
 
-# argument: exclude_literal
+# arguments:
+#   exclude_pattern ('out' param)
+#   exclude_file 
 _build_exclude_pattern() {
-  local result="$2"
-  if is_bats_file "$1" ; then
-    printf -v "$result" '%s' "'*$1'" # file matching pattern
+  local result="$1"
+  local exclude_file="$2"
+
+  if is_bats_file "$exclude_file"; then
+    printf -v "$result" '%s' "'*$exclude_file'" # file matching pattern
   else
-    printf -v "$result" '%s' "'*/$1/*'" # directory matching pattern
+    printf -v "$result" '%s' "'*/$exclude_file/*'" # directory matching pattern
   fi
 }
 
-# argument: EXCLUDE_FILES
+# arguments:
+#   multi_exclude_pattern ('out' param)
+#   exclude_files 
 _build_multi_exclude_pattern() {
-  local result="$2"
-  # given performance concerns we concatenate and loop in a native c-style manner
-  local exclude_pattern
-  _build_exclude_pattern "${EXCLUDE_FILES[0]}" "excl_pattern"
-  # shellcheck disable=SC2154
-  exclude_pattern="-path $excl_pattern"
-  local files_length=${#EXCLUDE_FILES[@]}
-  for ((i=1;i<files_length;i++))
-  do
-    _build_exclude_pattern "${EXCLUDE_FILES[i]}" "excl_pattern"
-    exclude_pattern="${exclude_pattern} -o -path $excl_pattern"
+  local result="$1"
+  shift
+  local exclude_files=("$@")
+  
+  exclude_pattern=
+  _build_exclude_pattern 'exclude_pattern' "${exclude_files[0]}"
+
+  multi_exclude_pattern="-path $exclude_pattern"
+  local files_length="${#exclude_files[@]}"
+
+  for (( i=1; i<files_length; i++ )); do  
+    _build_exclude_pattern 'exclude_pattern' "${exclude_files[i]}"
+    multi_exclude_pattern+=" -o -path $exclude_pattern"
   done
-  printf -v "$result" %s "$exclude_pattern"
+  printf -v "$result" '%s' "$multi_exclude_pattern"
 }
 
-# builds and returns specific `find` command as string literal 
-# according given user input to the bat command.
+# dynamic building of parametrized `find` command as string 
+# literal according given user input to the bats command.
+# enables appropriate filtering!
 # 
-# internals: performance over fancy code
-# - using printf -v instead of command substitution for return values
-# - using find combined with -prune instead of piping with grep/awk etc.
-# - use of sub processes limited to the absolute minimum.
-#
-build_find_command_string() {
+# arguments:
+#   find_command ('out' param)
+#   exclude_files
+build_find_command() {
   local result="$1"
+  # shellcheck disable=SC2178
+  local exclude_files="$2"
+  
+    # shellcheck disable=SC2128
   if [[ -z "$exclude_files" ]]; then
-    printf -v "$result" %s \
+    printf -v "$result" '%s' \
       "find -L $filename -type f \
         -name '*.${BATS_FILE_EXTENSION:-bats}'"
     return 0
   fi
 
-  # parsing procedure in terms of performance:
-  # choose array combined with looping (`read -ra`) 
-  # over one liners with grep, sed/awk etc.
   read -ra EXCLUDE_FILES <<< "$exclude_files"
 
-  # shellcheck disable=SC2154
   if [[ ${#EXCLUDE_FILES[@]} -eq 1 ]]; then
-    _build_exclude_pattern """${EXCLUDE_FILES[0]}""" 'excl_pattern'
+    _build_exclude_pattern 'exclude_pattern' """${EXCLUDE_FILES[0]}"""
     printf -v "$result" %s \
       "find -L $filename -type f,d \
-        \( -path $excl_pattern \) \
+        \( -path $exclude_pattern \) \
         -prune -o -name '*.${BATS_FILE_EXTENSION:-bats}'"
   else
-    _build_multi_exclude_pattern "${EXCLUDE_FILES[@]}" 'multi_excl_pattern'
+    _build_multi_exclude_pattern 'multi_exclude_pattern' "${EXCLUDE_FILES[@]}"
     printf -v "$result" %s \
       "find -L $filename -type f,d \
-        \( $multi_excl_pattern \) \
+        \( $multi_exclude_pattern \) \
         -prune -o -name '*.${BATS_FILE_EXTENSION:-bats}'"
   fi
 }
@@ -232,10 +249,10 @@ flags=('--dummy-flag') # add a dummy flag to prevent unset variable errors on em
 formatter_flags=('--dummy-flag') # add a dummy flag to prevent unset variable errors on empty array expansion in old bash versions
 formatter='tap'
 report_formatter=''
-recursive=
+recursive=1
 exclude_files=
 setup_suite_file=''
-export BATS_TEMPDIR_CLEANUP=1
+export BATS_TEMPDIR_CLEANUP=0
 output=
 if [[ -z "${CI:-}" && -t 0 && -t 1 ]] && command -v tput >/dev/null; then
   formatter='pretty'
@@ -313,7 +330,7 @@ while [[ "$#" -ne 0 ]]; do
     flags+=("--no-parallelize-within-files")
     ;;
   --no-tempdir-cleanup)
-    BATS_TEMPDIR_CLEANUP=''
+    BATS_TEMPDIR_CLEANUP=1
     ;;
   --tempdir) # for internal test consumption only!
     BATS_RUN_TMPDIR="$2"
@@ -392,7 +409,7 @@ bats_exit_trap() {
     printf "%s" "$POST_CAT"
   fi >&2
 
-  if [[ -n "$BATS_TEMPDIR_CLEANUP" ]]; then
+  if [[ "$BATS_TEMPDIR_CLEANUP" -eq 0 ]]; then
     rm -rf "$BATS_RUN_TMPDIR"
   else
     printf "BATS_RUN_TMPDIR: %s\n" "$BATS_RUN_TMPDIR" >&2
@@ -529,25 +546,26 @@ for filename in "${arguments[@]}"; do
 
   if [[ -d "$filename" ]]; then
     shopt -s nullglob
-    if [[ "$recursive" == "0" ]]; then
-      build_find_command_string "find_command"
 
-      # shellcheck disable=SC2154 
+    if [[ "$recursive" -eq 0 ]]; then
+      find_command=
+      build_find_command 'find_command' "$exclude_files"  
       while IFS= read -r -d $'\0' file; do
-        filenames+=("$file")   
-        # performance boost through piping by /dev/fd/63 instead of
-        # creating a temporary file for find's results.
-        # => pipe [<(..)] and redirect [<] '$find_command' to standard input.
-        # for `read` using c-style string termination '\0' [-print0]
-        # eval is a built-in command, no performance issue's expected
+        filenames+=("$file")
+        # using named pipe [<(..)] and stdin redirection [<] for handling 
+        # results from `$find_command` efficiently
       done < <(eval "$find_command" -print0 | sort -z)
     else
-      for suite_filename in "$filename"/*."${BATS_FILE_EXTENSION:-bats}"; do
-        if ! is_excluded "$suite_filename" ; then
-          filenames+=("$suite_filename")
-        fi
-      done
+      suite_filenames=("$filename"/*."${BATS_FILE_EXTENSION:-bats}") 
+      if [[ -n "$exclude_files" ]]; then
+        filter_suite 'filtered_suite_filenames' "$exclude_files" "${suite_filenames[@]}"
+        read -ra FILTERED_SUITE_FILENAMES <<< "$filtered_suite_filenames"
+        filenames=("${FILTERED_SUITE_FILENAMES[@]}")
+      else
+        filenames+=("${suite_filenames[@]}") 
+      fi
     fi
+
     shopt -u nullglob
   else
     filenames+=("$filename")
