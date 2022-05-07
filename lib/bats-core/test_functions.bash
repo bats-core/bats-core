@@ -175,9 +175,11 @@ bats_separate_lines() { # <output-array> <input-var>
   local input_var_name="$2"
   if [[ $keep_empty_lines ]]; then
     local bats_separate_lines_lines=()
-    while IFS= read -r line; do
-      bats_separate_lines_lines+=("$line")
-    done <<<"${!input_var_name}"
+    if [[ -n "${!input_var_name}" ]]; then # avoid getting an empty line for empty input
+      while IFS= read -r line; do
+        bats_separate_lines_lines+=("$line")
+      done <<<"${!input_var_name}"
+    fi
     eval "${output_array_name}=(\"\${bats_separate_lines_lines[@]}\")"
   else
     # shellcheck disable=SC2034,SC2206
