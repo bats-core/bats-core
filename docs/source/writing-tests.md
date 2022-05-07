@@ -59,7 +59,7 @@ If invoked with one of the following as the first argument, `run`
 will perform an implicit check on the exit status of the invoked command:
 
 ```pre
-    =N  expect exit status N (0-255), fail if otherwise
+    -N  expect exit status N (0-255), fail if otherwise
     ! expect nonzero exit status (1-255), fail if command succeeds
 ```
 
