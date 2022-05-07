@@ -1268,3 +1268,26 @@ EOF
   BATS_TEST_NAME_PREFIX='PREFIX: ' run bats "${FIXTURE_ROOT}/passing.bats"
   [ "${lines[1]}" == "ok 1 PREFIX: a passing test" ]
 }
+
+@test "Setting status in teardown* does not override exit code (see issue #575)" {
+  TEARDOWN_RETURN_CODE=0 TEST_RETURN_CODE=0 STATUS=0 run -0 bats "$FIXTURE_ROOT/teardown_override_status.bats"
+  TEARDOWN_RETURN_CODE=1 TEST_RETURN_CODE=0 STATUS=0 run -1 bats "$FIXTURE_ROOT/teardown_override_status.bats"
+  TEARDOWN_RETURN_CODE=0 TEST_RETURN_CODE=1 STATUS=0 run -1 bats "$FIXTURE_ROOT/teardown_override_status.bats"
+  TEARDOWN_RETURN_CODE=1 TEST_RETURN_CODE=1 STATUS=0 run -1 bats "$FIXTURE_ROOT/teardown_override_status.bats"
+  TEARDOWN_RETURN_CODE=0 TEST_RETURN_CODE=0 STATUS=1 run -0 bats "$FIXTURE_ROOT/teardown_override_status.bats"
+  TEARDOWN_RETURN_CODE=1 TEST_RETURN_CODE=0 STATUS=1 run -1 bats "$FIXTURE_ROOT/teardown_override_status.bats"
+
+  TEARDOWN_RETURN_CODE=0 TEST_RETURN_CODE=0 STATUS=0 run -0 bats "$FIXTURE_ROOT/teardown_file_override_status.bats"
+  TEARDOWN_RETURN_CODE=1 TEST_RETURN_CODE=0 STATUS=0 run -1 bats "$FIXTURE_ROOT/teardown_file_override_status.bats"
+  TEARDOWN_RETURN_CODE=0 TEST_RETURN_CODE=1 STATUS=0 run -1 bats "$FIXTURE_ROOT/teardown_file_override_status.bats"
+  TEARDOWN_RETURN_CODE=1 TEST_RETURN_CODE=1 STATUS=0 run -1 bats "$FIXTURE_ROOT/teardown_file_override_status.bats"
+  TEARDOWN_RETURN_CODE=0 TEST_RETURN_CODE=0 STATUS=1 run -0 bats "$FIXTURE_ROOT/teardown_file_override_status.bats"
+  TEARDOWN_RETURN_CODE=1 TEST_RETURN_CODE=0 STATUS=1 run -1 bats "$FIXTURE_ROOT/teardown_file_override_status.bats"
+
+  TEARDOWN_RETURN_CODE=0 TEST_RETURN_CODE=0 STATUS=0 run -0 bats "$FIXTURE_ROOT/teardown_suite_override_status/"
+  TEARDOWN_RETURN_CODE=1 TEST_RETURN_CODE=0 STATUS=0 run -1 bats "$FIXTURE_ROOT/teardown_suite_override_status/"
+  TEARDOWN_RETURN_CODE=0 TEST_RETURN_CODE=1 STATUS=0 run -1 bats "$FIXTURE_ROOT/teardown_suite_override_status/"
+  TEARDOWN_RETURN_CODE=1 TEST_RETURN_CODE=1 STATUS=0 run -1 bats "$FIXTURE_ROOT/teardown_suite_override_status/"
+  TEARDOWN_RETURN_CODE=0 TEST_RETURN_CODE=0 STATUS=1 run -0 bats "$FIXTURE_ROOT/teardown_suite_override_status/"
+  TEARDOWN_RETURN_CODE=1 TEST_RETURN_CODE=0 STATUS=1 run -1 bats "$FIXTURE_ROOT/teardown_suite_override_status/"
+}
