@@ -29,6 +29,7 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 * don't show empty lines as `#` with pretty formatter  (#561)
 * prevent `teardown`, `teardown_file`, and `teardown_suite` from overriding bats'
   exit code by setting `$status` (e.g. via calling `run`) (#581, #575)
+* `run --keep-empty-lines` now reports 0 lines on empty `$output` (#583)
 
 #### Documentation
 
