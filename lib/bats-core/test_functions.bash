@@ -209,10 +209,10 @@ run() { # [!|-N] [--keep-empty-lines] [--separate-stderr] [--] <command to run..
       -[0-9]*)
         expected_rc=${1#-}
         if [[ $expected_rc =~ [^0-9] ]]; then
-          printf "Usage error: run: '=NNN' requires numeric NNN (got: %s)\n" "$expected_rc" >&2
+          printf "Usage error: run: '-NNN' requires numeric NNN (got: %s)\n" "$expected_rc" >&2
           return 1
         elif [[ $expected_rc -gt 255 ]]; then
-          printf "Usage error: run: '=NNN': NNN must be <= 255 (got: %d)\n" "$expected_rc" >&2
+          printf "Usage error: run: '-NNN': NNN must be <= 255 (got: %d)\n" "$expected_rc" >&2
           return 1
         fi
       ;;
