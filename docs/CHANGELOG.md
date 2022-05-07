@@ -10,6 +10,13 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 
 ## [Unreleased]
 
+### Fixed
+
+* prevent `teardown`, `teardown_file`, and `teardown_suite` from overriding bats'
+  exit code by setting `$status` (e.g. via calling `run`) (#581, #575)
+  * **CRITICAL**: this can return exit code 0 despite failed tests, thus preventing
+    your CI from reporting test failures! The regression happened in version 1.6.0.
+
 ## [1.6.0] - 2022-02-24
 
 ### Added

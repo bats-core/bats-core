@@ -135,10 +135,10 @@ bats_exit_trap() {
   if [[ ${BATS_INTERRUPTED-NOTSET} != NOTSET ]]; then
     printf "\n# Received SIGINT, aborting ...\n\n"
   fi
-  exit "$status"
+  exit "$bats_exec_suite_status"
 }
 
-status=0
+bats_exec_suite_status=0
 printf '1..%d\n' "${test_count}"
 
 # No point on continuing if there's no tests.
@@ -163,15 +163,15 @@ if [[ "$num_jobs" -gt 1 ]] && [[ -z "$bats_no_parallelize_across_files" ]]; then
   # shellcheck disable=SC2086,SC2068
   # we need to handle the quoting of ${flags[@]} ourselves,
   # because parallel can only quote it as one
-  parallel --keep-order --jobs "$num_jobs" bats-exec-file "$(printf "%q " "${flags[@]}")" "{}" "$TESTS_LIST_FILE"  ::: "${BATS_UNIQUE_TEST_FILENAMES[@]}" 2>&1 || status=1
+  parallel --keep-order --jobs "$num_jobs" bats-exec-file "$(printf "%q " "${flags[@]}")" "{}" "$TESTS_LIST_FILE"  ::: "${BATS_UNIQUE_TEST_FILENAMES[@]}" 2>&1 || bats_exec_suite_status=1
 else
   for filename in "${BATS_UNIQUE_TEST_FILENAMES[@]}"; do
     if [[ "${BATS_INTERRUPTED-NOTSET}" != NOTSET ]]; then
-      status=130 # bash's code for SIGINT exits
+      bats_exec_suite_status=130 # bash's code for SIGINT exits
       break
     fi
-    bats-exec-file "${flags[@]}" "$filename" "${TESTS_LIST_FILE}" || status=1
+    bats-exec-file "${flags[@]}" "$filename" "${TESTS_LIST_FILE}" || bats_exec_suite_status=1
   done
 fi
 
-exit "$status"
+exit "$bats_exec_suite_status"

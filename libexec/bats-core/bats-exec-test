@@ -94,18 +94,18 @@ source "$BATS_ROOT/lib/bats-core/tracing.bash"
 
 bats_teardown_trap() {
   bats_check_status_from_trap
-  local status=0
+  local bats_teardown_trap_status=0
   # mark the start of this function to distinguish where skip is called
   # parameter 1 will signify the reason why this function was called
   # this is used to identify when this is called as exit trap function
   BATS_TEARDOWN_STARTED=${1:-1}
-  teardown >>"$BATS_OUT" 2>&1 || status="$?"
+  teardown >>"$BATS_OUT" 2>&1 || bats_teardown_trap_status="$?"
 
-  if [[ $status -eq 0 ]]; then
+  if [[ $bats_teardown_trap_status -eq 0 ]]; then
     BATS_TEARDOWN_COMPLETED=1
   elif [[ -n "$BATS_TEST_COMPLETED" ]]; then
     BATS_DEBUG_LAST_STACK_TRACE_IS_VALID=1
-    BATS_ERROR_STATUS="$status"
+    BATS_ERROR_STATUS="$bats_teardown_trap_status"
   fi
 
   bats_exit_trap
