@@ -43,6 +43,12 @@ fixtures run
     [ ${#lines[@]} -eq 2 ]
 }
 
+@test "--keep-empty-lines has zero lines for empty output (see #573)" {
+    run --keep-empty-lines true
+    printf "'%s'\n" "${lines[@]}"
+    [ ${#lines[@]} -eq 0 ]
+}
+
 print-stderr-stdout() {
     printf stdout
     printf stderr >&2
