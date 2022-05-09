@@ -136,6 +136,30 @@ fi
 # only abort on the lowest levels
 trap 'BATS_INTERRUPTED=true' INT
 
+bats_exec_suite_status=0
+printf '1..%d\n' "${test_count}"
+
+# No point on continuing if there's no tests.
+if [[ "${test_count}" == 0 ]]; then
+  exit
+fi
+
+export BATS_SUITE_TMPDIR="${BATS_RUN_TMPDIR}/suite"
+if ! mkdir "$BATS_SUITE_TMPDIR"; then
+  printf '%s\n' "Failed to create BATS_SUITE_TMPDIR" >&2
+  exit 1
+fi
+
+# Deduplicate filenames (without reordering) to avoid running duplicate tests n by n times.
+# (see https://github.com/bats-core/bats-core/issues/329)
+# If a file was specified multiple times, we already got it repeatedly in our TESTS_LIST_FILE.
+# Thus, it suffices to bats-exec-file it once to run all repeated tests on it.
+IFS=$'\n' read -d '' -r -a  BATS_UNIQUE_TEST_FILENAMES < <(printf "%s\n" "$@"| nl | sort -k 2 | uniq -f 1 | sort -n | cut -f 2-) || true
+
+# shellcheck source=lib/bats-core/tracing.bash
+source "$BATS_ROOT/lib/bats-core/tracing.bash"
+bats_setup_tracing
+
 trap bats_suite_exit_trap EXIT
 
 bats_suite_exit_trap() {
@@ -172,31 +196,6 @@ bats_teardown_suite_trap() {
   bats_run_teardown_suite
   bats_suite_exit_trap
 }
-
-bats_exec_suite_status=0
-printf '1..%d\n' "${test_count}"
-
-# No point on continuing if there's no tests.
-if [[ "${test_count}" == 0 ]]; then
-  exit
-fi
-
-export BATS_SUITE_TMPDIR="${BATS_RUN_TMPDIR}/suite"
-if ! mkdir "$BATS_SUITE_TMPDIR"; then
-  printf '%s\n' "Failed to create BATS_SUITE_TMPDIR" >&2
-  exit 1
-fi
-
-# Deduplicate filenames (without reordering) to avoid running duplicate tests n by n times.
-# (see https://github.com/bats-core/bats-core/issues/329)
-# If a file was specified multiple times, we already got it repeatedly in our TESTS_LIST_FILE.
-# Thus, it suffices to bats-exec-file it once to run all repeated tests on it.
-IFS=$'\n' read -d '' -r -a  BATS_UNIQUE_TEST_FILENAMES < <(printf "%s\n" "$@"| nl | sort -k 2 | uniq -f 1 | sort -n | cut -f 2-) || true
-
-
-# shellcheck source=lib/bats-core/tracing.bash
-source "$BATS_ROOT/lib/bats-core/tracing.bash"
-bats_setup_tracing
 
 setup_suite() {
   :
