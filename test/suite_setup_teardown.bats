@@ -86,7 +86,7 @@ setup() {
     [ "${lines[2]}" == "teardown_suite" ] # <- teardown is run
     # get a nice error message
     [ "${lines[3]}" == "not ok 1 setup_suite" ]
-    [ "${lines[4]}" == "# (from function \`setup_suite' in test file test/fixtures/suite_setup_teardown/failure_in_setup_suite/setup_suite.bash, line 3)" ]
+    [ "${lines[4]}" == "# (from function \`setup_suite' in test file $RELATIVE_FIXTURE_ROOT/failure_in_setup_suite/setup_suite.bash, line 3)" ]
     [ "${lines[5]}" == "#   \`false' failed" ]
 }
 
@@ -94,6 +94,6 @@ setup() {
     run ! bats "$FIXTURE_ROOT/failure_in_teardown_suite/"
     [ "${lines[2]}" == "teardown_suite before" ]
     [ "${lines[3]}" == "not ok 2 teardown_suite" ]
-    [ "${lines[4]}" == "# (from function \`teardown_suite' in test file test/fixtures/suite_setup_teardown/failure_in_teardown_suite/setup_suite.bash, line 7)" ]
+    [ "${lines[4]}" == "# (from function \`teardown_suite' in test file $RELATIVE_FIXTURE_ROOT/failure_in_teardown_suite/setup_suite.bash, line 7)" ]
     [ "${lines[5]}" == "#   \`false' failed" ]
 }
