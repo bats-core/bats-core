@@ -8,6 +8,7 @@ bats_no_parallelize_across_files=${BATS_NO_PARALLELIZE_ACROSS_FILES-}
 bats_no_parallelize_within_files=
 flags=('--dummy-flag') # add a dummy flag to prevent unset varialeb errors on empty array expansion in old bash versions
 setup_suite_file=''
+BATS_TRACE_LEVEL="${BATS_TRACE_LEVEL:-0}"
 
 abort() {
   printf 'Error: %s\n' "$1" >&2
@@ -46,6 +47,7 @@ while [[ "$#" -ne 0 ]]; do
     ;;
   --trace)
     flags+=('--trace')
+    (( ++BATS_TRACE_LEVEL )) # avoid returning 0
     ;;
   --print-output-on-failure)
     flags+=(--print-output-on-failure)
@@ -134,13 +136,41 @@ fi
 # only abort on the lowest levels
 trap 'BATS_INTERRUPTED=true' INT
 
-trap bats_exit_trap EXIT
+trap bats_suite_exit_trap EXIT
 
-bats_exit_trap() {
+bats_suite_exit_trap() {
+  if [[ -z "${BATS_SETUP_SUITE_COMPLETED}" || -z "${BATS_TEARDOWN_SUITE_COMPLETED}" ]]; then
+    if [[ -z "${BATS_SETUP_SUITE_COMPLETED}" ]]; then
+      printf "not ok 1 setup_suite\n"
+    elif [[ -z "${BATS_TEARDOWN_SUITE_COMPLETED}" ]]; then
+      printf "not ok %d teardown_suite\n" $((test_count+1))
+    fi
+    local stack_trace
+    bats_get_failure_stack_trace stack_trace
+    bats_print_stack_trace "${stack_trace[@]}"
+    bats_print_failed_command "${stack_trace[@]}"
+    bats_exec_suite_status=1
+  fi
   if [[ ${BATS_INTERRUPTED-NOTSET} != NOTSET ]]; then
     printf "\n# Received SIGINT, aborting ...\n\n"
   fi
   exit "$bats_exec_suite_status"
+}
+
+bats_run_teardown_suite() {
+  # avoid being called twice, in case this is not called through bats_teardown_suite_trap
+  # but from the end of file
+  trap bats_suite_exit_trap EXIT
+  set -eET
+  BATS_TEARDOWN_SUITE_COMPLETED=
+  teardown_suite
+  BATS_TEARDOWN_SUITE_COMPLETED=1
+  set +ET
+}
+
+bats_teardown_suite_trap() {
+  bats_run_teardown_suite
+  bats_suite_exit_trap
 }
 
 bats_exec_suite_status=0
@@ -163,19 +193,36 @@ fi
 # Thus, it suffices to bats-exec-file it once to run all repeated tests on it.
 IFS=$'\n' read -d '' -r -a  BATS_UNIQUE_TEST_FILENAMES < <(printf "%s\n" "$@"| nl | sort -k 2 | uniq -f 1 | sort -n | cut -f 2-) || true
 
+
+# shellcheck source=lib/bats-core/tracing.bash
+source "$BATS_ROOT/lib/bats-core/tracing.bash"
+bats_setup_tracing
+
+setup_suite() {
+  :
+}
+
+teardown_suite() {
+  : 
+}
+
+trap bats_teardown_suite_trap EXIT
+
 if [[ -n "$setup_suite_file" ]]; then
   setup_suite() {
     printf "%s does not define \`setup_suite()\`\n" "$setup_suite_file" >&2
     exit 1
   }
 
-  teardown_suite() {
-    : 
-  }
   # shellcheck disable=SC1090
   source "$setup_suite_file"
-  setup_suite
 fi
+
+set -eET
+BATS_SETUP_SUITE_COMPLETED=
+setup_suite
+BATS_SETUP_SUITE_COMPLETED=1
+set +ET
 
 if [[ "$num_jobs" -gt 1 ]] && [[ -z "$bats_no_parallelize_across_files" ]]; then
   # run files in parallel to get the maximum pool of parallel tasks
@@ -193,8 +240,7 @@ else
   done
 fi
 
-if [[ -n "$setup_suite_file" ]]; then
-  teardown_suite || bats_exec_suite_status=1
-fi
+set -eET
+bats_run_teardown_suite
 
 exit "$bats_exec_suite_status"
