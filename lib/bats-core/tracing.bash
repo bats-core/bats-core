@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# shellcheck source=lib/bats-core/common.bash
+source "$BATS_ROOT/lib/bats-core/common.bash"
+
 bats_capture_stack_trace() {
 	local test_file
 	local funcname
@@ -14,7 +17,7 @@ bats_capture_stack_trace() {
 		funcname="${FUNCNAME[$i]}"
 		BATS_DEBUG_LAST_STACK_TRACE+=("${BASH_LINENO[$((i-1))]} $funcname $test_file")
 		case "$funcname" in
-		"$BATS_TEST_NAME" | setup | teardown | setup_file | teardown_file)
+		"$BATS_TEST_NAME" | setup | teardown | setup_file | teardown_file | setup_suite | teardown_suite)
 			break
 			;;
 		esac
