@@ -7,6 +7,7 @@ setup() {
     if [[ -n "$RELATIVE_BATS_ROOT" && "$RELATIVE_BATS_ROOT" != */ ]]; then
         RELATIVE_BATS_ROOT+=/
     fi
+    echo "RELATIVE_BATS_ROOT=$RELATIVE_BATS_ROOT"
 }
 
 @test "invalid warning is an error" {
