@@ -3,6 +3,9 @@
 BATS_TEST_DIRNAME="${BATS_TEST_FILENAME%/*}"
 BATS_TEST_NAMES=()
 
+# shellcheck source=lib/bats-core/warnings.bash
+source "$BATS_ROOT/lib/bats-core/warnings.bash"
+
 # find_in_bats_lib_path echoes the first recognized load path to
 # a library in BATS_LIB_PATH or relative to BATS_TEST_DIRNAME.
 #
@@ -274,6 +277,7 @@ run() { # [!|-N] [--keep-empty-lines] [--separate-stderr] [--] <command to run..
     printf "%s\n" "$output" 
   fi
 
+
   if [[ -n "$expected_rc" ]]; then
     if [[ "$expected_rc" = "-1" ]]; then
       if [[ "$status" -eq 0 ]]; then
@@ -285,6 +289,8 @@ run() { # [!|-N] [--keep-empty-lines] [--separate-stderr] [--] <command to run..
       BATS_ERROR_SUFFIX=", expected exit code $expected_rc, got $status"
       return 1
     fi
+  elif [[ "$status" -eq 127 ]]; then # "command not found"
+    bats_generate_warning 1 "$BATS_RUN_COMMAND"
   fi
   # don't leak our trap into surrounding code
   trap bats_interrupt_trap INT

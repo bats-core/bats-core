@@ -15,6 +15,8 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 * Pretty formatter print filename when entering file (#561)
 * BATS_TEST_NAME_PREFIX allows prefixing test names on stdout and in reports (#561)
 * setup_suite and teardown_suite (#571, #585)
+* out-of-band warning infrastructure and first warning BW01 
+  (run command not found) (#586)
 
 #### Documentation
 

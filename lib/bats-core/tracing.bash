@@ -55,10 +55,11 @@ bats_print_stack_trace() {
 		bats_trim_filename "$filename" 'filename'
 		bats_frame_lineno "$frame" 'lineno'
 
+		printf '%s' "${BATS_STACK_TRACE_PREFIX-# }"
 		if [[ $index -eq 1 ]]; then
-			printf '# ('
+			printf '('
 		else
-			printf '#  '
+			printf ' '
 		fi
 
 		local fn

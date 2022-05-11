@@ -257,11 +257,27 @@ elif ! BATS_RUN_TMPDIR=$(mktemp -d "${BATS_TMPDIR}/bats-run-XXXXXX");then
   exit 1
 fi
 
-if [[ -n "$BATS_TEMPDIR_CLEANUP" ]]; then
-  trap 'rm -rf "$BATS_RUN_TMPDIR"' ERR EXIT
-else
-  trap 'printf "BATS_RUN_TMPDIR: $BATS_RUN_TMPDIR\n">&2' EXIT
-fi
+export BATS_WARNING_FILE="${BATS_RUN_TMPDIR}/warnings.log"
+
+bats_exit_trap() {
+  if [[ -s "$BATS_WARNING_FILE" ]]; then
+    if [[ $formatter == pretty ]]; then
+      PRE_CAT=$'\x1B[31m'
+      POST_CAT=$'\x1B[0m'
+    fi
+    printf "\nThe following warnings were encountered during tests:\n%s" "$PRE_CAT"
+    cat "$BATS_WARNING_FILE"
+    printf "%s" "$POST_CAT"
+  fi >&2
+
+  if [[ -n "$BATS_TEMPDIR_CLEANUP" ]]; then
+    rm -rf "$BATS_RUN_TMPDIR"
+  else
+    printf "BATS_RUN_TMPDIR: %s\n" "$BATS_RUN_TMPDIR" >&2
+  fi
+}
+
+trap bats_exit_trap EXIT
 
 if [[ "$formatter" != "tap" ]]; then
   flags+=('-x')
