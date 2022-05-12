@@ -14,4 +14,4 @@ Versions before v1.2.1 are documented over `there <https://github.com/bats-core/
    writing-tests
    gotchas
    faq
-
+   warnings/index

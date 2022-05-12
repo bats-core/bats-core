@@ -1,0 +1,17 @@
+BW01: `run`'s command `<command>` exited with code 127, indicating 'Command not found'. Use run's return code checks, e.g. `run -127`, to fix this message.
+===========================================================================================================================================================
+
+Due to `run`'s default behavior of always succeeding, errors in the command string can remain hidden from the user, e.g.[here](https://github.com/bats-core/bats-core/issues/578).
+As a proxy for this problem, the return code is checked for value 127 ("Command not found").
+
+How to fix
+----------
+
+If your command should actually return code 127, then you can simply use `run -127 <your command>` to state your intent and the message will go away.
+
+If your command should not return 127, you should fix the problem with the command.
+Take a careful look at the command string in the warning message, to see if it contains code that you did not intend to run.
+
+If your command should sometimes return 127, but never 0, you can use `run ! <your command>`.
+
+If your command can sometimes return 127 and sometimes 0, the please submit an issue.
