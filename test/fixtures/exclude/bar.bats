@@ -1,0 +1,1 @@
+@test 'bar in /test/fixtures/exclude' { true; }

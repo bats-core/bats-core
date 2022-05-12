@@ -1,0 +1,1 @@
+@test 'grault in /test/fixtures/exclude/c/c1/c2' { true; }

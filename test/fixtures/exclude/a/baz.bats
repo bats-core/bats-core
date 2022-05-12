@@ -1,0 +1,1 @@
+@test 'baz in /test/fixtures/exclude/a' { true; }

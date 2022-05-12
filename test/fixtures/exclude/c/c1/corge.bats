@@ -1,0 +1,1 @@
+@test 'corge in /test/fixtures/exclude/c/c1' { true; }

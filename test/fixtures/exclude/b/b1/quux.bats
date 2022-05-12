@@ -1,0 +1,1 @@
+@test 'quux in /test/fixtures/exclude/b/b1' { true; }
