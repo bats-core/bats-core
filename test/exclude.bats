@@ -91,8 +91,13 @@ fixtures exclude
   echo "$output" | grep "^ok . grault"
 }
 
+# run bats -r -e "a b grault.bats" "$FIXTURE_ROOT"
+# run bats -r -e "a qux.bats" "$FIXTURE_ROOT"
+# run bats -r -e "a bar.bats quux.bats c" "$FIXTURE_ROOT"
+
+#win
 @test "excluding folder a & test qux.bats in fixture" {
-  run bats -r -e "a qux.bats" "$FIXTURE_ROOT"
+  run bats -r -e 'a qux.bats' "$FIXTURE_ROOT"
   [ $status -eq 0 ]
   [ "${lines[0]}" = "1..5" ]
   echo "$output" | grep "^ok . foo"
@@ -111,8 +116,9 @@ fixtures exclude
   echo "$output" | grep "^ok . quux"
 }
 
+#win
 @test "excluding folder a & b and test grault.bats in fixture" {
-  run bats -r -e "a b grault.bats" "$FIXTURE_ROOT"
+  run bats -r -e 'a b grault.bats' "$FIXTURE_ROOT"
   [ $status -eq 0 ]
   [ "${lines[0]}" = "1..3" ]
   echo "$output" | grep "^ok . foo"
@@ -120,8 +126,9 @@ fixtures exclude
   echo "$output" | grep "^ok . corge"
 }
 
+#win
 @test "excluding folder a, test bar.bats & quux.bats and folder c in fixture" {
-  run bats -r -e "a bar.bats quux.bats c" "$FIXTURE_ROOT"
+  run bats -r -e 'a bar.bats quux.bats c' "$FIXTURE_ROOT"
   [ $status -eq 0 ]
   [ "${lines[0]}" = "1..2" ]
   echo "$output" | grep "^ok . foo"
