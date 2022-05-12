@@ -192,13 +192,13 @@ build_find_command() {
   if [[ ${#EXCLUDE_FILES[@]} -eq 1 ]]; then
     _build_exclude_pattern 'exclude_pattern' """${EXCLUDE_FILES[0]}"""
     printf -v "$result" %s \
-      "find -L $filename -type f,d \
+      "find -L $filename \
         \( -path $exclude_pattern \) \
         -prune -o -name '*.${BATS_FILE_EXTENSION:-bats}'"
   else
     _build_multi_exclude_pattern 'multi_exclude_pattern' "${EXCLUDE_FILES[@]}"
     printf -v "$result" %s \
-      "find -L $filename -type f,d \
+      "find -L $filename \
         \( $multi_exclude_pattern \) \
         -prune -o -name '*.${BATS_FILE_EXTENSION:-bats}'"
   fi
