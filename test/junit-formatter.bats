@@ -140,6 +140,7 @@ TESTSUITES_REGEX="<testsuites time=\"$FLOAT_REGEX\">"
 }
 
 @test "junit does not mark tests with FD 3 output in teardown_file as failed (issue #531)" {
+  bats_require_minimum_version 1.5.0
   run -0 bats --formatter junit "$FIXTURE_ROOT/issue_531.bats"
 
   [[ "${lines[2]}" == '<testsuite name="issue_531.bats" '*'>' ]]

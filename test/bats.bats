@@ -1062,6 +1062,7 @@ EOF
 }
 
 @test "pretty formatter summary is colorized red on failure" {
+  bats_require_minimum_version 1.5.0
   run -1 bats --pretty "$FIXTURE_ROOT/failing.bats"
   
   [ "${lines[4]}" == $'\033[0m\033[31;1m' ] # TODO: avoid checking for the leading reset too
@@ -1070,6 +1071,7 @@ EOF
 }
 
 @test "pretty formatter summary is colorized green on success" {
+  bats_require_minimum_version 1.5.0
   run -0 bats --pretty "$FIXTURE_ROOT/passing.bats"
 
   [ "${lines[2]}" == $'\033[0m\033[32;1m' ] # TODO: avoid checking for the leading reset too
@@ -1094,6 +1096,7 @@ EOF
 }
 
 @test "--show-output-of-passing-tests works as expected" {
+  bats_require_minimum_version 1.5.0
   run -0 bats --show-output-of-passing-tests "$FIXTURE_ROOT/show-output-of-passing-tests.bats"
   [ "${lines[0]}" == '1..1' ]
   [ "${lines[1]}" == 'ok 1 test' ]
@@ -1102,20 +1105,22 @@ EOF
 }
 
 @test "--verbose-run prints output" {
+  bats_require_minimum_version 1.5.0
   run -1 bats --verbose-run "$FIXTURE_ROOT/verbose-run.bats"
   [ "${lines[0]}" == '1..1' ]
   [ "${lines[1]}" == 'not ok 1 test' ]
-  [ "${lines[2]}" == "# (in test file $RELATIVE_FIXTURE_ROOT/verbose-run.bats, line 2)" ]
+  [ "${lines[2]}" == "# (in test file $RELATIVE_FIXTURE_ROOT/verbose-run.bats, line 3)" ]
   [ "${lines[3]}" == "#   \`run ! echo test' failed, expected nonzero exit code!" ]
   [ "${lines[4]}" == '# test' ]
   [ ${#lines[@]} -eq 5 ]
 }
 
 @test "BATS_VERBOSE_RUN=1 also prints output" {
+  bats_require_minimum_version 1.5.0
   run -1 env BATS_VERBOSE_RUN=1 bats "$FIXTURE_ROOT/verbose-run.bats"
   [ "${lines[0]}" == '1..1' ]
   [ "${lines[1]}" == 'not ok 1 test' ]
-  [ "${lines[2]}" == "# (in test file $RELATIVE_FIXTURE_ROOT/verbose-run.bats, line 2)" ]
+  [ "${lines[2]}" == "# (in test file $RELATIVE_FIXTURE_ROOT/verbose-run.bats, line 3)" ]
   [ "${lines[3]}" == "#   \`run ! echo test' failed, expected nonzero exit code!" ]
   [ "${lines[4]}" == '# test' ]
   [ ${#lines[@]} -eq 5 ]
@@ -1152,6 +1157,7 @@ EOF
     skip "this test requires flock not to be installed"
   fi
 
+  bats_require_minimum_version 1.5.0
   run ! bats --jobs 2 "$FIXTURE_ROOT/parallel.bats"
   [ "${lines[0]}" == "ERROR: flock/shlock is required for parallelization within files!" ]
   [ "${#lines[@]}" -eq 1 ]
@@ -1162,6 +1168,7 @@ EOF
 }
 
 @test "BATS_CODE_QUOTE_STYLE works with any two characters (even unicode)" {
+  bats_require_minimum_version 1.5.0
   BATS_CODE_QUOTE_STYLE='``' run -1 bats --tap "${FIXTURE_ROOT}/failing.bats"
   # shellcheck disable=SC2016
   [ "${lines[3]}" == '#   `eval "( exit ${STATUS:-1} )"` failed' ]
@@ -1172,6 +1179,8 @@ EOF
     # for example, this happens on windows!
     skip 'Unicode chars are not counted as one char in this system'
   fi
+
+  bats_require_minimum_version 1.5.0
   run -1 bats --tap "${FIXTURE_ROOT}/failing.bats"
   # shellcheck disable=SC2016
   [ "${lines[3]}" == '#   😁eval "( exit ${STATUS:-1} )"😂 failed' ]
@@ -1180,6 +1189,8 @@ EOF
 @test "BATS_CODE_QUOTE_STYLE=custom requires BATS_CODE_QUOTE_BEGIN/END" {
   # unset because they are set in the surrounding scope
   unset BATS_BEGIN_CODE_QUOTE BATS_END_CODE_QUOTE
+
+  bats_require_minimum_version 1.5.0
 
   BATS_CODE_QUOTE_STYLE=custom run -1 bats --tap "${FIXTURE_ROOT}/passing.bats"
   [ "${lines[0]}" == 'ERROR: BATS_CODE_QUOTE_STYLE=custom requires BATS_BEGIN_CODE_QUOTE and BATS_END_CODE_QUOTE to be set' ]
@@ -1194,6 +1205,7 @@ EOF
 }
 
 @test "Warn about invalid BATS_CODE_QUOTE_STYLE" {
+  bats_require_minimum_version 1.5.0
   BATS_CODE_QUOTE_STYLE='' run -1 bats --tap "${FIXTURE_ROOT}/passing.bats"
   [ "${lines[0]}" == 'ERROR: Unknown BATS_CODE_QUOTE_STYLE: ' ]
 
@@ -1240,6 +1252,7 @@ EOF
   # add variables that should be ignored like PIPESTATUS here
   BASH_DECLARED_VARIABLES=$(env -i PIPESTATUS= "$BASH" -c "declare -p")
   local BATS_DECLARED_VARIABLES_FILE="${BATS_TEST_TMPDIR}/variables.log"
+  bats_require_minimum_version 1.5.0
   # now capture bats @test environment
   run -0 env -i PATH="$PATH" BATS_DECLARED_VARIABLES_FILE="$BATS_DECLARED_VARIABLES_FILE"  bash "${BATS_ROOT}/bin/bats" "${FIXTURE_ROOT}/issue-519.bats"
   # use function to allow failing via !, run is a bit unwiedly with the pipe and subshells
@@ -1255,6 +1268,7 @@ EOF
 @test "Don't wait for disowned background jobs to finish because of open FDs (#205)" {
     SECONDS=0
     export LOG_FILE="$BATS_TEST_TMPDIR/fds.log"
+    bats_require_minimum_version 1.5.0
     run -0 bats --show-output-of-passing-tests --tap "${FIXTURE_ROOT}/issue-205.bats"
     echo "Whole suite took: $SECONDS seconds"
     FDS_LOG=$(<"$LOG_FILE")
@@ -1270,6 +1284,7 @@ EOF
 }
 
 @test "Setting status in teardown* does not override exit code (see issue #575)" {
+  bats_require_minimum_version 1.5.0
   TEARDOWN_RETURN_CODE=0 TEST_RETURN_CODE=0 STATUS=0 run -0 bats "$FIXTURE_ROOT/teardown_override_status.bats"
   TEARDOWN_RETURN_CODE=1 TEST_RETURN_CODE=0 STATUS=0 run -1 bats "$FIXTURE_ROOT/teardown_override_status.bats"
   TEARDOWN_RETURN_CODE=0 TEST_RETURN_CODE=1 STATUS=0 run -1 bats "$FIXTURE_ROOT/teardown_override_status.bats"

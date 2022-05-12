@@ -1,4 +1,6 @@
+
 @test bats_version_lt {
+    bats_require_minimum_version 1.5.0
     run ! bats_version_lt 1.0.0   1.0
     [ "$output" = "ERROR: version '1.0' must be of format <major>.<minor>.<patch>!" ]
 
