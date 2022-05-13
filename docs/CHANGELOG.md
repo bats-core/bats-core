@@ -24,6 +24,7 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 #### Documentation
 
 * document `$BATS_VERSION` (#557)
+* document new warning infrastructure (#589, #587, #586)
 
 ### Fixed
 
