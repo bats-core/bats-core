@@ -3,22 +3,29 @@
 load test_helper
 fixtures exclude
 
-# we test against following fixture/directory and test setup:
+# we test against following fixture/directory setup:
 # 
 # exclude
-# ├── a
+# ├── a0
 # │   └── baz.bats
-# ├── b
+# ├── b0
 # │   └── b1
 # │       ├── quux.bats
 # │       └── qux.bats
-# ├── c
+# ├── c0
 # │   └── c1
 # │       ├── c2
 # │       │   └── grault.bats
 # │        └── corge.bats
 # ├── bar.bats
 # └── foo.bats 
+#
+# note: 
+#   directory names has to be chosen wisely for interoperability with WSL:
+#   avoid directory names with one letter because it could interfere with 
+#   mounted windows drives => /mnt/X/.../exclude/X
+#   e.g. `bats -e "c" fixtures/exclude` operates on "/mnt/c/.../exclude/c/..."
+#   all tests would be excluded in such cases, no matter what! 
 
 @test "running all tests in fixture without exclude options" {
   run bats -r "$FIXTURE_ROOT"
@@ -57,8 +64,8 @@ fixtures exclude
   echo "$output" | grep "^ok . corge"
 }
 
-@test "excluding folder c in fixture" {
-  run bats -r -e "c" "$FIXTURE_ROOT"
+@test "excluding folder c0 in fixture" {
+  run bats -r -e "c0" "$FIXTURE_ROOT"
   [ $status -eq 0 ]
   [ "${lines[0]}" = "1..5" ]
   echo "$output" | grep "^ok . foo"
@@ -91,13 +98,8 @@ fixtures exclude
   echo "$output" | grep "^ok . grault"
 }
 
-# run bats -r -e "a b grault.bats" "$FIXTURE_ROOT"
-# run bats -r -e "a qux.bats" "$FIXTURE_ROOT"
-# run bats -r -e "a bar.bats quux.bats c" "$FIXTURE_ROOT"
-
-#win
-@test "excluding folder a & test qux.bats in fixture" {
-  run bats -r -e 'a qux.bats' "$FIXTURE_ROOT"
+@test "excluding folder a0 & test qux.bats in fixture" {
+  run bats -r -e "a0 qux.bats" "$FIXTURE_ROOT"
   [ $status -eq 0 ]
   [ "${lines[0]}" = "1..5" ]
   echo "$output" | grep "^ok . foo"
@@ -107,8 +109,8 @@ fixtures exclude
   echo "$output" | grep "^ok . grault"
 }
 
-@test "excluding tests foo.bats & qux.bats and folder c in fixture" {
-  run bats -r -e "foo.bats qux.bats c" "$FIXTURE_ROOT"
+@test "excluding tests foo.bats & qux.bats and folder c0 in fixture" {
+  run bats -r -e "foo.bats qux.bats c0" "$FIXTURE_ROOT"
   [ $status -eq 0 ]
   [ "${lines[0]}" = "1..3" ]
   echo "$output" | grep "^ok . baz"
@@ -116,9 +118,8 @@ fixtures exclude
   echo "$output" | grep "^ok . quux"
 }
 
-#win
-@test "excluding folder a & b and test grault.bats in fixture" {
-  run bats -r -e 'a b grault.bats' "$FIXTURE_ROOT"
+@test "excluding folder a0 & b0 and test grault.bats in fixture" {
+  run bats -r -e "a0 b0 grault.bats" "$FIXTURE_ROOT"
   [ $status -eq 0 ]
   [ "${lines[0]}" = "1..3" ]
   echo "$output" | grep "^ok . foo"
@@ -126,9 +127,8 @@ fixtures exclude
   echo "$output" | grep "^ok . corge"
 }
 
-#win
-@test "excluding folder a, test bar.bats & quux.bats and folder c in fixture" {
-  run bats -r -e 'a bar.bats quux.bats c' "$FIXTURE_ROOT"
+@test "excluding folder a0, test bar.bats & quux.bats and folder c0 in fixture" {
+  run bats -r -e "a0 bar.bats quux.bats c0" "$FIXTURE_ROOT"
   [ $status -eq 0 ]
   [ "${lines[0]}" = "1..2" ]
   echo "$output" | grep "^ok . foo"
@@ -147,15 +147,15 @@ fixtures exclude
   [ "${lines[0]}" = "0" ]
 }
 
-@test "excluding tests with pattern 'c*' in fixture" {
-  run bats -r --exclude "c*" "$FIXTURE_ROOT"
+@test "excluding tests with pattern 'b0*' in fixture" {
+  run bats -r --exclude "b0*" "$FIXTURE_ROOT"
   [ $status -eq 0 ]
   [ "${lines[0]}" = "1..5" ]
   echo "$output" | grep "^ok . foo"
   echo "$output" | grep "^ok . baz"
   echo "$output" | grep "^ok . bar"
-  echo "$output" | grep "^ok . qux"
-  echo "$output" | grep "^ok . quux"
+  echo "$output" | grep "^ok . corge"
+  echo "$output" | grep "^ok . grault"
 }
 
 @test "excluding tests with pattern 'b1*' and test bar.bats in fixture" {
