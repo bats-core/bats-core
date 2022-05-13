@@ -58,6 +58,11 @@ command and command arguments passed to `run` for execution.
 If invoked with one of the following as the first argument, `run`
 will perform an implicit check on the exit status of the invoked command:
 
+> ⚠️ **_CAUTION_** ⚠️: Previous versions of this documentation erronously contained
+> the syntax `=N` instead of `-N` below. Using this wrong format leads to silent
+> errors. See [issue #578](https://github.com/bats-core/bats-core/issues/578)
+> for more details and how to found out if your tests are affected.
+
 ```pre
     -N  expect exit status N (0-255), fail if otherwise
     ! expect nonzero exit status (1-255), fail if command succeeds
