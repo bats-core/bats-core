@@ -22,7 +22,8 @@ copyright = '2021, bats-core origanization'
 author = 'bats-core origanization'
 
 # The full version, including alpha/beta/rc tags
-release = '1'
+version = '1.5.0'
+release = version
 
 
 # -- General configuration ---------------------------------------------------
