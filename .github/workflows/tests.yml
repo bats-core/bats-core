@@ -20,8 +20,10 @@ jobs:
       - uses: actions/checkout@v2
       - name: Run shellcheck
         run: |
-          sudo apt-get update -y
-          sudo apt-get install shellcheck
+          scversion="latest"
+          wget -qO- "https://github.com/koalaman/shellcheck/releases/download/${scversion?}/shellcheck-${scversion?}.linux.x86_64.tar.xz" | tar -xJv
+          cp "shellcheck-${scversion}/shellcheck" /usr/bin/
+          shellcheck --version
           ./shellcheck.sh
 
   linux:
