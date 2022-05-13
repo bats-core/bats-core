@@ -15,8 +15,11 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 * Pretty formatter print filename when entering file (#561)
 * BATS_TEST_NAME_PREFIX allows prefixing test names on stdout and in reports (#561)
 * setup_suite and teardown_suite (#571, #585)
-* out-of-band warning infrastructure and first warning BW01 
-  (run command not found) (#586)
+* out-of-band warning infrastructure, with following warnings:
+  * BW01: run command not found (exit code 127)  (#586)
+  * BW02: run uses flags without proper `bats_require_minimum_version` guard (#587)
+* `bats_require_minimum_version` to guard code that would not run on older
+  versions (#587)
 
 #### Documentation
 
@@ -31,6 +34,8 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 * don't show empty lines as `#` with pretty formatter  (#561)
 * prevent `teardown`, `teardown_file`, and `teardown_suite` from overriding bats'
   exit code by setting `$status` (e.g. via calling `run`) (#581, #575)
+  * **CRITICAL**: this can return exit code 0 despite failed tests, thus preventing
+    your CI from reporting test failures! The regression happened in version 1.6.0.
 * `run --keep-empty-lines` now reports 0 lines on empty `$output` (#583)
 
 #### Documentation
