@@ -1,0 +1,46 @@
+BW02: <feature> requires at least BATS_VERSION=<version>. Use `bats_require_minimum_version <version>` to fix this message.
+===========================================================================================================================
+
+Using a feature that is only available starting with a certain version can be a problem when your tests also run on older versions of Bats.
+In most cases, running this code in older versions will generate an error due to a missing command.
+However, in cases like `run`'s where old version simply take all parameters as command to execute, the failure can be silent.
+
+How to fix
+----------
+
+When you encounter this warning, you can simply guard your code with `bats_require_minimum_version <version>` as the message says.
+For example, consider the following code:
+
+.. code-block:: bash
+
+    @test test {
+        bats_require_minimum_version 1.5.0
+        # pre 1.5.0 the flag --separate-stderr would be interpreted as command to run
+        run --separate-stderr some-command 
+        [ $output = "blablabla" ]
+    }
+
+
+The call to `bats_require_minimum_version` can be put anywhere before the warning generating command, even in `setup`, `setup_file`, or even outside any function.
+This can be used to give fine control over the version dependencies:
+
+.. code-block:: bash
+
+    @test test {
+        bats_require_minimum_version 1.5.0
+        # pre 1.5.0 the flag --separate-stderr would be interpreted as command to run
+        run --separate-stderr some-command 
+        [ $output = "blablabla" ]
+    }
+
+    @test test2 {
+        run some-other-command # no problem executing on earlier version
+    }
+
+
+If the above code is executed on a system with a `BATS_VERSION` pre 1.5.0, the first test will fail on `bats_require_minimum_version 1.5.0`.
+
+Instances:
+----------
+
+- run's non command parameters like `--keep-empty-lines` are only available since 1.5.0

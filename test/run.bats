@@ -1,5 +1,6 @@
 load test_helper
 fixtures run
+bats_require_minimum_version 1.5.0
 
 @test "run --keep-empty-lines preserves leading empty lines" {
     run --keep-empty-lines -- echo -n $'\na'
@@ -90,19 +91,19 @@ print-stderr-stdout() {
   echo "$output"
   [ "${lines[0]}" == 1..5 ]
   [ "${lines[1]}" == "not ok 1 run -0 false" ]
-  [ "${lines[2]}" == "# (in test file ${RELATIVE_FIXTURE_ROOT}/failing.bats, line 2)" ]
+  [ "${lines[2]}" == "# (in test file ${RELATIVE_FIXTURE_ROOT}/failing.bats, line 3)" ]
   [ "${lines[3]}" == "#   \`run -0 false' failed, expected exit code 0, got 1" ]
   [ "${lines[4]}" == "not ok 2 run -1 echo hi" ]
-  [ "${lines[5]}" == "# (in test file ${RELATIVE_FIXTURE_ROOT}/failing.bats, line 6)" ]
+  [ "${lines[5]}" == "# (in test file ${RELATIVE_FIXTURE_ROOT}/failing.bats, line 7)" ]
   [ "${lines[6]}" == "#   \`run -1 echo hi' failed, expected exit code 1, got 0" ]
   [ "${lines[7]}" == "not ok 3 run -2 exit 3" ]
-  [ "${lines[8]}" == "# (in test file ${RELATIVE_FIXTURE_ROOT}/failing.bats, line 10)" ]
+  [ "${lines[8]}" == "# (in test file ${RELATIVE_FIXTURE_ROOT}/failing.bats, line 11)" ]
   [ "${lines[9]}" == "#   \`run -2 exit 3' failed, expected exit code 2, got 3" ]
   [ "${lines[10]}" == "not ok 4 run ! true" ]
-  [ "${lines[11]}" == "# (in test file ${RELATIVE_FIXTURE_ROOT}/failing.bats, line 14)" ]
+  [ "${lines[11]}" == "# (in test file ${RELATIVE_FIXTURE_ROOT}/failing.bats, line 15)" ]
   [ "${lines[12]}" == "#   \`run ! true' failed, expected nonzero exit code!" ]
   [ "${lines[13]}" == "not ok 5 run multiple pass/fails" ]
-  [ "${lines[14]}" == "# (in test file ${RELATIVE_FIXTURE_ROOT}/failing.bats, line 21)" ]
+  [ "${lines[14]}" == "# (in test file ${RELATIVE_FIXTURE_ROOT}/failing.bats, line 22)" ]
   [ "${lines[15]}" == "#   \`run -1 /etc' failed, expected exit code 1, got 126" ]
 }
 

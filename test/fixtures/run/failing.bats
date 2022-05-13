@@ -1,3 +1,4 @@
+bats_require_minimum_version 1.5.0
 @test "run -0 false" {
   run -0 false
 }

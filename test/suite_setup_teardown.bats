@@ -1,5 +1,6 @@
 load test_helper
 fixtures suite_setup_teardown
+bats_require_minimum_version 1.5.0
 
 setup() {
     export LOGFILE="$BATS_TEST_TMPDIR/log"

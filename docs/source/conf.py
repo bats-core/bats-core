@@ -18,7 +18,7 @@
 # -- Project information -----------------------------------------------------
 
 project = 'bats-core'
-copyright = '2021, bats-core organization'
+copyright = '2022, bats-core organization'
 author = 'bats-core organization'
 
 # The full version, including alpha/beta/rc tags

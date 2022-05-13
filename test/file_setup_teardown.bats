@@ -1,3 +1,5 @@
+bats_require_minimum_version 1.5.0
+
 load 'test_helper'
 fixtures file_setup_teardown
 

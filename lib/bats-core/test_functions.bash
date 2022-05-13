@@ -198,8 +198,10 @@ run() { # [!|-N] [--keep-empty-lines] [--separate-stderr] [--] <command to run..
   local expected_rc=
   local keep_empty_lines=
   local output_case=merged
+  local has_flags=
   # parse options starting with -
   while [[ $# -gt 0 ]] && [[ $1 == -* || $1 == '!' ]]; do
+    has_flags=1
     case "$1" in
       '!')
         expected_rc=-1
@@ -231,6 +233,10 @@ run() { # [!|-N] [--keep-empty-lines] [--separate-stderr] [--] <command to run..
     esac
     shift
   done
+
+  if [[ -n $has_flags ]]; then
+    bats_warn_minimum_guaranteed_version "Using flags on \`run\`" 1.5.0
+  fi
 
   local pre_command=
 
