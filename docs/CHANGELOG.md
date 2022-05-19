@@ -14,7 +14,8 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 
 #### Documentation
 
-* update negation recommendations (#593)
+* update gotcha about negated statements: Recommend using `run !` on Bats
+  versions >=1.5.0 (#593)
 
 ## [1.7.0] - 2022-05-14
 
