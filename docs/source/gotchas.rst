@@ -12,10 +12,11 @@ Please adhere to this idiom while using bats, or you will constantly work agains
 My negated statement (e.g. ! true) does not fail the test, even when it should.
 -------------------------------------------------------------------------------
 
-Bash deliberately excludes negated return values from causing a pipeline to exit (see bash's `-e` option). You'll need to use the form `! x || false` or (recommended) use `run` and check for `[ $status != 0 ]`.
+Bash deliberately excludes negated return values from causing a pipeline to exit (see bash's `-e` option).
+Use `run !` on Bats 1.5.0 and above. For older bats versions, use one of `! x || false` or `run` with `[ $status != 0 ]`.
 
 If the negated command is the final statement in a test, that final statement's (negated) exit status will propagate through to the test's return code as usual.
-Negated statements of the form `! x || false` will explicitly fail the test when the pipeline returns true, regardless of where they occur in the test.
+Negated statements of one of the correct forms mentioned above will explicitly fail the test when the pipeline returns true, regardless of where they occur in the test.
 
 I cannot register a test multiple times via for loop.
 -----------------------------------------------------
