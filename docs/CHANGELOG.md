@@ -16,6 +16,7 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 
 * update gotcha about negated statements: Recommend using `run !` on Bats
   versions >=1.5.0 (#593)
+* add documentation for `bats_require_minimum_version` (#595)
 
 ## [1.7.0] - 2022-05-14
 
