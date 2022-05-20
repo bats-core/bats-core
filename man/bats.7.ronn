@@ -105,6 +105,49 @@ will source the script `test/test_helper.bash` in your test file. This
 can be useful for sharing functions to set up your environment or load
 fixtures.
 
+THE BATS_LOAD_LIBRARY COMMAND
+-----------------------------
+
+Some libraries are installed on the system, e.g. by `npm` or `brew`.
+These should not be `load`ed, as their path depends on the installation method.
+Instead, one should use `bats_load_library` together with setting
+`BATS_LIB_PATH`, a `PATH`-like colon-delimited variable.
+
+`bats_load_library` has two modes of resolving requests:
+
+1. by relative path from the `BATS_LIB_PATH` to a file in the library
+2. by library name, expecting libraries to have a `load.bash` entrypoint
+
+For example if your `BATS_LIB_PATH` is set to
+`~/.bats/libs:/usr/lib/bats`, then `bats_load_library test_helper`
+would look for existing files with the following paths:
+
+- `~/.bats/libs/test_helper`
+- `~/.bats/libs/test_helper/load.bash`
+- `/usr/lib/bats/test_helper`
+- `/usr/lib/bats/test_helper/load.bash`
+
+The first existing file in this list will be sourced.
+
+If you want to load only part of a library or the entry point is not named `load.bash`,
+you have to include it in the argument:
+`bats_load_library library_name/file_to_load` will try
+
+- `~/.bats/libs/library_name/file_to_load`
+- `~/.bats/libs/library_name/file_to_load/load.bash`
+- `/usr/lib/bats/library_name/file_to_load`
+- `/usr/lib/bats/library_name/file_to_load/load.bash`
+
+Apart from the changed lookup rules, `bats_load_library` behaves like `load`.
+
+**Note**: As seen above `load.bash` is the entry point for libraries and
+meant to load more files from its directory or other libraries.
+
+**Note**: Obviously, the actual `BATS_LIB_PATH` is highly dependant on the environment.
+To maintain a uniform location across systems, (distribution) package maintainers
+are encouraged to use `/usr/lib/bats/` as the install path for libraries where possible.
+However, if the package manager has another preferred location, like `npm` or `brew`,
+you should use this instead.
 
 THE SKIP COMMAND
 ----------------
