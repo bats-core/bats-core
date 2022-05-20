@@ -268,6 +268,28 @@ teardown_suite # from setup_suite.bash
 </details>
 <!-- markdownlint-enable MD033 -->
 
+## `bats_require_minimum_version <Bats version number>`
+
+Added in [v1.7.0](https://github.com/bats-core/bats-core/releases/tag/v1.7.0)
+
+Code for newer versions of Bats can be incompatible with older versions.
+In the best case this will lead to an error message and a failed test suite.
+In the worst case, the tests will pass erronously, potentially masking a failure.
+
+Use `bats_require_minimum_version <Bats version number>` to avoid this.
+It communicates in a concise manner, that you intend the following code to be run
+under the given Bats version or higher.
+
+Additionally, this function will communicate the current Bats version floor to
+subsequent code, allowing e.g. Bats' internal warning to give more informed warnings.
+
+__Note__: By default, calling `bats_require_minimum_version` with versions before
+Bats 1.7.0 will fail regardless of the required version as the function is not
+available. However, you can use the
+[bats-backports plugin](https://github.com/bats-core/bats-backports) to make
+your code usable with older versions, e.g. during migration while your CI system
+is not yet upgraded.
+
 ## Code outside of test cases
 
 You can include code in your test file outside of `@test` functions.  For
