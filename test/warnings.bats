@@ -51,7 +51,7 @@ setup() {
     [ "${lines[1]}" == "ok 1 Trigger BW02" ]
     [ "${lines[2]}" == "The following warnings were encountered during tests:" ]
     [ "${lines[3]}" == "BW02: Using flags on \`run\` requires at least BATS_VERSION=1.5.0. Use \`bats_require_minimum_version 1.5.0\` to fix this message." ]
-    [[ "${lines[4]}" == "      (from function \`bats_warn_minimum_guaranteed_version' in file ${RELATIVE_BATS_ROOT}lib/bats-core/warnings.bash, line 31,"* ]]
+    [[ "${lines[4]}" == "      (from function \`bats_warn_minimum_guaranteed_version' in file ${RELATIVE_BATS_ROOT}lib/bats-core/warnings.bash, line 33,"* ]]
     [[ "${lines[5]}" == "       from function \`run' in file ${RELATIVE_BATS_ROOT}lib/bats-core/test_functions.bash, line"* ]]
     [ "${lines[6]}" ==  "       in test file $RELATIVE_FIXTURE_ROOT/BW02.bats, line 2)" ]
 }
