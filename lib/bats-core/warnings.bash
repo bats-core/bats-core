@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 # shellcheck source=lib/bats-core/tracing.bash
 source "$BATS_ROOT/lib/bats-core/tracing.bash"
 
