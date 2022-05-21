@@ -20,6 +20,8 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 
 ### Fixed
 
+* added missing shebang  (#597)
+
 #### Documentation
 
 * typos (#596)
