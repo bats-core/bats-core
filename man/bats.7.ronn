@@ -38,7 +38,7 @@ Options:
        --separate-stderr
                 split stderr and stdout
        --keep-empty-lines
-                retain emtpy lines in `${lines[@]}`/`${stderr_lines[@]}`
+                retain empty lines in `${lines[@]}`/`${stderr_lines[@]}`
 
 Many Bats tests need to run a command and then make assertions about
 its exit status and output. Bats includes a `run` helper that invokes
