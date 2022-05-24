@@ -21,6 +21,7 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 ### Fixed
 
 * added missing shebang  (#597)
+* remaining instances of `run -<N>` being incorrectly documented as `run =<N>` (#599)
 
 #### Documentation
 

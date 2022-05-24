@@ -114,9 +114,9 @@ print-stderr-stdout() {
   [ "${lines[1]}" == "not ok 1 run '-4evah' echo hi" ]
   [ "${lines[2]}" == "# (in test file ${RELATIVE_FIXTURE_ROOT}/invalid.bats, line 2)" ]
   [ "${lines[3]}" == "#   \`run '-4evah' echo hi' failed" ]
-  [ "${lines[4]}" == "# Usage error: run: '=NNN' requires numeric NNN (got: 4evah)" ]
+  [ "${lines[4]}" == "# Usage error: run: '-NNN' requires numeric NNN (got: 4evah)" ]
   [ "${lines[5]}" == "not ok 2 run -256 echo hi" ]
   [ "${lines[6]}" == "# (in test file ${RELATIVE_FIXTURE_ROOT}/invalid.bats, line 6)" ]
   [ "${lines[7]}" == "#   \`run -256 echo hi' failed" ]
-  [ "${lines[8]}" == "# Usage error: run: '=NNN': NNN must be <= 255 (got: 256)" ]
+  [ "${lines[8]}" == "# Usage error: run: '-NNN': NNN must be <= 255 (got: 256)" ]
 }
