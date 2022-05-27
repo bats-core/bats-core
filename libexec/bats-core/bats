@@ -160,7 +160,7 @@ while [[ "$#" -ne 0 ]]; do
   -F | --formatter)
     shift
     # allow cat formatter to see extended output but don't advertise to users
-    if [[ $1 =~ ^(pretty|junit|tap|tap13|cat)$ ]]; then
+    if [[ $1 =~ ^(pretty|junit|tap|tap13|cat|/.*)$ ]]; then
       formatter="$1"
     else
       printf "Unknown formatter '%s', valid options are %s\n" "$1" "${VALID_FORMATTERS}"
@@ -317,6 +317,24 @@ if [[ "$formatter" == tap && -z "$report_formatter" ]]; then
   formatter="cat"
 fi
 
+bats_check_formatter() { # <formatter-path>
+  local -r formatter="$1"
+  if [[ ! -f "$formatter" ]]; then
+    printf "ERROR: Formatter '%s' is not readable!" "$formatter"
+    exit 1
+  elif [[ ! -x "$formatter" ]]; then
+    printf "ERROR: Formatter '%s' is not executable!" "$formatter"
+    exit 1
+  fi
+}
+
+if [[ $formatter == /* ]]; then # absolute paths are direct references to formatters
+  bats_check_formatter "$formatter"
+  interpolated_formatter="$formatter"
+else
+  interpolated_formatter="bats-format-${formatter}"
+fi
+
 if [[ "${#arguments[@]}" -eq 0 ]]; then
   abort 'Must specify at least one <test>'
 fi
@@ -326,17 +344,27 @@ if [[ -n "$report_formatter" ]]; then
   if [[ -z "$output" ]]; then
     output=.
   fi
-  case "$report_formatter" in
-    tap|tap13)
-      BATS_REPORT_FILE_NAME="report.tap"
-      ;;
-    junit)
-      BATS_REPORT_FILE_NAME="report.xml"
-      ;;
-    pretty)
-      BATS_REPORT_FILE_NAME="report.log"
-      ;;
-  esac
+  # only set BATS_REPORT_FILENAME if none was given
+  if [[ -z "${BATS_REPORT_FILENAME:-}" ]]; then
+    case "$report_formatter" in
+      tap|tap13)
+        BATS_REPORT_FILE_NAME="report.tap"
+        ;;
+      junit)
+        BATS_REPORT_FILE_NAME="report.xml"
+        ;;
+      *)
+        BATS_REPORT_FILE_NAME="report.log"
+        ;;
+    esac
+  fi
+fi
+
+if [[ $report_formatter == /* ]]; then # absolute paths are direct references to formatters
+  bats_check_formatter "$report_formatter"
+  interpolated_report_formatter="${report_formatter}"
+else
+  interpolated_report_formatter="bats-format-${report_formatter}"
 fi
 
 if [[ "${BATS_CODE_QUOTE_STYLE-BATS_CODE_QUOTE_STYLE_UNSET}" == BATS_CODE_QUOTE_STYLE_UNSET ]]; then
@@ -418,7 +446,12 @@ trap 'BATS_INTERRUPTED=true' INT # let the lower levels handle the interruption
 set -o pipefail execfail
 
 if [[ -n "$report_formatter" ]]; then
-  exec bats-exec-suite "${flags[@]}" "${filenames[@]}" | tee >("bats-format-${report_formatter}" "${report_formatter_flags[@]}" >"${BATS_REPORT_OUTPUT_PATH}/${BATS_REPORT_FILE_NAME}") | bats_test_count_validator | "bats-format-${formatter}" "${formatter_flags[@]}"
+  exec bats-exec-suite "${flags[@]}" "${filenames[@]}" | \
+    tee >("$interpolated_report_formatter" "${report_formatter_flags[@]}" >"${BATS_REPORT_OUTPUT_PATH}/${BATS_REPORT_FILE_NAME}") | \
+    bats_test_count_validator | \
+    "$interpolated_formatter" "${formatter_flags[@]}"
 else
-  exec bats-exec-suite "${flags[@]}" "${filenames[@]}" | bats_test_count_validator | "bats-format-${formatter}" "${formatter_flags[@]}"
+  exec bats-exec-suite "${flags[@]}" "${filenames[@]}" | \
+    bats_test_count_validator | \
+    "$interpolated_formatter" "${formatter_flags[@]}"
 fi
