@@ -54,14 +54,33 @@ ok 1 addition using bc
 ok 2 addition using dc
 ```
 
-Test reports will be output in the executing directory, but may be placed elsewhere
-by specifying the `--output` flag.
+If you have your own formatter, you can use an absolute path to the executable
+to use it:
+
+```bash
+$ bats --formatter /absolute/path/to/my-formatter addition.bats
+addition using bc WORKED
+addition using dc FAILED
+```
+
+You can also generate test report files via `--report-formatter` which accepts
+the same options as `--formatter`. By default, the file is stored in the current
+workdir. However, it may be placed elsewhere by specifying the `--output` flag.
 
 ```text
-$ bats --formatter junit addition.bats --output /tmp
+$ bats --report-formatter junit addition.bats --output /tmp
 1..2
 ok 1 addition using bc
 ok 2 addition using dc
+
+$ cat /tmp/report.xml
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites time="0.073">
+<testsuite name="addition.bats" tests="2" failures="0" errors="0" skipped="0">
+    <testcase classname="addition.bats" name="addition using bc" time="0.034" />
+    <testcase classname="addition.bats" name="addition using dc" time="0.039" />
+</testsuite>
+</testsuites>
 ```
 
 ## Parallel Execution
