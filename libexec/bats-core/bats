@@ -37,8 +37,8 @@ HELP_TEXT_HEADER
   -F, --formatter <type>    Switch between formatters: pretty (default),
                               tap (default w/o term), tap13, junit
   --gather-test-outputs-in <directory>
-                            Gather the output of failing *and* passing tests 
-                            as files in directory
+                            Gather the output of failing *and* passing tests
+                            as files in directory (if existing, must be empty)
   -h, --help                Display this help message
   -j, --jobs <jobs>         Number of parallel jobs (requires GNU parallel)
   --no-tempdir-cleanup      Preserve test output temporary directory
@@ -49,7 +49,7 @@ HELP_TEXT_HEADER
                             Serialize test execution within files instead of
                             running them in parallel (requires --jobs >1)
   --report-formatter <type> Switch between reporters (same options as --formatter)
-  -o, --output <dir>        Directory to write report files
+  -o, --output <dir>        Directory to write report files (must exist)
   -p, --pretty              Shorthand for "--formatter pretty"
   --print-output-on-failure Automatically print the value of `$output` on failed tests
   -r, --recursive           Include tests in subdirectories
@@ -221,7 +221,9 @@ while [[ "$#" -ne 0 ]]; do
   --gather-test-outputs-in)
     shift
     output_dir="$1"
-    if ! mkdir "$output_dir"; then
+    if [ -d "$output_dir" ] && [ -n "$(ls -A "$output_dir")" ]; then
+      abort "Directory $output_dir must be empty for --gather-test-outputs-in"
+    elif ! [ -d "$output_dir" ] && ! mkdir "$output_dir"; then
       abort "Could not create $output_dir for --gather-test-outputs-in"
     fi
     flags+=(--gather-test-outputs-in "$output_dir")
