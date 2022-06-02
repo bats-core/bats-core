@@ -1153,7 +1153,7 @@ EOF
   # anything existing, even if empty, 'hidden', etc. should cause failure
   mkdir "$OUTPUT_DIR" && touch "$OUTPUT_DIR/.oops"
   run -1 bats --verbose-run --gather-test-outputs-in "$OUTPUT_DIR" "$FIXTURE_ROOT/passing.bats"
-  [ "${lines[0]}" == "Error: Directory $OUTPUT_DIR must be empty for --gather-test-outputs-in" ]
+  [ "${lines[0]}" == "Error: Directory '$OUTPUT_DIR' must be empty for --gather-test-outputs-in" ]
 
   # empty directory is just fine
   rm "$OUTPUT_DIR/.oops" && rmdir "$OUTPUT_DIR" # avoiding rm -fr to avoid goofs
@@ -1161,7 +1161,6 @@ EOF
   run -0 bats --verbose-run --gather-test-outputs-in "$OUTPUT_DIR" "$FIXTURE_ROOT/passing.bats"
   [ "$(find "$OUTPUT_DIR" -type f | wc -l)" -eq 1 ]
 }
-
 
 @test "Tell about missing flock and shlock" {
   if ! command -v parallel; then

@@ -9,8 +9,15 @@ version() {
 }
 
 abort() {
+  local print_usage=1
+  if [[ ${1:-} == --no-print-usage ]]; then
+    print_usage=
+    shift
+  fi
   printf 'Error: %s\n' "$1" >&2
-  usage >&2
+  if [[ -n $print_usage ]]; then
+    usage >&2
+  fi
   exit 1
 }
 
@@ -221,10 +228,12 @@ while [[ "$#" -ne 0 ]]; do
   --gather-test-outputs-in)
     shift
     output_dir="$1"
-    if [ -d "$output_dir" ] && [ -n "$(ls -A "$output_dir")" ]; then
-      abort "Directory $output_dir must be empty for --gather-test-outputs-in"
-    elif ! [ -d "$output_dir" ] && ! mkdir "$output_dir"; then
-      abort "Could not create $output_dir for --gather-test-outputs-in"
+    if [ -d "$output_dir" ]; then
+      if ! find "$output_dir" -mindepth 1 -exec false {} + 2>/dev/null; then
+        abort --no-print-usage "Directory '$output_dir' must be empty for --gather-test-outputs-in"
+      fi
+    elif ! mkdir "$output_dir" 2>/dev/null; then
+      abort --no-print-usage "Could not create '$output_dir' for --gather-test-outputs-in"
     fi
     flags+=(--gather-test-outputs-in "$output_dir")
     ;;
