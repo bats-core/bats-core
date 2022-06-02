@@ -22,10 +22,13 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 
 * added missing shebang  (#597)
 * remaining instances of `run -<N>` being incorrectly documented as `run =<N>` (#599)
+* allow `--gather-test-outputs-in <directory>` to work with existing, empty
+  directories (#603)
+  * also add `--clean-and-gather-test-outpust-in <directory>` for improved UX
 
 #### Documentation
 
-* typos (#596)
+* fix typos and links (#596, #604)
 
 ## [1.7.0] - 2022-05-14
 
@@ -61,7 +64,7 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 #### Documentation
 
 * remove 2018 in title, update copyright dates in README.md (#567)
-* fix broken links and misspellings (#568, #604)
+* fix broken links (#568)
 * corrected invalid documentation of `run -N` (had `=N` instead) (#579)
   * **CRITICAL**: using the incorrect form can lead to silent errors. See
     [issue #578](https://github.com/bats-core/bats-core/issues/578) for more
