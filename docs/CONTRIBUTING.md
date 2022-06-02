@@ -34,7 +34,7 @@ CONTRIBUTING.md file][atom].
 * [Contributing Guidelines](#contributing-guidelines)
   * [Welcome!](#welcome)
   * [Table of contents](#table-of-contents)
-  * [Quick links <g-emoji alias="link" fallback-src="https://assets-cdn.github.com/images/icons/emoji/unicode/1f517.png" ios-version="6.0">🔗</g-emoji>](#quick-links-x1f517)
+  * [Quick links](#quick-links)
   * [Contributor License Agreement](#contributor-license-agreement)
   * [Code of conduct](#code-of-conduct)
   * [Asking questions and reporting issues](#asking-questions-and-reporting-issues)
@@ -55,7 +55,7 @@ CONTRIBUTING.md file][atom].
   * [Open Source License](#open-source-license)
   * [Credits](#credits)
 
-## Quick links &#x1f517;
+## Quick links
 
 - [Gitter channel →][gitterurl]: Feel free to come chat with us on Gitter
 - [README →][README]
