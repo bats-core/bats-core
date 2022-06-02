@@ -34,7 +34,7 @@ CONTRIBUTING.md file][atom].
 * [Contributing Guidelines](#contributing-guidelines)
   * [Welcome!](#welcome)
   * [Table of contents](#table-of-contents)
-  * [Quick links <g-emoji alias="link" fallback-src="https://assets-cdn.github.com/images/icons/emoji/unicode/1f517.png" ios-version="6.0">🔗</g-emoji>](#quick-links-)
+  * [Quick links](#quick-links)
   * [Contributor License Agreement](#contributor-license-agreement)
   * [Code of conduct](#code-of-conduct)
   * [Asking questions and reporting issues](#asking-questions-and-reporting-issues)
@@ -55,7 +55,7 @@ CONTRIBUTING.md file][atom].
   * [Open Source License](#open-source-license)
   * [Credits](#credits)
 
-## Quick links &#x1f517;
+## Quick links
 
 - [Gitter channel →][gitterurl]: Feel free to come chat with us on Gitter
 - [README →][README]
@@ -90,7 +90,7 @@ See also: ["Does my project need an additional contributor agreement? Probably
 
 ## Code of conduct
 
-Harrassment or rudeness of any kind will not be tolerated, period. For
+Harassment or rudeness of any kind will not be tolerated, period. For
 specifics, see the [CODE_OF_CONDUCT][] file.
 
 ## Asking questions and reporting issues
@@ -144,7 +144,7 @@ Also consider using:
 1. DO add information if you're facing a similar issue to someone else, but 
 within a different context (e.g. different steps needed to reproduce the issue 
 than previous stated, different version of Bash or BATS, different OS, etc.) 
-You can read on how to do that here: [Information to include][#information-to-include]
+You can read on how to do that here: [Information to include](#information-to-include)
 1. DO remember that you can use the *Subscribe* button on the right side of the
 page to receive notifications of further conversations or a resolution.
 

@@ -61,7 +61,7 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 #### Documentation
 
 * remove 2018 in title, update copyright dates in README.md (#567)
-* fix broken links (#568)
+* fix broken links and misspellings (#568, #604)
 * corrected invalid documentation of `run -N` (had `=N` instead) (#579)
   * **CRITICAL**: using the incorrect form can lead to silent errors. See
     [issue #578](https://github.com/bats-core/bats-core/issues/578) for more
