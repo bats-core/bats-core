@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+cat >/dev/null # ignore input 
+
+echo "Dummy Formatter!"

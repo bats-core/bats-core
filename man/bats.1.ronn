@@ -57,7 +57,8 @@ OPTIONS
   * `-f`, `--filter <regex>`:
     Filter test cases by names matching the regular expression
   * `-F`, `--formatter <type>`:
-    Switch between formatters: pretty (default), tap (default w/o term), tap13, junit
+    Switch between formatters: pretty (default), tap (default w/o term), tap13, junit,
+    `/<absolute path to formatter>`
   * `--gather-test-outputs-in <directory>`:
     Gather the output of failing *and* passing tests as files in directory
   * `-h`, `--help`:

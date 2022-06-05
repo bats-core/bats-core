@@ -63,15 +63,6 @@ setup() {
   [ "${lines[4]}" = "3 tests, 0 failures, 2 skipped" ]
 }
 
-@test "tap passing and skipping tests" {
-  run filter_control_sequences bats --formatter tap "$FIXTURE_ROOT/passing_and_skipping.bats"
-  [ $status -eq 0 ]
-  [ "${lines[0]}" = "1..3" ]
-  [ "${lines[1]}" = "ok 1 a passing test" ]
-  [ "${lines[2]}" = "ok 2 a skipped test with no reason # skip" ]
-  [ "${lines[3]}" = "ok 3 a skipped test with a reason # skip for a really good reason" ]
-}
-
 @test "summary passing and failing tests" {
   run filter_control_sequences bats -p "$FIXTURE_ROOT/failing_and_passing.bats"
   [ $status -eq 0 ]
@@ -82,15 +73,6 @@ setup() {
   run filter_control_sequences bats -p "$FIXTURE_ROOT/passing_failing_and_skipping.bats"
   [ $status -eq 0 ]
   [ "${lines[6]}" = "3 tests, 1 failure, 1 skipped" ]
-}
-
-@test "tap passing, failing and skipping tests" {
-  run filter_control_sequences bats --formatter tap "$FIXTURE_ROOT/passing_failing_and_skipping.bats"
-  [ $status -eq 0 ]
-  [ "${lines[0]}" = "1..3" ]
-  [ "${lines[1]}" = "ok 1 a passing test" ]
-  [ "${lines[2]}" = "ok 2 a skipping test # skip" ]
-  [ "${lines[3]}" = "not ok 3 a failing test" ]
 }
 
 @test "BATS_CWD is correctly set to PWD as validated by bats_trim_filename" {
@@ -266,16 +248,6 @@ setup() {
   [ "${lines[2]}" = "ok 2 a skipped test with a reason # skip a reason" ]
 }
 
-@test "skipped test with parens (pretty formatter)" {
-  run bats --pretty "$FIXTURE_ROOT/skipped_with_parens.bats"
-  [ $status -eq 0 ]
-
-  # Some systems (Alpine, for example) seem to emit an extra whitespace into
-  # entries in the 'lines' array when a carriage return is present from the
-  # pretty formatter.  This is why a '+' is used after the 'skipped' note.
-  [[ "${lines[*]}" =~ "- a skipped test with parentheses in the reason (skipped: "+"a reason (with parentheses))" ]]
-}
-
 @test "extended syntax" {
   emulate_bats_env
   run bats-exec-suite -x "$FIXTURE_ROOT/failing_and_passing.bats"
@@ -318,25 +290,6 @@ setup() {
   [ $status -eq 0 ]
   regex="ok 1 run long command in [1-9][0-9]*ms"
   [[ "${lines[3]}" =~ $regex ]]
-}
-
-@test "pretty and tap formats" {
-  run bats --formatter tap "$FIXTURE_ROOT/passing.bats"
-  tap_output="$output"
-  [ $status -eq 0 ]
-
-  run bats --pretty "$FIXTURE_ROOT/passing.bats"
-  pretty_output="$output"
-  [ $status -eq 0 ]
-
-  [ "$tap_output" != "$pretty_output" ]
-}
-
-@test "pretty formatter bails on invalid tap" {
-  run bats-format-pretty < <(printf "This isn't TAP!\nGood day to you\n")
-  [ $status -eq 0 ]
-  [ "${lines[0]}" = "This isn't TAP!" ]
-  [ "${lines[1]}" = "Good day to you" ]
 }
 
 @test "single-line tests" {
@@ -721,34 +674,6 @@ END_OF_ERR_MSG
   [ "$(find "$TEST_TMPDIR" -name '*.src' | wc -l)" -eq 1 ]
 }
 
-@test "All formatters (except cat) implement the callback interface" {
-  cd "$BATS_ROOT/libexec/bats-core/"
-  for formatter in bats-format-*; do
-    # the cat formatter is not expected to implement this interface
-    if [[ "$formatter" == *"bats-format-cat" ]]; then
-      continue
-    fi
-    tested_at_least_one_formatter=1
-    echo "Formatter: ${formatter}"
-    # the replay should be possible without errors
-    bash -u "$formatter" >/dev/null <<EOF
-1..1
-suite "$BATS_FIXTURE_ROOT/failing.bats"
-# output from setup_file
-begin 1 test_a_failing_test
-# fd3 output from test
-not ok 1 a failing test
-# (in test file test/fixtures/bats/failing.bats, line 4)
-#   \`eval "( exit ${STATUS:-1} )"' failed
-begin 2 test_a_successful_test
-ok 2 a succesful test
-unknown line
-EOF
-  done
-
-  [[ -n "$tested_at_least_one_formatter" ]]
-}
-
 @test "run should exit if tmpdir exist" {
   local dir
   dir=$(mktemp -d "${BATS_RUN_TMPDIR}/BATS_RUN_TMPDIR_TEST.XXXXXX")
@@ -1059,24 +984,6 @@ EOF
   run bats "${BATS_TEST_DESCRIPTION}"
   echo "$BATS_RUN_COMMAND"
   [[ "$BATS_RUN_COMMAND" == "bats BATS_RUN_COMMAND: test content of variable" ]]
-}
-
-@test "pretty formatter summary is colorized red on failure" {
-  bats_require_minimum_version 1.5.0
-  run -1 bats --pretty "$FIXTURE_ROOT/failing.bats"
-  
-  [ "${lines[4]}" == $'\033[0m\033[31;1m' ] # TODO: avoid checking for the leading reset too
-  [ "${lines[5]}" == '1 test, 1 failure' ]
-  [ "${lines[6]}" == $'\033[0m' ]
-}
-
-@test "pretty formatter summary is colorized green on success" {
-  bats_require_minimum_version 1.5.0
-  run -0 bats --pretty "$FIXTURE_ROOT/passing.bats"
-
-  [ "${lines[2]}" == $'\033[0m\033[32;1m' ] # TODO: avoid checking for the leading reset too
-  [ "${lines[3]}" == '1 test, 0 failures' ]
-  [ "${lines[4]}" == $'\033[0m' ]
 }
 
 @test "--print-output-on-failure works as expected" {

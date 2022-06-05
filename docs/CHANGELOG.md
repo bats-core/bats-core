@@ -12,6 +12,9 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 
 ### Added
 
+* using external formatters via `--formatter <absolute path>` (also works for
+  `--report-formatter`) (#602)
+
 #### Documentation
 
 * update gotcha about negated statements: Recommend using `run !` on Bats

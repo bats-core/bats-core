@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -eET
 
-export flags=('--dummy-flag')
+flags=('--dummy-flag')
 num_jobs=${BATS_NUMBER_OF_PARALLEL_JOBS:-1}
 filter=''
 extended_syntax=''
