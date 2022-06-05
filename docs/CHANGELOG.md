@@ -28,6 +28,7 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 * allow `--gather-test-outputs-in <directory>` to work with existing, empty
   directories (#603)
   * also add `--clean-and-gather-test-outpust-in <directory>` for improved UX
+* double slashes in paths derived from TMPDIR on MacOS (#607)
 
 #### Documentation
 
