@@ -321,10 +321,10 @@ fi
 bats_check_formatter() { # <formatter-path>
   local -r formatter="$1"
   if [[ ! -f "$formatter" ]]; then
-    printf "ERROR: Formatter '%s' is not readable!" "$formatter"
+    printf "ERROR: Formatter '%s' is not readable!\n" "$formatter"
     exit 1
   elif [[ ! -x "$formatter" ]]; then
-    printf "ERROR: Formatter '%s' is not executable!" "$formatter"
+    printf "ERROR: Formatter '%s' is not executable!\n" "$formatter"
     exit 1
   fi
 }
