@@ -9,8 +9,15 @@ version() {
 }
 
 abort() {
+  local print_usage=1
+  if [[ ${1:-} == --no-print-usage ]]; then
+    print_usage=
+    shift
+  fi
   printf 'Error: %s\n' "$1" >&2
-  usage >&2
+  if [[ -n $print_usage ]]; then
+    usage >&2
+  fi
   exit 1
 }
 
@@ -37,8 +44,8 @@ HELP_TEXT_HEADER
   -F, --formatter <type>    Switch between formatters: pretty (default),
                               tap (default w/o term), tap13, junit
   --gather-test-outputs-in <directory>
-                            Gather the output of failing *and* passing tests 
-                            as files in directory
+                            Gather the output of failing *and* passing tests
+                            as files in directory (if existing, must be empty)
   -h, --help                Display this help message
   -j, --jobs <jobs>         Number of parallel jobs (requires GNU parallel)
   --no-tempdir-cleanup      Preserve test output temporary directory
@@ -49,7 +56,7 @@ HELP_TEXT_HEADER
                             Serialize test execution within files instead of
                             running them in parallel (requires --jobs >1)
   --report-formatter <type> Switch between reporters (same options as --formatter)
-  -o, --output <dir>        Directory to write report files
+  -o, --output <dir>        Directory to write report files (must exist)
   -p, --pretty              Shorthand for "--formatter pretty"
   --print-output-on-failure Automatically print the value of `$output` on failed tests
   -r, --recursive           Include tests in subdirectories
@@ -221,8 +228,12 @@ while [[ "$#" -ne 0 ]]; do
   --gather-test-outputs-in)
     shift
     output_dir="$1"
-    if ! mkdir "$output_dir"; then
-      abort "Could not create $output_dir for --gather-test-outputs-in"
+    if [ -d "$output_dir" ]; then
+      if ! find "$output_dir" -mindepth 1 -exec false {} + 2>/dev/null; then
+        abort --no-print-usage "Directory '$output_dir' must be empty for --gather-test-outputs-in"
+      fi
+    elif ! mkdir "$output_dir" 2>/dev/null; then
+      abort --no-print-usage "Could not create '$output_dir' for --gather-test-outputs-in"
     fi
     flags+=(--gather-test-outputs-in "$output_dir")
     ;;
