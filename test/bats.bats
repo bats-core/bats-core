@@ -1229,3 +1229,7 @@ END_OF_ERR_MSG
   TEARDOWN_RETURN_CODE=0 TEST_RETURN_CODE=0 STATUS=1 run -0 bats "$FIXTURE_ROOT/teardown_suite_override_status/"
   TEARDOWN_RETURN_CODE=1 TEST_RETURN_CODE=0 STATUS=1 run -1 bats "$FIXTURE_ROOT/teardown_suite_override_status/"
 }
+
+@test "BATS_* variables don't contain double slashes" {
+  TMPDIR=/tmp/ bats "$FIXTURE_ROOT/BATS_variables_dont_contain_double_slashes.bats"
+}
