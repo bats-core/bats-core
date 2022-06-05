@@ -70,7 +70,7 @@ elif [[ ! -f "$BATS_TEST_FILENAME" ]]; then
 fi
 
 bats_create_test_tmpdirs() {
-  local tests_tmpdir="${BATS_RUN_TMPDIR}/test/"
+  local tests_tmpdir="${BATS_RUN_TMPDIR}/test"
   if ! mkdir -p "$tests_tmpdir"; then
     printf 'Failed to create: %s\n' "$tests_tmpdir" >&2
     exit 1
