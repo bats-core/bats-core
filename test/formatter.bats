@@ -94,6 +94,8 @@ EOF
 
 @test "specifying non executable external formatter is an error" {
   bats_require_minimum_version 1.5.0
-  run -1 bats "$FIXTURE_ROOT/passing.bats"  --formatter "$BATS_TEST_FILENAME"
-  [ "$output" = "ERROR: Formatter '$BATS_TEST_FILENAME' is not executable!" ]
+  local non_executable="$BATS_TEST_TMPDIR/non-executable"
+  touch "$non_executable"
+  run -1 bats "$FIXTURE_ROOT/passing.bats"  --formatter "$non_executable"
+  [ "$output" = "ERROR: Formatter '$non_executable' is not executable!" ]
 }
