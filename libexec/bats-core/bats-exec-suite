@@ -187,7 +187,7 @@ bats_run_teardown_suite() {
   trap bats_suite_exit_trap EXIT
   set -eET
   BATS_TEARDOWN_SUITE_COMPLETED=
-  teardown_suite
+  teardown_suite 2>&1
   BATS_TEARDOWN_SUITE_COMPLETED=1
   set +ET
 }
@@ -219,7 +219,7 @@ fi
 
 set -eET
 BATS_SETUP_SUITE_COMPLETED=
-setup_suite
+setup_suite 2>&1
 BATS_SETUP_SUITE_COMPLETED=1
 set +ET
 
