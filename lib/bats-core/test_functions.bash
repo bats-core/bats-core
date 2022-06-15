@@ -26,11 +26,11 @@ find_in_bats_lib_path() { # <return-var> <library-name>
     if [[ -f "$path/$library_name" ]]; then
       printf -v "$return_var" "%s" "$path/$library_name" 
       # A library load path was found, return
-      return
+      return 0
     elif [[ -f "$path/$library_name/load.bash" ]]; then
       printf -v "$return_var" "%s" "$path/$library_name/load.bash" 
       # A library load path was found, return
-      return
+      return 0
     fi
   done
 
@@ -65,7 +65,7 @@ bats_internal_load() {
           printf "Error while sourcing library loader at '%s'\n" "$library_load_path" >&2
           return 1
       fi
-      return
+      return 0
   fi
 
   printf "Passed library load path is neither a library loader nor library directory: %s\n" "$library_load_path" >&2
@@ -99,17 +99,17 @@ bats_load_safe() {
 
   if [[ -f "$slug.bash" ]]; then
     bats_internal_load "$slug.bash"
-    return 
+    return $?
   elif [[ -f "$slug" ]]; then
     bats_internal_load "$slug"
-    return
+    return $?
   fi
 
   # loading from PATH (retained for backwards compatibility)
   if [[ ! -f "$1" ]] && type -P "$1" >/dev/null; then
     # shellcheck disable=SC1090
     source "$1"
-    return
+    return $?
   fi
 
   # No library load path can be found
@@ -160,6 +160,7 @@ bats_load_library() { # <slug>
 # load acts like bats_load_safe but exits the shell instead of returning 1.
 load() {
     if ! bats_load_safe "$@"; then
+      echo "${FUNCNAME[0]} $LINENO" >&3
         exit 1
     fi
 }

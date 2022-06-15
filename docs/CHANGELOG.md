@@ -29,6 +29,7 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
   directories (#603)
   * also add `--clean-and-gather-test-outpust-in <directory>` for improved UX
 * double slashes in paths derived from TMPDIR on MacOS (#607)
+* fix `load` in `teardown` marking failed tests as not run (#612)
 
 #### Documentation
 

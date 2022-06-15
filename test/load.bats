@@ -185,3 +185,11 @@ setup() {
   export BATS_LIB_PATH="$path_dir"
   run -1 bats "$FIXTURE_ROOT/failing_bats_load_library.bats"
 }
+
+@test "load in teardown after failure does not prevent test from being counted (see #609)" {
+  run -1 bats "$FIXTURE_ROOT/load_in_teardown_after_failure.bats"
+  [ "${lines[0]}" = 1..1 ]
+  [ "${lines[1]}" = "not ok 1 failed" ]
+  [ "${lines[3]}" = "#   \`false' failed" ]
+  [ ${#lines[@]} -eq 4 ]
+}
