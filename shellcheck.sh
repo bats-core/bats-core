@@ -7,7 +7,7 @@ while IFS=  read -r -d $'\0'; do
     targets+=("$REPLY")
 done < <(
   find . -type f \( -name \*.bash -o -name \*.sh \) -print0; \
-  find . -name '*.bats' -not -name '*_no_shellcheck*' -print0; \
+  find . -type f -name '*.bats' -not -name '*_no_shellcheck*' -print0; \
   find libexec -type f -print0;
   find bin -type f -print0)
 
