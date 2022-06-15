@@ -10,7 +10,6 @@ BATS_SHOW_OUTPUT_OF_SUCCEEDING_TESTS="${BATS_SHOW_OUTPUT_OF_SUCCEEDING_TESTS:-}"
 BATS_VERBOSE_RUN="${BATS_VERBOSE_RUN:-}"
 BATS_GATHER_TEST_OUTPUTS_IN="${BATS_GATHER_TEST_OUTPUTS_IN:-}"
 BATS_TEST_NAME_PREFIX="${BATS_TEST_NAME_PREFIX:-}"
-BATS_RERUN_FAILED=
 
 while [[ "$#" -ne 0 ]]; do
   case "$1" in
@@ -38,9 +37,6 @@ while [[ "$#" -ne 0 ]]; do
   --gather-test-outputs-in)
     shift
     BATS_GATHER_TEST_OUTPUTS_IN="$1"
-    ;;
-  --rerun-failed)
-    BATS_RERUN_FAILED=1
     ;;
   *)
     break
@@ -128,9 +124,6 @@ bats_exit_trap() {
   local print_bats_out="${BATS_SHOW_OUTPUT_OF_SUCCEEDING_TESTS}"
 
   if [[ -z "$BATS_TEST_COMPLETED" || -z "$BATS_TEARDOWN_COMPLETED" || "${BATS_INTERRUPTED-NOTSET}" != NOTSET ]]; then
-    if [[ -n "$BATS_RERUN_FAILED" ]]; then
-      printf "%s\t%s\n" "$BATS_TEST_FILENAME" "$BATS_TEST_NAME" >> "${BATS_RERUN_FAILED_TMPFILE}"
-    fi
     if [[ "$BATS_ERROR_STATUS" -eq 0 ]]; then
       # For some versions of bash, `$?` may not be set properly for some error
       # conditions before triggering the EXIT trap directly (see #72 and #81).
@@ -155,11 +148,15 @@ bats_exit_trap() {
 
     print_bats_out=1
     status=1
+    local state=failed
   else
     printf 'ok %d %s%s\n' "$BATS_SUITE_TEST_NUMBER" "${BATS_TEST_NAME_PREFIX:-}${BATS_TEST_DESCRIPTION}${BATS_TEST_TIME}" \
       "$skipped" >&3
     status=0
+    local state=passed
   fi
+
+  printf "%s %s\t%s\n" "$state" "$BATS_TEST_FILENAME" "$BATS_TEST_NAME" >> "$BATS_RUNLOG_FILE"
 
   if [[ $print_bats_out ]]; then
     bats_prefix_lines_for_tap_output < "$BATS_OUT" | bats_replace_filename >&3

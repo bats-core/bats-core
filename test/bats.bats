@@ -1234,31 +1234,100 @@ END_OF_ERR_MSG
   TMPDIR=/tmp/ bats "$FIXTURE_ROOT/BATS_variables_dont_contain_double_slashes.bats"
 }
 
-@test "Without previous recording --rerun-failed runs all tests and then reruns only failed tests" {
-  cd "$BATS_TEST_TMPDIR" # don't pollute the source folder
-  run -1 bats --rerun-failed "$FIXTURE_ROOT/passing_and_failing.bats"
-  # without previous recording, all tests should be run
-  [ "${lines[0]}" == 'No recording of previos runs found. Running all tests!' ]
-  [ "${lines[1]}" == '1..2' ]
-  [ "${lines[2]}" == 'ok 1 a passing test' ]
-  [ "${lines[3]}" == 'not ok 2 a failing test' ]
+@test "Without .bats/run-logs --filter-status failed returns an error" {
+  bats_require_minimum_version 1.5.0
+  run -1 bats --filter-status failed "$FIXTURE_ROOT/passing_and_failing.bats"
+  [[ "${lines[0]}" == "Error: --filter-status needs '"*".bats/run-logs/' to save failed tests. Please create this folder, add it to .gitignore and try again." ]] || false
+}
 
-  run -1 bats --tap --rerun-failed "$FIXTURE_ROOT/passing_and_failing.bats"
+@test "Without previous recording --filter-status failed runs all tests and then runs only failed and missed tests" {
+  cd "$BATS_TEST_TMPDIR" # don't pollute the source folder
+  cp "$FIXTURE_ROOT/many_passing_and_one_failing.bats" .
+  mkdir -p .bats/run-logs
+  bats_require_minimum_version 1.5.0
+  run -1 bats --filter-status failed "many_passing_and_one_failing.bats"
+  # without previous recording, all tests should be run
+  [ "${lines[0]}" == 'No recording of previous runs found. Running all tests!' ]
+  [ "${lines[1]}" == '1..4' ]
+  [ "$(grep -c 'not ok' <<< "$output")" -eq 1 ]
+
+  run -1 bats --tap --filter-status failed "many_passing_and_one_failing.bats"
   # now we should only run the failing test
   [ "${lines[0]}" == 1..1 ]
   [ "${lines[1]}" == "not ok 1 a failing test" ]
+
+  # add a new test that was missed before
+  echo $'@test missed { :; }' >> "many_passing_and_one_failing.bats"
+
+  cat .bats/run-logs/*
+
+  run -1 bats --tap --filter-status failed "many_passing_and_one_failing.bats"
+  # now we should only run the failing test
+  [ "${lines[0]}" == 1..2 ]
+  [ "${lines[1]}" == "not ok 1 a failing test" ]
+  [ "${lines[4]}" == "ok 2 missed" ]
 }
 
-@test "--rerun-failed gives warning on empty failed test list" {
+@test "Without previous recording --filter-status passed runs all tests and then runs only passed and missed tests" {
   cd "$BATS_TEST_TMPDIR" # don't pollute the source folder
+  cp "$FIXTURE_ROOT/many_passing_and_one_failing.bats" .
+  mkdir -p .bats/run-logs
+  bats_require_minimum_version 1.5.0
+  run -1 bats --filter-status passed "many_passing_and_one_failing.bats"
+  # without previous recording, all tests should be run
+  [ "${lines[0]}" == 'No recording of previous runs found. Running all tests!' ]
+  [ "${lines[1]}" == '1..4' ]
+  [ "$(grep -c 'not ok' <<< "$output")" -eq 1 ]
+
+  run -0 bats --tap --filter-status passed "many_passing_and_one_failing.bats"
+  # now we should only run the passed tests
+  [ "${lines[0]}" == 1..3 ]
+  [ "$(grep -c 'not ok' <<< "$output")" -eq 0 ]
+
+  # add a new test that was missed before
+  echo $'@test missed { :; }' >> "many_passing_and_one_failing.bats"
+
+  run -0 bats --tap --filter-status passed "many_passing_and_one_failing.bats"
+  # now we should only run the passed and missed tests
+  [ "${lines[0]}" == 1..4 ]
+  [ "$(grep -c 'not ok' <<< "$output")" -eq 0 ]
+  [ "${lines[4]}" == "ok 4 missed" ]
+}
+
+@test "Without previous recording --filter-status missed runs all tests and then runs only missed tests" {
+  cd "$BATS_TEST_TMPDIR" # don't pollute the source folder
+  cp "$FIXTURE_ROOT/many_passing_and_one_failing.bats" .
+  mkdir -p .bats/run-logs
+  bats_require_minimum_version 1.5.0
+  run -1 bats --filter-status missed "many_passing_and_one_failing.bats"
+  # without previous recording, all tests should be run
+  [ "${lines[0]}" == 'No recording of previous runs found. Running all tests!' ]
+  [ "${lines[1]}" == '1..4' ]
+  [ "$(grep -c -E '^ok' <<< "$output")" -eq 3 ]
+
+  # add a new test that was missed before
+  echo $'@test missed { :; }' >> "many_passing_and_one_failing.bats"
+
+  run -0 bats --tap --filter-status missed "many_passing_and_one_failing.bats"
+  # now we should only run the missed test
+  [ "${lines[0]}" == 1..1 ]
+  [ "${lines[1]}" == "ok 1 missed" ]
+}
+
+
+
+@test "--filter-status failed gives warning on empty failed test list" {
+  cd "$BATS_TEST_TMPDIR" # don't pollute the source folder
+  cp "$FIXTURE_ROOT/passing.bats" .
+  mkdir -p .bats/run-logs
+  bats_require_minimum_version 1.5.0
   # have no failing tests
-  run -0 bats --rerun-failed "$FIXTURE_ROOT/passing.bats"
-  # try to rerun the empty list of failing tests
-  run -0 bats --rerun-failed "$FIXTURE_ROOT/passing.bats"
+  run -0 bats --filter-status failed "passing.bats"
+  # try to run the empty list of failing tests
+  run -0 bats --filter-status failed "passing.bats"
   [ "${lines[0]}" == "There where no failed tests in the last recorded run." ]
-  [ "${lines[1]}" == "Delete the file '.bats/rerun-failed-tests.list' to run all tests again." ]
-  [ "${lines[2]}" == "1..0" ]
-  [ "${#lines[@]}" -eq 3 ]
+  [ "${lines[1]}" == "1..0" ]
+  [ "${#lines[@]}" -eq 2 ]
 }
 
 enforce_own_process_group() {
@@ -1266,29 +1335,32 @@ enforce_own_process_group() {
     "$@"
   }
 
-@test "--rerun-failed does not update list when run is aborted" {
+@test "--filter-status failed does not update list when run is aborted" {
   if [[ "$BATS_NUMBER_OF_PARALLEL_JOBS" -gt 1 ]]; then
     skip "Aborts don't work in parallel mode"
   fi
 
   cd "$BATS_TEST_TMPDIR" # don't pollute the source folder
-  local RERUN_FILE=".bats/rerun-failed-tests.list"
+  cp "$FIXTURE_ROOT/sigint_in_failing_test.bats" .
+  mkdir -p .bats/run-logs
 
+  bats_require_minimum_version 1.5.0
   # don't hang yet, so we get a useful rerun file
-  run -1 env bats --rerun-failed "$FIXTURE_ROOT/sigint_in_failing_test.bats"
+  run -1 env DONT_ABORT=1 bats "sigint_in_failing_test.bats"
 
-  orig_date=$(date -r "$RERUN_FILE")
+  # check that we have exactly one log
+  run find .bats/run-logs -name '*.log'
+  [[ "${lines[0]}" == *.log ]] || false
+  [ ${#lines[@]} -eq 1 ]
 
-  # check that we have something to rerun
-  [ -s "$RERUN_FILE" ]
+  local first_run_logs="$output"
 
   sleep 1 # ensure we would get different timestamps for each run
 
   # now rerun but abort midrun
-  run -1 enforce_own_process_group bats --rerun-failed "$FIXTURE_ROOT/sigint_in_failing_test.bats"
+  run -1 enforce_own_process_group bats --rerun-failed "sigint_in_failing_test.bats"
 
-  new_date=$(date -r "$RERUN_FILE")
-  echo "$orig_date"
-  echo "$new_date"
-  [ "$orig_date" == "$new_date" ]
+  # should not have produced a new log
+  run find .bats/run-logs -name '*.log'
+  [ "$first_run_logs" == "$output" ]
 }

@@ -63,3 +63,36 @@ bats_require_minimum_version() { # <required version>
     BATS_GUARANTEED_MINIMUM_VERSION="$required_minimum_version"
   fi
 }
+
+bats_binary_search() { # <search-value> <array-name>
+  local -r search_value=$1 array_name=$2
+  
+  if [[ $# -ne 2 ]]; then
+    printf "ERROR: bats_binary_search requires exactly 2 arguments: <search value> <array name>\n" >&2
+    return 2
+  fi
+
+  # we'd like to test if array is set but we cannot distinguish unset from empty arrays, so we need to skip that
+
+  local start=0 mid end mid_value 
+  # start is inclusive, end is exclusive ...
+  eval "end=\${#${array_name}[@]}"
+
+  # so start == end means empty search space
+  while (( start < end )); do
+    mid=$(( (start + end) / 2 ))
+    eval "mid_value=\${${array_name}[$mid]}"
+    if [[ "$mid_value" == "$search_value" ]]; then
+      return 0
+    elif [[ "$mid_value" < "$search_value" ]]; then
+      # This branch excludes equality -> +1 to skip the mid element.
+      # This +1 also avoids endless recursion on odd sized search ranges.
+      start=$((mid + 1))
+    else
+      end=$mid
+    fi
+  done
+
+  # did not find it -> its not there
+  return 1
+}

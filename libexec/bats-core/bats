@@ -246,8 +246,9 @@ while [[ "$#" -ne 0 ]]; do
     shift
     BATS_CODE_QUOTE_STYLE="$1"
   ;;
-  --rerun-failed)
-    flags+=('--rerun-failed')
+  --filter-status)
+    shift
+    flags+=('--filter-status' "$1")
     ;;
   -*)
     abort "Bad command line option '$1'"
