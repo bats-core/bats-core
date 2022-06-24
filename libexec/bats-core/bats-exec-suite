@@ -205,7 +205,7 @@ if [[ -n "$filter_status" ]]; then
         printf "%s\n" "$line" 
         filtered_tests+=("$line")
       else
-        printf "status-filtered %s %s\n" "$filter_status" "$test_line" >> "$BATS_RUNLOG_FILE"
+        printf "status-filtered %s %s\n" "$filter_status" "$line" >> "$BATS_RUNLOG_FILE"
       fi
     done > "$TESTS_LIST_FILE"
 
