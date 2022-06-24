@@ -143,6 +143,7 @@ fi
 bats_gather_tests "$@"
 
 if [[ -n "$filter_status" ]]; then  
+  # shellcheck source=lib/bats-core/common.bash
   source "$BATS_ROOT/lib/bats-core/common.bash"
   case "$filter_status" in
     failed)
