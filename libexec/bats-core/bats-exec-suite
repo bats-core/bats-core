@@ -189,7 +189,7 @@ if [[ -n "$filter_status" ]]; then
           failed_tests+=("${line#failed }")
         ;;
         "status-filtered $filter_status"*) # pick up tests that were filtered in the last round for the same status
-          last_filtered_tests+=("${line#status-filtered "$filter_status"}")
+          last_filtered_tests+=("${line#status-filtered "$filter_status" }")
         ;;
         "status-filtered "*) # ignore other status-filtered lines
         ;;
