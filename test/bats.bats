@@ -1259,7 +1259,7 @@ END_OF_ERR_MSG
   # add a new test that was missed before
   echo $'@test missed { :; }' >> "many_passing_and_one_failing.bats"
 
-  cat .bats/run-logs/*
+  find .bats/run-logs/ -type f -print -exec cat {} \;
 
   run -1 bats --tap --filter-status failed "many_passing_and_one_failing.bats"
   # now we should only run the failing test
