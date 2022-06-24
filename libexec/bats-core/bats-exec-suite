@@ -169,9 +169,9 @@ if [[ -n "$filter_status" ]]; then
   if IFS='' read -d $'\n' -r BATS_PREVIOUS_RUNLOG_FILE < <(ls -1r "$BATS_RUN_LOGS_DIRECTORY"); then
     BATS_PREVIOUS_RUNLOG_FILE="$BATS_RUN_LOGS_DIRECTORY/$BATS_PREVIOUS_RUNLOG_FILE"
     # this can happen when doing multiple runs in the same second (e.g. bats internal tests)
-    if [[ $BATS_RUN_LOGS_DIRECTORY/$BATS_PREVIOUS_RUNLOG_FILE == "$BATS_RUNLOG_FILE" ]]; then
+    if [[ $BATS_PREVIOUS_RUNLOG_FILE == "$BATS_RUNLOG_FILE" ]]; then
       count=$(find "$BATS_RUN_LOGS_DIRECTORY" -name "$BATS_RUNLOG_DATE*" | wc -l)
-      BATS_RUNLOG_FILE="${BATS_RUNLOG_DATE}_$count.log"
+      BATS_RUNLOG_FILE="$BATS_RUN_LOGS_DIRECTORY/${BATS_RUNLOG_DATE}-$count.log"
     fi
     failed_tests=()
     passed_tests=()
