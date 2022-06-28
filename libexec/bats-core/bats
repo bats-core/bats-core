@@ -41,6 +41,10 @@ HELP_TEXT_HEADER
                             or 'custom' which requires setting $BATS_BEGIN_CODE_QUOTE and 
                             $BATS_END_CODE_QUOTE. Can also be set via $BATS_CODE_QUOTE_STYLE
   -f, --filter <regex>      Only run tests that match the regular expression
+  --filter-status <status>  Only run tests with the given status in the last completed (no CTRL+C/SIGINT) run.
+                            Valid <status> values are:
+                              failed - runs tests that failed or were not present in the last run
+                              missed - runs tests that were not present in the last run
   -F, --formatter <type>    Switch between formatters: pretty (default),
                               tap (default w/o term), tap13, junit, /<absolute path to formatter>
   --gather-test-outputs-in <directory>

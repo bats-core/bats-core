@@ -163,7 +163,7 @@ if [[ -n "$filter_status" ]]; then
       }
     ;;
     *)
-      printf "Error: Unknown value '%s' for --filter-status. Valid values are 'failed' and 'passing'.\n" "$filter_status">&2
+      printf "Error: Unknown value '%s' for --filter-status. Valid values are 'failed' and 'missed'.\n" "$filter_status">&2
       exit 1
     ;;
   esac
