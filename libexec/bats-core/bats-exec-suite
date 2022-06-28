@@ -136,7 +136,8 @@ if [[ ! -d "$BATS_RUN_LOGS_DIRECTORY" ]]; then
   # discard via sink instead of having a conditional later
   export BATS_RUNLOG_FILE='/dev/null'
 else
-  BATS_RUNLOG_DATE=$(date -Iseconds)
+  # use UTC (-u) to avoid problems with TZ changes
+  BATS_RUNLOG_DATE=$(date -u '+%Y-%m-%d %H:%M:%S UTC')
   export BATS_RUNLOG_FILE="$BATS_RUN_LOGS_DIRECTORY/${BATS_RUNLOG_DATE}.log"
 fi
 
@@ -169,6 +170,7 @@ if [[ -n "$filter_status" ]]; then
 
   if IFS='' read -d $'\n' -r BATS_PREVIOUS_RUNLOG_FILE < <(ls -1r "$BATS_RUN_LOGS_DIRECTORY"); then
     BATS_PREVIOUS_RUNLOG_FILE="$BATS_RUN_LOGS_DIRECTORY/$BATS_PREVIOUS_RUNLOG_FILE"
+    # TODO: only when this case is used do we get the failures where all tests are run after a missing test has been added
     # this can happen when doing multiple runs in the same second (e.g. bats internal tests)
     if [[ $BATS_PREVIOUS_RUNLOG_FILE == "$BATS_RUNLOG_FILE" ]]; then
       count=$(find "$BATS_RUN_LOGS_DIRECTORY" -name "$BATS_RUNLOG_DATE*" | wc -l)
@@ -203,7 +205,7 @@ if [[ -n "$filter_status" ]]; then
     filtered_tests=()
     for line in "${all_tests[@]}"; do
       if bats_filter_test_by_status "$line" && ! bats_binary_search "$line" last_filtered_tests; then
-        printf "%s\n" "$line" 
+        printf "%s\n" "$line"
         filtered_tests+=("$line")
       else
         printf "status-filtered %s %s\n" "$filter_status" "$line" >> "$BATS_RUNLOG_FILE"
