@@ -59,6 +59,11 @@ OPTIONS
   * `-F`, `--formatter <type>`:
     Switch between formatters: pretty (default), tap (default w/o term), tap13, junit,
     `/<absolute path to formatter>`
+  * `--filter-status <status>`
+    Only run tests with the given status in the last completed (no CTRL+C/SIGINT) run.
+    Valid <status> values are:
+      failed - runs tests that failed or were not present in the last run
+      missed - runs tests that were not present in the last run
   * `--gather-test-outputs-in <directory>`:
     Gather the output of failing *and* passing tests as files in directory
   * `-h`, `--help`:

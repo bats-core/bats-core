@@ -2,8 +2,6 @@
 set -eET
 
 # Variables used in other scripts.
-BATS_COUNT_ONLY=''
-BATS_TEST_FILTER=''
 BATS_ENABLE_TIMING=''
 BATS_EXTENDED_SYNTAX=''
 BATS_TRACE_LEVEL="${BATS_TRACE_LEVEL:-0}"
@@ -15,15 +13,6 @@ BATS_TEST_NAME_PREFIX="${BATS_TEST_NAME_PREFIX:-}"
 
 while [[ "$#" -ne 0 ]]; do
   case "$1" in
-  -c)
-    # shellcheck disable=SC2034
-    BATS_COUNT_ONLY=1
-    ;;
-  -f)
-    shift
-    # shellcheck disable=SC2034
-    BATS_TEST_FILTER="$1"
-    ;;
   -T)
     BATS_ENABLE_TIMING='-T'
     ;;
@@ -159,11 +148,15 @@ bats_exit_trap() {
 
     print_bats_out=1
     status=1
+    local state=failed
   else
     printf 'ok %d %s%s\n' "$BATS_SUITE_TEST_NUMBER" "${BATS_TEST_NAME_PREFIX:-}${BATS_TEST_DESCRIPTION}${BATS_TEST_TIME}" \
       "$skipped" >&3
     status=0
+    local state=passed
   fi
+
+  printf "%s %s\t%s\n" "$state" "$BATS_TEST_FILENAME" "$BATS_TEST_NAME" >> "$BATS_RUNLOG_FILE"
 
   if [[ $print_bats_out ]]; then
     bats_prefix_lines_for_tap_output < "$BATS_OUT" | bats_replace_filename >&3

@@ -6,6 +6,7 @@ filter=''
 num_jobs=${BATS_NUMBER_OF_PARALLEL_JOBS:-1}
 bats_no_parallelize_across_files=${BATS_NO_PARALLELIZE_ACROSS_FILES-}
 bats_no_parallelize_within_files=
+filter_status=''
 flags=('--dummy-flag') # add a dummy flag to prevent unset varialeb errors on empty array expansion in old bash versions
 setup_suite_file=''
 BATS_TRACE_LEVEL="${BATS_TRACE_LEVEL:-0}"
@@ -23,7 +24,6 @@ while [[ "$#" -ne 0 ]]; do
   -f)
     shift
     filter="$1"
-    flags+=('-f' "$filter")
     ;;
   -j)
     shift
@@ -42,6 +42,10 @@ while [[ "$#" -ne 0 ]]; do
   --no-parallelize-within-files)
     bats_no_parallelize_within_files=1
     flags+=("--no-parallelize-within-files")
+    ;;
+  --filter-status)
+    shift
+    filter_status="$1"
     ;;
   --dummy-flag)
     ;;
@@ -86,37 +90,141 @@ fi
 # create a file that contains all (filtered) tests to run from all files
 TESTS_LIST_FILE="${BATS_RUN_TMPDIR}/test_list_file.txt"
 
-all_tests=()
-for filename in "$@"; do
-  if [[ ! -f "$filename" ]]; then
-    abort "Test file \"${filename}\" does not exist"
-  fi
-
-  test_names=()
-  test_dupes=()
-  while read -r line; do
-    if [[ ! "$line" =~ ^bats_test_function\  ]]; then
-      continue
+bats_gather_tests() {
+  all_tests=()
+  for filename in "$@"; do
+    if [[ ! -f "$filename" ]]; then
+      abort "Test file \"${filename}\" does not exist"
     fi
-    line="${line%$'\r'}"
-    line="${line#* }"
-    test_line=$(printf "%s\t%s" "$filename" "$line")
-    all_tests+=("$test_line")
-    printf "%s\n" "$test_line" >>"$TESTS_LIST_FILE"
-    # avoid unbound variable errors on empty array expansion with old bash versions
-    if [[ ${#test_names[@]} -gt 0 && " ${test_names[*]} " == *" $line "* ]]; then
-      test_dupes+=("$line")
-      continue
+
+    test_names=()
+    test_dupes=()
+    while read -r line; do
+      if [[ ! "$line" =~ ^bats_test_function\  ]]; then
+        continue
+      fi
+      line="${line%$'\r'}"
+      line="${line#* }"
+      test_line=$(printf "%s\t%s" "$filename" "$line")
+      all_tests+=("$test_line")
+      printf "%s\n" "$test_line" >>"$TESTS_LIST_FILE"
+      # avoid unbound variable errors on empty array expansion with old bash versions
+      if [[ ${#test_names[@]} -gt 0 && " ${test_names[*]} " == *" $line "* ]]; then
+        test_dupes+=("$line")
+        continue
+      fi
+      test_names+=("$line")
+    done < <(BATS_TEST_FILTER="$filter" bats-preprocess "$filename")
+
+    if [[ "${#test_dupes[@]}" -ne 0 ]]; then
+      abort "Duplicate test name(s) in file \"${filename}\": ${test_dupes[*]}"
     fi
-    test_names+=("$line")
-  done < <(BATS_TEST_FILTER="$filter" bats-preprocess "$filename")
+  done
 
-  if [[ "${#test_dupes[@]}" -ne 0 ]]; then
-    abort "Duplicate test name(s) in file \"${filename}\": ${test_dupes[*]}"
+  test_count="${#all_tests[@]}"
+}
+
+TEST_ROOT=${1%/*}
+BATS_RUN_LOGS_DIRECTORY="$TEST_ROOT/.bats/run-logs"
+if [[ ! -d "$BATS_RUN_LOGS_DIRECTORY" ]]; then
+  if [[ -n "$filter_status" ]]; then
+    printf "Error: --filter-status needs '%s/' to save failed tests. Please create this folder, add it to .gitignore and try again.\n" "$BATS_RUN_LOGS_DIRECTORY"
+    exit 1
+  else
+    BATS_RUN_LOGS_DIRECTORY=
   fi
-done
+  # discard via sink instead of having a conditional later
+  export BATS_RUNLOG_FILE='/dev/null'
+else
+  # use UTC (-u) to avoid problems with TZ changes
+  BATS_RUNLOG_DATE=$(date -u '+%Y-%m-%d %H:%M:%S UTC')
+  export BATS_RUNLOG_FILE="$BATS_RUN_LOGS_DIRECTORY/${BATS_RUNLOG_DATE}.log"
+fi
 
-test_count="${#all_tests[@]}"
+bats_gather_tests "$@"
+
+if [[ -n "$filter_status" ]]; then  
+  # shellcheck source=lib/bats-core/common.bash
+  source "$BATS_ROOT/lib/bats-core/common.bash"
+  case "$filter_status" in
+    failed)
+      bats_filter_test_by_status() { # <line>
+        ! bats_binary_search "$1" "passed_tests"
+      }
+    ;;
+    passed)
+      bats_filter_test_by_status() {
+        ! bats_binary_search "$1" "failed_tests"
+      }
+    ;;
+    missed)
+      bats_filter_test_by_status() {
+        ! bats_binary_search "$1" "failed_tests" && ! bats_binary_search "$1" "passed_tests" 
+      }
+    ;;
+    *)
+      printf "Error: Unknown value '%s' for --filter-status. Valid values are 'failed' and 'missed'.\n" "$filter_status">&2
+      exit 1
+    ;;
+  esac
+
+  if IFS='' read -d $'\n' -r BATS_PREVIOUS_RUNLOG_FILE < <(ls -1r "$BATS_RUN_LOGS_DIRECTORY"); then
+    BATS_PREVIOUS_RUNLOG_FILE="$BATS_RUN_LOGS_DIRECTORY/$BATS_PREVIOUS_RUNLOG_FILE"
+    if [[ $BATS_PREVIOUS_RUNLOG_FILE == "$BATS_RUNLOG_FILE" ]]; then
+      count=$(find "$BATS_RUN_LOGS_DIRECTORY" -name "$BATS_RUNLOG_DATE*" | wc -l)
+      BATS_RUNLOG_FILE="$BATS_RUN_LOGS_DIRECTORY/${BATS_RUNLOG_DATE}-$count.log"
+    fi
+    failed_tests=()
+    passed_tests=()
+    # store tests that were already filtered out in the last run for the same filter reason
+    last_filtered_tests=()
+    i=0
+    while read -rd $'\n' line; do
+      ((++i))
+      case "$line" in
+        "passed "*)
+          passed_tests+=("${line#passed }")
+        ;;
+        "failed "*)
+          failed_tests+=("${line#failed }")
+        ;;
+        "status-filtered $filter_status"*) # pick up tests that were filtered in the last round for the same status
+          last_filtered_tests+=("${line#status-filtered "$filter_status" }")
+        ;;
+        "status-filtered "*) # ignore other status-filtered lines
+        ;;
+        "#"*) # allow for comments
+        ;;
+        *)
+          printf "Error: %s:%d: Invalid format: %s\n" "$BATS_PREVIOUS_RUNLOG_FILE" "$i" "$line" >&2
+          exit 1
+        ;;
+      esac
+    done < <(sort "$BATS_PREVIOUS_RUNLOG_FILE")
+
+    filtered_tests=()
+    for line in "${all_tests[@]}"; do
+      if bats_filter_test_by_status "$line" && ! bats_binary_search "$line" last_filtered_tests; then
+        printf "%s\n" "$line"
+        filtered_tests+=("$line")
+      else
+        printf "status-filtered %s %s\n" "$filter_status" "$line" >> "$BATS_RUNLOG_FILE"
+      fi
+    done > "$TESTS_LIST_FILE"
+
+    # save filtered tests to exclude them again in next round
+    for test_line in "${last_filtered_tests[@]}"; do 
+      printf "status-filtered %s %s\n" "$filter_status" "$test_line"
+    done >> "$BATS_RUNLOG_FILE"
+
+    test_count="${#filtered_tests[@]}"
+    if [[ ${#failed_tests} -eq 0 && ${#filtered_tests[@]} -eq 0 ]]; then
+      printf "There where no failed tests in the last recorded run.\n" >&2
+    fi
+  else
+    printf "No recording of previous runs found. Running all tests!\n" >&2
+  fi
+fi
 
 if [[ -n "$count_only_flag" ]]; then
   printf '%d\n' "${test_count}"
@@ -177,6 +285,11 @@ bats_suite_exit_trap() {
   fi
   if [[ ${BATS_INTERRUPTED-NOTSET} != NOTSET ]]; then
     printf "\n# Received SIGINT, aborting ...\n\n"
+  fi
+  
+  if [[ -d "$BATS_RUN_LOGS_DIRECTORY" && -n "${BATS_INTERRUPTED}" ]]; then
+    # aborting a test run with CTRL+C does not save the runlog file
+    rm "$BATS_RUNLOG_FILE"
   fi
   exit "$bats_exec_suite_status"
 }

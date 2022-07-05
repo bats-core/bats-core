@@ -1139,7 +1139,7 @@ END_OF_ERR_MSG
   [ "${lines[0]}" == 'ERROR: Unknown BATS_CODE_QUOTE_STYLE: three' ]
 }
 
-@test "Debug trap must only override variables that are prefixed with bats_ (issue #519)" {
+@test "Debug trap must only override variables that are prefixed with BATS_ (issue #519)" {
   # use declare -p to gather variables in pristine bash and bats @test environment
   # then compare which ones are introduced in @test compared to bash
 
@@ -1232,4 +1232,135 @@ END_OF_ERR_MSG
 
 @test "BATS_* variables don't contain double slashes" {
   TMPDIR=/tmp/ bats "$FIXTURE_ROOT/BATS_variables_dont_contain_double_slashes.bats"
+}
+
+@test "Without .bats/run-logs --filter-status failed returns an error" {
+  bats_require_minimum_version 1.5.0
+  run -1 bats --filter-status failed "$FIXTURE_ROOT/passing_and_failing.bats"
+  [[ "${lines[0]}" == "Error: --filter-status needs '"*".bats/run-logs/' to save failed tests. Please create this folder, add it to .gitignore and try again." ]] || false
+}
+
+@test "Without previous recording --filter-status failed runs all tests and then runs only failed and missed tests" {
+  cd "$BATS_TEST_TMPDIR" # don't pollute the source folder
+  cp "$FIXTURE_ROOT/many_passing_and_one_failing.bats" .
+  mkdir -p .bats/run-logs
+  bats_require_minimum_version 1.5.0
+  run -1 bats --filter-status failed "many_passing_and_one_failing.bats"
+  # without previous recording, all tests should be run
+  [ "${lines[0]}" == 'No recording of previous runs found. Running all tests!' ]
+  [ "${lines[1]}" == '1..4' ]
+  [ "$(grep -c 'not ok' <<< "$output")" -eq 1 ]
+
+  run -1 bats --tap --filter-status failed "many_passing_and_one_failing.bats"
+  # now we should only run the failing test
+  [ "${lines[0]}" == 1..1 ]
+  [ "${lines[1]}" == "not ok 1 a failing test" ]
+
+  # add a new test that was missed before
+  echo $'@test missed { :; }' >> "many_passing_and_one_failing.bats"
+
+  find .bats/run-logs/ -type f -print -exec cat {} \;
+
+  run -1 bats --tap --filter-status failed "many_passing_and_one_failing.bats"
+  # now we should only run the failing test
+  [ "${lines[0]}" == 1..2 ]
+  [ "${lines[1]}" == "not ok 1 a failing test" ]
+  [ "${lines[4]}" == "ok 2 missed" ]
+}
+
+@test "Without previous recording --filter-status passed runs all tests and then runs only passed and missed tests" {
+  cd "$BATS_TEST_TMPDIR" # don't pollute the source folder
+  cp "$FIXTURE_ROOT/many_passing_and_one_failing.bats" .
+  mkdir -p .bats/run-logs
+  bats_require_minimum_version 1.5.0
+  run -1 bats --filter-status passed "many_passing_and_one_failing.bats"
+  # without previous recording, all tests should be run
+  [ "${lines[0]}" == 'No recording of previous runs found. Running all tests!' ]
+  [ "${lines[1]}" == '1..4' ]
+  [ "$(grep -c 'not ok' <<< "$output")" -eq 1 ]
+
+  run -0 bats --tap --filter-status passed "many_passing_and_one_failing.bats"
+  # now we should only run the passed tests
+  [ "${lines[0]}" == 1..3 ]
+  [ "$(grep -c 'not ok' <<< "$output")" -eq 0 ]
+
+  # add a new test that was missed before
+  echo $'@test missed { :; }' >> "many_passing_and_one_failing.bats"
+
+  run -0 bats --tap --filter-status passed "many_passing_and_one_failing.bats"
+  # now we should only run the passed and missed tests
+  [ "${lines[0]}" == 1..4 ]
+  [ "$(grep -c 'not ok' <<< "$output")" -eq 0 ]
+  [ "${lines[4]}" == "ok 4 missed" ]
+}
+
+@test "Without previous recording --filter-status missed runs all tests and then runs only missed tests" {
+  cd "$BATS_TEST_TMPDIR" # don't pollute the source folder
+  cp "$FIXTURE_ROOT/many_passing_and_one_failing.bats" .
+  mkdir -p .bats/run-logs
+  bats_require_minimum_version 1.5.0
+  run -1 bats --filter-status missed "many_passing_and_one_failing.bats"
+  # without previous recording, all tests should be run
+  [ "${lines[0]}" == 'No recording of previous runs found. Running all tests!' ]
+  [ "${lines[1]}" == '1..4' ]
+  [ "$(grep -c -E '^ok' <<< "$output")" -eq 3 ]
+
+  # add a new test that was missed before
+  echo $'@test missed { :; }' >> "many_passing_and_one_failing.bats"
+
+  run -0 bats --tap --filter-status missed "many_passing_and_one_failing.bats"
+  # now we should only run the missed test
+  [ "${lines[0]}" == 1..1 ]
+  [ "${lines[1]}" == "ok 1 missed" ]
+}
+
+
+
+@test "--filter-status failed gives warning on empty failed test list" {
+  cd "$BATS_TEST_TMPDIR" # don't pollute the source folder
+  cp "$FIXTURE_ROOT/passing.bats" .
+  mkdir -p .bats/run-logs
+  bats_require_minimum_version 1.5.0
+  # have no failing tests
+  run -0 bats --filter-status failed "passing.bats"
+  # try to run the empty list of failing tests
+  run -0 bats --filter-status failed "passing.bats"
+  [ "${lines[0]}" == "There where no failed tests in the last recorded run." ]
+  [ "${lines[1]}" == "1..0" ]
+  [ "${#lines[@]}" -eq 2 ]
+}
+
+enforce_own_process_group() {
+    set -m
+    "$@"
+  }
+
+@test "--filter-status failed does not update list when run is aborted" {
+  if [[ "$BATS_NUMBER_OF_PARALLEL_JOBS" -gt 1 ]]; then
+    skip "Aborts don't work in parallel mode"
+  fi
+
+  cd "$BATS_TEST_TMPDIR" # don't pollute the source folder
+  cp "$FIXTURE_ROOT/sigint_in_failing_test.bats" .
+  mkdir -p .bats/run-logs
+
+  bats_require_minimum_version 1.5.0
+  # don't hang yet, so we get a useful rerun file
+  run -1 env DONT_ABORT=1 bats "sigint_in_failing_test.bats"
+
+  # check that we have exactly one log
+  run find .bats/run-logs -name '*.log'
+  [[ "${lines[0]}" == *.log ]] || false
+  [ ${#lines[@]} -eq 1 ]
+
+  local first_run_logs="$output"
+
+  sleep 1 # ensure we would get different timestamps for each run
+
+  # now rerun but abort midrun
+  run -1 enforce_own_process_group bats --rerun-failed "sigint_in_failing_test.bats"
+
+  # should not have produced a new log
+  run find .bats/run-logs -name '*.log'
+  [ "$first_run_logs" == "$output" ]
 }
