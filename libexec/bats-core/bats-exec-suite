@@ -170,8 +170,6 @@ if [[ -n "$filter_status" ]]; then
 
   if IFS='' read -d $'\n' -r BATS_PREVIOUS_RUNLOG_FILE < <(ls -1r "$BATS_RUN_LOGS_DIRECTORY"); then
     BATS_PREVIOUS_RUNLOG_FILE="$BATS_RUN_LOGS_DIRECTORY/$BATS_PREVIOUS_RUNLOG_FILE"
-    # TODO: only when this case is used do we get the failures where all tests are run after a missing test has been added
-    # this can happen when doing multiple runs in the same second (e.g. bats internal tests)
     if [[ $BATS_PREVIOUS_RUNLOG_FILE == "$BATS_RUNLOG_FILE" ]]; then
       count=$(find "$BATS_RUN_LOGS_DIRECTORY" -name "$BATS_RUNLOG_DATE*" | wc -l)
       BATS_RUNLOG_FILE="$BATS_RUN_LOGS_DIRECTORY/${BATS_RUNLOG_DATE}-$count.log"
@@ -194,6 +192,8 @@ if [[ -n "$filter_status" ]]; then
           last_filtered_tests+=("${line#status-filtered "$filter_status" }")
         ;;
         "status-filtered "*) # ignore other status-filtered lines
+        ;;
+        "#"*) # allow for comments
         ;;
         *)
           printf "Error: %s:%d: Invalid format: %s\n" "$BATS_PREVIOUS_RUNLOG_FILE" "$i" "$line" >&2
