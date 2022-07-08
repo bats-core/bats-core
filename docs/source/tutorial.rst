@@ -567,7 +567,7 @@ As an example, we want to add an echo server capability to our project. First, w
     setup_file() {
         load 'test_helper/common-setup'
         _common_setup
-        PORT=$(project.sh start-echo-server >/dev/null 2>&1)
+        PORT=$(project.sh start-echo-server 2>&1 >/dev/null)
         export PORT
     }
 
