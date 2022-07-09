@@ -35,6 +35,7 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 #### Documentation
 
 * fix typos and links (#596, #604)
+* fix redirection order of an example in the tutorial (#617)
 
 ## [1.7.0] - 2022-05-14
 
@@ -412,7 +413,16 @@ Changes:
 
 * Initial public release.
 
-[Unreleased]: https://github.com/bats-core/bats-core/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/bats-core/bats-core/compare/v1.7.0...HEAD
+[1.7.0]: https://github.com/bats-core/bats-core/compare/v1.6.1...v1.7.0
+[1.6.1]: https://github.com/bats-core/bats-core/compare/v1.6.0...v1.6.1
+[1.6.0]: https://github.com/bats-core/bats-core/compare/v1.5.0...v1.6.0
+[1.5.0]: https://github.com/bats-core/bats-core/compare/v1.4.1...v1.5.0
+[1.4.1]: https://github.com/bats-core/bats-core/compare/v1.4.0...v1.4.1
+[1.4.0]: https://github.com/bats-core/bats-core/compare/v1.3.0...v1.4.0
+[1.3.0]: https://github.com/bats-core/bats-core/compare/v1.2.1...v1.3.0
+[1.2.1]: https://github.com/bats-core/bats-core/compare/v1.2.0...v1.2.1
+[1.2.0]: https://github.com/bats-core/bats-core/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/bats-core/bats-core/compare/v1.0.2...v1.1.0
 [1.0.2]: https://github.com/bats-core/bats-core/compare/v1.0.1...v1.0.2
 [1.0.1]: https://github.com/bats-core/bats-core/compare/v1.0.0...v1.0.1
