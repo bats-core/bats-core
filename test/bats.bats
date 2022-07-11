@@ -802,6 +802,7 @@ END_OF_ERR_MSG
 }
 
 @test "CTRL-C aborts and fails after run" {
+  BATS_TEST_RETRIES=2
   if [[ "$BATS_NUMBER_OF_PARALLEL_JOBS" -gt 1 ]]; then
     skip "Aborts don't work in parallel mode"
   fi
