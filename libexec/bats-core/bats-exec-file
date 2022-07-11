@@ -260,8 +260,8 @@ bats_read_tests_list_file() {
     fi
     ((++line_number))
   done <"$TESTS_FILE"
-
-  declare -rig BATS_FILE_FIRST_TEST_NUMBER_IN_SUITE="$test_number_in_suite"
+  BATS_FILE_FIRST_TEST_NUMBER_IN_SUITE="$test_number_in_suite"
+  declare -ri BATS_FILE_FIRST_TEST_NUMBER_IN_SUITE # mark readonly (cannot merge assignment, because value would be lost)
 }
 
 bats_run_tests() {
@@ -310,6 +310,7 @@ if [[ -n "$extended_syntax" ]]; then
   printf "suite %s\n" "$filename"
 fi
 
+BATS_FILE_FIRST_TEST_NUMBER_IN_SUITE=0 # predeclare as Bash 3.2 does not support declare -g
 bats_read_tests_list_file
 
 # don't run potentially expensive setup/teardown_file
