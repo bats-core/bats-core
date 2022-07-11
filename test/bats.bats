@@ -1375,35 +1375,41 @@ enforce_own_process_group() {
   [ "${lines[5]}" == 'not ok 3 Override retries' ]
 
   run cat "$LOG"
-  [ "${lines[0]}" == 'setup_file ' ] # should only be executed once
+  [ "${lines[0]}" == ' setup_file ' ] # should only be executed once
+  [ "${lines[22]}" == ' teardown_file ' ] # should only be executed once
+  [ "${#lines[@]}" -eq 23 ]
 
   # 3x Fail All (give up after 3 tries/2 retries)
-  [ "${lines[1]}" == 'setup 1' ] # should be executed for each try
-  [ "${lines[2]}" == 'test_Fail_all 1' ]
-  [ "${lines[3]}" == 'teardown 1' ] # should be executed for each try
-  [ "${lines[4]}" == 'setup 2' ]
-  [ "${lines[5]}" == 'test_Fail_all 2' ]
-  [ "${lines[6]}" == 'teardown 2' ]
-  [ "${lines[7]}" == 'setup 3' ]
-  [ "${lines[8]}" == 'test_Fail_all 3' ]
-  [ "${lines[9]}" == 'teardown 3' ]
+  run grep test_Fail_all < "$LOG"
+  [ "${lines[0]}" == 'test_Fail_all setup 1' ] # should be executed for each try
+  [ "${lines[1]}" == 'test_Fail_all test_Fail_all 1' ]
+  [ "${lines[2]}" == 'test_Fail_all teardown 1' ] # should be executed for each try
+  [ "${lines[3]}" == 'test_Fail_all setup 2' ]
+  [ "${lines[4]}" == 'test_Fail_all test_Fail_all 2' ]
+  [ "${lines[5]}" == 'test_Fail_all teardown 2' ]
+  [ "${lines[6]}" == 'test_Fail_all setup 3' ]
+  [ "${lines[7]}" == 'test_Fail_all test_Fail_all 3' ]
+  [ "${lines[8]}" == 'test_Fail_all teardown 3' ]
+  [ "${#lines[@]}" -eq 9 ]
 
   # 2x Fail once (pass second try/first retry)
-  [ "${lines[10]}" == 'setup 1' ]
-  [ "${lines[11]}" == 'test_Fail_once 1' ]
-  [ "${lines[12]}" == 'teardown 1' ]
-  [ "${lines[13]}" == 'setup 2' ]
-  [ "${lines[14]}" == 'test_Fail_once 2' ]
-  [ "${lines[15]}" == 'teardown 2' ]
+  run grep test_Fail_once < "$LOG"
+  [ "${lines[0]}" == 'test_Fail_once setup 1' ]
+  [ "${lines[1]}" == 'test_Fail_once test_Fail_once 1' ]
+  [ "${lines[2]}" == 'test_Fail_once teardown 1' ]
+  [ "${lines[3]}" == 'test_Fail_once setup 2' ]
+  [ "${lines[4]}" == 'test_Fail_once test_Fail_once 2' ]
+  [ "${lines[5]}" == 'test_Fail_once teardown 2' ]
+  [ "${#lines[@]}" -eq 6 ]
 
   # 2x Override retries (give up after second try/first retry)
-  [ "${lines[16]}" == 'setup 1' ]
-  [ "${lines[17]}" == 'test_Override_retries 1' ]
-  [ "${lines[18]}" == 'teardown 1' ]
-  [ "${lines[19]}" == 'setup 2' ]
-  [ "${lines[20]}" == 'test_Override_retries 2' ]
-  [ "${lines[21]}" == 'teardown 2' ]
-
-  [ "${lines[22]}" == 'teardown_file ' ] # should only be executed once
+  run grep test_Override_retries < "$LOG"
+  [ "${lines[0]}" == 'test_Override_retries setup 1' ]
+  [ "${lines[1]}" == 'test_Override_retries test_Override_retries 1' ]
+  [ "${lines[2]}" == 'test_Override_retries teardown 1' ]
+  [ "${lines[3]}" == 'test_Override_retries setup 2' ]
+  [ "${lines[4]}" == 'test_Override_retries test_Override_retries 2' ]
+  [ "${lines[5]}" == 'test_Override_retries teardown 2' ]
+  [ "${#lines[@]}" -eq 6 ]
 
 }
