@@ -348,3 +348,10 @@ bats_test_function() {
   local test_name="$1"
   BATS_TEST_NAMES+=("$test_name")
 }
+
+# decides whether a failed test should be run again
+bats_should_retry_test() {
+  # test try number starts at 1
+  # 0 retries means run only first try
+  (( BATS_TEST_TRY_NUMBER <= BATS_TEST_RETRIES ))
+}

@@ -1364,3 +1364,46 @@ enforce_own_process_group() {
   run find .bats/run-logs -name '*.log'
   [ "$first_run_logs" == "$output" ]
 }
+
+@test "BATS_TEST_RETRIES allows for retrying tests" {
+  export LOG="$BATS_TEST_TMPDIR/call.log"
+  bats_require_minimum_version 1.5.0
+  run ! bats "$FIXTURE_ROOT/retry.bats"
+  [ "${lines[0]}" == '1..3' ]
+  [ "${lines[1]}" == 'not ok 1 Fail all' ]
+  [ "${lines[4]}" == 'ok 2 Fail once' ]
+  [ "${lines[5]}" == 'not ok 3 Override retries' ]
+
+  run cat "$LOG"
+  [ "${lines[0]}" == 'setup_file ' ] # should only be executed once
+
+  # 3x Fail All (give up after 3 tries/2 retries)
+  [ "${lines[1]}" == 'setup 1' ] # should be executed for each try
+  [ "${lines[2]}" == 'test_Fail_all 1' ]
+  [ "${lines[3]}" == 'teardown 1' ] # should be executed for each try
+  [ "${lines[4]}" == 'setup 2' ]
+  [ "${lines[5]}" == 'test_Fail_all 2' ]
+  [ "${lines[6]}" == 'teardown 2' ]
+  [ "${lines[7]}" == 'setup 3' ]
+  [ "${lines[8]}" == 'test_Fail_all 3' ]
+  [ "${lines[9]}" == 'teardown 3' ]
+
+  # 2x Fail once (pass second try/first retry)
+  [ "${lines[10]}" == 'setup 1' ]
+  [ "${lines[11]}" == 'test_Fail_once 1' ]
+  [ "${lines[12]}" == 'teardown 1' ]
+  [ "${lines[13]}" == 'setup 2' ]
+  [ "${lines[14]}" == 'test_Fail_once 2' ]
+  [ "${lines[15]}" == 'teardown 2' ]
+
+  # 2x Override retries (give up after second try/first retry)
+  [ "${lines[16]}" == 'setup 1' ]
+  [ "${lines[17]}" == 'test_Override_retries 1' ]
+  [ "${lines[18]}" == 'teardown 1' ]
+  [ "${lines[19]}" == 'setup 2' ]
+  [ "${lines[20]}" == 'test_Override_retries 2' ]
+  [ "${lines[21]}" == 'teardown 2' ]
+
+  [ "${lines[22]}" == 'teardown_file ' ] # should only be executed once
+
+}
