@@ -43,7 +43,7 @@ Your first test
 Now we want to add our first test.
 
 In the tutorial repository, we want to build up our project in a TDD fashion.
-Thus, we start with an empty project and our first test is to just run our (non existing) shell script.
+Thus, we start with an empty project and our first test is to just run our (nonexistent) shell script.
 
 We start by creating a new test file `test/test.bats`
 
