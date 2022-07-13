@@ -15,6 +15,8 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 * using external formatters via `--formatter <absolute path>` (also works for
   `--report-formatter`) (#602)
 * running only tests that failed in the last run via `--filter-status failed` (#483)
+* variable `BATS_TEST_RETRIES` that specifies how often a test should be
+  reattempted before it is considered failed (#618)
 
 #### Documentation
 

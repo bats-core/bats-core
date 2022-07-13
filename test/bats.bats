@@ -802,6 +802,8 @@ END_OF_ERR_MSG
 }
 
 @test "CTRL-C aborts and fails after run" {
+  # shellcheck disable=SC2034
+  BATS_TEST_RETRIES=2
   if [[ "$BATS_NUMBER_OF_PARALLEL_JOBS" -gt 1 ]]; then
     skip "Aborts don't work in parallel mode"
   fi
@@ -1363,4 +1365,53 @@ enforce_own_process_group() {
   # should not have produced a new log
   run find .bats/run-logs -name '*.log'
   [ "$first_run_logs" == "$output" ]
+}
+
+@test "BATS_TEST_RETRIES allows for retrying tests" {
+  export LOG="$BATS_TEST_TMPDIR/call.log"
+  bats_require_minimum_version 1.5.0
+  run ! bats "$FIXTURE_ROOT/retry.bats"
+  [ "${lines[0]}" == '1..3' ]
+  [ "${lines[1]}" == 'not ok 1 Fail all' ]
+  [ "${lines[4]}" == 'ok 2 Fail once' ]
+  [ "${lines[5]}" == 'not ok 3 Override retries' ]
+
+  run cat "$LOG"
+  [ "${lines[0]}" == ' setup_file ' ] # should only be executed once
+  [ "${lines[22]}" == ' teardown_file ' ] # should only be executed once
+  [ "${#lines[@]}" -eq 23 ]
+
+  # 3x Fail All (give up after 3 tries/2 retries)
+  run grep test_Fail_all < "$LOG"
+  [ "${lines[0]}" == 'test_Fail_all setup 1' ] # should be executed for each try
+  [ "${lines[1]}" == 'test_Fail_all test_Fail_all 1' ]
+  [ "${lines[2]}" == 'test_Fail_all teardown 1' ] # should be executed for each try
+  [ "${lines[3]}" == 'test_Fail_all setup 2' ]
+  [ "${lines[4]}" == 'test_Fail_all test_Fail_all 2' ]
+  [ "${lines[5]}" == 'test_Fail_all teardown 2' ]
+  [ "${lines[6]}" == 'test_Fail_all setup 3' ]
+  [ "${lines[7]}" == 'test_Fail_all test_Fail_all 3' ]
+  [ "${lines[8]}" == 'test_Fail_all teardown 3' ]
+  [ "${#lines[@]}" -eq 9 ]
+
+  # 2x Fail once (pass second try/first retry)
+  run grep test_Fail_once < "$LOG"
+  [ "${lines[0]}" == 'test_Fail_once setup 1' ]
+  [ "${lines[1]}" == 'test_Fail_once test_Fail_once 1' ]
+  [ "${lines[2]}" == 'test_Fail_once teardown 1' ]
+  [ "${lines[3]}" == 'test_Fail_once setup 2' ]
+  [ "${lines[4]}" == 'test_Fail_once test_Fail_once 2' ]
+  [ "${lines[5]}" == 'test_Fail_once teardown 2' ]
+  [ "${#lines[@]}" -eq 6 ]
+
+  # 2x Override retries (give up after second try/first retry)
+  run grep test_Override_retries < "$LOG"
+  [ "${lines[0]}" == 'test_Override_retries setup 1' ]
+  [ "${lines[1]}" == 'test_Override_retries test_Override_retries 1' ]
+  [ "${lines[2]}" == 'test_Override_retries teardown 1' ]
+  [ "${lines[3]}" == 'test_Override_retries setup 2' ]
+  [ "${lines[4]}" == 'test_Override_retries test_Override_retries 2' ]
+  [ "${lines[5]}" == 'test_Override_retries teardown 2' ]
+  [ "${#lines[@]}" -eq 6 ]
+
 }

@@ -235,6 +235,9 @@ test case.
 on stdout and in reports.
 * `$BATS_TEST_DESCRIPTION` is the description of the current test
 case.
+* `BATS_TEST_RETRIES` is the maximum number of additional attempts that will be
+  made on a failed test before it is finally considered failed.
+  The default of 0 means the test must pass on the first attempt.
 * `$BATS_TEST_NUMBER` is the (1-based) index of the current test case
 in the test file.
 * `$BATS_SUITE_TEST_NUMBER` is the (1-based) index of the current test

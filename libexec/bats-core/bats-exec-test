@@ -49,6 +49,7 @@ export BATS_TEST_FILENAME="$1"
 export BATS_TEST_NAME="$2"
 export BATS_SUITE_TEST_NUMBER="$3"
 export BATS_TEST_NUMBER="$4"
+BATS_TEST_TRY_NUMBER="$5"
 
 if [[ -z "$BATS_TEST_FILENAME" ]]; then
   printf 'usage: bats-exec-test <filename>\n' >&2
@@ -67,7 +68,7 @@ bats_create_test_tmpdirs() {
 
   BATS_TEST_TMPDIR="$tests_tmpdir/$BATS_SUITE_TEST_NUMBER"
   if ! mkdir "$BATS_TEST_TMPDIR"; then
-    printf 'Failed to create BATS_TEST_TMPDIR: %s\n' "$BATS_TEST_TMPDIR" >&2
+    printf 'Failed to create BATS_TEST_TMPDIR%d: %s\n' "$BATS_TEST_TRY_NUMBER" "$BATS_TEST_TMPDIR" >&2
     exit 1
   fi
 
@@ -123,6 +124,7 @@ bats_exit_trap() {
 
   local print_bats_out="${BATS_SHOW_OUTPUT_OF_SUCCEEDING_TESTS}"
 
+  local should_retry=''
   if [[ -z "$BATS_TEST_COMPLETED" || -z "$BATS_TEARDOWN_COMPLETED" || "${BATS_INTERRUPTED-NOTSET}" != NOTSET ]]; then
     if [[ "$BATS_ERROR_STATUS" -eq 0 ]]; then
       # For some versions of bash, `$?` may not be set properly for some error
@@ -136,19 +138,25 @@ bats_exit_trap() {
       # output, since there's no way to reach the `bats_exit_trap` call.
       BATS_ERROR_STATUS=1
     fi
-    printf 'not ok %d %s\n' "$BATS_SUITE_TEST_NUMBER" "${BATS_TEST_NAME_PREFIX:-}${BATS_TEST_DESCRIPTION}${BATS_TEST_TIME}" >&3
-    local stack_trace
-    bats_get_failure_stack_trace stack_trace
-    bats_print_stack_trace "${stack_trace[@]}" >&3
-    bats_print_failed_command "${stack_trace[@]}" >&3
+    if bats_should_retry_test; then
+      should_retry=1
+      status=126 # signify retry
+      rm -r "$BATS_TEST_TMPDIR" # clean up for retry
+    else
+      printf 'not ok %d %s\n' "$BATS_SUITE_TEST_NUMBER" "${BATS_TEST_NAME_PREFIX:-}${BATS_TEST_DESCRIPTION}${BATS_TEST_TIME}" >&3
+      local stack_trace
+      bats_get_failure_stack_trace stack_trace
+      bats_print_stack_trace "${stack_trace[@]}" >&3
+      bats_print_failed_command "${stack_trace[@]}" >&3
 
-    if [[ $BATS_PRINT_OUTPUT_ON_FAILURE && -n "${output:-}" ]]; then
-      printf "Last output:\n%s\n" "$output" >> "$BATS_OUT"
-    fi 
+      if [[ $BATS_PRINT_OUTPUT_ON_FAILURE && -n "${output:-}" ]]; then
+        printf "Last output:\n%s\n" "$output" >> "$BATS_OUT"
+      fi 
 
-    print_bats_out=1
-    status=1
-    local state=failed
+      print_bats_out=1    
+      status=1
+      local state=failed
+    fi
   else
     printf 'ok %d %s%s\n' "$BATS_SUITE_TEST_NUMBER" "${BATS_TEST_NAME_PREFIX:-}${BATS_TEST_DESCRIPTION}${BATS_TEST_TIME}" \
       "$skipped" >&3
@@ -156,16 +164,20 @@ bats_exit_trap() {
     local state=passed
   fi
 
-  printf "%s %s\t%s\n" "$state" "$BATS_TEST_FILENAME" "$BATS_TEST_NAME" >> "$BATS_RUNLOG_FILE"
+  if [[ -z "$should_retry" ]]; then
+    printf "%s %s\t%s\n" "$state" "$BATS_TEST_FILENAME" "$BATS_TEST_NAME" >> "$BATS_RUNLOG_FILE"
 
-  if [[ $print_bats_out ]]; then
-    bats_prefix_lines_for_tap_output < "$BATS_OUT" | bats_replace_filename >&3
+    if [[ $print_bats_out ]]; then
+      bats_prefix_lines_for_tap_output < "$BATS_OUT" | bats_replace_filename >&3
+    fi
   fi
-
   if [[ $BATS_GATHER_TEST_OUTPUTS_IN ]]; then
-    cp "$BATS_OUT" "$BATS_GATHER_TEST_OUTPUTS_IN/$BATS_SUITE_TEST_NUMBER-$BATS_TEST_DESCRIPTION.log"
+    local try_suffix=
+    if [[ -n "$should_retry" ]]; then
+      try_suffix="-try$BATS_TEST_TRY_NUMBER"
+    fi
+    cp "$BATS_OUT" "$BATS_GATHER_TEST_OUTPUTS_IN/$BATS_SUITE_TEST_NUMBER$try_suffix-$BATS_TEST_DESCRIPTION.log"
   fi
-
   rm -f "$BATS_OUT"
   exit "$status"
 }
