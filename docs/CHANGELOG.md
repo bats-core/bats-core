@@ -229,7 +229,7 @@ quotes around code blocks in error output (#506)
     `--report-formatter junit` to obtain the `.xml` report file!
 * removed `--parallel-preserve-environment` flag, as this is the default
   behavior (#324)
-* moved CI from Travis/Appveyor to Github Actions (#405)
+* moved CI from Travis/AppVeyor to Github Actions (#405)
 * preprocessed files are no longer removed if `--no-tempdir-cleanup` is
   specified (#395)
 
