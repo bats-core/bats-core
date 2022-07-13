@@ -170,7 +170,7 @@ bats_emit_trace() {
 		# shellcheck disable=SC2016
 		if [[ $BASH_COMMAND != '"$BATS_TEST_NAME" >> "$BATS_OUT" 2>&1 4>&1' && $BASH_COMMAND != "bats_test_begin "* ]] && # don't emit these internal calls
 			[[ $BASH_COMMAND != "$BATS_LAST_BASH_COMMAND" || $line != "$BATS_LAST_BASH_LINENO" ]] &&
-			# avoid printing a function twice (at call site and at definiton site)
+			# avoid printing a function twice (at call site and at definition site)
 			[[ $BASH_COMMAND != "$BATS_LAST_BASH_COMMAND" || ${BASH_LINENO[2]} != "$BATS_LAST_BASH_LINENO" || ${BASH_SOURCE[3]} != "$BATS_LAST_BASH_SOURCE" ]]; then
 			local file="${BASH_SOURCE[2]}" # index 2: skip over bats_emit_trace and bats_debug_trap
 			if [[ $file == "${BATS_TEST_SOURCE}" ]]; then
