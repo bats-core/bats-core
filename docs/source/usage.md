@@ -107,7 +107,7 @@ sequentially.
 
 If you have files where tests within the file would interfere with each other, you can use
 `--no-parallelize-within-files` to disable parallelization within all files.
-If you want more finegrained control, you can `export BATS_NO_PARALLELIZE_WITHIN_FILE=true` in `setup_file()`
+If you want more fine-grained control, you can `export BATS_NO_PARALLELIZE_WITHIN_FILE=true` in `setup_file()`
 or outside any function to disable parallelization only within the containing file.
 
 [tap-format]: https://testanything.org
