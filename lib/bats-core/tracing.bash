@@ -352,7 +352,7 @@ bats_interrupt_trap() {
   BATS_INTERRUPTED=true
   BATS_ERROR_STATUS=130
   # debug trap fires before interrupt trap but gets wrong linenumber (line 1)
-  # -> use last last stack trace
+  # -> use last stack trace
   exit $BATS_ERROR_STATUS
 }
 
