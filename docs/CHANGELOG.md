@@ -213,7 +213,7 @@ quotes around code blocks in error output (#506)
 * custom test-file extension via `BATS_FILE_EXTENSION` when searching for test
   files in a directory (#376)
 * TAP13 formatter, including millisecond timing (#337)
-* automatic release to NPM via Github Actions (#406)
+* automatic release to NPM via GitHub Actions (#406)
 
 #### Documentation
 
@@ -229,7 +229,7 @@ quotes around code blocks in error output (#506)
     `--report-formatter junit` to obtain the `.xml` report file!
 * removed `--parallel-preserve-environment` flag, as this is the default
   behavior (#324)
-* moved CI from Travis/AppVeyor to Github Actions (#405)
+* moved CI from Travis/AppVeyor to GitHub Actions (#405)
 * preprocessed files are no longer removed if `--no-tempdir-cleanup` is
   specified (#395)
 
