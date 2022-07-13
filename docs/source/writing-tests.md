@@ -245,7 +245,7 @@ after) all tests of the test run.
 <details>
   <summary>Example of setup/{,_file,_suite} (and teardown{,_file,_suite}) call order</summary>
 For example the following call order would result from two files (file 1 with
-tests 1 and 2, and file 2 with test3) with a corresponding `setup_suite.bash` file beeing tested:
+tests 1 and 2, and file 2 with test3) with a corresponding `setup_suite.bash` file being tested:
 
 ```text
 setup_suite # from setup_suite.bash
