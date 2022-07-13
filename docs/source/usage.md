@@ -95,7 +95,7 @@ a compatible replacement installed) using the `--jobs` parameter. This can
 result in your tests completing faster (depending on your tests and the testing
 hardware).
 
-Ordering of parallised tests is not guaranteed, so this mode may break suites
+Ordering of parallelised tests is not guaranteed, so this mode may break suites
 with dependencies between tests (or tests that write to shared locations). When
 enabling `--jobs` for the first time be sure to re-run bats multiple times to
 identify any inter-test dependencies or non-deterministic test behaviour.
