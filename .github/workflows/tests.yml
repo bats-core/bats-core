@@ -117,7 +117,7 @@ jobs:
           TERM: linux # fix tput for tty issue work around
         run: |
           npm pack ./
-          # somehow there is already an intalled bats version around
+          # somehow there is already an installed bats version around
           npm install --force -g ./bats-*.tgz
           bats  --print-output-on-failure test  
 
