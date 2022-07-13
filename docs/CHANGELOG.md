@@ -30,7 +30,7 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 * remaining instances of `run -<N>` being incorrectly documented as `run =<N>` (#599)
 * allow `--gather-test-outputs-in <directory>` to work with existing, empty
   directories (#603)
-  * also add `--clean-and-gather-test-outpust-in <directory>` for improved UX
+  * also add `--clean-and-gather-test-outputs-in <directory>` for improved UX
 * double slashes in paths derived from TMPDIR on MacOS (#607)
 * fix `load` in `teardown` marking failed tests as not run (#612)
 
