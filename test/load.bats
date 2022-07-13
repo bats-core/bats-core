@@ -8,7 +8,7 @@ setup() {
 }
 
 @test "find_in_bats_lib_path recognizes files relative to test file" {
-  test_dir="$BATS_TEST_TMPDIR/find_in_bats_lib_path/bats_test_dirname_priorty"
+  test_dir="$BATS_TEST_TMPDIR/find_in_bats_lib_path/bats_test_dirname_priority"
   mkdir -p "$test_dir"
   cp "$FIXTURE_ROOT/test_helper.bash" "$test_dir/"
   cp "$FIXTURE_ROOT/find_library_helper.bats" "$test_dir"
@@ -17,7 +17,7 @@ setup() {
 }
 
 @test "find_in_bats_lib_path recognizes files in BATS_LIB_PATH" {
-  test_dir="$BATS_TEST_TMPDIR/find_in_bats_lib_path/bats_test_dirname_priorty"
+  test_dir="$BATS_TEST_TMPDIR/find_in_bats_lib_path/bats_test_dirname_priority"
   mkdir -p "$test_dir"
   cp "$FIXTURE_ROOT/test_helper.bash" "$test_dir/"
 
