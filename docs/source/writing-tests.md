@@ -183,7 +183,7 @@ Apart from the changed lookup rules, `bats_load_library` behaves like `load`.
 __Note:__ As seen above `load.bash` is the entry point for libraries and
 meant to load more files from its directory or other libraries.
 
-__Note:__ Obviously, the actual `BATS_LIB_PATH` is highly dependant on the environment.
+__Note:__ Obviously, the actual `BATS_LIB_PATH` is highly dependent on the environment.
 To maintain a uniform location across systems, (distribution) package maintainers
 are encouraged to use `/usr/lib/bats/` as the install path for libraries where possible.
 However, if the package manager has another preferred location, like `npm` or `brew`,
