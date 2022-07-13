@@ -96,7 +96,7 @@ bats_semaphore_acquire_slot() {
 bats_semaphore_release_slot() {
     # we don't need to lock this, since only our process owns this file
     # and freeing a semaphore cannot lead to conflicts with others
-    rm "$BATS_SEMAPHORE_DIR/slot-$1" # this will fail if we had not aqcuired a semaphore!
+    rm "$BATS_SEMAPHORE_DIR/slot-$1" # this will fail if we had not acquired a semaphore!
 }
 
 bats_semaphore_get_free_slot_count() {
