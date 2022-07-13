@@ -297,7 +297,7 @@ The following are intended to prevent too-compact code:
 - If you need to capture the output from a function, store the output using
   `printf -v` instead if possible. `-v` specifies the name of the variable into
   which to write the result; the caller can supply this name as a parameter.
-- If you must use command substituion, use `$()` instead of backticks, as it's
+- If you must use command substitution, use `$()` instead of backticks, as it's
   more robust, more searchable, and can be nested.
 
 [win-slow]: https://rufflewind.com/2014-08-23/windows-bash-slow
