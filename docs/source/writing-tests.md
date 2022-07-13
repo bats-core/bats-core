@@ -274,7 +274,7 @@ Added in [v1.7.0](https://github.com/bats-core/bats-core/releases/tag/v1.7.0)
 
 Code for newer versions of Bats can be incompatible with older versions.
 In the best case this will lead to an error message and a failed test suite.
-In the worst case, the tests will pass erronously, potentially masking a failure.
+In the worst case, the tests will pass erroneously, potentially masking a failure.
 
 Use `bats_require_minimum_version <Bats version number>` to avoid this.
 It communicates in a concise manner, that you intend the following code to be run
