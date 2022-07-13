@@ -77,7 +77,7 @@ setup_file() {
   [[ "${lines[3]}" == "# (from function \`teardown_file' in test file $RELATIVE_FIXTURE_ROOT/teardown_file_failed.bats, line 3)" ]]
   [[ "${lines[4]}" == "#   \`false' failed" ]]
   [[ "${lines[5]}" == "# bats warning: Executed 2 instead of expected 1 tests" ]] # for now this warning is expected
-  # for a failed teardown_file not to change the number of tests being reported, we would have to alter at least one provious test result report
+  # for a failed teardown_file not to change the number of tests being reported, we would have to alter at least one previous test result report
   # this would require arbitrary amounts of buffering so we simply add our own line with a fake test number
   # tripping the count validator won't change the overall result, as we already are in a failure mode
 }
