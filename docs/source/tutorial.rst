@@ -43,7 +43,7 @@ Your first test
 Now we want to add our first test.
 
 In the tutorial repository, we want to build up our project in a TDD fashion.
-Thus, we start with an empty project and our first test is to just run our (non existing) shell script.
+Thus, we start with an empty project and our first test is to just run our (nonexistent) shell script.
 
 We start by creating a new test file `test/test.bats`
 
@@ -231,7 +231,7 @@ Then, `run` sucks up the stdout and stderr of the command it ran and stores it i
 This means `run` never fails the test and won't generate any context/output in the log of a failed test on its own.
 
 Marking the test as failed and printing context information is up to the consumers of `$status` and `$output`. 
-`assert_output` is such a consumer, it compares `$output` to the the parameter it got and tells us quite succinctly that it did not match in this case.
+`assert_output` is such a consumer, it compares `$output` to the parameter it got and tells us quite succinctly that it did not match in this case.
 
 For our current test we don't care about any other output or the error message, so we want it gone.
 `grep` is always at our fingertips, so we tape together this ramshackle construct

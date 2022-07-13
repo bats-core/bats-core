@@ -183,7 +183,7 @@ Apart from the changed lookup rules, `bats_load_library` behaves like `load`.
 __Note:__ As seen above `load.bash` is the entry point for libraries and
 meant to load more files from its directory or other libraries.
 
-__Note:__ Obviously, the actual `BATS_LIB_PATH` is highly dependant on the environment.
+__Note:__ Obviously, the actual `BATS_LIB_PATH` is highly dependent on the environment.
 To maintain a uniform location across systems, (distribution) package maintainers
 are encouraged to use `/usr/lib/bats/` as the install path for libraries where possible.
 However, if the package manager has another preferred location, like `npm` or `brew`,
@@ -245,7 +245,7 @@ after) all tests of the test run.
 <details>
   <summary>Example of setup/{,_file,_suite} (and teardown{,_file,_suite}) call order</summary>
 For example the following call order would result from two files (file 1 with
-tests 1 and 2, and file 2 with test3) with a corresponding `setup_suite.bash` file beeing tested:
+tests 1 and 2, and file 2 with test3) with a corresponding `setup_suite.bash` file being tested:
 
 ```text
 setup_suite # from setup_suite.bash
@@ -274,7 +274,7 @@ Added in [v1.7.0](https://github.com/bats-core/bats-core/releases/tag/v1.7.0)
 
 Code for newer versions of Bats can be incompatible with older versions.
 In the best case this will lead to an error message and a failed test suite.
-In the worst case, the tests will pass erronously, potentially masking a failure.
+In the worst case, the tests will pass erroneously, potentially masking a failure.
 
 Use `bats_require_minimum_version <Bats version number>` to avoid this.
 It communicates in a concise manner, that you intend the following code to be run

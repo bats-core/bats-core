@@ -85,7 +85,7 @@ git tag -a -s "v${NEW_BATS_VERSION}" --message "${BATS_RELEASE_NOTES}"
 
 git push --follow-tags
 
-5. Use Github hub to make a draft release:
+5. Use GitHub hub to make a draft release:
 
 hub release create "v${NEW_BATS_VERSION}" --draft --file "${BATS_RELEASE_NOTES}"
 

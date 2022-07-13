@@ -1180,7 +1180,7 @@ END_OF_ERR_MSG
   bats_require_minimum_version 1.5.0
   # now capture bats @test environment
   run -0 env -i PATH="$PATH" BATS_DECLARED_VARIABLES_FILE="$BATS_DECLARED_VARIABLES_FILE"  bash "${BATS_ROOT}/bin/bats" "${FIXTURE_ROOT}/issue-519.bats"
-  # use function to allow failing via !, run is a bit unwiedly with the pipe and subshells
+  # use function to allow failing via !, run is a bit unwieldy with the pipe and subshells
   check_no_new_variables() {
     # -23 -> only look at additions on the bats list
     ! comm -23 <(normalize_variable_list <"$BATS_DECLARED_VARIABLES_FILE") \

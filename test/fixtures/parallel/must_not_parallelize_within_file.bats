@@ -34,7 +34,7 @@ teardown() {
         echo "Test function sets BATS_NO_PARALLELIZE_WITHIN_FILE=true" >&3
     fi
     # stretch the time this test runs to prevent accidental serialization by the scheduler
-    # if both tests could run in parallel, this will increase the likelyhood of detecting it
+    # if both tests could run in parallel, this will increase the likelihood of detecting it
     # by delaying this test's teardown past the other's
     sleep 3
 }

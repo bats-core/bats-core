@@ -95,7 +95,7 @@ a compatible replacement installed) using the `--jobs` parameter. This can
 result in your tests completing faster (depending on your tests and the testing
 hardware).
 
-Ordering of parallised tests is not guaranteed, so this mode may break suites
+Ordering of parallelised tests is not guaranteed, so this mode may break suites
 with dependencies between tests (or tests that write to shared locations). When
 enabling `--jobs` for the first time be sure to re-run bats multiple times to
 identify any inter-test dependencies or non-deterministic test behaviour.
@@ -107,7 +107,7 @@ sequentially.
 
 If you have files where tests within the file would interfere with each other, you can use
 `--no-parallelize-within-files` to disable parallelization within all files.
-If you want more finegrained control, you can `export BATS_NO_PARALLELIZE_WITHIN_FILE=true` in `setup_file()`
+If you want more fine-grained control, you can `export BATS_NO_PARALLELIZE_WITHIN_FILE=true` in `setup_file()`
 or outside any function to disable parallelization only within the containing file.
 
 [tap-format]: https://testanything.org

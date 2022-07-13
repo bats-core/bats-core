@@ -35,7 +35,7 @@
     bats_require_minimum_version 0.2.3
     [ "${BATS_GUARANTEED_MINIMUM_VERSION}" = 0.2.3 ]
 
-    # a lower version shoudl not change
+    # a lower version should not change
     bats_require_minimum_version 0.1.2
     [ "${BATS_GUARANTEED_MINIMUM_VERSION}" = 0.2.3 ]
 }
