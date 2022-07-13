@@ -295,7 +295,7 @@ The following are intended to prevent too-compact code:
   the difference avoiding subshells makes.) Bash is quite powerful; see if you
   can do what you need in pure Bash first.
 - If you need to capture the output from a function, store the output using
-  `printf -v` instead if possible. `-v` specfies the name of the variable into
+  `printf -v` instead if possible. `-v` specifies the name of the variable into
   which to write the result; the caller can supply this name as a parameter.
 - If you must use command substituion, use `$()` instead of backticks, as it's
   more robust, more searchable, and can be nested.
