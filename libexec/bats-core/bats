@@ -282,13 +282,14 @@ export BATS_WARNING_FILE="${BATS_RUN_TMPDIR}/warnings.log"
 
 bats_exit_trap() {
   if [[ -s "$BATS_WARNING_FILE" ]]; then
+    local pre_cat='' post_cat=''
     if [[ $formatter == pretty ]]; then
-      PRE_CAT=$'\x1B[31m'
-      POST_CAT=$'\x1B[0m'
+      pre_cat=$'\x1B[31m'
+      post_cat=$'\x1B[0m'
     fi
-    printf "\nThe following warnings were encountered during tests:\n%s" "$PRE_CAT"
+    printf "\nThe following warnings were encountered during tests:\n%s" "$pre_cat"
     cat "$BATS_WARNING_FILE"
-    printf "%s" "$POST_CAT"
+    printf "%s" "$post_cat"
   fi >&2
 
   if [[ -n "$BATS_TEMPDIR_CLEANUP" ]]; then

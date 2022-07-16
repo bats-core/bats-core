@@ -326,8 +326,8 @@ setup() {
 @test 'ensure compatibility with unofficial Bash strict mode' {
   local expected='ok 1 unofficial Bash strict mode conditions met'
 
-  if [[ -n "$BATS_NUMBER_OF_PARALLEL_JOBS" ]]; then
-    if [[ -z "$BATS_NO_PARALLELIZE_ACROSS_FILES" ]]; then
+  if [[ -n "${BATS_NUMBER_OF_PARALLEL_JOBS:-}" ]]; then
+    if [[ -z "${BATS_NO_PARALLELIZE_ACROSS_FILES:-}" ]]; then
       type -p parallel &>/dev/null || skip "Don't check file parallelized without GNU parallel"
     fi
     (type -p flock &>/dev/null || type -p shlock &>/dev/null) || skip "Don't check parallelized without flock/shlock "
@@ -340,8 +340,8 @@ setup() {
   run env - \
           "PATH=$PATH" \
           "HOME=$HOME" \
-          "BATS_NO_PARALLELIZE_ACROSS_FILES=$BATS_NO_PARALLELIZE_ACROSS_FILES" \
-          "BATS_NUMBER_OF_PARALLEL_JOBS=$BATS_NUMBER_OF_PARALLEL_JOBS" \
+          "BATS_NO_PARALLELIZE_ACROSS_FILES=${BATS_NO_PARALLELIZE_ACROSS_FILES:-}" \
+          "BATS_NUMBER_OF_PARALLEL_JOBS=${BATS_NUMBER_OF_PARALLEL_JOBS:-}" \
           SHELLOPTS=nounset \
       "${BATS_ROOT}/bin/bats" "$FIXTURE_ROOT/unofficial_bash_strict_mode.bats"
   if [[ "$status" -ne 0 || "${lines[1]}" != "$expected" ]]; then
@@ -602,7 +602,7 @@ END_OF_ERR_MSG
 }
 
 @test "Don't hang on CTRL-C (issue #353)" {
-  if [[ "$BATS_NUMBER_OF_PARALLEL_JOBS" -gt 1 ]]; then
+  if [[ "${BATS_NUMBER_OF_PARALLEL_JOBS:-1}" -gt 1 ]]; then
     skip "Aborts don't work in parallel mode"
   fi
   load 'concurrent-coordination'
@@ -731,7 +731,7 @@ END_OF_ERR_MSG
 }
 
 @test "CTRL-C aborts and fails the current test" {
-  if [[ "$BATS_NUMBER_OF_PARALLEL_JOBS" -gt 1 ]]; then
+  if [[ "${BATS_NUMBER_OF_PARALLEL_JOBS:-1}" -gt 1 ]]; then
     skip "Aborts don't work in parallel mode"
   fi
   
@@ -767,7 +767,7 @@ END_OF_ERR_MSG
 }
 
 @test "CTRL-C aborts and fails the current run" {
-  if [[ "$BATS_NUMBER_OF_PARALLEL_JOBS" -gt 1 ]]; then
+  if [[ "${BATS_NUMBER_OF_PARALLEL_JOBS:-1}" -gt 1 ]]; then
     skip "Aborts don't work in parallel mode"
   fi
 
@@ -804,7 +804,7 @@ END_OF_ERR_MSG
 @test "CTRL-C aborts and fails after run" {
   # shellcheck disable=SC2034
   BATS_TEST_RETRIES=2
-  if [[ "$BATS_NUMBER_OF_PARALLEL_JOBS" -gt 1 ]]; then
+  if [[ "${BATS_NUMBER_OF_PARALLEL_JOBS:-1}" -gt 1 ]]; then
     skip "Aborts don't work in parallel mode"
   fi
 
@@ -839,7 +839,7 @@ END_OF_ERR_MSG
 }
 
 @test "CTRL-C aborts and fails the current teardown" {
-  if [[ "$BATS_NUMBER_OF_PARALLEL_JOBS" -gt 1 ]]; then
+  if [[ "${BATS_NUMBER_OF_PARALLEL_JOBS:-1}" -gt 1 ]]; then
     skip "Aborts don't work in parallel mode"
   fi
 
@@ -875,7 +875,7 @@ END_OF_ERR_MSG
 }
 
 @test "CTRL-C aborts and fails the current setup_file" {
-  if [[ "$BATS_NUMBER_OF_PARALLEL_JOBS" -gt 1 ]]; then
+  if [[ "${BATS_NUMBER_OF_PARALLEL_JOBS:-1}" -gt 1 ]]; then
     skip "Aborts don't work in parallel mode"
   fi
 
@@ -911,7 +911,7 @@ END_OF_ERR_MSG
 }
 
 @test "CTRL-C aborts and fails the current teardown_file" {
-  if [[ "$BATS_NUMBER_OF_PARALLEL_JOBS" -gt 1 ]]; then
+  if [[ "${BATS_NUMBER_OF_PARALLEL_JOBS:-1}" -gt 1 ]]; then
     skip "Aborts don't work in parallel mode"
   fi
   # shellcheck disable=SC2031
@@ -1338,7 +1338,7 @@ enforce_own_process_group() {
   }
 
 @test "--filter-status failed does not update list when run is aborted" {
-  if [[ "$BATS_NUMBER_OF_PARALLEL_JOBS" -gt 1 ]]; then
+  if [[ "${BATS_NUMBER_OF_PARALLEL_JOBS:-1}" -gt 1 ]]; then
     skip "Aborts don't work in parallel mode"
   fi
 

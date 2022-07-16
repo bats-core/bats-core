@@ -64,7 +64,7 @@ setup() {
     # the replay should be possible without errors
     bash -u "$formatter" >/dev/null <<EOF
 1..1
-suite "$BATS_FIXTURE_ROOT/failing.bats"
+suite "$FIXTURE_ROOT/failing.bats"
 # output from setup_file
 begin 1 test_a_failing_test
 # fd3 output from test
