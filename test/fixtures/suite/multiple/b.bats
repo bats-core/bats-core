@@ -3,5 +3,5 @@
 }
 
 @test "quasi-truth" {
-  [ -z "$FLUNK" ]
+  [ -z "${FLUNK:-}" ]
 }

@@ -6,5 +6,5 @@
 
 @test "variables do not persist across tests" {
   # shellcheck disable=SC2031
-  [ -z "$variable" ]
+  [ -z "${variable:-}" ]
 }

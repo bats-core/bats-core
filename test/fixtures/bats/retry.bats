@@ -1,7 +1,7 @@
 BATS_TEST_RETRIES=2 # means three tries per test
 
 log_caller() {
-    printf "%s %s %s\n" "$BATS_TEST_NAME" "${FUNCNAME[1]}" "$BATS_TEST_TRY_NUMBER"  >> "${LOG?}"
+    printf "%s %s %s\n" "${BATS_TEST_NAME:-}" "${FUNCNAME[1]}" "${BATS_TEST_TRY_NUMBER:-}"  >> "${LOG?}"
 }
 
 setup_file() {

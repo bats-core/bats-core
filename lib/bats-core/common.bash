@@ -65,13 +65,13 @@ bats_require_minimum_version() { # <required version>
 }
 
 bats_binary_search() { # <search-value> <array-name>
-  local -r search_value=$1 array_name=$2
-  
   if [[ $# -ne 2 ]]; then
     printf "ERROR: bats_binary_search requires exactly 2 arguments: <search value> <array name>\n" >&2
     return 2
   fi
 
+  local -r search_value=$1 array_name=$2
+  
   # we'd like to test if array is set but we cannot distinguish unset from empty arrays, so we need to skip that
 
   local start=0 mid end mid_value 

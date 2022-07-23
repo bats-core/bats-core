@@ -32,6 +32,7 @@ jobs:
           - ''
           # allow for some parallelity without GNU parallel, since it is not installed by default
           - 'BATS_NO_PARALLELIZE_ACROSS_FILES=1 BATS_NUMBER_OF_PARALLEL_JOBS=2'
+          - 'BASH_ENV=${GITHUB_WORKSPACE}/.github/workflows/set_nounset.bash'
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2

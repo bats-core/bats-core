@@ -124,7 +124,8 @@ bats_gather_tests() {
   test_count="${#all_tests[@]}"
 }
 
-TEST_ROOT=${1%/*}
+TEST_ROOT=${1-}
+TEST_ROOT=${TEST_ROOT%/*}
 BATS_RUN_LOGS_DIRECTORY="$TEST_ROOT/.bats/run-logs"
 if [[ ! -d "$BATS_RUN_LOGS_DIRECTORY" ]]; then
   if [[ -n "$filter_status" ]]; then
@@ -218,7 +219,7 @@ if [[ -n "$filter_status" ]]; then
     done >> "$BATS_RUNLOG_FILE"
 
     test_count="${#filtered_tests[@]}"
-    if [[ ${#failed_tests} -eq 0 && ${#filtered_tests[@]} -eq 0 ]]; then
+    if [[ ${#failed_tests[@]} -eq 0 && ${#filtered_tests[@]} -eq 0 ]]; then
       printf "There where no failed tests in the last recorded run.\n" >&2
     fi
   else
@@ -287,7 +288,7 @@ bats_suite_exit_trap() {
     printf "\n# Received SIGINT, aborting ...\n\n"
   fi
   
-  if [[ -d "$BATS_RUN_LOGS_DIRECTORY" && -n "${BATS_INTERRUPTED}" ]]; then
+  if [[ -d "$BATS_RUN_LOGS_DIRECTORY" && -n "${BATS_INTERRUPTED:-}" ]]; then
     # aborting a test run with CTRL+C does not save the runlog file
     rm "$BATS_RUNLOG_FILE"
   fi

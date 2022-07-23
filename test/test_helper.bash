@@ -13,7 +13,9 @@ fixtures() {
 }
 
 filter_control_sequences() {
-  "$@" | sed $'s,\x1b\\[[0-9;]*[a-zA-Z],,g'
+  local status=0
+  "$@" | sed $'s,\x1b\\[[0-9;]*[a-zA-Z],,g' || status=$?
+  return "$status"
 }
 
 if ! command -v tput >/dev/null; then

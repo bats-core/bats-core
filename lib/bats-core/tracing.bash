@@ -30,7 +30,7 @@ bats_capture_stack_trace() {
 bats_get_failure_stack_trace() {
 	local stack_trace_var
 	# See bats_debug_trap for details.
-	if [[ -n "${BATS_DEBUG_LAST_STACK_TRACE_IS_VALID}" ]]; then
+	if [[ -n "${BATS_DEBUG_LAST_STACK_TRACE_IS_VALID:-}" ]]; then
 		stack_trace_var=BATS_DEBUG_LAST_STACK_TRACE
 	else
 		stack_trace_var=BATS_DEBUG_LASTLAST_STACK_TRACE
@@ -275,7 +275,7 @@ bats_debug_trap() {
 # isn't set properly during `teardown()` errors.
 bats_check_status_from_trap() {
 	local status="$?"
-	if [[ -z "$BATS_TEST_COMPLETED" ]]; then
+	if [[ -z "${BATS_TEST_COMPLETED:-}" ]]; then
 		BATS_ERROR_STATUS="${BATS_ERROR_STATUS:-$status}"
 		if [[ "$BATS_ERROR_STATUS" -eq 0 ]]; then
 			BATS_ERROR_STATUS=1
@@ -299,6 +299,26 @@ bats_add_debug_exclude_path() { # <path>
 }
 
 bats_setup_tracing() {
+	# Variables for capturing accurate stack traces. See bats_debug_trap for
+	# details.
+	#
+	# BATS_DEBUG_LAST_LINENO, BATS_DEBUG_LAST_SOURCE, and
+	# BATS_DEBUG_LAST_STACK_TRACE hold data from the most recent call to
+	# bats_debug_trap.
+	#
+	# BATS_DEBUG_LASTLAST_STACK_TRACE holds data from two bats_debug_trap calls
+	# ago.
+	#
+	# BATS_DEBUG_LAST_STACK_TRACE_IS_VALID indicates that
+	# BATS_DEBUG_LAST_STACK_TRACE contains the stack trace of the test's error. If
+	# unset, BATS_DEBUG_LAST_STACK_TRACE is unreliable and
+	# BATS_DEBUG_LASTLAST_STACK_TRACE should be used instead.
+	BATS_DEBUG_LASTLAST_STACK_TRACE=()
+	BATS_DEBUG_LAST_LINENO=()
+	BATS_DEBUG_LAST_SOURCE=()
+	BATS_DEBUG_LAST_STACK_TRACE=()
+	BATS_DEBUG_LAST_STACK_TRACE_IS_VALID=
+	BATS_ERROR_SUFFIX=
 	BATS_DEBUG_EXCLUDE_PATHS=()
 	# exclude some paths by default
 	bats_add_debug_exclude_path "$BATS_ROOT/lib/"
