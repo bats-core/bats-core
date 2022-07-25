@@ -1,5 +1,5 @@
 
-@test "my sleep 2" {
-    sleep 2
+@test "my sleep ${SLEEP:-2}" {
+    sleep ${SLEEP:-2}
 }
 

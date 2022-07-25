@@ -212,7 +212,7 @@ bats_timout() {
 bats_strike_back() {
   # This will kill the killers in the case he is sleeping,
   local killer_pid=$1
-  if kill -0 "$killer_pid" > /dev/null; then
+  if kill -0 "$killer_pid" &> /dev/null; then
       pkill -PIPE -P "$killer_pid" &> /dev/null
       wait "$killer_pid" &> /dev/null
   fi
