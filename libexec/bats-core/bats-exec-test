@@ -116,7 +116,7 @@ bats_exit_trap() {
   local exit_metadata=''
   local killer_pid=${1:-}
   trap - ERR EXIT
-  if [[ -n "${BATS_TIMEOUT:-}" ]]; then
+  if [[ -n "${BATS_TEST_TIMEOUT:-}" ]]; then
     # Kill the watchdog in the case of of kernel finished before the timeout
     bats_strike_back "$killer_pid" || status=1
   fi
@@ -201,7 +201,7 @@ bats_timout() {
   target_pid=$$
   # Start another process to kill the children of this process
   (
-     sleep "$BATS_TIMEOUT"
+     sleep "$BATS_TEST_TIMEOUT"
      if kill -0 "$target_pid" &> /dev/null ; then
         pkill -PIPE -P "$target_pid" &> /dev/null
         wait "$target_pid" &> /dev/null
@@ -240,7 +240,7 @@ bats_perform_test() {
   fi
 
   local BATS_killer_pid=''
-  if [[ -n "${BATS_TIMEOUT:-}" ]]; then
+  if [[ -n "${BATS_TEST_TIMEOUT:-}" ]]; then
     bats_timout
     BATS_killer_pid=$!
   fi
