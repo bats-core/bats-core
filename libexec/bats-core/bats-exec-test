@@ -202,7 +202,7 @@ bats_timout() {
   # Start another process to kill the children of this process
   (
      sleep "$BATS_TIMEOUT"
-     if ps "$target_pid" &> /dev/null ; then
+     if kill -0 "$target_pid" &> /dev/null ; then
         pkill -PIPE -P "$target_pid" &> /dev/null
         wait "$target_pid" &> /dev/null
      fi
@@ -212,7 +212,7 @@ bats_timout() {
 bats_strike_back() {
   # This will kill the killers in the case he is sleeping,
   local killer_pid=$1
-  if ps -p "$killer_pid" > /dev/null; then
+  if kill -0 "$killer_pid" > /dev/null; then
       pkill -PIPE -P "$killer_pid" &> /dev/null
       wait "$killer_pid" &> /dev/null
   fi
