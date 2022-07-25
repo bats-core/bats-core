@@ -249,13 +249,15 @@ bats_perform_test() {
   BATS_TEARDOWN_COMPLETED=
   BATS_ERROR_STATUS=
   bats_setup_tracing
-  # mark this call as trap call
+  # use parameter to mark this call as trap call
+  # shellcheck disable=SC2064
   trap "bats_teardown_trap as-exit-trap $BATS_killer_pid" EXIT
 
   BATS_TEST_START_TIME=$(get_mills_since_epoch)
   "$BATS_TEST_NAME" >>"$BATS_OUT" 2>&1 4>&1
 
   BATS_TEST_COMPLETED=1
+  # shellcheck disable=SC2064
   trap "bats_exit_trap $BATS_killer_pid" EXIT
   bats_teardown_trap "" $BATS_killer_pid # pass empty parameter to signify call outside trap
 }
