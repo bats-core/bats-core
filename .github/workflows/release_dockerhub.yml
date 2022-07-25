@@ -44,5 +44,4 @@ jobs:
             platforms: linux/amd64,linux/arm64,linux/ppc64le,linux/s390x,linux/386,linux/arm/v7,linux/arm/v6
             tags: ${{ secrets.DOCKER_USERNAME }}/bats:${{ steps.version.outputs.version }}-no-faccessat2,${{ secrets.DOCKER_USERNAME }}/bats:latest-no-faccessat2
             push: true
-            build-args:
-              - bashver: 5.1.4
+            build-args: bashver=5.1.4
