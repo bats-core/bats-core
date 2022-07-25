@@ -17,6 +17,9 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 * running only tests that failed in the last run via `--filter-status failed` (#483)
 * variable `BATS_TEST_RETRIES` that specifies how often a test should be
   reattempted before it is considered failed (#618)
+* Docker tags `latest-no-faccessat2` and `<bats-version\>-no-faccessat2` for
+  avoiding `bash: bats: No such file or directory` on `docker<20.10` (or
+  `runc<v1.0.0-rc93`) (#622)
 
 #### Documentation
 
