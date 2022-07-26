@@ -207,11 +207,13 @@ bats_timeout_trap() {
 
 bats_timout() {
   local -ri target_pid=$$
+  # shellcheck disable=SC2064
   trap "bats_timeout_trap $target_pid" ALRM
   # Start another process to kill the children of this process
   (
      sleep "$BATS_TEST_TIMEOUT" &
-     trap "echo USR1>&3;kill $!; exit 0" USR1
+     # shellcheck disable=SC2064
+     trap "kill $!; exit 0" USR1
      wait
      if kill -0 "$target_pid"; then
         kill -ALRM "$target_pid"
@@ -270,7 +272,7 @@ bats_perform_test() {
   BATS_TEST_COMPLETED=1
   # shellcheck disable=SC2064
   trap "bats_exit_trap $BATS_killer_pid" EXIT
-  bats_teardown_trap "" $BATS_killer_pid # pass empty parameter to signify call outside trap
+  bats_teardown_trap "" "$BATS_killer_pid" # pass empty parameter to signify call outside trap
 }
 
 trap bats_interrupt_trap INT
