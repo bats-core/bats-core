@@ -116,6 +116,7 @@ bats_exit_trap() {
   local exit_metadata=''
   local killer_pid=${1:-}
   trap - ERR EXIT
+  trap '' ALRM # do nothing, this was for the timeout
   if [[ -n "${BATS_TEST_TIMEOUT:-}" ]]; then
     # Kill the watchdog in the case of of kernel finished before the timeout
     bats_strike_back "$killer_pid" || status=1
@@ -126,13 +127,12 @@ bats_exit_trap() {
     if [[ "$BATS_TEST_SKIPPED" != '1' ]]; then
         exit_metadata+=" $BATS_TEST_SKIPPED"
     fi
-  # 141 is the error code raised by pkill
-  elif [[ "$BATS_ERROR_STATUS" -eq 141 ]]; then
-     exit_metadata=" # timeout after $(( ($(get_mills_since_epoch) - BATS_TEST_START_TIME) / 1000 ))s"
+  elif [[ "${BATS_TIMED_OUT-NOTSET}" != NOTSET ]]; then
+     exit_metadata=" # timeout after ${BATS_TEST_TIMEOUT}s"
   fi
 
   BATS_TEST_TIME=''
-  if [[ -z "${exit_metadata}" && -n "$BATS_ENABLE_TIMING" ]]; then
+  if [[ -n "$BATS_ENABLE_TIMING" ]]; then
     BATS_TEST_TIME=" in "$(( $(get_mills_since_epoch) - BATS_TEST_START_TIME ))"ms"
   fi
 
@@ -196,16 +196,27 @@ bats_exit_trap() {
   exit "$status"
 }
 
+# Marks the test as failed due to timeout.
+# The actual termination of subprocesses is done via pkill in the background 
+# process in bats_timout
+bats_timeout_trap() {
+  BATS_TIMED_OUT=1
+  BATS_DEBUG_LAST_STACK_TRACE_IS_VALID=
+  exit 1
+}
+
 bats_timout() {
-  local target_pid
-  target_pid=$$
+  local -ri target_pid=$$
+  trap "bats_timeout_trap $target_pid" ALRM
   # Start another process to kill the children of this process
   (
-     sleep "$BATS_TEST_TIMEOUT"
-     if kill -0 "$target_pid" &> /dev/null ; then
-        pkill -PIPE -P "$target_pid" &> /dev/null
-        wait "$target_pid" &> /dev/null
-     fi
+     sleep "$BATS_TEST_TIMEOUT" &
+     trap "echo USR1>&3;kill $!; exit 0" USR1
+     wait
+     if kill -0 "$target_pid"; then
+        kill -ALRM "$target_pid"
+        pkill -P "$target_pid"
+     fi  &> /dev/null
   ) &
 }
 
@@ -213,7 +224,7 @@ bats_strike_back() {
   # This will kill the killers in the case he is sleeping,
   local killer_pid=$1
   if kill -0 "$killer_pid" &> /dev/null; then
-      pkill -PIPE -P "$killer_pid" &> /dev/null
+      pkill -USR1 -P "$killer_pid" &> /dev/null
       wait "$killer_pid" &> /dev/null
   fi
   wait
