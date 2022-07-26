@@ -215,7 +215,7 @@ bats_timout() {
      wait
      if kill -0 "$target_pid"; then
         kill -ALRM "$target_pid"
-        pkill -P "$target_pid"
+        pkill -n -P "$target_pid"
      fi  &> /dev/null
   ) &
 }
