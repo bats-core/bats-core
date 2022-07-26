@@ -102,6 +102,12 @@ bats_print_failed_command() {
 	bats_quote_code quoted_failed_command "$failed_command"
 	printf '#   %s ' "${quoted_failed_command}"
 
+	if [[ "${BATS_TIMED_OUT-NOTSET}" != NOTSET ]]; then
+		# the other values can be safely overwritten here,
+		# as the timeout is the primary reason for failure
+		BATS_ERROR_SUFFIX=" due to timeout"
+	fi
+
 	if [[ "$BATS_ERROR_STATUS" -eq 1 ]]; then
 		printf 'failed%s\n' "$BATS_ERROR_SUFFIX"
 	else
@@ -251,7 +257,9 @@ bats_debug_trap() {
 	
 	# don't update the trace within library functions or we get backtraces from inside traps
 	# also don't record new stack traces while handling interruptions, to avoid overriding the interrupted command
-	if [[ -z "$file_excluded" && "${BATS_INTERRUPTED-NOTSET}" == NOTSET ]]; then
+	if [[ -z "$file_excluded" && 
+			"${BATS_INTERRUPTED-NOTSET}" == NOTSET &&
+			"${BATS_TIMED_OUT-NOTSET}" == NOTSET ]]; then
 		BATS_DEBUG_LASTLAST_STACK_TRACE=(
 			${BATS_DEBUG_LAST_STACK_TRACE[@]+"${BATS_DEBUG_LAST_STACK_TRACE[@]}"}
 		)
