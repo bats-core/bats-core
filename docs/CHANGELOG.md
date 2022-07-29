@@ -37,6 +37,9 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 * double slashes in paths derived from TMPDIR on MacOS (#607)
 * fix `load` in `teardown` marking failed tests as not run (#612)
 * fix unset variable errors (with set -u) and add regression test (#621)
+* `teardown_file` errors don't swallow `setup_file` errors anymore, the behavior
+  is more like `teardown`'s now (only `return`/last command can trigger `teardown`
+   errors) (#623)
 
 #### Documentation
 

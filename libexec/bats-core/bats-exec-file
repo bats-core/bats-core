@@ -102,23 +102,35 @@ bats_run_setup_file() {
 }
 
 bats_run_teardown_file() {
+  local bats_teardown_file_status=0
   # avoid running the therdown trap due to errors in teardown_file
   trap 'bats_file_exit_trap' EXIT
-  # rely on bats_error_trap to catch failures
-  teardown_file >>"$BATS_OUT" 2>&1
 
-  BATS_TEARDOWN_FILE_COMPLETED=1
+  # rely on bats_error_trap to catch failures
+  teardown_file >>"$BATS_OUT" 2>&1 || bats_teardown_file_status=$?
+
+  if (( bats_teardown_file_status == 0 )); then
+    BATS_TEARDOWN_FILE_COMPLETED=1
+  elif [[ -n "${BATS_SETUP_FILE_COMPLETED:-}" ]]; then
+    BATS_DEBUG_LAST_STACK_TRACE_IS_VALID=1
+    BATS_ERROR_STATUS=$bats_teardown_file_status
+    return $BATS_ERROR_STATUS
+  fi
 }
 
 bats_file_teardown_trap() {
   bats_run_teardown_file
-  bats_file_exit_trap
+  bats_file_exit_trap in-teardown_trap
 }
 
 # shellcheck source=lib/bats-core/common.bash
 source "$BATS_ROOT/lib/bats-core/common.bash"
 
 bats_file_exit_trap() {
+  local -r last_return_code=$?
+  if [[ ${1:-} != in-teardown_trap ]]; then
+    BATS_ERROR_STATUS=$last_return_code
+  fi
   trap - ERR EXIT
   local failure_reason
   local -i failure_test_index=$(( BATS_FILE_FIRST_TEST_NUMBER_IN_SUITE + 1 ))
