@@ -116,10 +116,9 @@ bats_exit_trap() {
   local exit_metadata=''
   local killer_pid=${1:-}
   trap - ERR EXIT
-  trap '' ALRM # do nothing, this was for the timeout
   if [[ -n "${BATS_TEST_TIMEOUT:-}" ]]; then
     # Kill the watchdog in the case of of kernel finished before the timeout
-    bats_strike_back "$killer_pid" || status=1
+    bats_abort_timeout_countdown "$killer_pid" || status=1
   fi
 
   if [[ -n "$BATS_TEST_SKIPPED" ]]; then
@@ -198,38 +197,41 @@ bats_exit_trap() {
 
 # Marks the test as failed due to timeout.
 # The actual termination of subprocesses is done via pkill in the background 
-# process in bats_timout
+# process in bats_start_timeout_countdown
 bats_timeout_trap() {
   BATS_TIMED_OUT=1
   BATS_DEBUG_LAST_STACK_TRACE_IS_VALID=
   exit 1
 }
 
-bats_timout() {
+# sets a timeout for this process
+# use signals USR1 and USR2 to better mark which process kills which
+# SIGALRM might be more appropriate but may be interfered with by sleep:
+# "sleep(3) may be implemented using SIGALRM; mixing calls to alarm() 
+#  and sleep(3) is a bad idea." ~ https://linux.die.net/man/2/alarm
+bats_start_timeout_countdown() { # <timeout>
+  local -ri timeout=$1
   local -ri target_pid=$$
   # shellcheck disable=SC2064
-  trap "bats_timeout_trap $target_pid" ALRM
+  trap "bats_timeout_trap $target_pid" USR2
   # Start another process to kill the children of this process
   (
-     sleep "$BATS_TEST_TIMEOUT" &
+     sleep "$timeout" &
+     # sleep won't recieve signals, so we use wait below
+     # and kill sleep explicitly when signalled to do so
      # shellcheck disable=SC2064
      trap "kill $!; exit 0" USR1
      wait
-     if kill -0 "$target_pid"; then
-        kill -ALRM "$target_pid"
+     if kill -USR2 "$target_pid"; then
+        # get rid of signal blocking child processes (like sleep)
         pkill -n -P "$target_pid"
      fi  &> /dev/null
   ) &
 }
 
-bats_strike_back() {
-  # This will kill the killers in the case he is sleeping,
-  local killer_pid=$1
-  if kill -0 "$killer_pid" &> /dev/null; then
-      pkill -USR1 -P "$killer_pid" &> /dev/null
-      wait "$killer_pid" &> /dev/null
-  fi
-  wait
+bats_abort_timeout_countdown() {
+  # kill the countdown process, don't care if its still there
+  kill -USR1 "$1" || true  >/dev/null
 }
 
 get_mills_since_epoch() {
@@ -254,7 +256,7 @@ bats_perform_test() {
 
   local BATS_killer_pid=''
   if [[ -n "${BATS_TEST_TIMEOUT:-}" ]]; then
-    bats_timout
+    bats_start_timeout_countdown "$BATS_TEST_TIMEOUT"
     BATS_killer_pid=$!
   fi
   BATS_TEST_COMPLETED=
