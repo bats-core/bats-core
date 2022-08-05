@@ -379,6 +379,10 @@ There are several global variables you can use to introspect on Bats tests:
 - `BATS_TEST_RETRIES` is the maximum number of additional attempts that will be
   made on a failed test before it is finally considered failed.
   The default of 0 means the test must pass on the first attempt.
+- `BATS_TEST_TIMEOUT` is the number of seconds after which a test (including setup)
+  will be aborted and marked as failed. Updates to this value in `setup()` or `@test`
+  cannot change the running timeout countdown, so the latest useful update location
+  is `setup_file()`.
 - `$BATS_TEST_NUMBER` is the (1-based) index of the current test case in the test file.
 - `$BATS_SUITE_TEST_NUMBER` is the (1-based) index of the current test case in the test suite (over all files).
 - `$BATS_TMPDIR` is the base temporary directory used by bats to create its

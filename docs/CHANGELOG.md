@@ -20,6 +20,7 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 * Docker tags `latest-no-faccessat2` and `<bats-version\>-no-faccessat2` for
   avoiding `bash: bats: No such file or directory` on `docker<20.10` (or
   `runc<v1.0.0-rc93`) (#622)
+* `BATS_TEST_TIMEOUT` variable to force a timeout on test (including `setup()`) (#491)
 
 #### Documentation
 

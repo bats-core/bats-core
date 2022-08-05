@@ -145,7 +145,8 @@ If you need the library inside `setup_file` or `teardown_file` you need to load 
 How to set a test timeout in bats?
 ----------------------------------
 
-Unfortunately, this is not possible yet. Please contribute to issue `#396 <https://github.com/bats-core/bats-core/issues/396>`_ for further progress.
+Set the variable `$BATS_TEST_TIMEOUT` before `setup()` starts. This means you can set it either on the command line,
+in free code in the test file or in `setup_file()`.
 
 How can I lint/shell-format my bats tests?
 ------------------------------------------
