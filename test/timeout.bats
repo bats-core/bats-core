@@ -5,12 +5,13 @@ bats_require_minimum_version 1.5.0
 
 @test "test faster than timeout" {
     SECONDS=0
-    run -0 env BATS_TEST_TIMEOUT=5 SLEEP=1 bats -T "$FIXTURE_ROOT"
+    TIMEOUT=10
+    run -0 env BATS_TEST_TIMEOUT=$TIMEOUT SLEEP=1 bats -T "$FIXTURE_ROOT"
     [ "${lines[0]}" == '1..1' ]
     [[ "${lines[1]}" == 'ok 1 my sleep 1 in '*'ms' ]] || false
     [ "${#lines[@]}" -eq 2 ]
     # the timeout background process should not hold up execution
-    (( SECONDS < 5 )) || false
+    (( SECONDS < TIMEOUT )) || false
 }
 
 @test "test longer than timeout" {
