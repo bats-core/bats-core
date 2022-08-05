@@ -205,24 +205,27 @@ bats_timeout_trap() {
 }
 
 # sets a timeout for this process
-# use signals USR1 and USR2 to better mark which process kills which
-# SIGALRM might be more appropriate but may be interfered with by sleep:
-# "sleep(3) may be implemented using SIGALRM; mixing calls to alarm() 
-#  and sleep(3) is a bad idea." ~ https://linux.die.net/man/2/alarm
+#
+# using SIGABRT for interprocess communication.
+# Ruled out:
+# USR1/2 - not available on Windows
+# SIGALRM - interferes with sleep:
+#           "sleep(3) may be implemented using SIGALRM; mixing calls to alarm() 
+#           and sleep(3) is a bad idea." ~ https://linux.die.net/man/2/alarm
 bats_start_timeout_countdown() { # <timeout>
   local -ri timeout=$1
   local -ri target_pid=$$
   # shellcheck disable=SC2064
-  trap "bats_timeout_trap $target_pid" USR2
+  trap "bats_timeout_trap $target_pid" ABRT
   # Start another process to kill the children of this process
   (
      sleep "$timeout" &
      # sleep won't recieve signals, so we use wait below
      # and kill sleep explicitly when signalled to do so
      # shellcheck disable=SC2064
-     trap "kill $!; exit 0" USR1
+     trap "kill $!; exit 0" ABRT
      wait
-     if kill -USR2 "$target_pid"; then
+     if kill -ABRT "$target_pid"; then
         # get rid of signal blocking child processes (like sleep)
         pkill -n -P "$target_pid"
      fi  &> /dev/null
@@ -231,7 +234,7 @@ bats_start_timeout_countdown() { # <timeout>
 
 bats_abort_timeout_countdown() {
   # kill the countdown process, don't care if its still there
-  kill -USR1 "$1" &>/dev/null || true
+  kill -ABRT "$1" &>/dev/null || true
 }
 
 get_mills_since_epoch() {
