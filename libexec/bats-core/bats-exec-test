@@ -231,7 +231,7 @@ bats_start_timeout_countdown() { # <timeout>
 
 bats_abort_timeout_countdown() {
   # kill the countdown process, don't care if its still there
-  kill -USR1 "$1" || true  >/dev/null
+  kill -USR1 "$1" &>/dev/null || true
 }
 
 get_mills_since_epoch() {
