@@ -132,12 +132,6 @@ setup() {
   run -0 bats "$FIXTURE_ROOT/load.bats"
 }
 
-@test "bats_load_library requires BATS_LIB_PATH to be set" {
-  unset BATS_LIB_PATH
-  run ! bats "$FIXTURE_ROOT/bats_load_library.bats"
-  [ "${lines[4]}" == '# bats_load_library: requires BATS_LIB_PATH to be set!' ]
-}
-
 @test "bats_load_library supports libraries with loaders on the BATS_LIB_PATH" {
   path_dir="$BATS_TEST_TMPDIR/libraries/$BATS_TEST_NAME"
   mkdir -p "$path_dir"
