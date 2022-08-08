@@ -43,7 +43,7 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 
 #### Documentation
 
-* fix typos, spelling and links (#596, #604, #619)
+* fix typos, spelling and links (#596, #604, #619, #627)
 * fix redirection order of an example in the tutorial (#617)
 
 ## [1.7.0] - 2022-05-14
