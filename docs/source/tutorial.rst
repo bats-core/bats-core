@@ -257,7 +257,7 @@ This is a common mistake that can happen when our mind parses the file different
 `run` is just a function, so the pipe won't actually be forwarded into the function. Bash reads this as `(run project.sh) | grep Welcome`, 
 instead of our intended `run (project.sh | grep Welcome)`.
 
-Unfortunately, the latter is no valid bash syntax, so we have to work around it, e.g. by using a function:
+Unfortunately, the latter is not valid bash syntax, so we have to work around it, e.g. by using a function:
 
 .. code-block:: bash
 
