@@ -23,16 +23,3 @@ bats_require_minimum_version 1.5.0
     [ "${lines[3]}" == "#   \`sleep \"\${SLEEP?}\"' failed due to timeout" ]
     (( SECONDS < 10 )) || false
 }
-
-@test "pretty fomatter timeout" {
-    unset BATS_TIMING
-    run ! env BATS_TEST_TIMEOUT=1 SLEEP=10 bats --pretty "$FIXTURE_ROOT"
-    run filter_control_sequences echo "$output"
-    [[ "${lines[1]}" == *'✗ my sleep 10' ]] || false
-}
-
-@test "pretty fomatter timeout plus timing info" {
-    run ! env BATS_TEST_TIMEOUT=1 SLEEP=10 bats --pretty -T "$FIXTURE_ROOT"
-    run filter_control_sequences echo "$output"
-    [[ "${lines[1]}" == *'✗ my sleep 10 ['*']' ]] || false
-}
