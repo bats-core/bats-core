@@ -62,7 +62,8 @@ jobs:
           BATS_FORMATTER: ${{ matrix.formatter }}
         run: |
           bash --version
-          bash -c "time bin/bats  --print-output-on-failure test"
+          bash -c "time bin/bats --pretty --print-output-on-failure test"
+          
   npm_on_linux:
     strategy:
       matrix:
