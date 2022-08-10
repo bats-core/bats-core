@@ -32,6 +32,7 @@ init_file() {
   file_skipped=0
   file_exec_time=0
   test_exec_time=0
+  name=""
   _buffer=""
   _buffer_log=""
   _system_out_log=""
