@@ -88,7 +88,7 @@ bats_teardown_trap() {
   local bats_teardown_trap_status=0
 
   # `bats_teardown_trap` is always called with one parameter (BATS_TEARDOWN_STARTED)
-  # The second paramerts is optional and correspond for to the killer pid
+  # The second parameter is optional and corresponds for to the killer pid
   # that will be forwarded to the exit trap to kill it if necesary
   local killer_pid=${2:-}
   
