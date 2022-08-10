@@ -135,7 +135,7 @@ arguments=()
 unset flags recursive formatter_flags
 flags=('--dummy-flag') # add a dummy flag to prevent unset variable errors on empty array expansion in old bash versions
 formatter_flags=('--dummy-flag') # add a dummy flag to prevent unset variable errors on empty array expansion in old bash versions
-formatter='tap'
+formatter=${BATS_FORMATTER:-'tap'}
 report_formatter=''
 recursive=
 setup_suite_file=''
