@@ -7,7 +7,7 @@
 # bats_tap_stream_not_ok [--duration <milliseconds>] <test index> <test name> [<timeout-in-seconds>] 
 #                                                                             -> when a test has failed. also reports the timeout limit
 #                                                                                if the failure was due to timeout
-# bats_tap_stream_skipped <test index> <test name> <skip reason>              -> when a test was skipped
+# bats_tap_stream_skipped [--duraction <milliseconds>] <test index> <test name> <skip reason>              -> when a test was skipped
 # bats_tap_stream_comment <comment text without leading '# '> <scope>         -> when a comment line was encountered, 
 #                                                                                scope tells the last encountered of plan, begin, ok, not_ok, skipped, suite
 # bats_tap_stream_suite <file name>                                           -> when a new file is begun WARNING: extended only
@@ -53,7 +53,13 @@ function bats_parse_internal_extended_tap() {
                     scope=skipped
                     test_name="${BASH_REMATCH[2]}" # cut off name before "# skip"
                     local skip_reason="${BASH_REMATCH[4]}"
-                    bats_tap_stream_skipped "$ok_index" "$test_name" "$skip_reason"
+                    if [[ "$test_name" =~ $timing_expr ]]; then
+                        timing="${BASH_REMATCH[1]}"
+                        test_name="${test_name% in "${timing}"ms}"
+                        bats_tap_stream_skipped --duration "$timing" "$ok_index" "$test_name" "$skip_reason"
+                    else
+                        bats_tap_stream_skipped "$ok_index" "$test_name" "$skip_reason"
+                    fi
                 else
                     scope=ok
                     if [[ "$line" =~ $timing_expr ]]; then

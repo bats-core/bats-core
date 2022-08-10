@@ -7,16 +7,22 @@ setup() {
 
 @test "Timing printout shows milliseconds" {
     format_example_stream() {
-        bats-format-pretty -T  <<HERE
+        filter_control_sequences bats-format-pretty -T  <<HERE
 1..1
 suite /test/path
 begin 1 test
 ok 1 test in 123ms
+begin 2 test2
+not ok 2 test2 in 234ms
+begin 3 test3
+ok 3 test3 in 345ms # skip
 HERE
     }
     run format_example_stream
     echo "$output"
-    [[ "${lines[1]}" == *'[123]'* ]]
+    [[ "${lines[1]}" == *'test [123]'* ]]
+    [[ "${lines[2]}" == *'test2 [234]'* ]]
+    [[ "${lines[3]}" == *'test3 (skipped) [345]'* ]]
 }
 
 @test "pretty formatter summary is colorized red on failure" {

@@ -87,30 +87,30 @@ finish_test() {
 }
 
 pass() {
-  TIMING="${1:-}"
+  local TIMING="${1:-}"
   finish_test ' ✓ %s' "$name"
   test_result=pass
 }
 
 skip() {
-  local reason="$1"
+  local reason="$1" TIMING="${2:-}"
   if [[ -n "$reason" ]]; then
     reason=": $reason"
   fi
-  BATS_ENABLE_TIMING='' finish_test ' - %s (skipped%s)' "$name" "$reason"
+  finish_test ' - %s (skipped%s)' "$name" "$reason"
   test_result=skip
 }
 
 fail() {
+  local TIMING="${1:-}"
   set_color 1 bold
-  TIMING="${1:-}"
   finish_test ' ✗ %s' "$name"
   test_result=fail
 }
 
 timeout() {
+  local TIMING="${1:-}"
   set_color 3 bold
-  TIMING="${1:-}"
   TIMEOUT="${2:-}" finish_test ' ✗ %s' "$name"
   test_result=timeout
 }
@@ -286,10 +286,15 @@ bats_tap_stream_ok() {
 }
 
 bats_tap_stream_skipped() {
+  local duration=
+  if [[ "$1" == "--duration" ]]; then
+    duration="$2"
+    shift 2
+  fi
   index="$1"
   name="$2"
   ((++skipped))
-  skip "$3"
+  skip "$3" "$duration"
 }
 
 bats_tap_stream_not_ok() {
