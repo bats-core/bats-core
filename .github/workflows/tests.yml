@@ -27,7 +27,7 @@ jobs:
   linux:
     strategy:
       matrix:
-        os: ['ubuntu-20.04', 'ubuntu-18.04']
+        os: ['ubuntu-20.04', 'ubuntu-22.04']
         env_vars:
           - ''
           # allow for some parallelity without GNU parallel, since it is not installed by default
@@ -47,7 +47,7 @@ jobs:
   npm_on_linux:
     strategy:
       matrix:
-        os: ['ubuntu-20.04', 'ubuntu-18.04']
+        os: ['ubuntu-20.04', 'ubuntu-22.04']
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
@@ -84,7 +84,7 @@ jobs:
   macos:
     strategy:
       matrix:
-        os: ['macos-10.15']
+        os: ['macos-11', 'macos-12']
         env_vars:
           - ''
           # allow for some parallelity without GNU parallel, since it is not installed by default
@@ -105,7 +105,7 @@ jobs:
   npm_on_macos:
     strategy:
       matrix:
-        os: ['macos-10.15']
+        os: ['macos-11', 'macos-12']
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
@@ -152,7 +152,7 @@ jobs:
           time docker run -it -v $PWD:/opt/bats alpine sh -c "apk add bash ncurses; /opt/bats/bin/bats  --print-output-on-failure --tap /opt/bats/test"
 
   freebsd:
-    runs-on: macos-10.15
+    runs-on: macos-12
     strategy:
       matrix:
         packages:
@@ -160,7 +160,7 @@ jobs:
           - ""
     steps:
       - uses: actions/checkout@v2
-      - uses: vmactions/freebsd-vm@v0.1.5
+      - uses: vmactions/freebsd-vm@v0
         with:
           prepare: pkg install -y bash parallel ${{ matrix.packages }}
           run: |
