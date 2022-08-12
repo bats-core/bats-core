@@ -54,11 +54,6 @@ if ! BATS_PATH=$(bats_readlinkf "${BASH_SOURCE[0]}" 2>/dev/null); then
   BATS_PATH=$(bats_readlinkf "${BASH_SOURCE[0]}")
 fi
 
-# Set BATS_LIB_PATH if it isn't already.
-if [[ "${BATS_LIB_PATH-x}" == 'x' ]]; then
-  BATS_LIB_PATH='/usr/lib/bats'
-fi
-
 export BATS_ROOT=${BATS_PATH%/*/*}
 export -f bats_readlinkf
 exec env BATS_ROOT="$BATS_ROOT" "$BATS_ROOT/libexec/bats-core/bats" "$@"
