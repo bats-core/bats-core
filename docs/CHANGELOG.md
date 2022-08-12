@@ -40,8 +40,9 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 * `teardown_file` errors don't swallow `setup_file` errors anymore, the behavior
   is more like `teardown`'s now (only `return`/last command can trigger `teardown`
    errors) (#623)
-* upgraded from deprecated CI envs for MacOS (10 -> 11,12) and Ubuntu 
+* upgraded from deprecated CI envs for MacOS (10 -> 11,12) and Ubuntu
   (18.04 -> 22.04) (#630)
+* add `/usr/lib/bats` as default value for `BATS_LIB_PATH` (#628)
 
 #### Documentation
 
