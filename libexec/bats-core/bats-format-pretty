@@ -273,44 +273,29 @@ bats_tap_stream_begin() {
 }
 
 bats_tap_stream_ok() {
-  local duration=
-  if [[ "$1" == "--duration" ]]; then
-    duration="$2"
-    shift 2
-  fi
   index="$1"
   name="$2"
   ((++passed))
   
-  pass "$duration"
+  pass "${BATS_FORMATTER_TEST_DURATION:-}"
 }
 
 bats_tap_stream_skipped() {
-  local duration=
-  if [[ "$1" == "--duration" ]]; then
-    duration="$2"
-    shift 2
-  fi
   index="$1"
   name="$2"
   ((++skipped))
-  skip "$3" "$duration"
+  skip "$3" "${BATS_FORMATTER_TEST_DURATION:-}"
 }
 
 bats_tap_stream_not_ok() {
-  local duration=
-  if [[ "$1" == "--duration" ]]; then
-    duration="$2"
-    shift 2
-  fi
   index="$1"
   name="$2"
   
-  if (( $# == 3 )); then
-    timeout "$duration" "$3s"
+  if [[ ${BATS_FORMATTER_TEST_TIMEOUT-x} != x ]]; then
+    timeout "${BATS_FORMATTER_TEST_DURATION:-}" "${BATS_FORMATTER_TEST_TIMEOUT}s"
     ((++timed_out))
   else
-    fail "$duration"
+    fail "${BATS_FORMATTER_TEST_DURATION:-}"
     ((++failures))
   fi
   
