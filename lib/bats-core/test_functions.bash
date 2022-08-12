@@ -117,17 +117,8 @@ bats_load_safe() {
   return 1
 }
 
-bats_require_lib_path() {
-  if [[ -z "${BATS_LIB_PATH:-}" ]]; then
-    printf "%s: requires BATS_LIB_PATH to be set!\n" "${FUNCNAME[1]}" >&2
-    exit 1
-  fi
-}
-
 bats_load_library_safe() { # <slug>
   local slug="${1:?}" library_path
-
-  bats_require_lib_path
 
   # Check for library load paths in BATS_TEST_DIRNAME and BATS_LIB_PATH
   if [[ ${slug:0:1} != / ]]; then
@@ -151,7 +142,6 @@ bats_load_library_safe() { # <slug>
 
 # immediately exit on error, use bats_load_library_safe to catch and handle errors
 bats_load_library() { # <slug>
-  bats_require_lib_path
   if ! bats_load_library_safe "$@"; then
     exit 1
   fi

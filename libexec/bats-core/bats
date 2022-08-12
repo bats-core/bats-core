@@ -101,6 +101,7 @@ export BATS_TMPDIR="${TMPDIR:-/tmp}"
 BATS_TMPDIR=${BATS_TMPDIR%/} # chop off trailing / to avoid duplication
 export BATS_RUN_TMPDIR=
 export BATS_GUARANTEED_MINIMUM_VERSION=0.0.0
+export BATS_LIB_PATH=${BATS_LIB_PATH-/usr/lib/bats}
 
 if [[ ! -d "${BATS_TMPDIR}" ]];then
   printf "Error: BATS_TMPDIR (%s) does not exist or is not a directory" "${BATS_TMPDIR}" >&2
