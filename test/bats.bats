@@ -767,6 +767,9 @@ END_OF_ERR_MSG
 }
 
 @test "CTRL-C aborts and fails the current run" {
+  # shellcheck disable=SC2034
+  BATS_TEST_RETRIES=2
+  
   if [[ "${BATS_NUMBER_OF_PARALLEL_JOBS:-1}" -gt 1 ]]; then
     skip "Aborts don't work in parallel mode"
   fi

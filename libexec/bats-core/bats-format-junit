@@ -186,12 +186,8 @@ bats_tap_stream_begin() { # <test index> <test name>
   name="$2"
 }
 
-bats_tap_stream_ok() { # [--duration <milliseconds] <test index> <test name>
-  if [[ "$1" == "--duration" ]]; then
-    test_exec_time="${BASH_REMATCH[1]}"
-  else
-    test_exec_time=0
-  fi
+bats_tap_stream_ok() { # <test index> <test name>
+  test_exec_time=${BATS_FORMATTER_TEST_DURATION:-0}
   ((file_count += 1))
   test_result_state='ok'
   file_exec_time="$((file_exec_time + test_exec_time))"
@@ -199,6 +195,7 @@ bats_tap_stream_ok() { # [--duration <milliseconds] <test index> <test name>
 }
 
 bats_tap_stream_skipped() { # <test index> <test name> <skip reason>
+  test_exec_time=${BATS_FORMATTER_TEST_DURATION:-0}
   ((file_count += 1))
   ((file_skipped += 1))
   test_result_state='skipped'
@@ -206,14 +203,10 @@ bats_tap_stream_skipped() { # <test index> <test name> <skip reason>
   test_skip_message="$3"
 }
 
-bats_tap_stream_not_ok() { # [--duration <milliseconds>] <test index> <test name>
+bats_tap_stream_not_ok() { # <test index> <test name>
+  test_exec_time=${BATS_FORMATTER_TEST_DURATION:-0}
   ((file_count += 1))
   ((file_failures += 1))
-  if [[ "$1" == "--duration" ]]; then
-    test_exec_time="${BASH_REMATCH[1]}"
-  else
-    test_exec_time=0
-  fi
   test_result_state=not_ok
   file_exec_time="$((file_exec_time + test_exec_time))"
   suite_test_exec_time=$((suite_test_exec_time + test_exec_time))

@@ -86,6 +86,12 @@ source "$BATS_ROOT/lib/bats-core/tracing.bash"
 bats_teardown_trap() {
   bats_check_status_from_trap
   local bats_teardown_trap_status=0
+
+  # `bats_teardown_trap` is always called with one parameter (BATS_TEARDOWN_STARTED)
+  # The second parameter is optional and corresponds for to the killer pid
+  # that will be forwarded to the exit trap to kill it if necesary
+  local killer_pid=${2:-}
+  
   # mark the start of this function to distinguish where skip is called
   # parameter 1 will signify the reason why this function was called
   # this is used to identify when this is called as exit trap function
@@ -99,7 +105,7 @@ bats_teardown_trap() {
     BATS_ERROR_STATUS="$bats_teardown_trap_status"
   fi
 
-  bats_exit_trap
+  bats_exit_trap "$killer_pid"
 }
 
 # shellcheck source=lib/bats-core/common.bash
@@ -107,18 +113,25 @@ source "$BATS_ROOT/lib/bats-core/common.bash"
 
 bats_exit_trap() {
   local status
-  local skipped=''
+  local exit_metadata=''
+  local killer_pid=${1:-}
   trap - ERR EXIT
+  if [[ -n "${BATS_TEST_TIMEOUT:-}" ]]; then
+    # Kill the watchdog in the case of of kernel finished before the timeout
+    bats_abort_timeout_countdown "$killer_pid" || status=1
+  fi
 
   if [[ -n "$BATS_TEST_SKIPPED" ]]; then
-    skipped=' # skip'
+    exit_metadata=' # skip'
     if [[ "$BATS_TEST_SKIPPED" != '1' ]]; then
-      skipped+=" $BATS_TEST_SKIPPED"
+        exit_metadata+=" $BATS_TEST_SKIPPED"
     fi
+  elif [[ "${BATS_TIMED_OUT-NOTSET}" != NOTSET ]]; then
+     exit_metadata=" # timeout after ${BATS_TEST_TIMEOUT}s"
   fi
 
   BATS_TEST_TIME=''
-  if [[ -z "${skipped}" && -n "$BATS_ENABLE_TIMING" ]]; then
+  if [[ -n "$BATS_ENABLE_TIMING" ]]; then
     BATS_TEST_TIME=" in "$(( $(get_mills_since_epoch) - BATS_TEST_START_TIME ))"ms"
   fi
 
@@ -143,7 +156,7 @@ bats_exit_trap() {
       status=126 # signify retry
       rm -r "$BATS_TEST_TMPDIR" # clean up for retry
     else
-      printf 'not ok %d %s\n' "$BATS_SUITE_TEST_NUMBER" "${BATS_TEST_NAME_PREFIX:-}${BATS_TEST_DESCRIPTION}${BATS_TEST_TIME}" >&3
+      printf 'not ok %d %s%s\n' "$BATS_SUITE_TEST_NUMBER" "${BATS_TEST_NAME_PREFIX:-}${BATS_TEST_DESCRIPTION}${BATS_TEST_TIME}" "$exit_metadata" >&3
       local stack_trace
       bats_get_failure_stack_trace stack_trace
       bats_print_stack_trace "${stack_trace[@]}" >&3
@@ -159,7 +172,7 @@ bats_exit_trap() {
     fi
   else
     printf 'ok %d %s%s\n' "$BATS_SUITE_TEST_NUMBER" "${BATS_TEST_NAME_PREFIX:-}${BATS_TEST_DESCRIPTION}${BATS_TEST_TIME}" \
-      "$skipped" >&3
+      "$exit_metadata" >&3
     status=0
     local state=passed
   fi
@@ -182,6 +195,81 @@ bats_exit_trap() {
   exit "$status"
 }
 
+# Marks the test as failed due to timeout.
+# The actual termination of subprocesses is done via pkill in the background 
+# process in bats_start_timeout_countdown
+bats_timeout_trap() {
+  BATS_TIMED_OUT=1
+  BATS_DEBUG_LAST_STACK_TRACE_IS_VALID=
+  exit 1
+}
+
+bats_get_child_processes_of() { # <parent-pid>
+    local -ri parent_pid=${1?}
+    {
+      read -ra header
+      local pid_col ppid_col
+      for (( i = 0; i < ${#header[@]}; ++i )); do
+        if [[ ${header[$i]} == "PID" ]]; then
+          pid_col=$i
+        fi
+        if [[ ${header[$i]} == "PPID" ]]; then
+          ppid_col=$i
+        fi
+      done
+      while read -ra row; do
+        if (( ${row[$ppid_col]} == parent_pid )); then
+          printf "%d\n" "${row[$pid_col]}"
+        fi
+      done
+    } < <(ps -ef "$parent_pid")
+}
+
+bats_kill_childprocesses_of() { # <parent-pid>
+  local -ir parent_pid="${1?}"
+  if command -v pkill; then
+    pkill -P "$parent_pid"
+  else
+    # kill in reverse order (latest first)
+    while read -r pid; do
+      kill "$pid"
+    done < <(bats_get_child_processes_of "$parent_pid" | sort -r)
+  fi &>/dev/null
+}
+
+# sets a timeout for this process
+#
+# using SIGABRT for interprocess communication.
+# Ruled out:
+# USR1/2 - not available on Windows
+# SIGALRM - interferes with sleep:
+#           "sleep(3) may be implemented using SIGALRM; mixing calls to alarm() 
+#           and sleep(3) is a bad idea." ~ https://linux.die.net/man/2/alarm
+bats_start_timeout_countdown() { # <timeout>
+  local -ri timeout=$1
+  local -ri target_pid=$$
+  # shellcheck disable=SC2064
+  trap "bats_timeout_trap $target_pid" ABRT
+  # Start another process to kill the children of this process
+  (
+     sleep "$timeout" &
+     # sleep won't recieve signals, so we use wait below
+     # and kill sleep explicitly when signalled to do so
+     # shellcheck disable=SC2064
+     trap "kill $!; exit 0" ABRT
+     wait
+     if kill -ABRT "$target_pid"; then
+        # get rid of signal blocking child processes (like sleep)
+        bats_kill_childprocesses_of "$target_pid"
+     fi  &> /dev/null
+  ) &
+}
+
+bats_abort_timeout_countdown() {
+  # kill the countdown process, don't care if its still there
+  kill -ABRT "$1" &>/dev/null || true
+}
+
 get_mills_since_epoch() {
   local ms_since_epoch
   ms_since_epoch=$(date +%s%N)
@@ -202,20 +290,27 @@ bats_perform_test() {
     exit 1
   fi
 
+  local BATS_killer_pid=''
+  if [[ -n "${BATS_TEST_TIMEOUT:-}" ]]; then
+    bats_start_timeout_countdown "$BATS_TEST_TIMEOUT"
+    BATS_killer_pid=$!
+  fi
   BATS_TEST_COMPLETED=
   BATS_TEST_SKIPPED=
   BATS_TEARDOWN_COMPLETED=
   BATS_ERROR_STATUS=
   bats_setup_tracing
-  # mark this call as trap call
-  trap 'bats_teardown_trap as-exit-trap' EXIT
+  # use parameter to mark this call as trap call
+  # shellcheck disable=SC2064
+  trap "bats_teardown_trap as-exit-trap $BATS_killer_pid" EXIT
 
   BATS_TEST_START_TIME=$(get_mills_since_epoch)
   "$BATS_TEST_NAME" >>"$BATS_OUT" 2>&1 4>&1
 
   BATS_TEST_COMPLETED=1
-  trap 'bats_exit_trap' EXIT
-  bats_teardown_trap "" # pass empty parameter to signify call outside trap
+  # shellcheck disable=SC2064
+  trap "bats_exit_trap $BATS_killer_pid" EXIT
+  bats_teardown_trap "" "$BATS_killer_pid" # pass empty parameter to signify call outside trap
 }
 
 trap bats_interrupt_trap INT

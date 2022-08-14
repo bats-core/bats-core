@@ -1,27 +1,6 @@
 #!/usr/bin/env bash
 set -e
 
-while [[ "$#" -ne 0 ]]; do
-  case "$1" in
-  -T)
-    BATS_ENABLE_TIMING="-T"
-    ;;
-  esac
-  shift
-done
-
-header_pattern='[0-9]+\.\.[0-9]+'
-IFS= read -r header
-
-if [[ "$header" =~ $header_pattern ]]; then
-  printf "TAP version 13\n"
-  printf "%s\n" "$header"
-else
-  # If the first line isn't a TAP plan, print it and pass the rest through
-  printf '%s\n' "$header"
-  exec cat
-fi
-
 yaml_block_open=''
 add_yaml_entry() {
   if [[ -z "$yaml_block_open" ]]; then
@@ -42,50 +21,69 @@ trap '' INT
 
 number_of_printed_log_lines_for_this_test_so_far=0
 
-while IFS= read -r line; do
-  case "$line" in
-  'begin '*) ;;
-  'ok '*)
+# shellcheck source=lib/bats-core/formatter.bash
+source "$BATS_ROOT/lib/bats-core/formatter.bash"
+
+bats_tap_stream_plan() {
+  printf "TAP version 13\n"
+  printf "1..%d\n" "$1"
+}
+
+bats_tap_stream_begin() { #<test index> <test name>
+    :
+}
+
+bats_tap_stream_ok() { # <test index> <test name>
     close_previous_yaml_block
     number_of_printed_log_lines_for_this_test_so_far=0
-    if [[ -n "${BATS_ENABLE_TIMING-}" ]]; then
-      timing_expr="(ok [0-9]+ .+) in ([0-9]+)ms$"
-      if [[ "$line" =~ $timing_expr ]]; then
-        printf "%s\n" "${BASH_REMATCH[1]}"
-        add_yaml_entry "duration_ms" "${BASH_REMATCH[2]}"
-      else
-        echo "Could not match output line to timing regex: $line" >&2
-        exit 1
-      fi
-    else
-      printf "%s\n" "${line}"
+    printf "ok %d %s\n" "$1" "$2"
+    if [[ "${BATS_FORMATTER_TEST_DURATION-x}" != x ]]; then
+        add_yaml_entry "duration_ms" "${BATS_FORMATTER_TEST_DURATION}"
     fi
-    ;;
-  'not ok '*)
+}
+
+pass_on_optional_data() {
+    if [[ "${BATS_FORMATTER_TEST_DURATION-x}" != x ]]; then
+        add_yaml_entry "duration_ms" "${BATS_FORMATTER_TEST_DURATION}"
+    fi
+    if [[ "${BATS_FORMATTER_TEST_TIMEOUT-x}" != x ]]; then
+        add_yaml_entry "timeout_sec" "${BATS_FORMATTER_TEST_TIMEOUT}"
+    fi
+}
+
+bats_tap_stream_not_ok() { # <test index> <test name>
     close_previous_yaml_block
     number_of_printed_log_lines_for_this_test_so_far=0
-    timing_expr="(not ok [0-9]+ .+) in ([0-9])+ms$"
-    if [[ -n "${BATS_ENABLE_TIMING-}" ]]; then
-      if [[ "$line" =~ $timing_expr ]]; then
-        printf "%s\n" "${BASH_REMATCH[1]}"
-        add_yaml_entry "duration_ms" "${BASH_REMATCH[2]}"
-      else
-        echo "Could not match failure line to timing regex: $line" >&2
-        exit 1
-      fi
-    else
-      printf "%s\n" "${line}"
-    fi
-    ;;
-  '# '*)
+    
+    printf "not ok %d %s\n" "$1" "$2"
+    pass_on_optional_data
+}
+
+bats_tap_stream_skipped() { # <test index> <test name> <reason>
+    close_previous_yaml_block
+    number_of_printed_log_lines_for_this_test_so_far=0
+    
+    printf "not ok %d %s # SKIP %s\n" "$1" "$2" "$3"
+    pass_on_optional_data
+}
+
+bats_tap_stream_comment() { # <comment text without leading '# '>
     if [[ $number_of_printed_log_lines_for_this_test_so_far -eq 0 ]]; then
       add_yaml_entry "message" "|" # use a multiline string for this entry
     fi
     ((++number_of_printed_log_lines_for_this_test_so_far))
-    printf "    %s\n" "${line:2}"
-    ;;
-  'suite '*) ;;
-  esac
-done
+    printf "    %s\n" "$1"
+}
+
+bats_tap_stream_suite() { # <file name>
+    :
+}
+
+bats_tap_stream_unknown() { # <full line>       
+    :
+}
+
+bats_parse_internal_extended_tap
+
 # close the final block if there was one
 close_previous_yaml_block

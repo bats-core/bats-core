@@ -1,14 +1,25 @@
 #!/usr/bin/env bash
 
 # reads (extended) bats tap streams from stdin and calls callback functions for each line
+#
+# Segmenting functions
+# ==================== 
 # bats_tap_stream_plan <number of tests>                                      -> when the test plan is encountered
+# bats_tap_stream_suite <file name>                                           -> when a new file is begun WARNING: extended only
 # bats_tap_stream_begin <test index> <test name>                              -> when a new test is begun WARNING: extended only
-# bats_tap_stream_ok [--duration <milliseconds] <test index> <test name>      -> when a test was successful
-# bats_tap_stream_not_ok [--duration <milliseconds>] <test index> <test name> -> when a test has failed
+#
+# Test result functions
+# =====================
+# If timing was enabled, BATS_FORMATTER_TEST_DURATION will be set to their duration in milliseconds
+# bats_tap_stream_ok <test index> <test name>                                 -> when a test was successful
+# bats_tap_stream_not_ok <test index> <test name>                             -> when a test has failed. If the failure was due to a timeout,
+#                                                                                BATS_FORMATTER_TEST_TIMEOUT is set to the timeout duration in seconds
 # bats_tap_stream_skipped <test index> <test name> <skip reason>              -> when a test was skipped
+#
+# Context functions
+# =================
 # bats_tap_stream_comment <comment text without leading '# '> <scope>         -> when a comment line was encountered, 
 #                                                                                scope tells the last encountered of plan, begin, ok, not_ok, skipped, suite
-# bats_tap_stream_suite <file name>                                           -> when a new file is begun WARNING: extended only
 # bats_tap_stream_unknown <full line> <scope>                                 -> when a line is encountered that does not match the previous entries,
 #                                                                                scope @see bats_tap_stream_comment
 # forwards all input as is, when there is no TAP test plan header
@@ -26,6 +37,7 @@ function bats_parse_internal_extended_tap() {
 
     ok_line_regexpr="ok ([0-9]+) (.*)"
     skip_line_regexpr="ok ([0-9]+) (.*) # skip( (.*))?$"
+    timeout_line_regexpr="not ok ([0-9]+) (.*) # timeout after ([0-9]+)s$"
     not_ok_line_regexpr="not ok ([0-9]+) (.*)"
 
     timing_expr="in ([0-9]+)ms$"
@@ -34,6 +46,7 @@ function bats_parse_internal_extended_tap() {
     index=0
     scope=plan
     while IFS= read -r line; do
+        unset BATS_FORMATTER_TEST_DURATION BATS_FORMATTER_TEST_TIMEOUT
         case "$line" in
         'begin '*) # this might only be called in extended tap output
             ((++begin_index))
@@ -50,11 +63,18 @@ function bats_parse_internal_extended_tap() {
                     scope=skipped
                     test_name="${BASH_REMATCH[2]}" # cut off name before "# skip"
                     local skip_reason="${BASH_REMATCH[4]}"
-                    bats_tap_stream_skipped "$ok_index" "$test_name" "$skip_reason"
+                    if [[ "$test_name" =~ $timing_expr ]]; then
+                        local BATS_FORMATTER_TEST_DURATION="${BASH_REMATCH[1]}"
+                        test_name="${test_name% in "${BATS_FORMATTER_TEST_DURATION}"ms}"
+                        bats_tap_stream_skipped "$ok_index" "$test_name" "$skip_reason"
+                    else
+                        bats_tap_stream_skipped "$ok_index" "$test_name" "$skip_reason"
+                    fi
                 else
                     scope=ok
                     if [[ "$line" =~ $timing_expr ]]; then
-                        bats_tap_stream_ok --duration "${BASH_REMATCH[1]}" "$ok_index" "$test_name"
+                        local BATS_FORMATTER_TEST_DURATION="${BASH_REMATCH[1]}"
+                        bats_tap_stream_ok "$ok_index" "${test_name% in "${BASH_REMATCH[1]}"ms}"
                     else
                         bats_tap_stream_ok "$ok_index" "$test_name"
                     fi
@@ -70,11 +90,18 @@ function bats_parse_internal_extended_tap() {
             if [[ "$line" =~ $not_ok_line_regexpr ]]; then
                 not_ok_index="${BASH_REMATCH[1]}"
                 test_name="${BASH_REMATCH[2]}"
-                if [[ "$line" =~ $timing_expr ]]; then
-                    bats_tap_stream_not_ok --duration "${BASH_REMATCH[1]}" "$not_ok_index" "$test_name"
-                else
-                    bats_tap_stream_not_ok "$not_ok_index" "$test_name"
+                if [[ "$line" =~ $timeout_line_regexpr ]]; then
+                    not_ok_index="${BASH_REMATCH[1]}"
+                    test_name="${BASH_REMATCH[2]}"
+                    # shellcheck disable=SC2034 # used in bats_tap_stream_ok
+                    local BATS_FORMATTER_TEST_TIMEOUT="${BASH_REMATCH[3]}"
                 fi
+                if [[ "$test_name" =~ $timing_expr ]]; then
+                    # shellcheck disable=SC2034 # used in bats_tap_stream_ok
+                    local BATS_FORMATTER_TEST_DURATION="${BASH_REMATCH[1]}"
+                    test_name="${test_name% in "${BASH_REMATCH[1]}"ms}"
+                fi
+                bats_tap_stream_not_ok "$not_ok_index" "$test_name"
             else
                 printf "ERROR: could not match not ok line: %s" "$line" >&2
                 exit 1
