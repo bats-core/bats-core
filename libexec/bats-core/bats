@@ -359,13 +359,13 @@ if [[ -n "$report_formatter" ]]; then
   if [[ -z "${BATS_REPORT_FILENAME:-}" ]]; then
     case "$report_formatter" in
       tap|tap13)
-        BATS_REPORT_FILE_NAME="report.tap"
+        BATS_REPORT_FILENAME="report.tap"
         ;;
       junit)
-        BATS_REPORT_FILE_NAME="report.xml"
+        BATS_REPORT_FILENAME="report.xml"
         ;;
       *)
-        BATS_REPORT_FILE_NAME="report.log"
+        BATS_REPORT_FILENAME="report.log"
         ;;
     esac
   fi
@@ -458,7 +458,7 @@ set -o pipefail execfail
 
 if [[ -n "$report_formatter" ]]; then
   exec bats-exec-suite "${flags[@]}" "${filenames[@]}" | \
-    tee >("$interpolated_report_formatter" "${report_formatter_flags[@]}" >"${BATS_REPORT_OUTPUT_PATH}/${BATS_REPORT_FILE_NAME}") | \
+    tee >("$interpolated_report_formatter" "${report_formatter_flags[@]}" >"${BATS_REPORT_OUTPUT_PATH}/${BATS_REPORT_FILENAME}") | \
     bats_test_count_validator | \
     "$interpolated_formatter" "${formatter_flags[@]}"
 else
