@@ -21,6 +21,8 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
   avoiding `bash: bats: No such file or directory` on `docker<20.10` (or
   `runc<v1.0.0-rc93`) (#622)
 * `BATS_TEST_TIMEOUT` variable to force a timeout on test (including `setup()`) (#491)
+* also print (nonempty) `$stderr` (from `run --separate-stderr`) with
+  `--print-output-on-failure` (#631)
 
 #### Documentation
 
