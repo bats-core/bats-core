@@ -102,6 +102,7 @@ BATS_TMPDIR=${BATS_TMPDIR%/} # chop off trailing / to avoid duplication
 export BATS_RUN_TMPDIR=
 export BATS_GUARANTEED_MINIMUM_VERSION=0.0.0
 export BATS_LIB_PATH=${BATS_LIB_PATH-/usr/lib/bats}
+BATS_REPORT_OUTPUT_DIR=${BATS_REPORT_OUTPUT_DIR-.}
 
 if [[ ! -d "${BATS_TMPDIR}" ]];then
   printf "Error: BATS_TMPDIR (%s) does not exist or is not a directory" "${BATS_TMPDIR}" >&2
@@ -140,7 +141,6 @@ report_formatter=''
 recursive=
 setup_suite_file=''
 export BATS_TEMPDIR_CLEANUP=1
-output=
 if [[ -z "${CI:-}" && -t 0 && -t 1 ]] && command -v tput >/dev/null; then
   formatter='pretty'
 fi
@@ -184,7 +184,7 @@ while [[ "$#" -ne 0 ]]; do
     ;;
   -o | --output)
     shift
-    output="$1"
+    BATS_REPORT_OUTPUT_DIR="$1"
     ;;
   -p | --pretty)
     formatter='pretty'
@@ -351,9 +351,8 @@ if [[ "${#arguments[@]}" -eq 0 ]]; then
 fi
 
 if [[ -n "$report_formatter" ]]; then
-  # default to the current directory for output
-  if [[ -z "$output" ]]; then
-    output=.
+  if [[ ! -w "${BATS_REPORT_OUTPUT_DIR}" ]]; then
+    abort "Output path ${BATS_REPORT_OUTPUT_DIR} is not writeable"
   fi
   # only set BATS_REPORT_FILENAME if none was given
   if [[ -z "${BATS_REPORT_FILENAME:-}" ]]; then
@@ -400,13 +399,6 @@ case "${BATS_CODE_QUOTE_STYLE}" in
     exit 1
   ;;
 esac
-
-if [[ -n "$output" ]]; then
-  if [[ ! -w "${output}" ]]; then
-    abort "Output path ${output} is not writeable"
-  fi
-  export BATS_REPORT_OUTPUT_PATH="$output"
-fi
 
 if [[ -n "$setup_suite_file" && ! -f "$setup_suite_file" ]]; then
   abort "--setup-suite-file $setup_suite_file does not exist!"
@@ -458,7 +450,7 @@ set -o pipefail execfail
 
 if [[ -n "$report_formatter" ]]; then
   exec bats-exec-suite "${flags[@]}" "${filenames[@]}" | \
-    tee >("$interpolated_report_formatter" "${report_formatter_flags[@]}" >"${BATS_REPORT_OUTPUT_PATH}/${BATS_REPORT_FILENAME}") | \
+    tee >("$interpolated_report_formatter" "${report_formatter_flags[@]}" >"${BATS_REPORT_OUTPUT_DIR}/${BATS_REPORT_FILENAME}") | \
     bats_test_count_validator | \
     "$interpolated_formatter" "${formatter_flags[@]}"
 else
