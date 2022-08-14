@@ -261,7 +261,7 @@ run() { # [!|-N] [--keep-empty-lines] [--separate-stderr] [--] <command to run..
 
   if [[ "$output_case" == separate ]]; then
       # shellcheck disable=SC2034
-      read -d '' -r stderr < "$bats_run_separate_stderr_file"
+      read -d '' -r stderr < "$bats_run_separate_stderr_file" || true
       bats_separate_lines stderr_lines stderr
   fi
 
