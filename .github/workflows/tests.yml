@@ -44,26 +44,16 @@ jobs:
           bash -c "time ${{ matrix.env_vars }} bin/bats  --print-output-on-failure --formatter tap test"
 
   unset_variables:
-    strategy:
-      matrix:
-        formatter:
-          - pretty
-          - tap
-          - tap13
-          - junit
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Check unset variables on formatter ${{ matrix.formatter }}
+      - name: Check unset variables
         shell: 'script -q -e -c "bash {0}"' # work around tty issues
         env:
           TERM: linux # fix tput for tty issue work around
           BASH_ENV: ${GITHUB_WORKSPACE}/.github/workflows/set_nounset.bash
-          BATS_FORMATTER: ${{ matrix.formatter }}
-        run: |
-          bash --version
-          bash -c "time bin/bats --pretty --print-output-on-failure test"
-          
+        run: bin/bats test
+
   npm_on_linux:
     strategy:
       matrix:
