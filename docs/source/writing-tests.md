@@ -268,6 +268,42 @@ teardown_suite # from setup_suite.bash
 </details>
 <!-- markdownlint-enable MD033 -->
 
+Note that the `teardown*` functions can fail a test, if their return code is nonzero.
+This means, using `return 1` or having the last command in teardown fail, will
+fail the teardown. Unlike `@test`, failing commands within `teardown` won't
+trigger failure as ERREXIT is disabled.
+
+<!-- markdownlint-disable MD033 -->
+<details>
+  <summary>Example of different teardown failure modes</summary>
+
+```bash
+teardown() {
+  false # this will fail the test, as it determines the return code
+}
+
+teardown() {
+  false # this won't fail the test ...
+  echo some more code # ... and this will be executed too!
+}
+
+teardown() {
+  return 1 # this will fail the test, but the rest won't be executed
+  echo some more code
+}
+
+teardown() {
+  if true; then
+    false # this will also fail the test, as it is the last command in this function
+  else
+    true
+  fi
+}
+```
+
+</details>
+<!-- markdownlint-enable MD033 -->
+
 ## `bats_require_minimum_version <Bats version number>`
 
 Added in [v1.7.0](https://github.com/bats-core/bats-core/releases/tag/v1.7.0)
