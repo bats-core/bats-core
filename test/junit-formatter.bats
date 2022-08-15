@@ -151,3 +151,10 @@ TESTSUITES_REGEX="<testsuites time=\"$FLOAT_REGEX\">"
   [[ "${lines[6]}" == '    </testcase>' ]]
   [[ "${lines[7]}" == '</testsuite>' ]]
 }
+
+@test "don't choke on setup_file errors" {
+  bats_require_minimum_version 1.5.0
+  local stderr='' # silence shellcheck
+  run -1 --separate-stderr bats --formatter junit "$FIXTURE_ROOT/../file_setup_teardown/setup_file_failed.bats"
+  [ "${stderr}" == "" ]
+}

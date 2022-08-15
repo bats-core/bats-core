@@ -46,6 +46,7 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 * upgraded from deprecated CI envs for MacOS (10 -> 11,12) and Ubuntu
   (18.04 -> 22.04) (#630)
 * add `/usr/lib/bats` as default value for `BATS_LIB_PATH` (#628)
+* fix unset variable in `bats-formatter-junit` when `setup_file` fails (#632)
 
 #### Documentation
 
