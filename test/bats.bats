@@ -1007,6 +1007,24 @@ END_OF_ERR_MSG
   [ ${#lines[@]} -eq 10 ]
 }
 
+@test "--print-output-on-failure also shows stderr (for run --separate-stderr)" {
+  run bats --print-output-on-failure --show-output-of-passing-tests "$FIXTURE_ROOT/print_output_on_failure_with_stderr.bats"
+  [ "${lines[0]}" == '1..3' ]
+  [ "${lines[1]}" == 'ok 1 no failure prints no output' ]
+  # ^ no output despite --show-output-of-passing-tests, because there is no failure
+  [ "${lines[2]}" == 'not ok 2 failure prints output' ]
+  [ "${lines[3]}" == "# (in test file $RELATIVE_FIXTURE_ROOT/print_output_on_failure_with_stderr.bats, line 7)" ]
+  [ "${lines[4]}" == "#   \`run -1 --separate-stderr bash -c 'echo \"fail hard\"; echo with stderr >&2'' failed, expected exit code 1, got 0" ]
+  [ "${lines[5]}" == '# Last output:' ]
+  [ "${lines[6]}" == '# fail hard' ]
+  [ "${lines[7]}" == '# Last stderr:' ]
+  [ "${lines[8]}" == '# with stderr' ]
+  [ "${lines[9]}" == 'not ok 3 empty output on failure' ]
+  [ "${lines[10]}" == "# (in test file $RELATIVE_FIXTURE_ROOT/print_output_on_failure_with_stderr.bats, line 11)" ]
+  [ "${lines[11]}" == "#   \`false' failed" ]
+  [ ${#lines[@]} -eq 12 ]
+}
+
 @test "--show-output-of-passing-tests works as expected" {
   bats_require_minimum_version 1.5.0
   run -0 bats --show-output-of-passing-tests "$FIXTURE_ROOT/show-output-of-passing-tests.bats"
