@@ -47,6 +47,8 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
   (18.04 -> 22.04) (#630)
 * add `/usr/lib/bats` as default value for `BATS_LIB_PATH` (#628)
 * fix unset variable in `bats-formatter-junit` when `setup_file` fails (#632)
+* unify error behavior of `teardown`/`teardown_file`/`teardown_suite` functions:
+  only fail via return code, not via ERREXIT (#633)
 
 #### Documentation
 
