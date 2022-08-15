@@ -296,14 +296,19 @@ bats_suite_exit_trap() {
 }
 
 bats_run_teardown_suite() {
+  local bats_teardown_suite_status=0
   # avoid being called twice, in case this is not called through bats_teardown_suite_trap
   # but from the end of file
   trap bats_suite_exit_trap EXIT
-  set -eET
   BATS_TEARDOWN_SUITE_COMPLETED=
-  teardown_suite 2>&1
-  BATS_TEARDOWN_SUITE_COMPLETED=1
-  set +ET
+  teardown_suite 2>&1 || bats_teardown_suite_status=$?
+  if (( bats_teardown_suite_status == 0 )); then
+    BATS_TEARDOWN_SUITE_COMPLETED=1
+  elif [[ -n "${BATS_SETUP_SUITE_COMPLETED:-}" ]]; then
+    BATS_DEBUG_LAST_STACK_TRACE_IS_VALID=1
+    BATS_ERROR_STATUS=$bats_teardown_suite_status
+    return $BATS_ERROR_STATUS
+  fi
 }
 
 bats_teardown_suite_trap() {

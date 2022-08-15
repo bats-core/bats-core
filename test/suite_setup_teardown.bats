@@ -91,12 +91,21 @@ setup() {
     [ "${lines[5]}" == "#   \`false' failed" ]
 }
 
-@test "failure in teardown_suite is reported and fails test suite, remaining code is skipped" {
-    run ! bats "$FIXTURE_ROOT/failure_in_teardown_suite/"
+@test "midway failure in teardown_suite does not fail test suite, remaining code is executed" {
+    run -0 bats "$FIXTURE_ROOT/failure_in_teardown_suite/"
+    [ "${lines[2]}" == "teardown_suite before" ]
+    [ "${lines[3]}" == "teardown_suite after" ]
+    [ "${#lines[@]}" -eq 4 ]
+}
+
+@test "nonzero return in teardown_suite does fails test suite" {
+    run -1 bats "$FIXTURE_ROOT/return_nonzero_in_teardown_suite/"
     [ "${lines[2]}" == "teardown_suite before" ]
     [ "${lines[3]}" == "not ok 2 teardown_suite" ]
-    [ "${lines[4]}" == "# (from function \`teardown_suite' in test file $RELATIVE_FIXTURE_ROOT/failure_in_teardown_suite/setup_suite.bash, line 7)" ]
-    [ "${lines[5]}" == "#   \`false' failed" ]
+    [ "${lines[4]}" == "# (from function \`teardown_suite' in test file $RELATIVE_FIXTURE_ROOT/return_nonzero_in_teardown_suite/setup_suite.bash, line 7)" ]
+    [ "${lines[5]}" == "#   \`return 1' failed" ]
+    [ "${lines[6]}" == "# bats warning: Executed 2 instead of expected 1 tests" ]
+    [ "${#lines[@]}" -eq 7 ]
 }
 
 @test "stderr from setup/teardown_suite does not overtake stdout" {
