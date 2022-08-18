@@ -24,3 +24,19 @@ setup() {
     [ "${lines[1]}" == "ok 1 No tags" ]
     [ ${#lines[@]} -eq 2 ]
 }
+
+@test "--filter-tags only selects tests that match all tags (logic and)" {
+    run -0 bats --filter-tags 'test:tag:1,file:tag:1' "$FIXTURE_ROOT/tagged.bats"
+    [ "${lines[0]}" == "1..1" ]
+    [ "${lines[1]}" == "ok 1 File and test tags" ]
+    [ ${#lines[@]} -eq 2 ]
+}
+
+@test "multiple --filter-tags work as logical or" {
+    run -0 bats --filter-tags 'test:tag:1,file:tag:1' --filter-tags 'test:tag:2,file:tag:1' "$FIXTURE_ROOT/tagged.bats"
+    [ "${lines[0]}" == "1..2" ]
+    [ "${lines[1]}" == "ok 1 File and test tags" ]
+    [ "${lines[2]}" == "ok 2 File and other test tags" ]
+    [ ${#lines[@]} -eq 3 ]
+}
+

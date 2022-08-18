@@ -7,7 +7,7 @@ num_jobs=${BATS_NUMBER_OF_PARALLEL_JOBS:-1}
 bats_no_parallelize_across_files=${BATS_NO_PARALLELIZE_ACROSS_FILES-}
 bats_no_parallelize_within_files=
 filter_status=''
-filter_tags=()
+filter_tags_list=()
 flags=('--dummy-flag') # add a dummy flag to prevent unset variable errors on empty array expansion in old bash versions
 setup_suite_file=''
 BATS_TRACE_LEVEL="${BATS_TRACE_LEVEL:-0}"
@@ -50,7 +50,7 @@ while [[ "$#" -ne 0 ]]; do
     ;;
   --filter-tags)
     shift
-    filter_tags+=("$1")
+    filter_tags_list+=("$1")
     ;;
   --dummy-flag)
     ;;
@@ -116,10 +116,19 @@ bats_gather_tests() {
         tags="${BASH_REMATCH[1]}"
         line="${BASH_REMATCH[2]}"
       else
-        tags
+        tags=''
       fi
-      if [[ ${#filter_tags[@]} -gt 0 && $tags != "$filter_tags" ]]; then
-        continue
+      if [[ ${#filter_tags_list[@]} -gt 0 ]]; then
+        local match=
+        for filter_tags in "${filter_tags_list[@]}"; do
+          if [[ $tags == "$filter_tags" ]]; then
+            match=1
+            break
+          fi
+        done
+        if [[ -z "$match" ]]; then
+          continue
+        fi
       fi
       test_line=$(printf "%s\t%s" "$filename" "$line")
       all_tests+=("$test_line")
