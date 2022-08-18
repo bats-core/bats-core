@@ -17,3 +17,10 @@ setup() {
     [ "${lines[5]}" == "ok 5 Only test tags" ]
     [ ${#lines[@]} -eq 6 ]
 }
+
+@test "Empty tag filter runs tests without tag" {
+    run -0 bats --filter-tags '' "$FIXTURE_ROOT/tagged.bats"
+    [ "${lines[0]}" == "1..1" ]
+    [ "${lines[1]}" == "ok 1 No tags" ]
+    [ ${#lines[@]} -eq 2 ]
+}

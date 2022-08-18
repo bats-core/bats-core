@@ -255,6 +255,10 @@ while [[ "$#" -ne 0 ]]; do
     shift
     flags+=('--filter-status' "$1")
     ;;
+  --filter-tags)
+    shift
+    flags+=('--filter-tags' "$1")
+    ;;
   -*)
     abort "Bad command line option '$1'"
     ;;
