@@ -96,3 +96,53 @@ bats_binary_search() { # <search-value> <array-name>
   # did not find it -> its not there
   return 1
 }
+
+# store the values in ascending order in result array
+# Intended for short lists!
+bats_sort() { # <result-array-name> <values to sort...>
+  local -r result_name=$1
+  local -a sorted_array=()
+  shift
+  local -i j i=0
+  for (( j=1; j <= $#; ++j )); do
+    for ((i=${#sorted_array[@]}; i >= 0; --i )); do
+      if [[ $i -eq 0 || ${sorted_array[$((i-1))]} < ${!j} ]]; then
+        sorted_array[$i]=${!j}
+        break
+      else
+        sorted_array[$i]=${sorted_array[$((i-1))]}
+      fi
+    done
+  done
+
+  eval "$result_name=(\"\${sorted_array[@]}\")"
+}
+
+# check if all search values (must be sorted!) are in the (sorted!) array
+# Intended for short lists/arrays!
+bats_all_in() { # <sorted-array> <sorted search values...>
+  local -r haystack_array=$1
+  shift
+
+  local -i haystack_length # just to appease shellcheck
+  eval "local -r haystack_length=\${#${haystack_array}[@]}"
+  
+  local -i haystack_index=0 # initialize only here to continue from last search position
+  local search_value haystack_value # just to appease shellcheck
+  for (( i=1; i <= $#; ++i )); do
+    eval "local search_value=${!i}"
+    for ((; haystack_index < haystack_length; ++haystack_index)); do
+      eval "local haystack_value=\${${haystack_array}[$haystack_index]}"
+      if [[ $haystack_value > "$search_value" ]]; then
+        # we passed the location this value would have been at -> not found
+        return 1
+      elif [[ $haystack_value == "$search_value" ]]; then
+        continue 2 # search value found  -> try the next one
+      fi
+    done
+    return 1 # we ran of the end of the haystack without finding the value!
+  done
+
+  # did not return from loop above -> all search values were found
+  return 0
+}

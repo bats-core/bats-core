@@ -17,6 +17,9 @@ abort() {
   exit 1
 }
 
+# shellcheck source=lib/bats-core/common.bash
+source "$BATS_ROOT/lib/bats-core/common.bash"
+
 while [[ "$#" -ne 0 ]]; do
   case "$1" in
   -c)
@@ -50,7 +53,9 @@ while [[ "$#" -ne 0 ]]; do
     ;;
   --filter-tags)
     shift
-    filter_tags_list+=("$1")
+    IFS=, read -ra tags <<<"$1"
+    bats_sort sorted_tags "${tags[@]}"
+    IFS=, filter_tags_list+=("${sorted_tags[*]}")
     ;;
   --dummy-flag)
     ;;
@@ -113,18 +118,27 @@ bats_gather_tests() {
       line="${line#* }"
       TAG_REGEX="--tags '(.*)' (.*)"
       if [[ "$line" =~ $TAG_REGEX ]]; then
-        tags="${BASH_REMATCH[1]}"
+        IFS=, read -ra tags <<<"${BASH_REMATCH[1]}"
         line="${BASH_REMATCH[2]}"
       else
-        tags=''
+        tags=()
       fi
       if [[ ${#filter_tags_list[@]} -gt 0 ]]; then
         local match=
         for filter_tags in "${filter_tags_list[@]}"; do
-          if [[ $tags == "$filter_tags" ]]; then
-            match=1
-            break
-          fi
+            # empty search tags only match empty test tags!
+            if [[ -z "$filter_tags" ]]; then
+              if [[ ${#tags[@]} -eq 0 ]]; then
+                match=1
+                break
+              fi
+              continue
+            fi
+
+            IFS=, read -ra filter_tags <<<"$filter_tags"
+            if bats_all_in tags "${filter_tags[@]}"; then
+              match=1
+            fi
         done
         if [[ -z "$match" ]]; then
           continue
@@ -170,8 +184,6 @@ fi
 bats_gather_tests "$@"
 
 if [[ -n "$filter_status" ]]; then  
-  # shellcheck source=lib/bats-core/common.bash
-  source "$BATS_ROOT/lib/bats-core/common.bash"
   case "$filter_status" in
     failed)
       bats_filter_test_by_status() { # <line>

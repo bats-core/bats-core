@@ -70,3 +70,58 @@
     run -0 bats_binary_search 4 even_length_array
 
 }
+
+@test bats_sort {
+    bats_sort empty
+    echo "empty(${#empty[@]}): ${empty[*]}"
+    [ ${#empty[@]} -eq 0 ]
+
+    bats_sort one_element 1
+    echo "one_element(${#one_element[@]}): ${one_element[*]}"
+    [ ${#one_element[@]} -eq 1 ]
+    [ ${one_element[0]} = 1 ]
+
+    bats_sort two_sorted 1 2
+    echo "two_sorted(${#two_sorted[@]}): ${two_sorted[*]}"
+    [ ${#two_sorted[@]} -eq 2 ]
+    [ ${two_sorted[0]} = 1 ]
+    [ ${two_sorted[1]} = 2 ]
+
+    bats_sort two_elements_reversed 2 1 
+    echo "two_elements_reversed(${#two_elements_reversed[@]}): ${two_elements_reversed[*]}"
+    [ ${#two_elements_reversed[@]} -eq 2 ]
+    [ ${two_elements_reversed[0]} = 1 ]
+    [ ${two_elements_reversed[1]} = 2 ]
+
+    bats_sort three_elements_scrambled 2 1 3 
+    echo "three_elements_scrambled(${#three_elements_scrambled[@]}): ${three_elements_scrambled[*]}"
+    [ ${#three_elements_scrambled[@]} -eq 3 ]
+    [ ${three_elements_scrambled[0]} = 1 ]
+    [ ${three_elements_scrambled[1]} = 2 ]
+    [ ${three_elements_scrambled[2]} = 3 ]
+}
+
+@test bats_all_in {
+    bats_require_minimum_version 1.5.0
+
+    local -ra empty=() one=(1) onetwo=(1 2)
+    # find nothing in any array
+    run -0 bats_all_in empty
+    run -0 bats_all_in one
+    run -0 bats_all_in onetwo
+    # find single search value in single element array
+    run -0 bats_all_in one 1
+    # find single search values in multi element array
+    run -0 bats_all_in onetwo 1
+    # find multiple search values in multi element array
+    run -0 bats_all_in onetwo 1 2
+
+    # don't find in empty array
+    run -1 bats_all_in empty 1
+    # don't find in non empty
+    run -1 bats_all_in one 2
+    # don't find smaller values
+    run -1 bats_all_in onetwo 0 1 2
+    # don't find greater values
+    run -1 bats_all_in onetwo 1 2 3
+}

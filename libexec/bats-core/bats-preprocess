@@ -35,6 +35,8 @@ BATS_TEST_PATTERN="^[[:blank:]]*@test[[:blank:]]+(.*[^[:blank:]])[[:blank:]]+\{(
 BATS_TEST_PATTERN_COMMENT="[[:blank:]]*([^[:blank:]()]+)[[:blank:]]*\(?\)?[[:blank:]]+\{[[:blank:]]+#[[:blank:]]*@test[[:blank:]]*\$"
 BATS_COMMENT_COMMAND_PATTERN="^[[:blank:]]*#[[:blank:]]*bats[[:blank:]]*(.*)$"
 
+source "$BATS_ROOT/lib/bats-core/common.bash"
+
 test_file="$1"
 tests=()
 test_tags=()
@@ -49,7 +51,7 @@ file_tags=()
       bats_encode_test_name "$name" 'encoded_name'
       printf '%s() { bats_test_begin "%s"; %s\n' "${encoded_name:?}" "$name" "$body" || :
 
-      tags=("${test_tags[@]}" "${file_tags[@]}")
+      bats_sort tags "${test_tags[@]}" "${file_tags[@]}"
       if [[ -z "$BATS_TEST_FILTER" || "$name" =~ $BATS_TEST_FILTER ]]; then
         IFS=,
         tests+=("--tags '${tags[*]}' $encoded_name")
