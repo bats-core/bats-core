@@ -9,7 +9,7 @@ bats_preprocess_source() {
 	# export to make it visible to bats_evaluate_preprocessed_source
 	# since the latter runs in bats-exec-test's bash while this runs in bats-exec-file's
 	export BATS_TEST_SOURCE="${BATS_TMPNAME}.src"
-	bats-preprocess "$BATS_TEST_FILENAME" >"$BATS_TEST_SOURCE"
+	CHECK_BATS_COMMENT_COMMANDS=1 bats-preprocess "$BATS_TEST_FILENAME" >"$BATS_TEST_SOURCE"
 }
 
 bats_evaluate_preprocessed_source() {

@@ -154,6 +154,10 @@ bats_gather_tests() {
       fi
       test_names+=("$line")
     done < <(BATS_TEST_FILTER="$filter" bats-preprocess "$filename")
+    
+    if (( $? != 0 )); then
+      abort "Aborted due to preprocessing failure in $filename"
+    fi
 
     if [[ "${#test_dupes[@]}" -ne 0 ]]; then
       abort "Duplicate test name(s) in file \"${filename}\": ${test_dupes[*]}"

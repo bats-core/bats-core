@@ -146,3 +146,9 @@ bats_all_in() { # <sorted-array> <sorted search values...>
   # did not return from loop above -> all search values were found
   return 0
 }
+
+bats_trim () { # <output-variable> <string>
+  local -r bats_trim_ltrimmed=${2#"${2%%[![:space:]]*}"} # cut off leading whitespace
+  local -r bats_trim_trimmed=${bats_trim_ltrimmed%"${bats_trim_ltrimmed##*[![:space:]]}"} # cut off trailing whitespace
+  printf -v "$1" "%s" "$bats_trim_trimmed"
+}

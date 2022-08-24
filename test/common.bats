@@ -125,3 +125,17 @@
     # don't find greater values
     run -1 bats_all_in onetwo 1 2 3
 }
+
+@test bats_trim {
+    bats_trim empty ""
+    [ "${empty-NOTSET}" = "" ]
+
+    bats_trim already_trimmed "abc"
+    [ "$already_trimmed" = abc ]
+
+    bats_trim trimmed "  abc  "
+    [ "$trimmed" = abc ]
+
+    bats_trim whitespaces_within "  a b  "
+    [ "$whitespaces_within" = "a b" ]
+}
