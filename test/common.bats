@@ -178,10 +178,6 @@
     run -1 bats_append_arrays_as_args --
     [ "${lines[0]}" == "Error: append_arrays_as_args is missing a command or -- separator" ]
 
-    # cannot distinguish undefined from empty arrays in old bash!
-    run -0 bats_append_arrays_as_args undefined -- count_and_print_args 
-    [ "${lines[0]}" == '0 ' ]
-
     empty=()
     run -0 bats_append_arrays_as_args empty -- count_and_print_args 
     [ "${lines[0]}" == '0 ' ]
