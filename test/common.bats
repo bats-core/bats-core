@@ -126,6 +126,32 @@
     run -1 bats_all_in onetwo 1 2 3
 }
 
+@test bats_any_in {
+    bats_require_minimum_version 1.5.0
+
+    local -ra empty=() one=(1) onetwo=(1 2)
+    # empty search set is always false
+    run -1 bats_any_in empty
+    run -1 bats_any_in one
+    run -1 bats_any_in onetwo
+
+    # find single search value in single element array
+    run -0 bats_any_in one 1
+    # find single search values in multi element array
+    run -0 bats_any_in onetwo 2
+    # find multiple search values in multi element array
+    run -0 bats_any_in onetwo 1 2
+
+    # don't find in empty array
+    run -1 bats_any_in empty 1
+    # don't find in non empty
+    run -1 bats_any_in one 2
+    # don't find smaller values
+    run -1 bats_any_in onetwo 0
+    # don't find greater values
+    run -1 bats_any_in onetwo 3
+}
+
 @test bats_trim {
     bats_trim empty ""
     [ "${empty-NOTSET}" = "" ]

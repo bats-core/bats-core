@@ -65,3 +65,15 @@ setup() {
     [ "${stderr_lines[2]}" = "$FIXTURE_ROOT/invalid_tags.bats:4: Error: Invalid test_tags: ',bc'. Tags must not be empty. Please remove redundant commas!" ]
     [ "${stderr_lines[3]}" = "$FIXTURE_ROOT/invalid_tags.bats:5: Error: Invalid test_tags: 'a+b'. Valid tags must match [-_:[:alnum:]]+ and be separated with comma (and optional spaces)" ]
 }
+
+@test "--filter-tags allows for negation via !" {
+    run -0 bats --filter-tags '!file:tag:1' "$FIXTURE_ROOT/tagged.bats"
+    [ "${lines[0]}" = '1..2' ]
+    [ "${lines[1]}" = 'ok 1 No tags' ]
+    [ "${lines[2]}" = 'ok 2 Only test tags' ]
+    [ "${#lines[@]}" -eq 3 ]
+}
+
+<<TODOS # 
+  - not logic
+TODOS

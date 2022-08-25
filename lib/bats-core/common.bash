@@ -147,6 +147,33 @@ bats_all_in() { # <sorted-array> <sorted search values...>
   return 0
 }
 
+# check if any search value (must be sorted!) is in the (sorted!) array
+# intended for short lists/arrays
+bats_any_in() { # <sorted-array> <sorted search values>
+  local -r haystack_array=$1
+  shift
+
+  local -i haystack_length # just to appease shellcheck
+  eval "local -r haystack_length=\${#${haystack_array}[@]}"
+  
+  local -i haystack_index=0 # initialize only here to continue from last search position
+  local search_value haystack_value # just to appease shellcheck
+  for (( i=1; i <= $#; ++i )); do
+    eval "local search_value=${!i}"
+    for ((; haystack_index < haystack_length; ++haystack_index)); do
+      eval "local haystack_value=\${${haystack_array}[$haystack_index]}"
+      if [[ $haystack_value > "$search_value" ]]; then
+        continue 2 # search value not in array! -> try next
+      elif [[ $haystack_value == "$search_value" ]]; then
+        return 0 # search value found
+      fi
+    done
+  done
+
+  # did not return from loop above -> no search value was found
+  return 1
+}
+
 bats_trim () { # <output-variable> <string>
   local -r bats_trim_ltrimmed=${2#"${2%%[![:space:]]*}"} # cut off leading whitespace
   local -r bats_trim_trimmed=${bats_trim_ltrimmed%"${bats_trim_ltrimmed##*[![:space:]]}"} # cut off trailing whitespace

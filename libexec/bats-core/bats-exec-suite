@@ -54,6 +54,9 @@ while [[ "$#" -ne 0 ]]; do
   --filter-tags)
     shift
     IFS=, read -ra tags <<<"$1"
+    for (( i = 0; i < ${#tags[@]}; ++i )); do
+      bats_trim "tags[$i]" "${tags[$i]}"
+    done
     bats_sort sorted_tags "${tags[@]}"
     IFS=, filter_tags_list+=("${sorted_tags[*]}")
     ;;
@@ -134,9 +137,18 @@ bats_gather_tests() {
               fi
               continue
             fi
-
-            IFS=, read -ra filter_tags <<<"$filter_tags"
-            if bats_all_in tags "${filter_tags[@]}"; then
+            local -a positive_filter_tags=() negative_filter_tags=()
+            IFS=, read -ra filter_tags <<< "$filter_tags" || true
+            for filter_tag in "${filter_tags[@]}"; do
+              if [[ $filter_tag == !* ]]; then
+                bats_trim filter_tag "${filter_tag#!}"
+                negative_filter_tags+=("${filter_tag}")
+              else
+                positive_filter_tags+=("${filter_tag}")
+              fi
+            done
+            if bats_all_in tags "${positive_filter_tags[@]}" &&
+              ! bats_any_in tags "${negative_filter_tags[@]}"; then
               match=1
             fi
         done
