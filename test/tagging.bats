@@ -58,12 +58,12 @@ setup() {
 }
 
 @test "exit with error on invalid tags in .bats file" {
-    run -1 --separate-stderr bats "$FIXTURE_ROOT/invalid_tags.bats"
-
-    [ "${stderr_lines[0]}" = "$FIXTURE_ROOT/invalid_tags.bats:1: Error: Invalid file_tags: ',bc'. Tags must not be empty. Please remove redundant commas!" ]
-    [ "${stderr_lines[1]}" = "$FIXTURE_ROOT/invalid_tags.bats:2: Error: Invalid file_tags: 'a+b'. Valid tags must match [-_:[:alnum:]]+ and be separated with comma (and optional spaces)" ]
-    [ "${stderr_lines[2]}" = "$FIXTURE_ROOT/invalid_tags.bats:4: Error: Invalid test_tags: ',bc'. Tags must not be empty. Please remove redundant commas!" ]
-    [ "${stderr_lines[3]}" = "$FIXTURE_ROOT/invalid_tags.bats:5: Error: Invalid test_tags: 'a+b'. Valid tags must match [-_:[:alnum:]]+ and be separated with comma (and optional spaces)" ]
+    run -1 bats "$FIXTURE_ROOT/invalid_tags.bats"
+    [ "${lines[0]}" = "1..1" ]
+    [ "${lines[1]}" = "$FIXTURE_ROOT/invalid_tags.bats:1: Error: Invalid file_tags: ',bc'. Tags must not be empty. Please remove redundant commas!" ]
+    [ "${lines[2]}" = "$FIXTURE_ROOT/invalid_tags.bats:2: Error: Invalid file_tags: 'a+b'. Valid tags must match [-_:[:alnum:]]+ and be separated with comma (and optional spaces)" ]
+    [ "${lines[3]}" = "$FIXTURE_ROOT/invalid_tags.bats:4: Error: Invalid test_tags: ',bc'. Tags must not be empty. Please remove redundant commas!" ]
+    [ "${lines[4]}" = "$FIXTURE_ROOT/invalid_tags.bats:5: Error: Invalid test_tags: 'a+b'. Valid tags must match [-_:[:alnum:]]+ and be separated with comma (and optional spaces)" ]
 }
 
 @test "--filter-tags allows for negation via !" {
