@@ -37,6 +37,7 @@ BATS_COMMENT_COMMAND_PATTERN="^[[:blank:]]*#[[:blank:]]*bats[[:blank:]]+(.*)$"
 BATS_VALID_TAG_PATTERN="[-_:[:alnum:]]+"
 BATS_VALID_TAGS_PATTERN="^ *($BATS_VALID_TAG_PATTERN)?( *, *$BATS_VALID_TAG_PATTERN)* *$"
 
+# shellcheck source=lib/bats-core/common.bash
 source "$BATS_ROOT/lib/bats-core/common.bash"
 
 extract_tags() { # <tag_type/return_var> <tags-string>
@@ -70,6 +71,7 @@ extract_tags() { # <tag_type/return_var> <tags-string>
 test_file="$1"
 tests=()
 test_tags=()
+# shellcheck disable=SC2034 # used in `bats_sort tags`/`extract_tags``
 file_tags=()
 line_number=0
 exit_code=0
@@ -91,6 +93,7 @@ exit_code=0
         IFS=,
         tests+=("--tags '${tags[*]-}' $encoded_name")
       fi
+      # shellcheck disable=SC2034 # used in `bats_sort tags`/`extract_tags`
       test_tags=() # reset test tags for next test
     else
       if [[ "$line" =~ $BATS_COMMENT_COMMAND_PATTERN ]]; then

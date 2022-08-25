@@ -182,6 +182,7 @@ bats_any_in() { # <sorted-array> <sorted search values>
 
 bats_trim () { # <output-variable> <string>
   local -r bats_trim_ltrimmed=${2#"${2%%[![:space:]]*}"} # cut off leading whitespace
+  # shellcheck disable=SC2034 # used in eval!
   local -r bats_trim_trimmed=${bats_trim_ltrimmed%"${bats_trim_ltrimmed##*[![:space:]]}"} # cut off trailing whitespace
   eval "$1=\$bats_trim_trimmed"
 }
