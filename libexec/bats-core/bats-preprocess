@@ -60,7 +60,11 @@ extract_tags() { # <tag_type/return_var> <tags-string>
     printf "Valid tags must match %s and be separated with comma (and optional spaces)\n" "$BATS_VALID_TAG_PATTERN" 
     exit_code=1
   fi >&2
-  eval "$tag_type=(\"\${tags[@]}\")"
+  if (( ${#tags[@]} > 0)); then
+    eval "$tag_type=(\"\${tags[@]}\")"
+  else
+    eval "$tag_type=()"
+  fi
 }
 
 test_file="$1"
@@ -80,10 +84,12 @@ exit_code=0
       bats_encode_test_name "$name" 'encoded_name'
       printf '%s() { bats_test_begin "%s"; %s\n' "${encoded_name:?}" "$name" "$body" || :
 
-      bats_sort tags "${test_tags[@]}" "${file_tags[@]}"
+      bats_append_arrays_as_args \
+                          test_tags file_tags \
+        -- bats_sort tags 
       if [[ -z "$BATS_TEST_FILTER" || "$name" =~ $BATS_TEST_FILTER ]]; then
         IFS=,
-        tests+=("--tags '${tags[*]}' $encoded_name")
+        tests+=("--tags '${tags[*]-}' $encoded_name")
       fi
       test_tags=() # reset test tags for next test
     else

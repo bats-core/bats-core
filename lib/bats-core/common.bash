@@ -101,8 +101,14 @@ bats_binary_search() { # <search-value> <array-name>
 # Intended for short lists!
 bats_sort() { # <result-array-name> <values to sort...>
   local -r result_name=$1
-  local -a sorted_array=()
   shift
+
+  if (( $# == 0 )); then
+    eval "$result_name=()"
+    return 0
+  fi
+
+  local -a sorted_array=()
   local -i j i=0
   for (( j=1; j <= $#; ++j )); do
     for ((i=${#sorted_array[@]}; i >= 0; --i )); do
@@ -178,4 +184,29 @@ bats_trim () { # <output-variable> <string>
   local -r bats_trim_ltrimmed=${2#"${2%%[![:space:]]*}"} # cut off leading whitespace
   local -r bats_trim_trimmed=${bats_trim_ltrimmed%"${bats_trim_ltrimmed##*[![:space:]]}"} # cut off trailing whitespace
   eval "$1=\$bats_trim_trimmed"
+}
+
+# a helper function to work around unbound variable errors with ${arr[@]} on Bash 3
+bats_append_arrays_as_args () { # <array...> -- <command ...>
+  local -a trailing_args=()
+  while (( $# > 0)) && [[ $1 != -- ]]; do
+    local array=$1
+    shift
+
+    if eval "(( \${#${array}[@]} > 0 ))"; then
+      eval "trailing_args+=(\"\${${array}[@]}\")"
+    fi
+  done
+  shift # remove -- separator 
+
+  if (( $# == 0 )); then
+    printf "Error: append_arrays_as_args is missing a command or -- separator\n" >&2
+    return 1
+  fi
+
+  if (( ${#trailing_args[@]} > 0 )); then
+    "$@" "${trailing_args[@]}"
+  else
+    "$@"
+  fi
 }

@@ -165,3 +165,39 @@
     bats_trim whitespaces_within "  a b  "
     [ "$whitespaces_within" = "a b" ]
 }
+
+@test bats_append_arrays_as_args {
+    bats_require_minimum_version 1.5.0
+    count_and_print_args() {
+        echo "$# $*"
+    }
+    
+    run -1 bats_append_arrays_as_args
+    [ "${lines[0]}" == "Error: append_arrays_as_args is missing a command or -- separator" ]
+
+    run -1 bats_append_arrays_as_args --
+    [ "${lines[0]}" == "Error: append_arrays_as_args is missing a command or -- separator" ]
+
+    # cannot distinguish undefined from empty arrays in old bash!
+    run -0 bats_append_arrays_as_args undefined -- count_and_print_args 
+    [ "${lines[0]}" == '0 ' ]
+
+    empty=()
+    run -0 bats_append_arrays_as_args empty -- count_and_print_args 
+    [ "${lines[0]}" == '0 ' ]
+
+    run -0 bats_append_arrays_as_args -- count_and_print_args
+    [ "${lines[0]}" == '0 ' ]
+
+    arr=(a)
+    run -0 bats_append_arrays_as_args arr -- count_and_print_args 
+    [ "${lines[0]}" == '1 a' ]
+
+    arr2=(b)
+    run -0 bats_append_arrays_as_args arr arr2 -- count_and_print_args 
+    [ "${lines[0]}" == '2 a b' ]
+
+    
+    run -0 bats_append_arrays_as_args arr empty arr2 -- count_and_print_args 
+    [ "${lines[0]}" == '2 a b' ]
+}

@@ -73,7 +73,3 @@ setup() {
     [ "${lines[2]}" = 'ok 2 Only test tags' ]
     [ "${#lines[@]}" -eq 3 ]
 }
-
-<<TODOS # 
-  - not logic
-TODOS
