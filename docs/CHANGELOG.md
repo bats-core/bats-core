@@ -23,6 +23,8 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 * `BATS_TEST_TIMEOUT` variable to force a timeout on test (including `setup()`) (#491)
 * also print (nonempty) `$stderr` (from `run --separate-stderr`) with
   `--print-output-on-failure` (#631)
+* `# bats test_tags=<tag list>`/`# bats file_tags=<tag list>` and
+  `--filter-tags <tag list>` for tagging tests for execution filters (#642)
 
 #### Documentation
 

@@ -12,6 +12,85 @@ For sample test files, see [examples](https://github.com/bats-core/bats-core/tre
 
 [bats-eval]: https://github.com/bats-core/bats-core/wiki/Bats-Evaluation-Process
 
+## Tagging tests
+
+Startig with version 1.8.0, Bats comes with a tagging system, that allows users
+to categorize their tests and filter according to those categories.
+
+Each test has a list of tags attached to it. Without specification, this list is empty.
+Tags can be defined in two ways. The first being `# bats test_tags=`:
+
+```bash
+# bats test_tags=tag:1, tag:2, tag:3
+@test "second test" {
+  # ...
+}
+
+@test "second test" {
+  # ...
+}
+```
+
+These tags (`tag:1`, `tag:2`, `tag:3`) will be attached to the test `first test`.
+The second test will have no tags attached. Values defined in the `# bats test_tags=`
+directive will be assigned to the next `@test` that is being encountered in the
+file and forgotten after that. Only the value of the last `# bats test_tags=` directive
+before a given test will be used.
+
+Sometimes, we want to give all tests in a file a set of the same tags. This can
+be achieved via `# bats file_tags=`. They will be added to all tests in the file
+after that directive. An additional `# bats file_tags=` directive will override
+the previously defined values:
+
+```bash
+@test "Zeroth test" { 
+  # will have no tags
+}
+
+# bats file_tags=a:b
+# bats test_tags=c:d
+
+@test "First test" { 
+  # will be tagged a:b, c:d
+}
+
+# bats file_tags=
+
+@test "Second test" {
+  # will have no tags
+}
+```
+
+Tags are case sensitive and must only consist of alphanumeric characters and `_`,
+ `-`, or `:`. They must not contain whitespaces!
+The colon is intended as a separator for (recursive) namespacing.
+
+Tag lists must be separated by commas and are allowed to contain whitespace.
+They must not contain empty tags like `test_tags=,b` (first tag is empty),
+`test_tags=a,,c`, `test_tags=a,  ,c` (second tag is only whitespace/empty),
+`test_tags=a,b,` (third tag is empty).
+
+Every tag starting with a `bats:` (case insensitive!) is reserved for Bats'
+internal use.
+
+### Filtering execution
+
+Tags can be used for more finegrained filtering of which tests to run via `--filter-tags`.
+This accepts a comma separated list of tags. Only tests that match all of these
+tags will be executed. For example, `bats --filter-tags a,b,c` will pick up tests
+with tags `a,b,c`, but not tests that miss one or more of those tags.
+
+Additionally, you can specify negative tags via `bats --filter-tags a,!b,c`,
+which now won't match tests with tags `a,b,c`, due to the `b`, but will select `a,c`.
+To put it more formally, `--filter-tags` is a boolean conjunction.
+
+To allow for more complex queries, you can specify multiple `--filter-tags`.
+A test will be executed, if it matches at least one of them.
+This means multiple `--filter-tags` form a boolean disjunction.
+
+A query of `--filter-tags a,!b --filter-tags b,c` can be translated to:
+Execute only tests that (have tag a, but not tag b) or (have tag b and c).
+
 ## Comment syntax
 
 External tools (like `shellcheck`, `shfmt`, and various IDE's) may not support

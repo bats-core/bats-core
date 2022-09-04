@@ -7,6 +7,7 @@ num_jobs=${BATS_NUMBER_OF_PARALLEL_JOBS:-1}
 bats_no_parallelize_across_files=${BATS_NO_PARALLELIZE_ACROSS_FILES-}
 bats_no_parallelize_within_files=
 filter_status=''
+filter_tags_list=()
 flags=('--dummy-flag') # add a dummy flag to prevent unset variable errors on empty array expansion in old bash versions
 setup_suite_file=''
 BATS_TRACE_LEVEL="${BATS_TRACE_LEVEL:-0}"
@@ -15,6 +16,9 @@ abort() {
   printf 'Error: %s\n' "$1" >&2
   exit 1
 }
+
+# shellcheck source=lib/bats-core/common.bash
+source "$BATS_ROOT/lib/bats-core/common.bash"
 
 while [[ "$#" -ne 0 ]]; do
   case "$1" in
@@ -46,6 +50,19 @@ while [[ "$#" -ne 0 ]]; do
   --filter-status)
     shift
     filter_status="$1"
+    ;;
+  --filter-tags)
+    shift
+    IFS=, read -ra tags <<<"$1" || true
+    if (( ${#tags[@]} > 0 )); then
+      for (( i = 0; i < ${#tags[@]}; ++i )); do
+        bats_trim "tags[$i]" "${tags[$i]}"
+      done
+      bats_sort sorted_tags "${tags[@]}"
+      IFS=, filter_tags_list+=("${sorted_tags[*]}")
+    else
+      filter_tags_list+=("")
+    fi
     ;;
   --dummy-flag)
     ;;
@@ -91,6 +108,7 @@ fi
 TESTS_LIST_FILE="${BATS_RUN_TMPDIR}/test_list_file.txt"
 
 bats_gather_tests() {
+  local line test_line tags 
   all_tests=()
   for filename in "$@"; do
     if [[ ! -f "$filename" ]]; then
@@ -105,6 +123,43 @@ bats_gather_tests() {
       fi
       line="${line%$'\r'}"
       line="${line#* }"
+      TAG_REGEX="--tags '(.*)' (.*)"
+      if [[ "$line" =~ $TAG_REGEX ]]; then
+        IFS=, read -ra tags <<<"${BASH_REMATCH[1]}" || true
+        line="${BASH_REMATCH[2]}"
+      else
+        tags=()
+      fi
+      if [[ ${#filter_tags_list[@]} -gt 0 ]]; then
+        local match=
+        for filter_tags in "${filter_tags_list[@]}"; do
+            # empty search tags only match empty test tags!
+            if [[ -z "$filter_tags" ]]; then
+              if [[ ${#tags[@]} -eq 0 ]]; then
+                match=1
+                break
+              fi
+              continue
+            fi
+            local -a positive_filter_tags=() negative_filter_tags=()
+            IFS=, read -ra filter_tags <<< "$filter_tags" || true
+            for filter_tag in "${filter_tags[@]}"; do
+              if [[ $filter_tag == !* ]]; then
+                bats_trim filter_tag "${filter_tag#!}"
+                negative_filter_tags+=("${filter_tag}")
+              else
+                positive_filter_tags+=("${filter_tag}")
+              fi
+            done
+            if bats_append_arrays_as_args positive_filter_tags -- bats_all_in tags &&
+              ! bats_append_arrays_as_args negative_filter_tags -- bats_any_in tags; then
+              match=1
+            fi
+        done
+        if [[ -z "$match" ]]; then
+          continue
+        fi
+      fi
       test_line=$(printf "%s\t%s" "$filename" "$line")
       all_tests+=("$test_line")
       printf "%s\n" "$test_line" >>"$TESTS_LIST_FILE"
@@ -145,8 +200,6 @@ fi
 bats_gather_tests "$@"
 
 if [[ -n "$filter_status" ]]; then  
-  # shellcheck source=lib/bats-core/common.bash
-  source "$BATS_ROOT/lib/bats-core/common.bash"
   case "$filter_status" in
     failed)
       bats_filter_test_by_status() { # <line>
