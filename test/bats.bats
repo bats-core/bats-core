@@ -33,7 +33,6 @@ setup() {
 }
 
 @test "invalid filename prints an error" {
-  whereis bats
   reentrant_run bats nonexistent
   [ $status -eq 1 ]
   [ "$(expr "$output" : ".*does not exist")" -ne 0 ]
