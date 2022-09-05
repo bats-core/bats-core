@@ -36,7 +36,7 @@ setup() {
 }
 
 @test "#113: set BATS_ROOT when /bin is a symlink to /usr/bin" {
-  run "$BATS_TEST_TMPDIR/bin/bats" -v
+  reentrant_run "$BATS_TEST_TMPDIR/bin/bats" -v
   [ "$status" -eq 0 ]
   [ "${output%% *}" == 'Bats' ]
 }
@@ -68,7 +68,7 @@ setup() {
 
   # shellcheck disable=SC2103,SC2164
   cd - >/dev/null
-  run "$BATS_TEST_TMPDIR/bin/foo" -v
+  reentrant_run "$BATS_TEST_TMPDIR/bin/foo" -v
   echo "$output"
   [ "$status" -eq 0 ]
   [ "${output%% *}" == 'Bats' ]
@@ -76,7 +76,7 @@ setup() {
 
 @test "set BATS_ROOT when calling from same dir" {
   cd "$BATS_TEST_TMPDIR"
-  run ./bin/bats -v
+  reentrant_run ./bin/bats -v
   [ "$status" -eq 0 ]
   [ "${output%% *}" == 'Bats' ]
 }
@@ -85,7 +85,7 @@ setup() {
   cd /tmp
   # shellcheck disable=SC2031,SC2030
   PATH="$PATH:$BATS_TEST_TMPDIR/bin"
-  run bats -v
+  reentrant_run bats -v
   [ "$status" -eq 0 ]
   [ "${output%% *}" == 'Bats' ]
 }
@@ -94,7 +94,7 @@ setup() {
   cd /tmp
   # shellcheck disable=SC2031,SC2030
   PATH="$PATH:$BATS_TEST_TMPDIR/bin"
-  run bash bats -v
+  reentrant_run bash bats -v
   [ "$status" -eq 0 ]
   [ "${output%% *}" == 'Bats' ]
 }

@@ -6,7 +6,7 @@ setup() {
 }
 
 @test "no --trace doesn't show anything on failure" {
-  run -1 bats "$FIXTURE_ROOT/failing_complex.bats"
+  reentrant_run -1 bats "$FIXTURE_ROOT/failing_complex.bats"
   [ "${lines[0]}" = "1..1" ]
   [ "${lines[1]}" = "not ok 1 a complex failing test" ]
   [ "${lines[2]}" = "# (in test file $RELATIVE_FIXTURE_ROOT/failing_complex.bats, line 4)" ]
@@ -16,7 +16,7 @@ setup() {
 }
 
 @test "--trace recurses into functions but not into run" {
-    run -1 bats --trace "$FIXTURE_ROOT/failing_recursive.bats"
+    reentrant_run -1 bats --trace "$FIXTURE_ROOT/failing_recursive.bats"
     
     [ "${lines[0]}" = '1..1' ]
     [ "${lines[1]}" = 'not ok 1 a recursive failing test' ]

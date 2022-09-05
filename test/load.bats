@@ -5,6 +5,7 @@ bats_require_minimum_version 1.5.0
 setup() {
   load test_helper
   fixtures load
+  REENTRANT_RUN_PRESERVE+=(BATS_LIB_PATH)
 }
 
 @test "find_in_bats_lib_path recognizes files relative to test file" {
@@ -13,7 +14,7 @@ setup() {
   cp "$FIXTURE_ROOT/test_helper.bash" "$test_dir/"
   cp "$FIXTURE_ROOT/find_library_helper.bats" "$test_dir"
 
-  BATS_LIB_PATH="" LIBRARY_NAME="test_helper" LIBRARY_PATH="$test_dir/test_helper.bash" run bats "$test_dir/find_library_helper.bats"
+  BATS_LIB_PATH="" LIBRARY_NAME="test_helper" LIBRARY_PATH="$test_dir/test_helper.bash" reentrant_run bats "$test_dir/find_library_helper.bats"
 }
 
 @test "find_in_bats_lib_path recognizes files in BATS_LIB_PATH" {
@@ -21,7 +22,7 @@ setup() {
   mkdir -p "$test_dir"
   cp "$FIXTURE_ROOT/test_helper.bash" "$test_dir/"
 
-  BATS_LIB_PATH="$test_dir" LIBRARY_NAME="test_helper" LIBRARY_PATH="$test_dir/test_helper.bash" run bats "$FIXTURE_ROOT/find_library_helper.bats"
+  BATS_LIB_PATH="$test_dir" LIBRARY_NAME="test_helper" LIBRARY_PATH="$test_dir/test_helper.bash" reentrant_run bats "$FIXTURE_ROOT/find_library_helper.bats"
 }
 
 @test "find_in_bats_lib_path returns 1 if no load path is found" {
@@ -29,7 +30,7 @@ setup() {
   mkdir -p "$test_dir"
   cp "$FIXTURE_ROOT/test_helper.bash" "$test_dir/"
 
-  BATS_LIB_PATH="$test_dir" LIBRARY_NAME="test_helper" run bats "$FIXTURE_ROOT/find_library_helper_err.bats"
+  BATS_LIB_PATH="$test_dir" LIBRARY_NAME="test_helper" reentrant_run bats "$FIXTURE_ROOT/find_library_helper_err.bats"
 }
 
 @test "find_in_bats_lib_path follows the priority of BATS_LIB_PATH" {
@@ -43,36 +44,36 @@ setup() {
   mkdir -p "$second_dir"
   cp "$FIXTURE_ROOT/exit1.bash" "$second_dir/target.bash"
 
-  BATS_LIB_PATH="$first_dir:$second_dir" LIBRARY_NAME="target" LIBRARY_PATH="$first_dir/target.bash" run bats "$FIXTURE_ROOT/find_library_helper.bats"
+  BATS_LIB_PATH="$first_dir:$second_dir" LIBRARY_NAME="target" LIBRARY_PATH="$first_dir/target.bash" reentrant_run bats "$FIXTURE_ROOT/find_library_helper.bats"
 }
 
 @test "load sources scripts relative to the current test file" {
-  run bats "$FIXTURE_ROOT/load.bats"
+  reentrant_run bats "$FIXTURE_ROOT/load.bats"
   [ $status -eq 0 ]
 }
 
 @test "load sources relative scripts with filename extension" {
-  HELPER_NAME="test_helper.bash" run bats "$FIXTURE_ROOT/load.bats"
+  HELPER_NAME="test_helper.bash" reentrant_run bats "$FIXTURE_ROOT/load.bats"
   [ $status -eq 0 ]
 }
 
 @test "load aborts if the specified script does not exist" {
-  HELPER_NAME="nonexistent" run bats "$FIXTURE_ROOT/load.bats"
+  HELPER_NAME="nonexistent" reentrant_run bats "$FIXTURE_ROOT/load.bats"
   [ $status -eq 1 ]
 }
 
 @test "load sources scripts by absolute path" {
-  HELPER_NAME="${FIXTURE_ROOT}/test_helper.bash" run bats "$FIXTURE_ROOT/load.bats"
+  HELPER_NAME="${FIXTURE_ROOT}/test_helper.bash" reentrant_run bats "$FIXTURE_ROOT/load.bats"
   [ $status -eq 0 ]
 }
 
 @test "load aborts if the script, specified by an absolute path, does not exist" {
-  HELPER_NAME="${FIXTURE_ROOT}/nonexistent" run bats "$FIXTURE_ROOT/load.bats"
+  HELPER_NAME="${FIXTURE_ROOT}/nonexistent" reentrant_run bats "$FIXTURE_ROOT/load.bats"
   [ $status -eq 1 ]
 }
 
 @test "load relative script with ambiguous name" {
-  HELPER_NAME="ambiguous" run bats "$FIXTURE_ROOT/load.bats"
+  HELPER_NAME="ambiguous" reentrant_run bats "$FIXTURE_ROOT/load.bats"
   [ $status -eq 0 ]
 }
 
@@ -82,8 +83,8 @@ setup() {
   cp "${FIXTURE_ROOT}/test_helper.bash" "${path_dir}/on_path/load.bash"
   # shellcheck disable=SC2030,SC2031
   export BATS_LIB_PATH="${path_dir}"  HELPER_NAME="on_path" 
-  run ! bats "$FIXTURE_ROOT/load.bats"
-  run -0 bats "$FIXTURE_ROOT/bats_load_library.bats"
+  reentrant_run ! bats "$FIXTURE_ROOT/load.bats"
+  reentrant_run -0 bats "$FIXTURE_ROOT/bats_load_library.bats"
 }
 
 @test "load supports plain symbols" {
@@ -129,7 +130,7 @@ setup() {
   cp "${FIXTURE_ROOT}/test_helper.bash" "${path_dir}/on_path"
   # shellcheck disable=SC2030,SC2031
   export PATH="${path_dir}:$PATH"  HELPER_NAME="on_path"
-  run -0 bats "$FIXTURE_ROOT/load.bats"
+  reentrant_run -0 bats "$FIXTURE_ROOT/load.bats"
 }
 
 @test "bats_load_library supports libraries with loaders on the BATS_LIB_PATH" {
@@ -139,8 +140,8 @@ setup() {
   cp "${FIXTURE_ROOT}/exit1.bash" "${path_dir}/exit1.bash"
   # shellcheck disable=SC2030,SC2031
   export BATS_LIB_PATH="${BATS_TEST_TMPDIR}/libraries" HELPER_NAME="$BATS_TEST_NAME"
-  run -0 bats "$FIXTURE_ROOT/bats_load_library.bats"
-  run ! bats "$FIXTURE_ROOT/bats_load.bats" # load does not use BATS_LIB_PATH!
+  reentrant_run -0 bats "$FIXTURE_ROOT/bats_load_library.bats"
+  reentrant_run ! bats "$FIXTURE_ROOT/bats_load.bats" # load does not use BATS_LIB_PATH!
 }
 
 @test "bats_load_library supports libraries with loaders on the BATS_LIB_PATH with multiple libraries" {
@@ -153,8 +154,8 @@ setup() {
   cp "${FIXTURE_ROOT}/test_helper.bash" "$path_dir/$BATS_TEST_NAME/load.bash"
   # shellcheck disable=SC2030,SC2031
   export BATS_LIB_PATH="$path_dir" HELPER_NAME="$BATS_TEST_NAME"
-  run -0 bats "$FIXTURE_ROOT/bats_load_library.bats"
-  run ! bats "$FIXTURE_ROOT/load.bats" # load does not use BATS_LIB_PATH!
+  reentrant_run -0 bats "$FIXTURE_ROOT/bats_load_library.bats"
+  reentrant_run ! bats "$FIXTURE_ROOT/load.bats" # load does not use BATS_LIB_PATH!
 }
 
 @test "bats_load_library can handle whitespaces in BATS_LIB_PATH" {
@@ -167,7 +168,7 @@ setup() {
   cp "${FIXTURE_ROOT}/test_helper.bash" "$path_dir/$BATS_TEST_NAME/load.bash"
   # shellcheck disable=SC2030,SC2031
   export BATS_LIB_PATH="$path_dir" HELPER_NAME="$BATS_TEST_NAME"
-  run -0 bats "$FIXTURE_ROOT/bats_load_library.bats"
+  reentrant_run -0 bats "$FIXTURE_ROOT/bats_load_library.bats"
 }
 
 @test "bats_load_library errors when a library errors while sourcing" {
@@ -177,11 +178,11 @@ setup() {
 
   # shellcheck disable=SC2030,SC2031
   export BATS_LIB_PATH="$path_dir"
-  run -1 bats "$FIXTURE_ROOT/failing_bats_load_library.bats"
+  reentrant_run -1 bats "$FIXTURE_ROOT/failing_bats_load_library.bats"
 }
 
 @test "load in teardown after failure does not prevent test from being counted (see #609)" {
-  run -1 bats "$FIXTURE_ROOT/load_in_teardown_after_failure.bats"
+  reentrant_run -1 bats "$FIXTURE_ROOT/load_in_teardown_after_failure.bats"
   [ "${lines[0]}" = 1..1 ]
   [ "${lines[1]}" = "not ok 1 failed" ]
   [ "${lines[3]}" = "#   \`false' failed" ]

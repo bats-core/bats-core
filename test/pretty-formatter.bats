@@ -27,7 +27,7 @@ HERE
 
 @test "pretty formatter summary is colorized red on failure" {
   bats_require_minimum_version 1.5.0
-  run -1 bats --pretty "$FIXTURE_ROOT/failing.bats"
+  reentrant_run -1 bats --pretty "$FIXTURE_ROOT/failing.bats"
   
   [ "${lines[4]}" == $'\033[0m\033[31;1m' ] # TODO: avoid checking for the leading reset too
   [ "${lines[5]}" == '1 test, 1 failure' ]
@@ -36,7 +36,7 @@ HERE
 
 @test "pretty formatter summary is colorized green on success" {
   bats_require_minimum_version 1.5.0
-  run -0 bats --pretty "$FIXTURE_ROOT/passing.bats"
+  reentrant_run -0 bats --pretty "$FIXTURE_ROOT/passing.bats"
 
   [ "${lines[2]}" == $'\033[0m\033[32;1m' ] # TODO: avoid checking for the leading reset too
   [ "${lines[3]}" == '1 test, 0 failures' ]

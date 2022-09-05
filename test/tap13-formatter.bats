@@ -2,7 +2,7 @@ load 'test_helper'
 fixtures bats # reuse bats fixtures
 
 @test "passing test" {
-    run bats --formatter tap13 "${FIXTURE_ROOT}/passing.bats"
+    reentrant_run bats --formatter tap13 "${FIXTURE_ROOT}/passing.bats"
     
     [ "${lines[0]}" == 'TAP version 13' ]
     [ "${lines[1]}" == '1..1' ]
@@ -11,7 +11,7 @@ fixtures bats # reuse bats fixtures
 }
 
 @test "failing test" {
-    run bats --formatter tap13 "${FIXTURE_ROOT}/failing.bats"
+    reentrant_run bats --formatter tap13 "${FIXTURE_ROOT}/failing.bats"
     
     [ "${lines[0]}" == 'TAP version 13' ]
     [ "${lines[1]}" == '1..1' ]
@@ -25,7 +25,7 @@ fixtures bats # reuse bats fixtures
 }
 
 @test "passing test with timing" {
-    run bats --formatter tap13 --timing "${FIXTURE_ROOT}/passing.bats"
+    reentrant_run bats --formatter tap13 --timing "${FIXTURE_ROOT}/passing.bats"
     
     [ "${lines[0]}" == 'TAP version 13' ]
     [ "${lines[1]}" == '1..1' ]
@@ -38,7 +38,7 @@ fixtures bats # reuse bats fixtures
 }
 
 @test "failing test with timing" {
-    run bats --formatter tap13 --timing "${FIXTURE_ROOT}/failing.bats"
+    reentrant_run bats --formatter tap13 --timing "${FIXTURE_ROOT}/failing.bats"
     
     [ "${lines[0]}" == 'TAP version 13' ]
     [ "${lines[1]}" == '1..1' ]

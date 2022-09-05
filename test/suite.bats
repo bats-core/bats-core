@@ -1,31 +1,34 @@
-load test_helper
-fixtures suite
+setup() {
+  load test_helper
+  fixtures suite
+  REENTRANT_RUN_PRESERVE+=(BATS_LIBEXEC)
+}
 
 @test "running a suite with no test files" {
-  run bats "$FIXTURE_ROOT/empty"
+  reentrant_run bats "$FIXTURE_ROOT/empty"
   [ $status -eq 0 ]
   [ "$output" = "1..0" ]
 }
 
 @test "running a suite with one test file" {
-  run bats "$FIXTURE_ROOT/single"
+  reentrant_run bats "$FIXTURE_ROOT/single"
   [ $status -eq 0 ]
   [ "${lines[0]}" = "1..1" ]
   [ "${lines[1]}" = "ok 1 a passing test" ]
 }
 
 @test "counting tests in a suite" {
-  run bats -c "$FIXTURE_ROOT/single"
+  reentrant_run bats -c "$FIXTURE_ROOT/single"
   [ $status -eq 0 ]
   [ "$output" -eq 1 ]
 
-  run bats -c "$FIXTURE_ROOT/multiple"
+  reentrant_run bats -c "$FIXTURE_ROOT/multiple"
   [ $status -eq 0 ]
   [ "$output" -eq 3 ]
 }
 
 @test "aggregated output of multiple tests in a suite" {
-  run bats "$FIXTURE_ROOT/multiple"
+  reentrant_run bats "$FIXTURE_ROOT/multiple"
   [ $status -eq 0 ]
   [ "${lines[0]}" = "1..3" ]
   echo "$output" | grep "^ok . truth"
@@ -34,14 +37,14 @@ fixtures suite
 }
 
 @test "a failing test in a suite results in an error exit code" {
-  FLUNK=1 run bats "$FIXTURE_ROOT/multiple"
+  FLUNK=1 reentrant_run bats "$FIXTURE_ROOT/multiple"
   [ $status -eq 1 ]
   [ "${lines[0]}" = "1..3" ]
   echo "$output" | grep "^not ok . quasi-truth"
 }
 
 @test "running an ad-hoc suite by specifying multiple test files" {
-  run bats "$FIXTURE_ROOT/multiple/a.bats" "$FIXTURE_ROOT/multiple/b.bats"
+  reentrant_run bats "$FIXTURE_ROOT/multiple/a.bats" "$FIXTURE_ROOT/multiple/b.bats"
   [ $status -eq 0 ]
   [ "${lines[0]}" = "1..3" ]
   echo "$output" | grep "^ok . truth"
@@ -51,7 +54,7 @@ fixtures suite
 
 @test "extended syntax in suite" {
   emulate_bats_env
-  FLUNK=1 run bats-exec-suite -x "$FIXTURE_ROOT/multiple/"*.bats
+  FLUNK=1 reentrant_run bats-exec-suite -x "$FIXTURE_ROOT/multiple/"*.bats
   echo "output: $output"
   [ $status -eq 1 ]
   [ "${lines[0]}" = "1..3" ]
@@ -67,7 +70,7 @@ fixtures suite
 
 @test "timing syntax in suite" {
   emulate_bats_env
-  FLUNK=1 run bats-exec-suite -T "$FIXTURE_ROOT/multiple/"*.bats
+  FLUNK=1 reentrant_run bats-exec-suite -T "$FIXTURE_ROOT/multiple/"*.bats
   echo "$output"
   [ $status -eq 1 ]
   [ "${lines[0]}" = "1..3" ]
@@ -81,7 +84,7 @@ fixtures suite
 
 @test "extended timing syntax in suite" {
   emulate_bats_env
-  FLUNK=1 run bats-exec-suite -x -T "$FIXTURE_ROOT/multiple/"*.bats
+  FLUNK=1 reentrant_run bats-exec-suite -x -T "$FIXTURE_ROOT/multiple/"*.bats
   echo "$output"
   [ $status -eq 1 ]
   [ "${lines[0]}" = "1..3" ]
@@ -99,7 +102,7 @@ fixtures suite
 }
 
 @test "recursive support (short option)" {
-  run bats -r "${FIXTURE_ROOT}/recursive"
+  reentrant_run bats -r "${FIXTURE_ROOT}/recursive"
   [ $status -eq 0 ]
   [ "${lines[0]}" = "1..2" ]
   [ "${lines[1]}" = "ok 1 another passing test" ]
@@ -107,7 +110,7 @@ fixtures suite
 }
 
 @test "recursive support (long option)" {
-  run bats --recursive "${FIXTURE_ROOT}/recursive"
+  reentrant_run bats --recursive "${FIXTURE_ROOT}/recursive"
   [ $status -eq 0 ]
   [ "${lines[0]}" = "1..2" ]
   [ "${lines[1]}" = "ok 1 another passing test" ]
@@ -119,7 +122,7 @@ fixtures suite
     skip "symbolic links aren't functional on OSTYPE=$OSTYPE"
   fi
 
-  run bats -r "${FIXTURE_ROOT}/recursive_with_symlinks"
+  reentrant_run bats -r "${FIXTURE_ROOT}/recursive_with_symlinks"
   [ $status -eq 0 ]
   [ "${lines[0]}" = "1..2" ]
   [ "${lines[1]}" = "ok 1 another passing test" ]
@@ -127,7 +130,7 @@ fixtures suite
 }
 
 @test "run entire suite when --filter isn't set" {
-  run bats "${FIXTURE_ROOT}/filter"
+  reentrant_run bats "${FIXTURE_ROOT}/filter"
   [ "$status" -eq 0 ]
   [ "${lines[0]}" = '1..9' ]
   [ "${lines[1]}" = 'ok 1 foo in a' ]
@@ -142,7 +145,7 @@ fixtures suite
 }
 
 @test "use --filter to run subset of test cases from across the suite" {
-  run bats -f 'ba[rz]' "${FIXTURE_ROOT}/filter"
+  reentrant_run bats -f 'ba[rz]' "${FIXTURE_ROOT}/filter"
   [ "$status" -eq 0 ]
   [ "${lines[0]}" = '1..4' ]
   [ "${lines[1]}" = 'ok 1 --bar in a' ]
@@ -152,13 +155,13 @@ fixtures suite
 
   local prev_output="$output"
 
-  run bats --filter 'ba[rz]' "${FIXTURE_ROOT}/filter"
+  reentrant_run bats --filter 'ba[rz]' "${FIXTURE_ROOT}/filter"
   [ "$status" -eq 0 ]
   [ "$output" = "$prev_output" ]
 }
 
 @test "--filter can handle regular expressions that contain [_- ]" {
-  run bats -f '--ba[rz][ _]in' "${FIXTURE_ROOT}/filter"
+  reentrant_run bats -f '--ba[rz][ _]in' "${FIXTURE_ROOT}/filter"
   [ "$status" -eq 0 ]
   [ "${lines[0]}" = '1..2' ]
   [ "${lines[1]}" = 'ok 1 --bar in a' ]
@@ -166,7 +169,7 @@ fixtures suite
 }
 
 @test "--filter can handle regular expressions that start with ^" {
-  run bats -f '^ba[rz]' "${FIXTURE_ROOT}/filter"
+  reentrant_run bats -f '^ba[rz]' "${FIXTURE_ROOT}/filter"
   [ "$status" -eq 0 ]
   [ "${lines[0]}" = '1..2' ]
   [ "${lines[1]}" = 'ok 1 baz in a' ]
@@ -178,13 +181,15 @@ fixtures suite
 }
 
 @test "BATS_TEST_NUMBER starts at 1 in each individual test file" {
-  run bats "${FIXTURE_ROOT}/test_number"
+  reentrant_run bats "${FIXTURE_ROOT}/test_number"
   echo "$output"
   [ "$status" -eq 0 ]
 }
 
 @test "Override BATS_FILE_EXTENSION with suite" {
-  BATS_FILE_EXTENSION="test" run bats "${FIXTURE_ROOT}/override_BATS_FILE_EXTENSION"
+  # shellcheck disable=SC2030
+  REENTRANT_RUN_PRESERVE+=(BATS_FILE_EXTENSION)
+  BATS_FILE_EXTENSION="test" reentrant_run bats "${FIXTURE_ROOT}/override_BATS_FILE_EXTENSION"
   echo "$output"
   [ "$status" -eq 0 ]
   [ "${#lines[@]}" -eq 2 ]
@@ -193,7 +198,9 @@ fixtures suite
 }
 
 @test "Override BATS_FILE_EXTENSION with suite recursive" {
-  BATS_FILE_EXTENSION="other_extension" run bats -r "${FIXTURE_ROOT}/override_BATS_FILE_EXTENSION"
+  # shellcheck disable=SC2030,SC2031
+  REENTRANT_RUN_PRESERVE+=(BATS_FILE_EXTENSION)
+  BATS_FILE_EXTENSION="other_extension" reentrant_run bats -r "${FIXTURE_ROOT}/override_BATS_FILE_EXTENSION"
   echo "$output"
   [ "$status" -eq 0 ]
   [ "${#lines[@]}" -eq 2 ]
