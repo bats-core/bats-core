@@ -113,3 +113,10 @@ setup() {
     [[ "$output" == *$'setup_suite stdout\nsetup_suite stderr'* ]] || false
     [[ "$output" == *$'teardown_suite stdout\nteardown_suite stderr'* ]] || false
 }
+
+@test "load is available in setup_suite" {
+    run -0 bats "$FIXTURE_ROOT/call_load/"
+    [ "${lines[0]}" = "1..1" ]
+    [ "${lines[1]}" = "ok 1 passing" ]
+    [ "${#lines[@]}" -eq 2 ]
+}
