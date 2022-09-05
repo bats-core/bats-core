@@ -187,6 +187,7 @@ setup() {
 }
 
 @test "Override BATS_FILE_EXTENSION with suite" {
+  # shellcheck disable=SC2030
   REENTRANT_RUN_PRESERVE+=(BATS_FILE_EXTENSION)
   BATS_FILE_EXTENSION="test" reentrant_run bats "${FIXTURE_ROOT}/override_BATS_FILE_EXTENSION"
   echo "$output"
@@ -197,6 +198,7 @@ setup() {
 }
 
 @test "Override BATS_FILE_EXTENSION with suite recursive" {
+  # shellcheck disable=SC2030,SC2031
   REENTRANT_RUN_PRESERVE+=(BATS_FILE_EXTENSION)
   BATS_FILE_EXTENSION="other_extension" reentrant_run bats -r "${FIXTURE_ROOT}/override_BATS_FILE_EXTENSION"
   echo "$output"

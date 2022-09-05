@@ -154,6 +154,7 @@ setup() {
 
   # shellcheck disable=SC2031,SC2030
   export BATS_TEST_SUITE_TMPDIR="${BATS_TEST_TMPDIR}"
+  # shellcheck disable=SC2030
   REENTRANT_RUN_PRESERVE+=(BATS_TEST_SUITE_TMPDIR)
 
   reentrant_run bats "$FIXTURE_ROOT/setup.bats"
@@ -167,6 +168,7 @@ setup() {
 
   # shellcheck disable=SC2031,SC2030
   export BATS_TEST_SUITE_TMPDIR="${BATS_TEST_TMPDIR}"
+  # shellcheck disable=SC2030,SC2031
   REENTRANT_RUN_PRESERVE+=(BATS_TEST_SUITE_TMPDIR)
 
   reentrant_run bats "$FIXTURE_ROOT/teardown.bats"
@@ -1123,6 +1125,7 @@ END_OF_ERR_MSG
 @test "BATS_CODE_QUOTE_STYLE works with any two characters (even unicode)" {
   bats_require_minimum_version 1.5.0
 
+  # shellcheck disable=SC2030,SC2031
   REENTRANT_RUN_PRESERVE+=(BATS_CODE_QUOTE_STYLE)
   BATS_CODE_QUOTE_STYLE='``' reentrant_run -1 bats --tap "${FIXTURE_ROOT}/failing.bats"
   # shellcheck disable=SC2016
@@ -1147,6 +1150,7 @@ END_OF_ERR_MSG
 
   bats_require_minimum_version 1.5.0
 
+  # shellcheck disable=SC2030,SC2031
   REENTRANT_RUN_PRESERVE+=(BATS_CODE_QUOTE_STYLE)
   BATS_CODE_QUOTE_STYLE=custom reentrant_run -1 bats --tap "${FIXTURE_ROOT}/passing.bats"
   [ "${lines[0]}" == 'ERROR: BATS_CODE_QUOTE_STYLE=custom requires BATS_BEGIN_CODE_QUOTE and BATS_END_CODE_QUOTE to be set' ]
@@ -1164,6 +1168,7 @@ END_OF_ERR_MSG
 @test "Warn about invalid BATS_CODE_QUOTE_STYLE" {
   bats_require_minimum_version 1.5.0
 
+  # shellcheck disable=SC2030,SC2031
   REENTRANT_RUN_PRESERVE+=(BATS_CODE_QUOTE_STYLE)
 
   BATS_CODE_QUOTE_STYLE='' reentrant_run -1 bats --tap "${FIXTURE_ROOT}/passing.bats"
@@ -1239,6 +1244,7 @@ END_OF_ERR_MSG
 }
 
 @test "Allow for prefixing tests' names with BATS_TEST_NAME_PREFIX" {
+  # shellcheck disable=SC2030,SC2031
   REENTRANT_RUN_PRESERVE+=(BATS_TEST_NAME_PREFIX)
   BATS_TEST_NAME_PREFIX='PREFIX: ' reentrant_run bats "${FIXTURE_ROOT}/passing.bats"
   [ "${lines[1]}" == "ok 1 PREFIX: a passing test" ]
