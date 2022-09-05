@@ -16,7 +16,7 @@ setup_file() {
 @test "teardown_file is run once per file" {
   # shellcheck disable=SC2031,SC2030
   export LOG="$BATS_TEST_TMPDIR/teardown_file_once.log"
-  run bats "$FIXTURE_ROOT/teardown_file.bats"
+  reentrant_run bats "$FIXTURE_ROOT/teardown_file.bats"
   [[ $status -eq 0 ]]
   # output the log for faster debugging
   cat "$LOG"
@@ -30,7 +30,7 @@ setup_file() {
 @test "setup_file is called correctly in multi file suite" {
     # shellcheck disable=SC2031,SC2030
     export LOG="$BATS_TEST_TMPDIR/setup_file_multi_file_suite.log"
-    run bats "$FIXTURE_ROOT/setup_file.bats" "$FIXTURE_ROOT/no_setup_file.bats" "$FIXTURE_ROOT/setup_file2.bats"
+    reentrant_run bats "$FIXTURE_ROOT/setup_file.bats" "$FIXTURE_ROOT/no_setup_file.bats" "$FIXTURE_ROOT/setup_file2.bats"
     [[ $status -eq 0 ]]
     run wc -l < "$LOG"
     # each setup_file[2].bats is in the log exactly once!
@@ -42,7 +42,7 @@ setup_file() {
 @test "teardown_file is called correctly in multi file suite" {
   # shellcheck disable=SC2031,SC2030
   export LOG="$BATS_TEST_TMPDIR/teardown_file_multi_file_suite.log"
-  run bats "$FIXTURE_ROOT/teardown_file.bats" "$FIXTURE_ROOT/no_teardown_file.bats" "$FIXTURE_ROOT/teardown_file2.bats"
+  reentrant_run bats "$FIXTURE_ROOT/teardown_file.bats" "$FIXTURE_ROOT/no_teardown_file.bats" "$FIXTURE_ROOT/teardown_file2.bats"
   [[ $status -eq 0 ]]
   run wc -l < "$LOG"
   # each teardown_file[2].bats is in the log exactly once!
@@ -54,7 +54,7 @@ setup_file() {
 
 @test "setup_file failure aborts tests for this file" {
   # this might need to mark them as skipped as the test count is already determined at this point
-  run bats "$FIXTURE_ROOT/setup_file_failed.bats"
+  reentrant_run bats "$FIXTURE_ROOT/setup_file_failed.bats"
   echo "$output"
   [[ "${lines[0]}" == "1..2" ]]
   [[ "${lines[1]}" == "not ok 1 setup_file failed" ]]
@@ -68,7 +68,7 @@ setup_file() {
 }
 
 @test "teardown_file failure fails at least one test from the file" {
-  run bats "$FIXTURE_ROOT/teardown_file_failed.bats"
+  reentrant_run bats "$FIXTURE_ROOT/teardown_file_failed.bats"
   [[ $status -ne 0 ]]
   echo "$output"
   [[ "${lines[0]}" == "1..1" ]]
@@ -85,7 +85,7 @@ setup_file() {
 @test "teardown_file runs even if any test in the file failed" {
   # shellcheck disable=SC2031,SC2030
   export LOG="$BATS_TEST_TMPDIR/teardown_file_failed.log"
-  run bats "$FIXTURE_ROOT/teardown_file_after_failing_test.bats"
+  reentrant_run bats "$FIXTURE_ROOT/teardown_file_after_failing_test.bats"
   [[ $status -ne 0 ]]
   grep teardown_file_after_failing_test.bats "$LOG"
   echo "$output"
@@ -124,7 +124,7 @@ not ok 1 failing test
 @test "setup_file runs even if all tests in the file are skipped" {
   # shellcheck disable=SC2031,SC2030
   export LOG="$BATS_TEST_TMPDIR/setup_file_skipped.log" 
-  run bats "$FIXTURE_ROOT/setup_file_even_if_all_tests_are_skipped.bats"
+  reentrant_run bats "$FIXTURE_ROOT/setup_file_even_if_all_tests_are_skipped.bats"
   [[ -f "$LOG" ]]
   grep setup_file_even_if_all_tests_are_skipped.bats "$LOG"
 }
@@ -132,7 +132,7 @@ not ok 1 failing test
 @test "teardown_file runs even if all tests in the file are skipped" {
   # shellcheck disable=SC2031,SC2030
   export LOG="$BATS_TEST_TMPDIR/teardown_file_skipped.log" 
-  run bats "$FIXTURE_ROOT/teardown_file_even_if_all_tests_are_skipped.bats"
+  reentrant_run bats "$FIXTURE_ROOT/teardown_file_even_if_all_tests_are_skipped.bats"
   [[ $status -eq 0 ]]
   [[ -f "$LOG" ]]
   grep teardown_file_even_if_all_tests_are_skipped.bats "$LOG"
@@ -141,14 +141,14 @@ not ok 1 failing test
 @test "setup_file must not leak context between tests in the same suite" {
   # example: BATS_ROOT was unset in one test but used in others, therefore, the suite failed
   # Simulate leaking env var from first to second test by: export SETUP_FILE_VAR="LEAK!"
-  run bats "$FIXTURE_ROOT/setup_file_does_not_leak_env.bats" "$FIXTURE_ROOT/setup_file_does_not_leak_env2.bats"
+  reentrant_run bats "$FIXTURE_ROOT/setup_file_does_not_leak_env.bats" "$FIXTURE_ROOT/setup_file_does_not_leak_env2.bats"
   echo "$output"
   [[ $status -eq 0 ]]
 }
 
 @test "teardown_file must not leak context between tests in the same suite" {
   # example: BATS_ROOT was unset in one test but used in others, therefore, the suite failed
-  run bats "$FIXTURE_ROOT/teardown_file_does_not_leak.bats" "$FIXTURE_ROOT/teardown_file_does_not_leak2.bats"
+  reentrant_run bats "$FIXTURE_ROOT/teardown_file_does_not_leak.bats" "$FIXTURE_ROOT/teardown_file_does_not_leak2.bats"
   echo "$output"
   [[ $status -eq 0 ]]
   [[ $output == "1..2
@@ -157,7 +157,7 @@ ok 2 must not see variable from first run" ]]
 }
 
 @test "halfway setup_file errors are caught and reported" {
-  run bats "$FIXTURE_ROOT/setup_file_halfway_error.bats"
+  reentrant_run bats "$FIXTURE_ROOT/setup_file_halfway_error.bats"
   [ $status -ne 0 ]
   echo "$output"
   [ "${lines[0]}" == "1..1" ]
@@ -167,7 +167,7 @@ ok 2 must not see variable from first run" ]]
 }
 
 @test "halfway teardown_file errors are ignored" {
-  run -0 bats "$FIXTURE_ROOT/teardown_file_halfway_error.bats"
+  reentrant_run -0 bats "$FIXTURE_ROOT/teardown_file_halfway_error.bats"
   [ "${lines[0]}" == "1..1" ]
   [ "${lines[1]}" == "ok 1 empty" ]
   [ "${#lines[@]}" -eq 2 ]
@@ -182,14 +182,14 @@ ok 2 must not see variable from first run" ]]
   # shellcheck disable=SC2031
   export LOG="$BATS_TEST_TMPDIR/setup_file.log"
   # only select the test from no_setup_file
-  run bats -f test "$FIXTURE_ROOT/setup_file.bats" "$FIXTURE_ROOT/no_setup_file.bats"
+  reentrant_run bats -f test "$FIXTURE_ROOT/setup_file.bats" "$FIXTURE_ROOT/no_setup_file.bats"
 
   [ ! -f "$LOG" ] # setup_file must not have been executed!
   [ "${lines[0]}" == '1..1' ] # but at least one test should have been run
 }
 
 @test "Failure in setup_file and teardown_file still prints error message" {
-  run ! bats "$FIXTURE_ROOT/error_in_setup_and_teardown_file.bats"
+  reentrant_run ! bats "$FIXTURE_ROOT/error_in_setup_and_teardown_file.bats"
   [ "${lines[0]}" == '1..1' ]
   [ "${lines[1]}" == 'not ok 1 setup_file failed' ]
   [ "${lines[2]}" == "# (from function \`setup_file' in test file $RELATIVE_FIXTURE_ROOT/error_in_setup_and_teardown_file.bats, line 2)" ]

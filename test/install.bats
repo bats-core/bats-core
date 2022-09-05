@@ -32,7 +32,7 @@ setup() {
   [ -f "$INSTALL_DIR/share/man/man1/bats.1" ]
   [ -f "$INSTALL_DIR/share/man/man7/bats.7" ]
 
-  run "$INSTALL_DIR/bin/bats" -v
+  reentrant_run "$INSTALL_DIR/bin/bats" -v
   [ "$status" -eq 0 ]
   [ "${output%% *}" == 'Bats' ]
 
@@ -78,7 +78,7 @@ setup() {
   [ -f "$INSTALL_DIR/share/man/man1/bats.1" ]
   [ -f "$INSTALL_DIR/share/man/man7/bats.7" ]
 
-  run "$INSTALL_DIR/bin/bats" -v
+  reentrant_run "$INSTALL_DIR/bin/bats" -v
   [ "$status" -eq 0 ]
   [ "${output%% *}" == 'Bats' ]
 
@@ -141,7 +141,7 @@ setup() {
     './bats "$@"' >"$bats_symlink"
   chmod 700 "$bats_symlink"
 
-  run "$bats_symlink" -v
+  reentrant_run "$bats_symlink" -v
   [ "$status" -eq 0 ]
   [ "${output%% *}" == 'Bats' ]
 }

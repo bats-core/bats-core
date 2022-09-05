@@ -87,7 +87,7 @@ print-stderr-stdout() {
 }
 
 @test "run exit code check output " {
-  run ! bats --tap "${FIXTURE_ROOT}/failing.bats"
+  reentrant_run ! bats --tap "${FIXTURE_ROOT}/failing.bats"
   echo "$output"
   [ "${lines[0]}" == 1..5 ]
   [ "${lines[1]}" == "not ok 1 run -0 false" ]
@@ -108,7 +108,7 @@ print-stderr-stdout() {
 }
 
 @test "run invalid exit code check error message" {
-  run ! bats --tap "${FIXTURE_ROOT}/invalid.bats"
+  reentrant_run ! bats --tap "${FIXTURE_ROOT}/invalid.bats"
   echo "$output"
   [ "${lines[0]}" == 1..2 ]
   [ "${lines[1]}" == "not ok 1 run '-4evah' echo hi" ]

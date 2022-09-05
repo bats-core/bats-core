@@ -8,7 +8,7 @@ TIMESTAMP_REGEX='[0-9]+-[0-1][0-9]-[0-3][0-9]T[0-2][0-9]:[0-5][0-9]:[0-5][0-9]'
 TESTSUITES_REGEX="<testsuites time=\"$FLOAT_REGEX\">"
 
 @test "junit formatter with skipped test does not fail" {
-  run bats --formatter junit "$FIXTURE_ROOT/skipped.bats"
+  reentrant_run bats --formatter junit "$FIXTURE_ROOT/skipped.bats"
   echo "$output"
   [[ $status -eq 0 ]]
   [[ "${lines[0]}" == '<?xml version="1.0" encoding="UTF-8"?>' ]]
@@ -50,7 +50,7 @@ TESTSUITES_REGEX="<testsuites time=\"$FLOAT_REGEX\">"
       TEST_FILE_PATH="$FIXTURE_ROOT/$TEST_FILE_NAME"
     ;;
   esac
-  run bats --formatter junit "$TEST_FILE_PATH"
+  reentrant_run bats --formatter junit "$TEST_FILE_PATH"
 
   echo "$output"
   [[ "${lines[2]}" == "<testsuite name=\"$ESCAPED_TEST_FILE_NAME\" tests=\"3\" failures=\"1\" errors=\"0\" skipped=\"1\" time=\""*"\" timestamp=\""*"\" hostname=\""*"\">" ]]
@@ -63,7 +63,7 @@ TESTSUITES_REGEX="<testsuites time=\"$FLOAT_REGEX\">"
 }
 
 @test "junit formatter: test suites" {
-  run bats --formatter junit "$FIXTURE_ROOT/suite/"
+  reentrant_run bats --formatter junit "$FIXTURE_ROOT/suite/"
   echo "$output"
 
   [[ "${lines[0]}" == '<?xml version="1.0" encoding="UTF-8"?>' ]]
@@ -79,7 +79,7 @@ TESTSUITES_REGEX="<testsuites time=\"$FLOAT_REGEX\">"
 
 @test "junit formatter: test suites relative path" {
   cd "$FIXTURE_ROOT"
-  run bats --formatter junit "suite/"
+  reentrant_run bats --formatter junit "suite/"
   echo "$output"
 
   [[ "${lines[0]}" == '<?xml version="1.0" encoding="UTF-8"?>' ]]
@@ -94,7 +94,7 @@ TESTSUITES_REGEX="<testsuites time=\"$FLOAT_REGEX\">"
 }
 
 @test "junit formatter: files with the same name are distinguishable" {
-  run bats --formatter junit -r "$FIXTURE_ROOT/duplicate/"
+  reentrant_run bats --formatter junit -r "$FIXTURE_ROOT/duplicate/"
   echo "$output"
 
   [[ "${lines[2]}" == *"<testsuite name=\"first/file1.bats\""* ]]
@@ -103,7 +103,7 @@ TESTSUITES_REGEX="<testsuites time=\"$FLOAT_REGEX\">"
 
 @test "junit formatter as report formatter creates report.xml" {
   cd "$BATS_TEST_TMPDIR" # don't litter sources with output files
-  run bats --report-formatter junit "$FIXTURE_ROOT/suite/"
+  reentrant_run bats --report-formatter junit "$FIXTURE_ROOT/suite/"
   echo "$output"
   [[ -e "report.xml" ]]
   run cat "report.xml"
@@ -113,7 +113,7 @@ TESTSUITES_REGEX="<testsuites time=\"$FLOAT_REGEX\">"
 }
 
 @test "junit does not mark tests with FD 3 output as failed (issue #360)" {
-  run bats --formatter junit "$FIXTURE_ROOT/issue_360.bats"
+  reentrant_run bats --formatter junit "$FIXTURE_ROOT/issue_360.bats"
 
   echo "$output"
 
@@ -141,7 +141,7 @@ TESTSUITES_REGEX="<testsuites time=\"$FLOAT_REGEX\">"
 
 @test "junit does not mark tests with FD 3 output in teardown_file as failed (issue #531)" {
   bats_require_minimum_version 1.5.0
-  run -0 bats --formatter junit "$FIXTURE_ROOT/issue_531.bats"
+  reentrant_run -0 bats --formatter junit "$FIXTURE_ROOT/issue_531.bats"
 
   [[ "${lines[2]}" == '<testsuite name="issue_531.bats" '*'>' ]]
   [[ "${lines[3]}" == '    <testcase classname="issue_531.bats" '*'>' ]]
@@ -155,6 +155,6 @@ TESTSUITES_REGEX="<testsuites time=\"$FLOAT_REGEX\">"
 @test "don't choke on setup_file errors" {
   bats_require_minimum_version 1.5.0
   local stderr='' # silence shellcheck
-  run -1 --separate-stderr bats --formatter junit "$FIXTURE_ROOT/../file_setup_teardown/setup_file_failed.bats"
+  reentrant_run -1 --separate-stderr bats --formatter junit "$FIXTURE_ROOT/../file_setup_teardown/setup_file_failed.bats"
   [ "${stderr}" == "" ]
 }

@@ -6,7 +6,7 @@ setup() {
 }
 
 @test "tap passing and skipping tests" {
-  run filter_control_sequences bats --formatter tap "$FIXTURE_ROOT/passing_and_skipping.bats"
+  reentrant_run filter_control_sequences bats --formatter tap "$FIXTURE_ROOT/passing_and_skipping.bats"
   [ $status -eq 0 ]
   [ "${lines[0]}" = "1..3" ]
   [ "${lines[1]}" = "ok 1 a passing test" ]
@@ -15,7 +15,7 @@ setup() {
 }
 
 @test "tap passing, failing and skipping tests" {
-  run filter_control_sequences bats --formatter tap "$FIXTURE_ROOT/passing_failing_and_skipping.bats"
+  reentrant_run filter_control_sequences bats --formatter tap "$FIXTURE_ROOT/passing_failing_and_skipping.bats"
   [ $status -eq 0 ]
   [ "${lines[0]}" = "1..3" ]
   [ "${lines[1]}" = "ok 1 a passing test" ]
@@ -24,7 +24,7 @@ setup() {
 }
 
 @test "skipped test with parens (pretty formatter)" {
-  run bats --pretty "$FIXTURE_ROOT/skipped_with_parens.bats"
+  reentrant_run bats --pretty "$FIXTURE_ROOT/skipped_with_parens.bats"
   [ $status -eq 0 ]
 
   # Some systems (Alpine, for example) seem to emit an extra whitespace into
@@ -34,11 +34,11 @@ setup() {
 }
 
 @test "pretty and tap formats" {
-  run bats --formatter tap "$FIXTURE_ROOT/passing.bats"
+  reentrant_run bats --formatter tap "$FIXTURE_ROOT/passing.bats"
   tap_output="$output"
   [ $status -eq 0 ]
 
-  run bats --pretty "$FIXTURE_ROOT/passing.bats"
+  reentrant_run bats --pretty "$FIXTURE_ROOT/passing.bats"
   pretty_output="$output"
   [ $status -eq 0 ]
 
@@ -46,7 +46,7 @@ setup() {
 }
 
 @test "pretty formatter bails on invalid tap" {
-  run bats-format-pretty < <(printf "This isn't TAP!\nGood day to you\n")
+  reentrant_run bats-format-pretty < <(printf "This isn't TAP!\nGood day to you\n")
   [ $status -eq 0 ]
   [ "${lines[0]}" = "This isn't TAP!" ]
   [ "${lines[1]}" = "Good day to you" ]
@@ -82,13 +82,13 @@ EOF
 
 @test "absolute paths load external formatters" {
     bats_require_minimum_version 1.5.0
-    run -0 bats "$FIXTURE_ROOT/passing.bats"  --formatter "$FIXTURE_ROOT/dummy-formatter"
+    reentrant_run -0 bats "$FIXTURE_ROOT/passing.bats"  --formatter "$FIXTURE_ROOT/dummy-formatter"
     [ "$output" = "Dummy Formatter!" ]
 }
 
 @test "specifying nonexistent external formatter is an error" {
   bats_require_minimum_version 1.5.0
-  run -1 bats "$FIXTURE_ROOT/passing.bats"  --formatter "$FIXTURE_ROOT/non-existing-file"
+  reentrant_run -1 bats "$FIXTURE_ROOT/passing.bats"  --formatter "$FIXTURE_ROOT/non-existing-file"
   [ "$output" = "ERROR: Formatter '$FIXTURE_ROOT/non-existing-file' is not readable!" ]
 }
 
@@ -96,6 +96,6 @@ EOF
   bats_require_minimum_version 1.5.0
   local non_executable="$BATS_TEST_TMPDIR/non-executable"
   touch "$non_executable"
-  run -1 bats "$FIXTURE_ROOT/passing.bats"  --formatter "$non_executable"
+  reentrant_run -1 bats "$FIXTURE_ROOT/passing.bats"  --formatter "$non_executable"
   [ "$output" = "ERROR: Formatter '$non_executable' is not executable!" ]
 }

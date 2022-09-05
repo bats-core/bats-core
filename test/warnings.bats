@@ -17,12 +17,13 @@ setup() {
 }
 
 @test "invalid warning is an error" {
-    run -1 bats_generate_warning invalid-number
+    REENTRANT_RUN_PRESERVE+=(BATS_WARNING_SHORT_DESCS)
+    reentrant_run -1 bats_generate_warning invalid-number
     [[ "$output" == "Invalid Bats warning number 'invalid-number'. It must be an integer between 1 and "* ]]
 }
 
 @test "BW01 is printed when \`run\`ing a (non-existant) command with exit code 127 without exit code check" {
-    run -0 bats "$FIXTURE_ROOT/BW01.bats"
+    reentrant_run -0 bats "$FIXTURE_ROOT/BW01.bats"
     [ "${lines[0]}" == "1..1" ]
     [ "${lines[1]}" == "ok 1 Trigger BW01" ]
     [ "${lines[2]}" == "The following warnings were encountered during tests:" ]
@@ -32,21 +33,21 @@ setup() {
 }
 
 @test "BW01 is not printed when \`run\`ing a (non-existant) command with exit code 127 with exit code check" {
-    run -0 bats "$FIXTURE_ROOT/BW01_check_exit_code_is_127.bats"
+    reentrant_run -0 bats "$FIXTURE_ROOT/BW01_check_exit_code_is_127.bats"
     [ "${lines[0]}" == "1..1" ]
     [ "${lines[1]}" == "ok 1 Don't trigger BW01 with checked exit code 127" ]
     [ "${#lines[@]}" -eq 2 ]
 }
 
 @test "BW01 is not printed when \`run\`ing a command with exit code !=127 without exit code check" {
-    run -0 bats "$FIXTURE_ROOT/BW01_no_exit_code_check_no_exit_code_127.bats"
+    reentrant_run -0 bats "$FIXTURE_ROOT/BW01_no_exit_code_check_no_exit_code_127.bats"
     [ "${lines[0]}" == "1..1" ]
     [ "${lines[1]}" == "ok 1 Don't trigger BW01 with exit code !=127 and no check" ]
     [ "${#lines[@]}" -eq 2 ]
 }
 
 @test "BW02 is printed when run uses parameters without guaranteed version >= 1.5.0" {
-    run -0 bats "$FIXTURE_ROOT/BW02.bats"
+    reentrant_run -0 bats "$FIXTURE_ROOT/BW02.bats"
     [ "${lines[0]}" == "1..1" ]
     [ "${lines[1]}" == "ok 1 Trigger BW02" ]
     [ "${lines[2]}" == "The following warnings were encountered during tests:" ]
