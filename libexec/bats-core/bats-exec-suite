@@ -11,13 +11,14 @@ filter_tags_list=()
 flags=('--dummy-flag') # add a dummy flag to prevent unset variable errors on empty array expansion in old bash versions
 setup_suite_file=''
 BATS_TRACE_LEVEL="${BATS_TRACE_LEVEL:-0}"
+BATS_SHOW_OUTPUT_OF_SUCCEEDING_TESTS=
 
 abort() {
   printf 'Error: %s\n' "$1" >&2
   exit 1
 }
 
-# shellcheck source=lib/bats-core/common.bash
+# shellcheck source=lib/bats-core/common.bash disable=SC2153
 source "$BATS_ROOT/lib/bats-core/common.bash"
 
 while [[ "$#" -ne 0 ]]; do
@@ -75,6 +76,7 @@ while [[ "$#" -ne 0 ]]; do
     ;;
   --show-output-of-passing-tests)
     flags+=(--show-output-of-passing-tests)
+    BATS_SHOW_OUTPUT_OF_SUCCEEDING_TESTS=1
     ;;
   --verbose-run)
     flags+=(--verbose-run)
@@ -324,7 +326,10 @@ bats_setup_tracing
 
 trap bats_suite_exit_trap EXIT
 
+exec 3<&1
+
 bats_suite_exit_trap() {
+  local print_bats_out="${BATS_SHOW_OUTPUT_OF_SUCCEEDING_TESTS}"
   if [[ -z "${BATS_SETUP_SUITE_COMPLETED}" || -z "${BATS_TEARDOWN_SUITE_COMPLETED}" ]]; then
     if [[ -z "${BATS_SETUP_SUITE_COMPLETED}" ]]; then
       printf "not ok 1 setup_suite\n"
@@ -335,8 +340,14 @@ bats_suite_exit_trap() {
     bats_get_failure_stack_trace stack_trace
     bats_print_stack_trace "${stack_trace[@]}"
     bats_print_failed_command "${stack_trace[@]}"
+    print_bats_out=1
     bats_exec_suite_status=1
   fi
+
+  if [[ -n "$print_bats_out" ]]; then
+    bats_prefix_lines_for_tap_output < "$BATS_OUT"
+  fi
+
   if [[ ${BATS_INTERRUPTED-NOTSET} != NOTSET ]]; then
     printf "\n# Received SIGINT, aborting ...\n\n"
   fi
@@ -346,7 +357,7 @@ bats_suite_exit_trap() {
     rm "$BATS_RUNLOG_FILE"
   fi
   exit "$bats_exec_suite_status"
-}
+} >&3
 
 bats_run_teardown_suite() {
   local bats_teardown_suite_status=0
@@ -354,7 +365,7 @@ bats_run_teardown_suite() {
   # but from the end of file
   trap bats_suite_exit_trap EXIT
   BATS_TEARDOWN_SUITE_COMPLETED=
-  teardown_suite 2>&1 || bats_teardown_suite_status=$?
+  teardown_suite >>"$BATS_OUT" 2>&1 || bats_teardown_suite_status=$?
   if (( bats_teardown_suite_status == 0 )); then
     BATS_TEARDOWN_SUITE_COMPLETED=1
   elif [[ -n "${BATS_SETUP_SUITE_COMPLETED:-}" ]]; then
@@ -394,9 +405,11 @@ if [[ -n "$setup_suite_file" ]]; then
   source "$setup_suite_file"
 fi
 
+BATS_OUT="$BATS_RUN_TMPDIR/suite.out"
+
 set -eET
 BATS_SETUP_SUITE_COMPLETED=
-setup_suite 2>&1
+setup_suite >>"$BATS_OUT" 2>&1
 BATS_SETUP_SUITE_COMPLETED=1
 set +ET
 
