@@ -17,7 +17,7 @@ bats_capture_stack_trace() {
 		funcname="${FUNCNAME[$i]}"
 		BATS_DEBUG_LAST_STACK_TRACE+=("${BASH_LINENO[$((i-1))]} $funcname $test_file")
 		case "$funcname" in
-		"$BATS_TEST_NAME" | setup | teardown | setup_file | teardown_file | setup_suite | teardown_suite)
+		"${BATS_TEST_NAME-}" | setup | teardown | setup_file | teardown_file | setup_suite | teardown_suite)
 			break
 			;;
 		esac
@@ -64,7 +64,7 @@ bats_print_stack_trace() {
 
 		local fn
 		bats_frame_function "$frame" 'fn'
-		if [[ "$fn" != "$BATS_TEST_NAME" ]] && 
+		if [[ "$fn" != "${BATS_TEST_NAME-}" ]] && 
 			# don't print "from function `source'"",
 			# when failing in free code during `source $test_file` from bats-exec-file
 			! [[ "$fn" == 'source' &&  $index -eq $count ]]; then 
@@ -128,7 +128,7 @@ bats_frame_filename() {
 	local __bff_filename="${1#* }"
 	__bff_filename="${__bff_filename#* }"
 
-	if [[ "$__bff_filename" == "$BATS_TEST_SOURCE" ]]; then
+	if [[ "$__bff_filename" == "${BATS_TEST_SOURCE-}" ]]; then
 		__bff_filename="$BATS_TEST_FILENAME"
 	fi
 	printf -v "$2" '%s' "$__bff_filename"
