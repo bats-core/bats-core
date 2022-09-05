@@ -51,6 +51,7 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 * fix unset variable in `bats-formatter-junit` when `setup_file` fails (#632)
 * unify error behavior of `teardown`/`teardown_file`/`teardown_suite` functions:
   only fail via return code, not via ERREXIT (#633)
+* fix unbound variable errors with `set -u` on `setup_suite` failures (#643)
 
 #### Documentation
 
