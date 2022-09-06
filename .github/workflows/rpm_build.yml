@@ -1,0 +1,15 @@
+name: Build RPM
+
+# Controls when the action will run. 
+on: [push, pull_request, workflow_dispatch]
+
+jobs:
+  rpm:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build RPM on Ubuntu
+        run: |
+          sudo apt install rpm
+          sudo mkdir -p /root/rpmbuild/SOURCES/ 
+          sudo rpmbuild --undefine=_disable_source_fetch -v -bb ./contrib/rpm/bats.spec
