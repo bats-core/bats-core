@@ -39,9 +39,20 @@ rm -rf $RPM_BUILD_ROOT
 %{_libexecdir}/%{repo}
 %{_mandir}/man1/%{name}.1.gz
 %{_mandir}/man7/%{name}.7.gz
+/usr/lib/%{repo}/common.bash
+/usr/lib/%{repo}/formatter.bash
+/usr/lib/%{repo}/preprocessing.bash
+/usr/lib/%{repo}/semaphore.bash
+/usr/lib/%{repo}/test_functions.bash
+/usr/lib/%{repo}/tracing.bash
+/usr/lib/%{repo}/validator.bash
+/usr/lib/%{repo}/warnings.bash
 
 %changelog
-* Tue Jul 08 2018 mbland <mbland@acm.org> - 1.1.0-1
+* Wed Sep 07 2022 Marcel Hecko <marcel@blava.net> - 1.2.0-1
+- Fix and test RPM build on Rocky Linux release 8.6
+
+* Sun Jul 08 2018 mbland <mbland@acm.org> - 1.1.0-1
 - Increase version to match upstream release
 
 * Mon Jun 18 2018 pixdrift <support@pixeldrift.net> - 1.0.2-1
