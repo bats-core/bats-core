@@ -196,7 +196,7 @@ jobs:
         run: |
           dnf install -y rpm-build rpmdevtools
           rpmdev-setuptree
-          rpmbuild --undefine=_disable_source_fetch -v -bb ./contrib/rpm/bats.spec
+          rpmbuild -v -bb ./contrib/rpm/bats.spec
           ls -al /github/home/rpmbuild/RPMS/noarch/
           dnf install -y /github/home/rpmbuild/RPMS/noarch/bats-*.rpm
       - name: Run tests
