@@ -153,13 +153,17 @@ jobs:
   
   alpine:
     runs-on: ubuntu-latest
+    container: alpine:latest
     steps:
       - uses: actions/checkout@v2
+      - name: Install dependencies
+        run: apk add bash ncurses util-linux
       - name: Run test on bash version ${{ matrix.version }}
         shell: 'script -q -e -c "bash {0}"' # work around tty issues
-        run: |
-          set -e
-          time docker run -it -v $PWD:/opt/bats alpine sh -c "apk add bash ncurses; /opt/bats/bin/bats  --print-output-on-failure --tap /opt/bats/test"
+        env:
+          TERM: linux # fix tput for tty issue work around
+        run:
+          time ./bin/bats  --print-output-on-failure test/
 
   freebsd:
     runs-on: macos-12
@@ -196,4 +200,7 @@ jobs:
           ls -al /github/home/rpmbuild/RPMS/noarch/
           dnf install -y /github/home/rpmbuild/RPMS/noarch/bats-*.rpm
       - name: Run tests
-        run: bats test/ --print-output-on-failure
+        shell: 'script -q -e -c "bash {0}"' # work around tty issues
+        env:
+          TERM: linux # fix tput for tty issue work around
+        run: bats --print-output-on-failure test/
