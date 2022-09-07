@@ -192,10 +192,12 @@ jobs:
     container: almalinux:8
     steps:
       - uses: actions/checkout@v2
+      - run: dnf install -y rpm-build rpmdevtools
       - name: Build and install RPM
         run: |
-          dnf install -y rpm-build rpmdevtools
           rpmdev-setuptree
+          version=$(rpmspec -q --qf '%{version}' contrib/rpm/bats.spec)
+          tar --transform "s,^,bats-core-${version}/," -cf /github/home/rpmbuild/SOURCES/v${version}.tar.gz ./
           rpmbuild -v -bb ./contrib/rpm/bats.spec
           ls -al /github/home/rpmbuild/RPMS/noarch/
           dnf install -y /github/home/rpmbuild/RPMS/noarch/bats-*.rpm
