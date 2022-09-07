@@ -115,7 +115,7 @@ setup() {
 }
 
 @test "load is available in setup_suite" {
-    run -0 bats "$FIXTURE_ROOT/call_load/"
+    reentrant_run -0 bats "$FIXTURE_ROOT/call_load/"
     [ "${lines[0]}" = "1..1" ]
     [ "${lines[1]}" = "ok 1 passing" ]
     [ "${#lines[@]}" -eq 2 ]
