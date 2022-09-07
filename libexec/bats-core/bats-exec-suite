@@ -385,6 +385,8 @@ if [[ -n "$setup_suite_file" ]]; then
     exit 1
   }
 
+  # shellcheck disable=SC2034 # will be used in the sourced file below
+  BATS_TEST_FILENAME="$setup_suite_file"
   # shellcheck source=lib/bats-core/test_functions.bash
   source "$BATS_ROOT/lib/bats-core/test_functions.bash"
 
