@@ -52,7 +52,7 @@ jobs:
         env:
           TERM: linux # fix tput for tty issue work around
           BASH_ENV: ${GITHUB_WORKSPACE}/.github/workflows/set_nounset.bash
-        run: bin/bats test
+        run: bin/bats test --print-output-on-failure
 
   npm_on_linux:
     strategy:

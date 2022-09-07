@@ -149,7 +149,6 @@ bats_load_library() { # <slug>
 # load acts like bats_load_safe but exits the shell instead of returning 1.
 load() {
     if ! bats_load_safe "$@"; then
-      echo "${FUNCNAME[0]} $LINENO" >&3
         exit 1
     fi
 }
