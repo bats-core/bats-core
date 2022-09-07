@@ -183,3 +183,17 @@ jobs:
       # list symlinks that are broken and force non-zero exit if there are any
       - run: "! find . -xtype l | grep ."
     
+  rpm:
+    runs-on: ubuntu-latest
+    container: almalinux:8
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build and install RPM
+        run: |
+          dnf install -y rpm-build rpmdevtools
+          rpmdev-setuptree
+          rpmbuild --undefine=_disable_source_fetch -v -bb ./contrib/rpm/bats.spec
+          ls -al /github/home/rpmbuild/RPMS/noarch/
+          dnf install -y /github/home/rpmbuild/RPMS/noarch/bats-*.rpm
+      - name: Run tests
+        run: bats test/ --print-output-on-failure
