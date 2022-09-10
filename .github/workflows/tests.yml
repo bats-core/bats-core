@@ -193,7 +193,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - run: dnf install -y rpm-build rpmdevtools
-      - name: Build and install RPM
+      - name: Build and install RPM and dependencies
         run: |
           rpmdev-setuptree
           version=$(rpmspec -q --qf '%{version}' contrib/rpm/bats.spec)
@@ -201,6 +201,7 @@ jobs:
           rpmbuild -v -bb ./contrib/rpm/bats.spec
           ls -al /github/home/rpmbuild/RPMS/noarch/
           dnf install -y /github/home/rpmbuild/RPMS/noarch/bats-*.rpm
+          dnf -y install procps-ng # avoid timeout failure
       - name: Run tests
         shell: 'script -q -e -c "bash {0}"' # work around tty issues
         env:
