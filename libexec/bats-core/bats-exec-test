@@ -239,7 +239,7 @@ bats_kill_childprocesses_of() { # <parent-pid>
     while read -r pid; do
       kill "$pid"
     done < <(bats_get_child_processes_of "$parent_pid" | sort -r)
-  fi &>/dev/null
+  fi >/dev/null
 }
 
 # sets a timeout for this process
@@ -255,6 +255,10 @@ bats_start_timeout_countdown() { # <timeout>
   local -ri target_pid=$$
   # shellcheck disable=SC2064
   trap "bats_timeout_trap $target_pid" ABRT
+  if ! (command -v ps || command -v pkill) >/dev/null; then
+    printf "Error: Cannot execute timeout because neither pkill nor ps are available on this system!\n" >&2
+    exit 1
+  fi
   # Start another process to kill the children of this process
   (
      sleep "$timeout" &
