@@ -13,6 +13,8 @@
 
 load test_helper
 
+# bats file_tags=dep:install_sh
+
 setup() {
   # give each test their own tmpdir to allow for parallelization without interference
   # shellcheck disable=SC2103,SC2164
