@@ -60,12 +60,12 @@ bats_internal_load() {
 
   # library_load_path is a library loader
   if [[ -f "$library_load_path" ]]; then
-      # shellcheck disable=SC1090
-      if ! source "$library_load_path"; then
-          printf "Error while sourcing library loader at '%s'\n" "$library_load_path" >&2
-          return 1
-      fi
-      return 0
+    # shellcheck disable=SC1090
+    if ! source "$library_load_path"; then
+      printf "Error while sourcing library loader at '%s'\n" "$library_load_path" >&2
+      return 1
+    fi
+    return 0
   fi
 
   printf "Passed library load path is neither a library loader nor library directory: %s\n" "$library_load_path" >&2
@@ -148,9 +148,9 @@ bats_load_library() { # <slug>
 
 # load acts like bats_load_safe but exits the shell instead of returning 1.
 load() {
-    if ! bats_load_safe "$@"; then
-        exit 1
-    fi
+  if ! bats_load_safe "$@"; then
+    exit 1
+  fi
 }
 
 bats_redirect_stderr_into_file() {
@@ -257,9 +257,9 @@ run() { # [!|-N] [--keep-empty-lines] [--separate-stderr] [--] <command to run..
   bats_separate_lines lines output
 
   if [[ "$output_case" == separate ]]; then
-      # shellcheck disable=SC2034
-      read -d '' -r stderr < "$bats_run_separate_stderr_file" || true
-      bats_separate_lines stderr_lines stderr
+    # shellcheck disable=SC2034
+    read -d '' -r stderr < "$bats_run_separate_stderr_file" || true
+    bats_separate_lines stderr_lines stderr
   fi
 
   # shellcheck disable=SC2034

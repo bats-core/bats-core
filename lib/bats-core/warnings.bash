@@ -14,11 +14,11 @@ bats_generate_warning() { # <warning number> [--no-stacktrace] [<printf args for
   fi
   if [[ $warning_number =~ [0-9]+ ]] && ((warning_number < ${#BATS_WARNING_SHORT_DESCS[@]} )); then
     {
-        printf "BW%s: ${BATS_WARNING_SHORT_DESCS[$warning_number]}\n" "${padding:${#warning_number}}${warning_number}" "$@"
-        if [[ -z "$no_stacktrace" ]]; then
-          bats_capture_stack_trace
-          BATS_STACK_TRACE_PREFIX='      ' bats_print_stack_trace "${BATS_DEBUG_LAST_STACK_TRACE[@]}"
-        fi
+      printf "BW%s: ${BATS_WARNING_SHORT_DESCS[$warning_number]}\n" "${padding:${#warning_number}}${warning_number}" "$@"
+      if [[ -z "$no_stacktrace" ]]; then
+        bats_capture_stack_trace
+        BATS_STACK_TRACE_PREFIX='      ' bats_print_stack_trace "${BATS_DEBUG_LAST_STACK_TRACE[@]}"
+      fi
     } >> "$BATS_WARNING_FILE" 2>&3
   else
     printf "Invalid Bats warning number '%s'. It must be an integer between 1 and %d." "$warning_number" "$((${#BATS_WARNING_SHORT_DESCS[@]} - 1))" >&2
