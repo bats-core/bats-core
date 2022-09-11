@@ -242,7 +242,12 @@ run() { # [!|-N] [--keep-empty-lines] [--separate-stderr] [--] <command to run..
 
   local origFlags="$-"
   set +eET
-  local origIFS="$IFS"
+  local origIFS="${IFS-}"
+  local origIFS_set="${IFS+set}"
+  local IFS="$origIFS"
+  if [[ ! $origIFS_set ]]; then
+    unset -v IFS
+  fi
   if [[ $keep_empty_lines ]]; then
     # 'output', 'status', 'lines' are global variables available to tests.
     # preserve trailing newlines by appending . and removing it later
@@ -265,7 +270,11 @@ run() { # [!|-N] [--keep-empty-lines] [--separate-stderr] [--] <command to run..
 
   # shellcheck disable=SC2034
   BATS_RUN_COMMAND="${*}"
-  IFS="$origIFS"
+  if [[ $origIFS_set ]]; then
+    IFS="$origIFS"
+  else
+    unset -v IFS
+  fi
   set "-$origFlags"
 
   if [[ ${BATS_VERBOSE_RUN:-} ]]; then
