@@ -58,9 +58,24 @@ setup() {
 }
 
 @test "BW03 is printed when a test file defines setup_suite and setup_suite is not defined" {
-    reentrant_run -0 bats "$FIXTURE_ROOT/BW03"
+    reentrant_run -0 bats "$FIXTURE_ROOT/BW03/define_setup_suite_in_wrong_file.bats"
     [ "${lines[0]}" == "1..1" ]
     [ "${lines[1]}" == "ok 1 test" ]
     [ "${lines[2]}" == "The following warnings were encountered during tests:" ]
-    [ "${lines[3]}" == "BW03: setup_suite was defined in a test file. It belongs into setup_suite.bash to be picked up automatically." ]
+    [ "${lines[3]}" == "BW03: \`setup_suite\` is visible to test file '${FIXTURE_ROOT}/BW03/define_setup_suite_in_wrong_file.bats', but was not executed. It belongs into 'setup_suite.bash' to be picked up automatically." ]
+    [ "${#lines[@]}" -eq 4 ]
+}
+
+@test "BW03 is not printed when a test file defines setup_suite but setup_suite was completed" {
+    reentrant_run -0 bats "$FIXTURE_ROOT/BW03/define_setup_suite_in_wrong_file.bats" --setup-suite-file "$FIXTURE_ROOT/BW03/non_default_setup_suite.bash"
+    [ "${lines[0]}" == "1..1" ]
+    [ "${lines[1]}" == "ok 1 test" ]
+    [ "${#lines[@]}" -eq 2 ]
+}
+
+@test "BW03 can be suppressed by setting BATS_SETUP_SUITE_COMPLETED" {
+    reentrant_run -0 bats "$FIXTURE_ROOT/BW03/suppress_warning.bats"
+    [ "${lines[0]}" == "1..1" ]
+    [ "${lines[1]}" == "ok 1 test" ]
+    [ "${#lines[@]}" -eq 2 ]
 }
