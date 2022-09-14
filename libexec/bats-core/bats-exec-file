@@ -156,7 +156,7 @@ bats_file_exit_trap() {
   fi
 
   # setup_file not executed but defined in this test file? -> might be defined in the wrong file
-  if [[ -z "$BATS_SETUP_SUITE_COMPLETED" ]] && declare -F setup_suite >/dev/null; then
+  if [[ -z "${BATS_SETUP_SUITE_COMPLETED-}" ]] && declare -F setup_suite >/dev/null; then
     bats_generate_warning 3 --no-stacktrace "$BATS_TEST_FILENAME"
   fi
 
