@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 
 ## [Unreleased]
 
+## [1.8.0] - 2022-09-15
+
 ### Added
 
 * using external formatters via `--formatter <absolute path>` (also works for
