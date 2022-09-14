@@ -53,7 +53,10 @@ setup() {
 
 @test "setup_suite.bash without setup_suite() is an error" {
     reentrant_run ! bats "$FIXTURE_ROOT/no_setup_suite_function/"
-    [ "${lines[1]}" == "$FIXTURE_ROOT/no_setup_suite_function/setup_suite.bash does not define \`setup_suite()\`" ]
+    [ "${lines[0]}" == "1..1" ]
+    [ "${lines[1]}" == "not ok 1 setup_suite" ]
+    [ "${lines[2]}" == "# $FIXTURE_ROOT/no_setup_suite_function/setup_suite.bash does not define \`setup_suite()\`" ]
+    [ "${#lines[@]}" -eq 3 ]
 }
 
 @test "exported variables from setup_suite are visible in setup_file, setup and @test" {
@@ -73,45 +76,49 @@ setup() {
 
 @test "errors in setup_suite reported correctly" {
     LANG=C reentrant_run ! bats "$FIXTURE_ROOT/error_in_setup_suite/"
-    [ "${lines[1]}" == "$FIXTURE_ROOT/error_in_setup_suite/setup_suite.bash: line 2: call-to-undefined-command: command not found" ]
+    [ "${lines[4]}" == "# $FIXTURE_ROOT/error_in_setup_suite/setup_suite.bash: line 2: call-to-undefined-command: command not found" ]
 }
 
 @test "errors in teardown_suite reported correctly" {
     LANG=C reentrant_run ! bats "$FIXTURE_ROOT/error_in_teardown_suite/"
-    [ "${lines[2]}" == "$FIXTURE_ROOT/error_in_teardown_suite/setup_suite.bash: line 6: call-to-undefined-command: command not found" ]
+    [ "${lines[5]}" == "# $FIXTURE_ROOT/error_in_teardown_suite/setup_suite.bash: line 6: call-to-undefined-command: command not found" ]
 }
 
 @test "failure in setup_suite skips further setup and suite but runs teardown_suite" {
     reentrant_run ! bats "$FIXTURE_ROOT/failure_in_setup_suite/"
-    [ "${lines[1]}" == "setup_suite before" ] # <- only setup_suite code before failure is run
-    [ "${lines[2]}" == "teardown_suite" ] # <- teardown is run
+    [ "${lines[0]}" == "1..1" ]
     # get a nice error message
-    [ "${lines[3]}" == "not ok 1 setup_suite" ]
-    [ "${lines[4]}" == "# (from function \`setup_suite' in test file $RELATIVE_FIXTURE_ROOT/failure_in_setup_suite/setup_suite.bash, line 3)" ]
-    [ "${lines[5]}" == "#   \`false' failed" ]
+    [ "${lines[1]}" == "not ok 1 setup_suite" ]
+    [ "${lines[2]}" == "# (from function \`setup_suite' in test file $RELATIVE_FIXTURE_ROOT/failure_in_setup_suite/setup_suite.bash, line 3)" ]
+    [ "${lines[3]}" == "#   \`false' failed" ]
+    [ "${lines[4]}" == "# setup_suite before" ] # <- only setup_suite code before failure is run
+    [ "${lines[5]}" == "# teardown_suite" ] # <- teardown is run
+    [ ${#lines[@]} -eq 6 ]
 }
 
 @test "midway failure in teardown_suite does not fail test suite, remaining code is executed" {
-    reentrant_run -0 bats "$FIXTURE_ROOT/failure_in_teardown_suite/"
-    [ "${lines[2]}" == "teardown_suite before" ]
-    [ "${lines[3]}" == "teardown_suite after" ]
+    reentrant_run -0 bats --show-output-of-passing-tests "$FIXTURE_ROOT/failure_in_teardown_suite/"
+    [ "${lines[2]}" == "# teardown_suite before" ]
+    [ "${lines[3]}" == "# teardown_suite after" ]
     [ "${#lines[@]}" -eq 4 ]
 }
 
 @test "nonzero return in teardown_suite does fails test suite" {
     reentrant_run -1 bats "$FIXTURE_ROOT/return_nonzero_in_teardown_suite/"
-    [ "${lines[2]}" == "teardown_suite before" ]
-    [ "${lines[3]}" == "not ok 2 teardown_suite" ]
-    [ "${lines[4]}" == "# (from function \`teardown_suite' in test file $RELATIVE_FIXTURE_ROOT/return_nonzero_in_teardown_suite/setup_suite.bash, line 7)" ]
-    [ "${lines[5]}" == "#   \`return 1' failed" ]
+    [ "${lines[0]}" == "1..1" ]
+    [ "${lines[1]}" == "ok 1 test" ]
+    [ "${lines[2]}" == "not ok 2 teardown_suite" ]
+    [ "${lines[3]}" == "# (from function \`teardown_suite' in test file $RELATIVE_FIXTURE_ROOT/return_nonzero_in_teardown_suite/setup_suite.bash, line 7)" ]
+    [ "${lines[4]}" == "#   \`return 1' failed" ]
+    [ "${lines[5]}" == "# teardown_suite before" ]
     [ "${lines[6]}" == "# bats warning: Executed 2 instead of expected 1 tests" ]
     [ "${#lines[@]}" -eq 7 ]
 }
 
 @test "stderr from setup/teardown_suite does not overtake stdout" {
-    reentrant_run -0 --separate-stderr bats "$FIXTURE_ROOT/stderr_in_setup_teardown_suite/"
-    [[ "$output" == *$'setup_suite stdout\nsetup_suite stderr'* ]] || false
-    [[ "$output" == *$'teardown_suite stdout\nteardown_suite stderr'* ]] || false
+    reentrant_run -1 --separate-stderr bats "$FIXTURE_ROOT/stderr_in_setup_teardown_suite/"
+    [[ "$output" == *$'setup_suite stdout\n'*'setup_suite stderr'* ]] || false
+    [[ "$output" == *$'teardown_suite stdout\n'*'teardown_suite stderr'* ]] || false
 }
 
 @test "load is available in setup_suite" {
@@ -119,4 +126,21 @@ setup() {
     [ "${lines[0]}" = "1..1" ]
     [ "${lines[1]}" = "ok 1 passing" ]
     [ "${#lines[@]}" -eq 2 ]
+}
+
+@test "output frorm setup_suite is only visible on failure" {
+    reentrant_run -0 bats "$FIXTURE_ROOT/default_name/"
+    [ "${lines[0]}" = "1..1" ]
+    [ "${lines[1]}" = "ok 1 passing" ]
+    [ "${#lines[@]}" -eq 2 ]
+
+
+    reentrant_run -1 bats "$FIXTURE_ROOT/output_with_failure/"
+    [ "${lines[0]}" = "1..1" ]
+    [ "${lines[1]}" = "not ok 1 setup_suite" ]
+    [ "${lines[2]}" = "# (from function \`setup_suite' in test file $RELATIVE_FIXTURE_ROOT/output_with_failure/setup_suite.bash, line 3)" ]
+    [ "${lines[3]}" = "#   \`false' failed" ]
+    [ "${lines[4]}" = "# setup_suite" ]
+    [ "${lines[5]}" = "# teardown_suite" ]
+    [ "${#lines[@]}" -eq 6 ]
 }

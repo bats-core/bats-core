@@ -6,4 +6,5 @@ setup_suite() {
 teardown_suite() {
     echo teardown_suite stdout
     echo teardown_suite stderr >&2
+    false
 }

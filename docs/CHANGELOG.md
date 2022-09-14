@@ -55,6 +55,7 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 * fix `load` not being available in `setup_suite` (#644)
 * fix RPM spec, add regression test (#648)
 * fix handling of `IFS` by `run` (#650)
+* only print `setup_file`'s stderr on errors (#649)
 
 #### Documentation
 
