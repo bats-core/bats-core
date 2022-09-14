@@ -5,10 +5,10 @@ source "$BATS_ROOT/lib/bats-core/tracing.bash"
 
 # generate a warning report for the parent call's call site
 bats_generate_warning() { # <warning number> [--no-stacktrace] [<printf args for warning string>...]
-  local warning_number="$1" padding="00"
+  local warning_number="${1-}" padding="00"
   shift
   local no_stacktrace=
-  if [[ $1 == --no-stacktrace ]]; then
+  if [[ ${1-} == --no-stacktrace ]]; then
     no_stacktrace=1
     shift
   fi
