@@ -86,7 +86,7 @@ bats_print_stack_trace() {
 bats_print_failed_command() {
 	local stack_trace=("${@}")
 	if [[ ${#stack_trace[@]} -eq 0 ]]; then
-		return 
+		return 0
 	fi
 	local frame="${stack_trace[${#stack_trace[@]} - 1]}"
 	local filename

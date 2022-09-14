@@ -55,10 +55,8 @@ setup() {
     reentrant_run ! bats "$FIXTURE_ROOT/no_setup_suite_function/"
     [ "${lines[0]}" == "1..1" ]
     [ "${lines[1]}" == "not ok 1 setup_suite" ]
-    [ "${lines[2]}" == "# (from function \`teardown_suite' in test file $RELATIVE_FIXTURE_ROOT/no_setup_suite_function/setup_suite.bash, line 1)" ]
-    [ "${lines[3]}" == "#   \`teardown_suite() {' failed with status 0" ]
-    [ "${lines[4]}" == "# $FIXTURE_ROOT/no_setup_suite_function/setup_suite.bash does not define \`setup_suite()\`" ]
-    [ "${#lines[@]}" -eq 5 ]
+    [ "${lines[2]}" == "# $FIXTURE_ROOT/no_setup_suite_function/setup_suite.bash does not define \`setup_suite()\`" ]
+    [ "${#lines[@]}" -eq 3 ]
 }
 
 @test "exported variables from setup_suite are visible in setup_file, setup and @test" {

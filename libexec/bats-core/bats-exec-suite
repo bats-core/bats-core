@@ -393,7 +393,7 @@ trap bats_teardown_suite_trap EXIT
 if [[ -n "$setup_suite_file" ]]; then
   setup_suite() {
     printf "%s does not define \`setup_suite()\`\n" "$setup_suite_file" >&2
-    exit 1
+    return 1
   }
 
   # shellcheck disable=SC2034 # will be used in the sourced file below
