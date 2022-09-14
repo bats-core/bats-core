@@ -25,3 +25,4 @@ Currently, Bats emits the following warnings:
 
     BW01
     BW02
+    BW03
