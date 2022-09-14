@@ -324,7 +324,8 @@ __Note:__ As `setup_suite` and `teardown_suite` are intended for all files in a 
 they must be defined in a separate `setup_suite.bash` file. Automatic discovery works
 by searching for `setup_suite.bash` in the folder of the first `*.bats` file of the suite.
 If this automatism does not work for your usecase, you can work around by specifying
-`--setup-suite-file` on the `bats` command.
+`--setup-suite-file` on the `bats` command. If you have a `setup_suite.bash`, it must define
+`setup_suite`! However, defining `teardown_suite` is optional.
 
 <!-- markdownlint-disable  MD033 -->
 <details>
