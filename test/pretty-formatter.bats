@@ -56,10 +56,10 @@ HERE
   }
   run format_example_stream
   # black text, green timing
-  [[ "${lines[1]}" == *$'\x1b[2G\x1b[1G ✓ test timing=1, timeout=0\x1b[32;22m [123]'* ]]
+  [[ "${lines[1]}" == *$'\x1b[2G\x1b[1G ✓ test timing=1, timeout=0\x1b[32;22m [123]'* ]] || false
   # red bold text, green timing
-  [[ "${lines[2]}" == *$'\x1b[2G\x1b[33;1m\x1b[1G ✗ test timing=1, timeout=1\x1b[32;22m [456 (timeout: 0s)]'* ]]
-  [[ "${lines[4]}" == *$'2 tests, 0 failures, 1 timed out in 0 seconds'* ]]
+  [[ "${lines[2]}" == *$'\x1b[2G\x1b[33;1m\x1b[1G ✗ test timing=1, timeout=1\x1b[32;22m [456 (timeout: 0s)]'* ]] || false
+  [[ "${lines[4]}" == *'2 tests, 0 failures, 1 timed out in '*' seconds' ]] || false
 
 format_example_stream() {
     bats-format-pretty  <<HERE
