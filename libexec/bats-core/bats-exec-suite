@@ -380,16 +380,13 @@ bats_teardown_suite_trap() {
   bats_suite_exit_trap
 }
 
-setup_suite() {
-  :
-}
-
 teardown_suite() {
   : 
 }
 
 trap bats_teardown_suite_trap EXIT
 
+BATS_OUT="$BATS_RUN_TMPDIR/suite.out"
 if [[ -n "$setup_suite_file" ]]; then
   setup_suite() {
     printf "%s does not define \`setup_suite()\`\n" "$setup_suite_file" >&2
@@ -403,15 +400,18 @@ if [[ -n "$setup_suite_file" ]]; then
 
   # shellcheck disable=SC1090
   source "$setup_suite_file"
+  
+  set -eET
+  export BATS_SETUP_SUITE_COMPLETED=
+  setup_suite >>"$BATS_OUT" 2>&1
+  BATS_SETUP_SUITE_COMPLETED=1
+  set +ET
+else
+  # prevent exit trap from printing an error because of incomplete setup_suite, 
+  # when there was none to execute
+  BATS_SETUP_SUITE_COMPLETED=1
 fi
 
-BATS_OUT="$BATS_RUN_TMPDIR/suite.out"
-
-set -eET
-BATS_SETUP_SUITE_COMPLETED=
-setup_suite >>"$BATS_OUT" 2>&1
-BATS_SETUP_SUITE_COMPLETED=1
-set +ET
 
 if [[ "$num_jobs" -gt 1 ]] && [[ -z "$bats_no_parallelize_across_files" ]]; then
   # run files in parallel to get the maximum pool of parallel tasks

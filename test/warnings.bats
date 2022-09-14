@@ -52,7 +52,30 @@ setup() {
     [ "${lines[1]}" == "ok 1 Trigger BW02" ]
     [ "${lines[2]}" == "The following warnings were encountered during tests:" ]
     [ "${lines[3]}" == "BW02: Using flags on \`run\` requires at least BATS_VERSION=1.5.0. Use \`bats_require_minimum_version 1.5.0\` to fix this message." ]
-    [[ "${lines[4]}" == "      (from function \`bats_warn_minimum_guaranteed_version' in file ${RELATIVE_BATS_ROOT}lib/bats-core/warnings.bash, line 33,"* ]]
+    [[ "${lines[4]}" == "      (from function \`bats_warn_minimum_guaranteed_version' in file ${RELATIVE_BATS_ROOT}lib/bats-core/warnings.bash, line "* ]]
     [[ "${lines[5]}" == "       from function \`run' in file ${RELATIVE_BATS_ROOT}lib/bats-core/test_functions.bash, line"* ]]
     [ "${lines[6]}" ==  "       in test file $RELATIVE_FIXTURE_ROOT/BW02.bats, line 2)" ]
+}
+
+@test "BW03 is printed when a test file defines setup_suite and setup_suite is not defined" {
+    reentrant_run -0 bats "$FIXTURE_ROOT/BW03/define_setup_suite_in_wrong_file.bats"
+    [ "${lines[0]}" == "1..1" ]
+    [ "${lines[1]}" == "ok 1 test" ]
+    [ "${lines[2]}" == "The following warnings were encountered during tests:" ]
+    [ "${lines[3]}" == "BW03: \`setup_suite\` is visible to test file '${FIXTURE_ROOT}/BW03/define_setup_suite_in_wrong_file.bats', but was not executed. It belongs into 'setup_suite.bash' to be picked up automatically." ]
+    [ "${#lines[@]}" -eq 4 ]
+}
+
+@test "BW03 is not printed when a test file defines setup_suite but setup_suite was completed" {
+    reentrant_run -0 bats "$FIXTURE_ROOT/BW03/define_setup_suite_in_wrong_file.bats" --setup-suite-file "$FIXTURE_ROOT/BW03/non_default_setup_suite.bash"
+    [ "${lines[0]}" == "1..1" ]
+    [ "${lines[1]}" == "ok 1 test" ]
+    [ "${#lines[@]}" -eq 2 ]
+}
+
+@test "BW03 can be suppressed by setting BATS_SETUP_SUITE_COMPLETED" {
+    reentrant_run -0 bats "$FIXTURE_ROOT/BW03/suppress_warning.bats"
+    [ "${lines[0]}" == "1..1" ]
+    [ "${lines[1]}" == "ok 1 test" ]
+    [ "${#lines[@]}" -eq 2 ]
 }

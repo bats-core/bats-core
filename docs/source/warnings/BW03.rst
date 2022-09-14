@@ -1,0 +1,15 @@
+BW03: `setup_suite` is visible to test file '<path>', but was not executed. It belongs into 'setup_suite.bash' to be picked up automatically.
+=============================================================================================================================================
+
+In contrast to the other setup functions, `setup_suite` must not be defined in `*.bats` files but in `setup_suite.bash`.
+When a file is executed and sees `setup_suite` defined but not run before the tests, this warning will be printed.
+
+How to fix
+----------
+
+The fix depends on your actual intention. There are basically two cases:
+
+1. You want a setup before all tests and accidentally put `setup_suite` into a test file instead of `setup_suite.bash`.
+   Simply move `setup_suite` (and `teardown_suite`!) into `setup_suite.bash`.
+2. You did not mean to run a setup before any test but need to defined a function named `setup_suite` in your test file.
+   In this case, you can silence this warning by assigning `BATS_SETUP_SUITE_COMPLETED='suppress BW03'`.

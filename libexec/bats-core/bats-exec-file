@@ -154,6 +154,12 @@ bats_file_exit_trap() {
     rm -rf "$BATS_OUT"
     bats_exec_file_status=1
   fi
+
+  # setup_file not executed but defined in this test file? -> might be defined in the wrong file
+  if [[ -z "${BATS_SETUP_SUITE_COMPLETED-}" ]] && declare -F setup_suite >/dev/null; then
+    bats_generate_warning 3 --no-stacktrace "$BATS_TEST_FILENAME"
+  fi
+
   exit $bats_exec_file_status
 }
 
