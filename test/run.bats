@@ -120,3 +120,21 @@ print-stderr-stdout() {
   [ "${lines[7]}" == "#   \`run -256 echo hi' failed" ]
   [ "${lines[8]}" == "# Usage error: run: '-NNN': NNN must be <= 255 (got: 256)" ]
 }
+
+@test "run is not affected by IFS" {
+  IFS=_
+  run true
+  [ "$status" -eq 0 ]
+  IFS=0
+  run true
+  [ "$status" -eq 0 ]
+}
+
+@test "run does not change IFS" {
+  local IFS=_
+  run true
+  [ "$IFS" = _ ]
+  unset IFS
+  run true
+  [ "${IFS-(unset)}" = '(unset)' ]
+}

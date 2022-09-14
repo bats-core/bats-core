@@ -54,6 +54,7 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 * fix unbound variable errors with `set -u` on `setup_suite` failures (#643)
 * fix `load` not being available in `setup_suite` (#644)
 * fix RPM spec, add regression test (#648)
+* fix handling of `IFS` by `run` (#650)
 
 #### Documentation
 
