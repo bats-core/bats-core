@@ -25,12 +25,14 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
   `--print-output-on-failure` (#631)
 * `# bats test_tags=<tag list>`/`# bats file_tags=<tag list>` and
   `--filter-tags <tag list>` for tagging tests for execution filters (#642)
+* warning BW03: inform about `setup_file` in wrong file (`.bats` instead of `setup_suite.bash`) (#652)
 
 #### Documentation
 
 * update gotcha about negated statements: Recommend using `run !` on Bats
   versions >=1.5.0 (#593)
 * add documentation for `bats_require_minimum_version` (#595)
+* improve documentation about `setup_file` (#652)
 
 ### Fixed
 
