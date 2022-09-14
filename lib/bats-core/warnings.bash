@@ -3,14 +3,6 @@
 # shellcheck source=lib/bats-core/tracing.bash
 source "$BATS_ROOT/lib/bats-core/tracing.bash"
 
-BATS_WARNING_SHORT_DESCS=(
-  # to start with 1
-  'PADDING'
-  # see issue #578 for context
-  "\`run\`'s command \`%s\` exited with code 127, indicating 'Command not found'. Use run's return code checks, e.g. \`run -127\`, to fix this message."
-  "%s requires at least BATS_VERSION=%s. Use \`bats_require_minimum_version %s\` to fix this message."
-)
-
 # generate a warning report for the parent call's call site
 bats_generate_warning() { # <warning number> [<printf args for warning string>...]
   local warning_number="$1" padding="00"
@@ -33,3 +25,13 @@ bats_warn_minimum_guaranteed_version() { # <feature> <minimum required version>
     bats_generate_warning 2 "$1" "$2" "$2"
   fi
 }
+
+# put after functions to avoid line changes in tests when new ones get added
+BATS_WARNING_SHORT_DESCS=(
+  # to start with 1
+  'PADDING'
+  # see issue #578 for context
+  "\`run\`'s command \`%s\` exited with code 127, indicating 'Command not found'. Use run's return code checks, e.g. \`run -127\`, to fix this message."
+  "%s requires at least BATS_VERSION=%s. Use \`bats_require_minimum_version %s\` to fix this message."
+  "setup_suite was defined in a test file. It belongs into setup_suite.bash to be picked up automatically."
+)
