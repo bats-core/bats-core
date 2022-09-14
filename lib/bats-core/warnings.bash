@@ -4,14 +4,21 @@
 source "$BATS_ROOT/lib/bats-core/tracing.bash"
 
 # generate a warning report for the parent call's call site
-bats_generate_warning() { # <warning number> [<printf args for warning string>...]
+bats_generate_warning() { # <warning number> [--no-stacktrace] [<printf args for warning string>...]
   local warning_number="$1" padding="00"
   shift
+  local no_stacktrace=
+  if [[ $1 == --no-stacktrace ]]; then
+    no_stacktrace=1
+    shift
+  fi
   if [[ $warning_number =~ [0-9]+ ]] && ((warning_number < ${#BATS_WARNING_SHORT_DESCS[@]} )); then
     {
         printf "BW%s: ${BATS_WARNING_SHORT_DESCS[$warning_number]}\n" "${padding:${#warning_number}}${warning_number}" "$@"
-        bats_capture_stack_trace
-        BATS_STACK_TRACE_PREFIX='      ' bats_print_stack_trace "${BATS_DEBUG_LAST_STACK_TRACE[@]}"
+        if [[ -z "$no_stacktrace" ]]; then
+          bats_capture_stack_trace
+          BATS_STACK_TRACE_PREFIX='      ' bats_print_stack_trace "${BATS_DEBUG_LAST_STACK_TRACE[@]}"
+        fi
     } >> "$BATS_WARNING_FILE" 2>&3
   else
     printf "Invalid Bats warning number '%s'. It must be an integer between 1 and %d." "$warning_number" "$((${#BATS_WARNING_SHORT_DESCS[@]} - 1))" >&2
@@ -33,5 +40,5 @@ BATS_WARNING_SHORT_DESCS=(
   # see issue #578 for context
   "\`run\`'s command \`%s\` exited with code 127, indicating 'Command not found'. Use run's return code checks, e.g. \`run -127\`, to fix this message."
   "%s requires at least BATS_VERSION=%s. Use \`bats_require_minimum_version %s\` to fix this message."
-  "setup_suite was defined in a test file. It belongs into setup_suite.bash to be picked up automatically."
+  "\`setup_suite\` is visible to test file '%s', but was not executed. It belongs into 'setup_suite.bash' to be picked up automatically."
 )
