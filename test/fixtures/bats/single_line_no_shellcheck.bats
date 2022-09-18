@@ -1,4 +1,4 @@
-@test "empty" {; }
+@test "empty" { }
 
 @test "passing" { true; }
 
