@@ -77,9 +77,9 @@ setup() {
   regex="ok 1 truth in [0-9]+ms"
   [[ "${lines[1]}" =~ $regex ]]
   regex="ok 2 more truth in [0-9]+ms"
-  [[ "${lines[2]}" =~  $regex ]]
+  [[ "${lines[2]}" =~ $regex ]]
   regex="not ok 3 quasi-truth in [0-9]+ms"
-  [[ "${lines[3]}" =~  $regex ]]
+  [[ "${lines[3]}" =~ $regex ]]
 }
 
 @test "extended timing syntax in suite" {

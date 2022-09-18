@@ -45,9 +45,9 @@ extract_tags() { # <tag_type/return_var> <tags-string>
   local -a tags=()
 
   if [[ $tags_string =~ $BATS_VALID_TAGS_PATTERN ]]; then
-    IFS=, read -ra tags <<< "$tags_string"
+    IFS=, read -ra tags <<<"$tags_string"
     local -ri length=${#tags[@]}
-    for (( i = 0; i < length; ++i )); do
+    for ((i = 0; i < length; ++i)); do
       local element="tags[$i]"
       bats_trim "$element" "${!element}" 2>/dev/null # printf on bash 3 will complain but work anyways
       if [[ -z "${!element}" && -n "${CHECK_BATS_COMMENT_COMMANDS:-}" ]]; then
@@ -58,10 +58,10 @@ extract_tags() { # <tag_type/return_var> <tags-string>
     done
   elif [[ -n "${CHECK_BATS_COMMENT_COMMANDS:-}" ]]; then
     printf "%s:%d: Error: Invalid %s: '%s'. " "$test_file" "$line_number" "$tag_type" "$tags_string"
-    printf "Valid tags must match %s and be separated with comma (and optional spaces)\n" "$BATS_VALID_TAG_PATTERN" 
+    printf "Valid tags must match %s and be separated with comma (and optional spaces)\n" "$BATS_VALID_TAG_PATTERN"
     exit_code=1
   fi >&2
-  if (( ${#tags[@]} > 0)); then
+  if ((${#tags[@]} > 0)); then
     eval "$tag_type=(\"\${tags[@]}\")"
   else
     eval "$tag_type=()"
@@ -77,7 +77,7 @@ line_number=0
 exit_code=0
 {
   while IFS= read -r line; do
-    (( ++line_number ))
+    ((++line_number))
     line="${line//$'\r'/}"
     if [[ "$line" =~ $BATS_TEST_PATTERN ]] || [[ "$line" =~ $BATS_TEST_PATTERN_COMMENT ]]; then
       name="${BASH_REMATCH[1]#[\'\"]}"
@@ -87,8 +87,8 @@ exit_code=0
       printf '%s() { bats_test_begin "%s"; %s\n' "${encoded_name:?}" "$name" "$body" || :
 
       bats_append_arrays_as_args \
-                          test_tags file_tags \
-        -- bats_sort tags 
+        test_tags file_tags \
+        -- bats_sort tags
       if [[ -z "$BATS_TEST_FILTER" || "$name" =~ $BATS_TEST_FILTER ]]; then
         IFS=,
         tests+=("--tags '${tags[*]-}' $encoded_name")
@@ -98,12 +98,12 @@ exit_code=0
     else
       if [[ "$line" =~ $BATS_COMMENT_COMMAND_PATTERN ]]; then
         command=${BASH_REMATCH[1]}
-        case $command in 
-          'test_tags='*)
-            extract_tags test_tags "${command#test_tags=}"
+        case $command in
+        'test_tags='*)
+          extract_tags test_tags "${command#test_tags=}"
           ;;
-          'file_tags='*)
-            extract_tags file_tags "${command#file_tags=}"
+        'file_tags='*)
+          extract_tags file_tags "${command#file_tags=}"
           ;;
         esac
       fi

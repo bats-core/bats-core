@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 
 ## [Unreleased]
 
+### Fixed
+
+* `shfmt` all files and enforce via CI (#651)
+
 ## [1.8.0] - 2022-09-15
 
 ### Added

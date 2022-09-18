@@ -1,11 +1,11 @@
 setup_file() {
-    echo "$BATS_TEST_FILENAME" >> "$LOG"
+  echo "$BATS_TEST_FILENAME" >>"$LOG"
 }
 
 @test "Test 1" {
-    true
+  true
 }
 
 @test "Test 2" {
-    true
+  true
 }

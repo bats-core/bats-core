@@ -55,8 +55,8 @@ while [[ "$#" -ne 0 ]]; do
   --filter-tags)
     shift
     IFS=, read -ra tags <<<"$1" || true
-    if (( ${#tags[@]} > 0 )); then
-      for (( i = 0; i < ${#tags[@]}; ++i )); do
+    if ((${#tags[@]} > 0)); then
+      for ((i = 0; i < ${#tags[@]}; ++i)); do
         bats_trim "tags[$i]" "${tags[$i]}"
       done
       bats_sort sorted_tags "${tags[@]}"
@@ -65,11 +65,11 @@ while [[ "$#" -ne 0 ]]; do
       filter_tags_list+=("")
     fi
     ;;
-  --dummy-flag)
-    ;;
+  --dummy-flag) ;;
+
   --trace)
     flags+=('--trace')
-    (( ++BATS_TRACE_LEVEL )) # avoid returning 0
+    ((++BATS_TRACE_LEVEL)) # avoid returning 0
     ;;
   --print-output-on-failure)
     flags+=(--print-output-on-failure)
@@ -110,7 +110,7 @@ fi
 TESTS_LIST_FILE="${BATS_RUN_TMPDIR}/test_list_file.txt"
 
 bats_gather_tests() {
-  local line test_line tags 
+  local line test_line tags
   all_tests=()
   for filename in "$@"; do
     if [[ ! -f "$filename" ]]; then
@@ -135,28 +135,28 @@ bats_gather_tests() {
       if [[ ${#filter_tags_list[@]} -gt 0 ]]; then
         local match=
         for filter_tags in "${filter_tags_list[@]}"; do
-            # empty search tags only match empty test tags!
-            if [[ -z "$filter_tags" ]]; then
-              if [[ ${#tags[@]} -eq 0 ]]; then
-                match=1
-                break
-              fi
-              continue
-            fi
-            local -a positive_filter_tags=() negative_filter_tags=()
-            IFS=, read -ra filter_tags <<< "$filter_tags" || true
-            for filter_tag in "${filter_tags[@]}"; do
-              if [[ $filter_tag == !* ]]; then
-                bats_trim filter_tag "${filter_tag#!}"
-                negative_filter_tags+=("${filter_tag}")
-              else
-                positive_filter_tags+=("${filter_tag}")
-              fi
-            done
-            if bats_append_arrays_as_args positive_filter_tags -- bats_all_in tags &&
-              ! bats_append_arrays_as_args negative_filter_tags -- bats_any_in tags; then
+          # empty search tags only match empty test tags!
+          if [[ -z "$filter_tags" ]]; then
+            if [[ ${#tags[@]} -eq 0 ]]; then
               match=1
+              break
             fi
+            continue
+          fi
+          local -a positive_filter_tags=() negative_filter_tags=()
+          IFS=, read -ra filter_tags <<<"$filter_tags" || true
+          for filter_tag in "${filter_tags[@]}"; do
+            if [[ $filter_tag == !* ]]; then
+              bats_trim filter_tag "${filter_tag#!}"
+              negative_filter_tags+=("${filter_tag}")
+            else
+              positive_filter_tags+=("${filter_tag}")
+            fi
+          done
+          if bats_append_arrays_as_args positive_filter_tags -- bats_all_in tags &&
+            ! bats_append_arrays_as_args negative_filter_tags -- bats_any_in tags; then
+            match=1
+          fi
         done
         if [[ -z "$match" ]]; then
           continue
@@ -201,26 +201,26 @@ fi
 
 bats_gather_tests "$@"
 
-if [[ -n "$filter_status" ]]; then  
+if [[ -n "$filter_status" ]]; then
   case "$filter_status" in
-    failed)
-      bats_filter_test_by_status() { # <line>
-        ! bats_binary_search "$1" "passed_tests"
-      }
+  failed)
+    bats_filter_test_by_status() { # <line>
+      ! bats_binary_search "$1" "passed_tests"
+    }
     ;;
-    passed)
-      bats_filter_test_by_status() {
-        ! bats_binary_search "$1" "failed_tests"
-      }
+  passed)
+    bats_filter_test_by_status() {
+      ! bats_binary_search "$1" "failed_tests"
+    }
     ;;
-    missed)
-      bats_filter_test_by_status() {
-        ! bats_binary_search "$1" "failed_tests" && ! bats_binary_search "$1" "passed_tests" 
-      }
+  missed)
+    bats_filter_test_by_status() {
+      ! bats_binary_search "$1" "failed_tests" && ! bats_binary_search "$1" "passed_tests"
+    }
     ;;
-    *)
-      printf "Error: Unknown value '%s' for --filter-status. Valid values are 'failed' and 'missed'.\n" "$filter_status">&2
-      exit 1
+  *)
+    printf "Error: Unknown value '%s' for --filter-status. Valid values are 'failed' and 'missed'.\n" "$filter_status" >&2
+    exit 1
     ;;
   esac
 
@@ -238,22 +238,22 @@ if [[ -n "$filter_status" ]]; then
     while read -rd $'\n' line; do
       ((++i))
       case "$line" in
-        "passed "*)
-          passed_tests+=("${line#passed }")
+      "passed "*)
+        passed_tests+=("${line#passed }")
         ;;
-        "failed "*)
-          failed_tests+=("${line#failed }")
+      "failed "*)
+        failed_tests+=("${line#failed }")
         ;;
-        "status-filtered $filter_status"*) # pick up tests that were filtered in the last round for the same status
-          last_filtered_tests+=("${line#status-filtered "$filter_status" }")
+      "status-filtered $filter_status"*) # pick up tests that were filtered in the last round for the same status
+        last_filtered_tests+=("${line#status-filtered "$filter_status" }")
         ;;
-        "status-filtered "*) # ignore other status-filtered lines
+      "status-filtered "*) # ignore other status-filtered lines
         ;;
-        "#"*) # allow for comments
+      "#"*) # allow for comments
         ;;
-        *)
-          printf "Error: %s:%d: Invalid format: %s\n" "$BATS_PREVIOUS_RUNLOG_FILE" "$i" "$line" >&2
-          exit 1
+      *)
+        printf "Error: %s:%d: Invalid format: %s\n" "$BATS_PREVIOUS_RUNLOG_FILE" "$i" "$line" >&2
+        exit 1
         ;;
       esac
     done < <(sort "$BATS_PREVIOUS_RUNLOG_FILE")
@@ -264,14 +264,14 @@ if [[ -n "$filter_status" ]]; then
         printf "%s\n" "$line"
         filtered_tests+=("$line")
       else
-        printf "status-filtered %s %s\n" "$filter_status" "$line" >> "$BATS_RUNLOG_FILE"
+        printf "status-filtered %s %s\n" "$filter_status" "$line" >>"$BATS_RUNLOG_FILE"
       fi
-    done > "$TESTS_LIST_FILE"
+    done >"$TESTS_LIST_FILE"
 
     # save filtered tests to exclude them again in next round
-    for test_line in "${last_filtered_tests[@]}"; do 
+    for test_line in "${last_filtered_tests[@]}"; do
       printf "status-filtered %s %s\n" "$filter_status" "$test_line"
-    done >> "$BATS_RUNLOG_FILE"
+    done >>"$BATS_RUNLOG_FILE"
 
     test_count="${#filtered_tests[@]}"
     if [[ ${#failed_tests[@]} -eq 0 && ${#filtered_tests[@]} -eq 0 ]]; then
@@ -318,7 +318,7 @@ fi
 # (see https://github.com/bats-core/bats-core/issues/329)
 # If a file was specified multiple times, we already got it repeatedly in our TESTS_LIST_FILE.
 # Thus, it suffices to bats-exec-file it once to run all repeated tests on it.
-IFS=$'\n' read -d '' -r -a  BATS_UNIQUE_TEST_FILENAMES < <(printf "%s\n" "$@"| nl | sort -k 2 | uniq -f 1 | sort -n | cut -f 2-) || true
+IFS=$'\n' read -d '' -r -a BATS_UNIQUE_TEST_FILENAMES < <(printf "%s\n" "$@" | nl | sort -k 2 | uniq -f 1 | sort -n | cut -f 2-) || true
 
 # shellcheck source=lib/bats-core/tracing.bash
 source "$BATS_ROOT/lib/bats-core/tracing.bash"
@@ -334,7 +334,7 @@ bats_suite_exit_trap() {
     if [[ -z "${BATS_SETUP_SUITE_COMPLETED}" ]]; then
       printf "not ok 1 setup_suite\n"
     elif [[ -z "${BATS_TEARDOWN_SUITE_COMPLETED}" ]]; then
-      printf "not ok %d teardown_suite\n" $((test_count+1))
+      printf "not ok %d teardown_suite\n" $((test_count + 1))
     fi
     local stack_trace
     bats_get_failure_stack_trace stack_trace
@@ -345,13 +345,13 @@ bats_suite_exit_trap() {
   fi
 
   if [[ -n "$print_bats_out" ]]; then
-    bats_prefix_lines_for_tap_output < "$BATS_OUT"
+    bats_prefix_lines_for_tap_output <"$BATS_OUT"
   fi
 
   if [[ ${BATS_INTERRUPTED-NOTSET} != NOTSET ]]; then
     printf "\n# Received SIGINT, aborting ...\n\n"
   fi
-  
+
   if [[ -d "$BATS_RUN_LOGS_DIRECTORY" && -n "${BATS_INTERRUPTED:-}" ]]; then
     # aborting a test run with CTRL+C does not save the runlog file
     rm "$BATS_RUNLOG_FILE"
@@ -366,7 +366,7 @@ bats_run_teardown_suite() {
   trap bats_suite_exit_trap EXIT
   BATS_TEARDOWN_SUITE_COMPLETED=
   teardown_suite >>"$BATS_OUT" 2>&1 || bats_teardown_suite_status=$?
-  if (( bats_teardown_suite_status == 0 )); then
+  if ((bats_teardown_suite_status == 0)); then
     BATS_TEARDOWN_SUITE_COMPLETED=1
   elif [[ -n "${BATS_SETUP_SUITE_COMPLETED:-}" ]]; then
     BATS_DEBUG_LAST_STACK_TRACE_IS_VALID=1
@@ -381,7 +381,7 @@ bats_teardown_suite_trap() {
 }
 
 teardown_suite() {
-  : 
+  :
 }
 
 trap bats_teardown_suite_trap EXIT
@@ -400,25 +400,24 @@ if [[ -n "$setup_suite_file" ]]; then
 
   # shellcheck disable=SC1090
   source "$setup_suite_file"
-  
+
   set -eET
   export BATS_SETUP_SUITE_COMPLETED=
   setup_suite >>"$BATS_OUT" 2>&1
   BATS_SETUP_SUITE_COMPLETED=1
   set +ET
 else
-  # prevent exit trap from printing an error because of incomplete setup_suite, 
+  # prevent exit trap from printing an error because of incomplete setup_suite,
   # when there was none to execute
   BATS_SETUP_SUITE_COMPLETED=1
 fi
-
 
 if [[ "$num_jobs" -gt 1 ]] && [[ -z "$bats_no_parallelize_across_files" ]]; then
   # run files in parallel to get the maximum pool of parallel tasks
   # shellcheck disable=SC2086,SC2068
   # we need to handle the quoting of ${flags[@]} ourselves,
   # because parallel can only quote it as one
-  parallel --keep-order --jobs "$num_jobs" bats-exec-file "$(printf "%q " "${flags[@]}")" "{}" "$TESTS_LIST_FILE"  ::: "${BATS_UNIQUE_TEST_FILENAMES[@]}" 2>&1 || bats_exec_suite_status=1
+  parallel --keep-order --jobs "$num_jobs" bats-exec-file "$(printf "%q " "${flags[@]}")" "{}" "$TESTS_LIST_FILE" ::: "${BATS_UNIQUE_TEST_FILENAMES[@]}" 2>&1 || bats_exec_suite_status=1
 else
   for filename in "${BATS_UNIQUE_TEST_FILENAMES[@]}"; do
     if [[ "${BATS_INTERRUPTED-NOTSET}" != NOTSET ]]; then

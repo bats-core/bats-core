@@ -1,5 +1,3 @@
-
 @test "my sleep ${SLEEP}" {
-    sleep "${SLEEP?}"
+  sleep "${SLEEP?}"
 }
-

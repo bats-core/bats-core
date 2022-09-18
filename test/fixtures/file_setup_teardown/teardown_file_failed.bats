@@ -1,8 +1,7 @@
-
 teardown_file() {
-    false
+  false
 }
 
 @test "test" {
-    true
+  true
 }

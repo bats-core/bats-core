@@ -30,3 +30,6 @@ tab_width = 4
 # trailing spaces indicates word wrap
 trim_trailing_spaces = false
 trim_trailing_whitespace = false
+
+[test/fixtures/bats/*_no_shellcheck.bats]
+ignore = true

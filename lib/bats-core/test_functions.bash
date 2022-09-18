@@ -20,15 +20,15 @@ find_in_bats_lib_path() { # <return-var> <library-name>
   local library_name="${2:?}"
 
   local -a bats_lib_paths
-  IFS=: read -ra bats_lib_paths <<< "$BATS_LIB_PATH"
+  IFS=: read -ra bats_lib_paths <<<"$BATS_LIB_PATH"
 
   for path in "${bats_lib_paths[@]}"; do
     if [[ -f "$path/$library_name" ]]; then
-      printf -v "$return_var" "%s" "$path/$library_name" 
+      printf -v "$return_var" "%s" "$path/$library_name"
       # A library load path was found, return
       return 0
     elif [[ -f "$path/$library_name/load.bash" ]]; then
-      printf -v "$return_var" "%s" "$path/$library_name/load.bash" 
+      printf -v "$return_var" "%s" "$path/$library_name/load.bash"
       # A library load path was found, return
       return 0
     fi
@@ -60,12 +60,12 @@ bats_internal_load() {
 
   # library_load_path is a library loader
   if [[ -f "$library_load_path" ]]; then
-      # shellcheck disable=SC1090
-      if ! source "$library_load_path"; then
-          printf "Error while sourcing library loader at '%s'\n" "$library_load_path" >&2
-          return 1
-      fi
-      return 0
+    # shellcheck disable=SC1090
+    if ! source "$library_load_path"; then
+      printf "Error while sourcing library loader at '%s'\n" "$library_load_path" >&2
+      return 1
+    fi
+    return 0
   fi
 
   printf "Passed library load path is neither a library loader nor library directory: %s\n" "$library_load_path" >&2
@@ -148,9 +148,9 @@ bats_load_library() { # <slug>
 
 # load acts like bats_load_safe but exits the shell instead of returning 1.
 load() {
-    if ! bats_load_safe "$@"; then
-        exit 1
-    fi
+  if ! bats_load_safe "$@"; then
+    exit 1
+  fi
 }
 
 bats_redirect_stderr_into_file() {
@@ -192,32 +192,32 @@ run() { # [!|-N] [--keep-empty-lines] [--separate-stderr] [--] <command to run..
   while [[ $# -gt 0 ]] && [[ $1 == -* || $1 == '!' ]]; do
     has_flags=1
     case "$1" in
-      '!')
-        expected_rc=-1
+    '!')
+      expected_rc=-1
       ;;
-      -[0-9]*)
-        expected_rc=${1#-}
-        if [[ $expected_rc =~ [^0-9] ]]; then
-          printf "Usage error: run: '-NNN' requires numeric NNN (got: %s)\n" "$expected_rc" >&2
-          return 1
-        elif [[ $expected_rc -gt 255 ]]; then
-          printf "Usage error: run: '-NNN': NNN must be <= 255 (got: %d)\n" "$expected_rc" >&2
-          return 1
-        fi
-      ;;
-      --keep-empty-lines)
-        keep_empty_lines=1
-      ;;
-      --separate-stderr)
-        output_case="separate"
-      ;;
-      --)
-        shift # eat the -- before breaking away
-        break
-      ;;
-      *)
-        printf "Usage error: unknown flag '%s'" "$1" >&2
+    -[0-9]*)
+      expected_rc=${1#-}
+      if [[ $expected_rc =~ [^0-9] ]]; then
+        printf "Usage error: run: '-NNN' requires numeric NNN (got: %s)\n" "$expected_rc" >&2
         return 1
+      elif [[ $expected_rc -gt 255 ]]; then
+        printf "Usage error: run: '-NNN': NNN must be <= 255 (got: %d)\n" "$expected_rc" >&2
+        return 1
+      fi
+      ;;
+    --keep-empty-lines)
+      keep_empty_lines=1
+      ;;
+    --separate-stderr)
+      output_case="separate"
+      ;;
+    --)
+      shift # eat the -- before breaking away
+      break
+      ;;
+    *)
+      printf "Usage error: unknown flag '%s'" "$1" >&2
+      return 1
       ;;
     esac
     shift
@@ -230,13 +230,13 @@ run() { # [!|-N] [--keep-empty-lines] [--separate-stderr] [--] <command to run..
   local pre_command=
 
   case "$output_case" in
-    merged) # redirects stderr into stdout and fills only $output/$lines
-      pre_command=bats_merge_stdout_and_stderr
+  merged) # redirects stderr into stdout and fills only $output/$lines
+    pre_command=bats_merge_stdout_and_stderr
     ;;
-    separate) # splits stderr into own file and fills $stderr/$stderr_lines too
-      local bats_run_separate_stderr_file
-      bats_run_separate_stderr_file="$(mktemp "${BATS_TEST_TMPDIR}/separate-stderr-XXXXXX")"
-      pre_command=bats_redirect_stderr_into_file
+  separate) # splits stderr into own file and fills $stderr/$stderr_lines too
+    local bats_run_separate_stderr_file
+    bats_run_separate_stderr_file="$(mktemp "${BATS_TEST_TMPDIR}/separate-stderr-XXXXXX")"
+    pre_command=bats_redirect_stderr_into_file
     ;;
   esac
 
@@ -246,7 +246,12 @@ run() { # [!|-N] [--keep-empty-lines] [--separate-stderr] [--] <command to run..
     # 'output', 'status', 'lines' are global variables available to tests.
     # preserve trailing newlines by appending . and removing it later
     # shellcheck disable=SC2034
-    output="$("$pre_command" "$@"; status=$?; printf .; exit $status)" && status=0 || status=$?
+    output="$(
+      "$pre_command" "$@"
+      status=$?
+      printf .
+      exit $status
+    )" && status=0 || status=$?
     output="${output%.}"
   else
     # 'output', 'status', 'lines' are global variables available to tests.
@@ -257,9 +262,9 @@ run() { # [!|-N] [--keep-empty-lines] [--separate-stderr] [--] <command to run..
   bats_separate_lines lines output
 
   if [[ "$output_case" == separate ]]; then
-      # shellcheck disable=SC2034
-      read -d '' -r stderr < "$bats_run_separate_stderr_file" || true
-      bats_separate_lines stderr_lines stderr
+    # shellcheck disable=SC2034
+    read -d '' -r stderr <"$bats_run_separate_stderr_file" || true
+    bats_separate_lines stderr_lines stderr
   fi
 
   # shellcheck disable=SC2034
@@ -267,9 +272,8 @@ run() { # [!|-N] [--keep-empty-lines] [--separate-stderr] [--] <command to run..
   set "-$origFlags"
 
   if [[ ${BATS_VERBOSE_RUN:-} ]]; then
-    printf "%s\n" "$output" 
+    printf "%s\n" "$output"
   fi
-
 
   if [[ -n "$expected_rc" ]]; then
     if [[ "$expected_rc" = "-1" ]]; then
@@ -339,5 +343,5 @@ bats_test_function() {
 bats_should_retry_test() {
   # test try number starts at 1
   # 0 retries means run only first try
-  (( BATS_TEST_TRY_NUMBER <= BATS_TEST_RETRIES ))
+  ((BATS_TEST_TRY_NUMBER <= BATS_TEST_RETRIES))
 }

@@ -14,21 +14,21 @@ bats_test_count_validator() {
     # ... count the actual number of [not ] oks...
     local actual_number_of_tests=0
     while IFS= read -r line; do
-        # forward line
-        printf "%s\n" "$line"
-        case "$line" in
-        'ok '*)
-        (( ++actual_number_of_tests ))
+      # forward line
+      printf "%s\n" "$line"
+      case "$line" in
+      'ok '*)
+        ((++actual_number_of_tests))
         ;;
-        'not ok'*)
-        (( ++actual_number_of_tests ))
+      'not ok'*)
+        ((++actual_number_of_tests))
         ;;
-        esac
+      esac
     done
     # ... and error if they are not the same
     if [[ "${actual_number_of_tests}" != "${expected_number_of_tests}" ]]; then
-        printf '# bats warning: Executed %s instead of expected %s tests\n' "$actual_number_of_tests" "$expected_number_of_tests"
-        return 1
+      printf '# bats warning: Executed %s instead of expected %s tests\n' "$actual_number_of_tests" "$expected_number_of_tests"
+      return 1
     fi
   else
     # forward output unchanged

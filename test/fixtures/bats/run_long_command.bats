@@ -1,3 +1,3 @@
 @test "run long command" {
-    run sleep 3
+  run sleep 3
 }

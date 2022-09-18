@@ -1,15 +1,15 @@
 setup() {
-    true
+  true
 }
 
 teardown() {
-    true
+  true
 }
 
 setup_file() {
-    true
+  true
 }
 
 teardown_file() {
-    true
+  true
 }

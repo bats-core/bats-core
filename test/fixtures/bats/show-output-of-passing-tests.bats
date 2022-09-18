@@ -1,3 +1,3 @@
 @test "test" {
-    echo output
+  echo output
 }

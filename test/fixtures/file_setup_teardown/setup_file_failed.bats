@@ -1,11 +1,11 @@
 setup_file() {
-    false
+  false
 }
 
 @test "test 1" {
-    true
+  true
 }
 
 @test "test 2" {
-    true
+  true
 }

@@ -1,5 +1,5 @@
-echo "file1" >> "$TEMPFILE"
+echo "file1" >>"$TEMPFILE"
 
 @test "test1" {
-    :
+  :
 }

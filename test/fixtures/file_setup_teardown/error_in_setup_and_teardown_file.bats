@@ -1,11 +1,11 @@
 setup_file() {
-    false
+  false
 }
 
 teardown_file() {
-    false
+  false
 }
 
 @test dummy {
-    :
+  :
 }

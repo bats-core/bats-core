@@ -4,5 +4,5 @@
 # bats test_tags=,bc
 # bats test_tags=a+b
 @test test {
-    :    
+  :
 }

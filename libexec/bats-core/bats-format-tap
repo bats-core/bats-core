@@ -6,50 +6,50 @@ trap '' INT
 source "$BATS_ROOT/lib/bats-core/formatter.bash"
 
 bats_tap_stream_plan() {
-    printf "1..%d\n" "$1"
+  printf "1..%d\n" "$1"
 }
 
 bats_tap_stream_begin() { #<test index> <test name>
-    :
+  :
 }
 
 bats_tap_stream_ok() { # [<test index> <test name>
-    printf "ok %d %s" "$1" "$2"
-    if [[ "${BATS_FORMATTER_TEST_DURATION-x}" != x ]]; then
-        printf " # in %d ms" "$BATS_FORMATTER_TEST_DURATION"
-    fi
-    printf "\n"
+  printf "ok %d %s" "$1" "$2"
+  if [[ "${BATS_FORMATTER_TEST_DURATION-x}" != x ]]; then
+    printf " # in %d ms" "$BATS_FORMATTER_TEST_DURATION"
+  fi
+  printf "\n"
 }
 
 bats_tap_stream_not_ok() { # <test index> <test name>
-    printf "not ok %d %s" "$1" "$2"
-    if [[ "${BATS_FORMATTER_TEST_DURATION-x}" != x ]]; then
-        printf " # in %d ms" "$BATS_FORMATTER_TEST_DURATION"
-    fi
-    if [[ "${BATS_FORMATTER_TEST_TIMEOUT-x}" != x ]]; then
-        printf " # timeout after %d s" "${BATS_FORMATTER_TEST_TIMEOUT}"
-    fi
-    printf "\n"
+  printf "not ok %d %s" "$1" "$2"
+  if [[ "${BATS_FORMATTER_TEST_DURATION-x}" != x ]]; then
+    printf " # in %d ms" "$BATS_FORMATTER_TEST_DURATION"
+  fi
+  if [[ "${BATS_FORMATTER_TEST_TIMEOUT-x}" != x ]]; then
+    printf " # timeout after %d s" "${BATS_FORMATTER_TEST_TIMEOUT}"
+  fi
+  printf "\n"
 }
 
 bats_tap_stream_skipped() { # <test index> <test name> <reason>
-    if [[ $# -eq 3 ]]; then
-        printf "ok %d %s # skip %s\n" "$1" "$2" "$3"
-    else
-        printf "ok %d %s # skip\n" "$1" "$2" 
-    fi
+  if [[ $# -eq 3 ]]; then
+    printf "ok %d %s # skip %s\n" "$1" "$2" "$3"
+  else
+    printf "ok %d %s # skip\n" "$1" "$2"
+  fi
 }
 
 bats_tap_stream_comment() { # <comment text without leading '# '>
-    printf "# %s\n" "$1"
+  printf "# %s\n" "$1"
 }
 
 bats_tap_stream_suite() { # <file name>
-    :
+  :
 }
 
-bats_tap_stream_unknown() { # <full line>       
-    printf "%s\n" "$1"
+bats_tap_stream_unknown() { # <full line>
+  printf "%s\n" "$1"
 }
 
 bats_parse_internal_extended_tap

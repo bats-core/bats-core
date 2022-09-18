@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 
 bats_prefix_lines_for_tap_output() {
-    while IFS= read -r line; do
-      printf '# %s\n' "$line" || break # avoid feedback loop when errors are redirected into BATS_OUT (see #353)
-    done
-    if [[ -n "$line" ]]; then
-      printf '# %s\n' "$line"
-    fi
+  while IFS= read -r line; do
+    printf '# %s\n' "$line" || break # avoid feedback loop when errors are redirected into BATS_OUT (see #353)
+  done
+  if [[ -n "$line" ]]; then
+    printf '# %s\n' "$line"
+  fi
 }
 
 function bats_replace_filename() {
@@ -20,7 +20,7 @@ function bats_replace_filename() {
 }
 
 bats_quote_code() { # <var> <code>
-	printf -v "$1" -- "%s%s%s" "$BATS_BEGIN_CODE_QUOTE" "$2" "$BATS_END_CODE_QUOTE"
+  printf -v "$1" -- "%s%s%s" "$BATS_BEGIN_CODE_QUOTE" "$2" "$BATS_END_CODE_QUOTE"
 }
 
 bats_check_valid_version() {
@@ -36,13 +36,13 @@ bats_version_lt() { # <version1> <version2>
   bats_check_valid_version "$2"
 
   local -a version1_parts version2_parts
-  IFS=. read -ra version1_parts <<< "$1"
-  IFS=. read -ra version2_parts <<< "$2"
+  IFS=. read -ra version1_parts <<<"$1"
+  IFS=. read -ra version2_parts <<<"$2"
 
   for i in {0..2}; do
-    if (( version1_parts[i] < version2_parts[i] )); then
+    if ((version1_parts[i] < version2_parts[i])); then
       return 0
-    elif (( version1_parts[i] > version2_parts[i] )); then
+    elif ((version1_parts[i] > version2_parts[i])); then
       return 1
     fi
   done
@@ -71,16 +71,16 @@ bats_binary_search() { # <search-value> <array-name>
   fi
 
   local -r search_value=$1 array_name=$2
-  
+
   # we'd like to test if array is set but we cannot distinguish unset from empty arrays, so we need to skip that
 
-  local start=0 mid end mid_value 
+  local start=0 mid end mid_value
   # start is inclusive, end is exclusive ...
   eval "end=\${#${array_name}[@]}"
 
   # so start == end means empty search space
-  while (( start < end )); do
-    mid=$(( (start + end) / 2 ))
+  while ((start < end)); do
+    mid=$(((start + end) / 2))
     eval "mid_value=\${${array_name}[$mid]}"
     if [[ "$mid_value" == "$search_value" ]]; then
       return 0
@@ -103,20 +103,20 @@ bats_sort() { # <result-array-name> <values to sort...>
   local -r result_name=$1
   shift
 
-  if (( $# == 0 )); then
+  if (($# == 0)); then
     eval "$result_name=()"
     return 0
   fi
 
   local -a sorted_array=()
   local -i j i=0
-  for (( j=1; j <= $#; ++j )); do
-    for ((i=${#sorted_array[@]}; i >= 0; --i )); do
-      if [[ $i -eq 0 || ${sorted_array[$((i-1))]} < ${!j} ]]; then
+  for ((j = 1; j <= $#; ++j)); do
+    for ((i = ${#sorted_array[@]}; i >= 0; --i)); do
+      if [[ $i -eq 0 || ${sorted_array[$((i - 1))]} < ${!j} ]]; then
         sorted_array[$i]=${!j}
         break
       else
-        sorted_array[$i]=${sorted_array[$((i-1))]}
+        sorted_array[$i]=${sorted_array[$((i - 1))]}
       fi
     done
   done
@@ -132,12 +132,12 @@ bats_all_in() { # <sorted-array> <sorted search values...>
 
   local -i haystack_length # just to appease shellcheck
   eval "local -r haystack_length=\${#${haystack_array}[@]}"
-  
-  local -i haystack_index=0 # initialize only here to continue from last search position
+
+  local -i haystack_index=0         # initialize only here to continue from last search position
   local search_value haystack_value # just to appease shellcheck
-  for (( i=1; i <= $#; ++i )); do
+  for ((i = 1; i <= $#; ++i)); do
     eval "local search_value=${!i}"
-    for ((; haystack_index < haystack_length; ++haystack_index)); do
+    for (( ; haystack_index < haystack_length; ++haystack_index)); do
       eval "local haystack_value=\${${haystack_array}[$haystack_index]}"
       if [[ $haystack_value > "$search_value" ]]; then
         # we passed the location this value would have been at -> not found
@@ -161,12 +161,12 @@ bats_any_in() { # <sorted-array> <sorted search values>
 
   local -i haystack_length # just to appease shellcheck
   eval "local -r haystack_length=\${#${haystack_array}[@]}"
-  
-  local -i haystack_index=0 # initialize only here to continue from last search position
+
+  local -i haystack_index=0         # initialize only here to continue from last search position
   local search_value haystack_value # just to appease shellcheck
-  for (( i=1; i <= $#; ++i )); do
+  for ((i = 1; i <= $#; ++i)); do
     eval "local search_value=${!i}"
-    for ((; haystack_index < haystack_length; ++haystack_index)); do
+    for (( ; haystack_index < haystack_length; ++haystack_index)); do
       eval "local haystack_value=\${${haystack_array}[$haystack_index]}"
       if [[ $haystack_value > "$search_value" ]]; then
         continue 2 # search value not in array! -> try next
@@ -180,7 +180,7 @@ bats_any_in() { # <sorted-array> <sorted search values>
   return 1
 }
 
-bats_trim () { # <output-variable> <string>
+bats_trim() {                                            # <output-variable> <string>
   local -r bats_trim_ltrimmed=${2#"${2%%[![:space:]]*}"} # cut off leading whitespace
   # shellcheck disable=SC2034 # used in eval!
   local -r bats_trim_trimmed=${bats_trim_ltrimmed%"${bats_trim_ltrimmed##*[![:space:]]}"} # cut off trailing whitespace
@@ -188,9 +188,9 @@ bats_trim () { # <output-variable> <string>
 }
 
 # a helper function to work around unbound variable errors with ${arr[@]} on Bash 3
-bats_append_arrays_as_args () { # <array...> -- <command ...>
+bats_append_arrays_as_args() { # <array...> -- <command ...>
   local -a trailing_args=()
-  while (( $# > 0)) && [[ $1 != -- ]]; do
+  while (($# > 0)) && [[ $1 != -- ]]; do
     local array=$1
     shift
 
@@ -198,14 +198,14 @@ bats_append_arrays_as_args () { # <array...> -- <command ...>
       eval "trailing_args+=(\"\${${array}[@]}\")"
     fi
   done
-  shift # remove -- separator 
+  shift # remove -- separator
 
-  if (( $# == 0 )); then
+  if (($# == 0)); then
     printf "Error: append_arrays_as_args is missing a command or -- separator\n" >&2
     return 1
   fi
 
-  if (( ${#trailing_args[@]} > 0 )); then
+  if ((${#trailing_args[@]} > 0)); then
     "$@" "${trailing_args[@]}"
   else
     "$@"
