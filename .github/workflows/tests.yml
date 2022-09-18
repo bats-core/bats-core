@@ -19,7 +19,10 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
-      - run: shfmt --diff .
+      - run: |
+          curl https://github.com/mvdan/sh/releases/download/v3.5.1/shfmt_v3.5.1_linux_amd64 -o shfmt
+          chmod a+x shfmt
+      - run: ./shfmt --diff .
 
   shellcheck:
     runs-on: ubuntu-20.04
