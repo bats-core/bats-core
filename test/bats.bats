@@ -781,8 +781,10 @@ END_OF_ERR_MSG
 
   [ "${lines[1]}" == "not ok 1 test" ]
   # due to scheduling the exact line will vary but we should exit with 130
+  [[ "${lines[2]}" == "# (in test file "*")" ]] || false  
   [[ "${lines[3]}" == *"failed with status 130" ]] || false
   [ "${lines[4]}" == "# Received SIGINT, aborting ..." ]
+  [ ${#lines[@]} -eq 5 ]
 }
 
 @test "CTRL-C aborts and fails the current run" {
