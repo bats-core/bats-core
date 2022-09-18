@@ -83,7 +83,7 @@ finish_test() {
     fi
   fi
   advance
-  move_down $(( line_backoff_count - 1 ))
+  move_down $((line_backoff_count - 1))
 }
 
 pass() {
@@ -117,13 +117,13 @@ timeout() {
 
 log() {
   case ${test_result} in
-    pass)
+  pass)
     clear_color
     ;;
-    fail)
+  fail)
     set_color 1
     ;;
-    timeout)
+  timeout)
     set_color 3
     ;;
   esac
@@ -132,7 +132,7 @@ log() {
 }
 
 summary() {
-  if  [ "$failures" -eq 0 ] ; then
+  if [ "$failures" -eq 0 ]; then
     set_color 2 bold
   else
     set_color 1 bold
@@ -152,7 +152,7 @@ summary() {
     buffer ', %d skipped' "$skipped"
   fi
 
-  if (( timed_out > 0 )); then
+  if ((timed_out > 0)); then
     buffer ', %d timed out' "$timed_out"
   fi
 
@@ -276,7 +276,7 @@ bats_tap_stream_ok() {
   index="$1"
   name="$2"
   ((++passed))
-  
+
   pass "${BATS_FORMATTER_TEST_DURATION:-}"
 }
 
@@ -290,7 +290,7 @@ bats_tap_stream_skipped() {
 bats_tap_stream_not_ok() {
   index="$1"
   name="$2"
-  
+
   if [[ ${BATS_FORMATTER_TEST_TIMEOUT-x} != x ]]; then
     timeout "${BATS_FORMATTER_TEST_DURATION:-}" "${BATS_FORMATTER_TEST_TIMEOUT}s"
     ((++timed_out))
@@ -298,7 +298,7 @@ bats_tap_stream_not_ok() {
     fail "${BATS_FORMATTER_TEST_DURATION:-}"
     ((++failures))
   fi
-  
+
 }
 
 bats_tap_stream_comment() { # <comment> <scope>
@@ -307,11 +307,11 @@ bats_tap_stream_comment() { # <comment> <scope>
   if [[ $line_backoff_count -eq 0 && $scope == begin ]]; then
     # if this is the first line after begin, go down one line
     buffer "\n"
-    (( ++line_backoff_count )) # prefix-increment to avoid "error" due to returning 0
+    ((++line_backoff_count)) # prefix-increment to avoid "error" due to returning 0
   fi
 
-  (( ++line_backoff_count ))
-  (( line_backoff_count += ${#1} / screen_width)) # account for linebreaks due to length
+  ((++line_backoff_count))
+  ((line_backoff_count += ${#1} / screen_width)) # account for linebreaks due to length
   log "$1"
 }
 
@@ -329,18 +329,18 @@ bats_tap_stream_suite() {
 
 line_backoff_count=0
 bats_tap_stream_unknown() { # <full line> <scope>
-    local scope=$2
-    # count the lines we printed after the begin text, (or after suite, in case of syntax errors)
-    if [[ $line_backoff_count -eq 0 && ( $scope == begin ||  $scope == suite )]]; then
-      # if this is the first line after begin, go down one line
-      buffer "\n"
-      (( ++line_backoff_count )) # prefix-increment to avoid "error" due to returning 0
-    fi
+  local scope=$2
+  # count the lines we printed after the begin text, (or after suite, in case of syntax errors)
+  if [[ $line_backoff_count -eq 0 && ($scope == begin || $scope == suite) ]]; then
+    # if this is the first line after begin, go down one line
+    buffer "\n"
+    ((++line_backoff_count)) # prefix-increment to avoid "error" due to returning 0
+  fi
 
-    (( ++line_backoff_count ))
-    (( line_backoff_count += ${#1} / screen_width)) # account for linebreaks due to length
-    buffer "%s\n" "$1"
-    flush
+  ((++line_backoff_count))
+  ((line_backoff_count += ${#1} / screen_width)) # account for linebreaks due to length
+  buffer "%s\n" "$1"
+  flush
 }
 
 bats_parse_internal_extended_tap

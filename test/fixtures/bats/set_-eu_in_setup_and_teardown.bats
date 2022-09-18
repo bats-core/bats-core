@@ -1,23 +1,23 @@
 setup() {
-    set -eu
+  set -eu
 }
 
 teardown() {
-    set -eu
+  set -eu
 }
 
 @test "skipped test" {
-    skip
+  skip
 }
 
 @test "skipped test with reason" {
-    skip "reason"
+  skip "reason"
 }
 
 @test "passing test" {
-    run true
+  run true
 }
 
 @test "failing test" {
-    false
+  false
 }

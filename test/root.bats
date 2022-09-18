@@ -53,19 +53,19 @@ setup() {
   mkdir -p "opt/bats/bin2"
   pwd
 
-# - /usr/bin/foo => /usr/bin/bar (relative executable)
+  # - /usr/bin/foo => /usr/bin/bar (relative executable)
   ln -s bar usr/bin/foo
-# - /usr/bin/bar => /opt/bats/bin0/bar (absolute executable)
+  # - /usr/bin/bar => /opt/bats/bin0/bar (absolute executable)
   ln -s "$BATS_TEST_TMPDIR/opt/bats/bin0/bar" usr/bin/bar
-# - /opt/bats/bin0 => /opt/bats/bin1 (relative directory)
+  # - /opt/bats/bin0 => /opt/bats/bin1 (relative directory)
   ln -s bin1 opt/bats/bin0
-# - /opt/bats/bin1 => /opt/bats/bin2 (absolute directory)
+  # - /opt/bats/bin1 => /opt/bats/bin2 (absolute directory)
   ln -s "$BATS_TEST_TMPDIR/opt/bats/bin2" opt/bats/bin1
-# - /opt/bats/bin2/bar => /opt/bats-core/bin/bar (absolute executable)
+  # - /opt/bats/bin2/bar => /opt/bats-core/bin/bar (absolute executable)
   ln -s "$BATS_TEST_TMPDIR/opt/bats-core/bin/bar" opt/bats/bin2/bar
-# - /opt/bats-core/bin/bar => /opt/bats-core/bin/baz (relative executable)
+  # - /opt/bats-core/bin/bar => /opt/bats-core/bin/baz (relative executable)
   ln -s baz opt/bats-core/bin/bar
-# - /opt/bats-core/bin/baz => /opt/bats-core/bin/bats (relative executable)
+  # - /opt/bats-core/bin/baz => /opt/bats-core/bin/bats (relative executable)
   ln -s bats opt/bats-core/bin/baz
 
   # shellcheck disable=SC2103,SC2164

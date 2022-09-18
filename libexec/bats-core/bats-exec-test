@@ -20,10 +20,10 @@ while [[ "$#" -ne 0 ]]; do
     # shellcheck disable=SC2034
     BATS_EXTENDED_SYNTAX='-x'
     ;;
-  --dummy-flag)
-    ;;
+  --dummy-flag) ;;
+
   --trace)
-    (( ++BATS_TRACE_LEVEL )) # avoid returning 0
+    ((++BATS_TRACE_LEVEL)) # avoid returning 0
     ;;
   --print-output-on-failure)
     BATS_PRINT_OUTPUT_ON_FAILURE=1
@@ -72,7 +72,7 @@ bats_create_test_tmpdirs() {
     exit 1
   fi
 
-  printf "%s\n" "$BATS_TEST_NAME" > "$BATS_TEST_TMPDIR.name"
+  printf "%s\n" "$BATS_TEST_NAME" >"$BATS_TEST_TMPDIR.name"
 
   export BATS_TEST_TMPDIR
 }
@@ -91,7 +91,7 @@ bats_teardown_trap() {
   # The second parameter is optional and corresponds for to the killer pid
   # that will be forwarded to the exit trap to kill it if necesary
   local killer_pid=${2:-}
-  
+
   # mark the start of this function to distinguish where skip is called
   # parameter 1 will signify the reason why this function was called
   # this is used to identify when this is called as exit trap function
@@ -124,15 +124,15 @@ bats_exit_trap() {
   if [[ -n "$BATS_TEST_SKIPPED" ]]; then
     exit_metadata=' # skip'
     if [[ "$BATS_TEST_SKIPPED" != '1' ]]; then
-        exit_metadata+=" $BATS_TEST_SKIPPED"
+      exit_metadata+=" $BATS_TEST_SKIPPED"
     fi
   elif [[ "${BATS_TIMED_OUT-NOTSET}" != NOTSET ]]; then
-     exit_metadata=" # timeout after ${BATS_TEST_TIMEOUT}s"
+    exit_metadata=" # timeout after ${BATS_TEST_TIMEOUT}s"
   fi
 
   BATS_TEST_TIME=''
   if [[ -n "$BATS_ENABLE_TIMING" ]]; then
-    BATS_TEST_TIME=" in "$(( $(get_mills_since_epoch) - BATS_TEST_START_TIME ))"ms"
+    BATS_TEST_TIME=" in "$(($(get_mills_since_epoch) - BATS_TEST_START_TIME))"ms"
   fi
 
   local print_bats_out="${BATS_SHOW_OUTPUT_OF_SUCCEEDING_TESTS}"
@@ -153,7 +153,7 @@ bats_exit_trap() {
     fi
     if bats_should_retry_test; then
       should_retry=1
-      status=126 # signify retry
+      status=126                # signify retry
       rm -r "$BATS_TEST_TMPDIR" # clean up for retry
     else
       printf 'not ok %d %s%s\n' "$BATS_SUITE_TEST_NUMBER" "${BATS_TEST_NAME_PREFIX:-}${BATS_TEST_DESCRIPTION}${BATS_TEST_TIME}" "$exit_metadata" >&3
@@ -169,9 +169,9 @@ bats_exit_trap() {
         if [[ -n "${stderr:-}" ]]; then
           printf "Last stderr: \n%s\n" "$stderr"
         fi
-      fi  >> "$BATS_OUT"
+      fi >>"$BATS_OUT"
 
-      print_bats_out=1    
+      print_bats_out=1
       status=1
       local state=failed
     fi
@@ -183,10 +183,10 @@ bats_exit_trap() {
   fi
 
   if [[ -z "$should_retry" ]]; then
-    printf "%s %s\t%s\n" "$state" "$BATS_TEST_FILENAME" "$BATS_TEST_NAME" >> "$BATS_RUNLOG_FILE"
+    printf "%s %s\t%s\n" "$state" "$BATS_TEST_FILENAME" "$BATS_TEST_NAME" >>"$BATS_RUNLOG_FILE"
 
     if [[ $print_bats_out ]]; then
-      bats_prefix_lines_for_tap_output < "$BATS_OUT" | bats_replace_filename >&3
+      bats_prefix_lines_for_tap_output <"$BATS_OUT" | bats_replace_filename >&3
     fi
   fi
   if [[ $BATS_GATHER_TEST_OUTPUTS_IN ]]; then
@@ -201,7 +201,7 @@ bats_exit_trap() {
 }
 
 # Marks the test as failed due to timeout.
-# The actual termination of subprocesses is done via pkill in the background 
+# The actual termination of subprocesses is done via pkill in the background
 # process in bats_start_timeout_countdown
 bats_timeout_trap() {
   BATS_TIMED_OUT=1
@@ -210,24 +210,24 @@ bats_timeout_trap() {
 }
 
 bats_get_child_processes_of() { # <parent-pid>
-    local -ri parent_pid=${1?}
-    {
-      read -ra header
-      local pid_col ppid_col
-      for (( i = 0; i < ${#header[@]}; ++i )); do
-        if [[ ${header[$i]} == "PID" ]]; then
-          pid_col=$i
-        fi
-        if [[ ${header[$i]} == "PPID" ]]; then
-          ppid_col=$i
-        fi
-      done
-      while read -ra row; do
-        if (( ${row[$ppid_col]} == parent_pid )); then
-          printf "%d\n" "${row[$pid_col]}"
-        fi
-      done
-    } < <(ps -ef "$parent_pid")
+  local -ri parent_pid=${1?}
+  {
+    read -ra header
+    local pid_col ppid_col
+    for ((i = 0; i < ${#header[@]}; ++i)); do
+      if [[ ${header[$i]} == "PID" ]]; then
+        pid_col=$i
+      fi
+      if [[ ${header[$i]} == "PPID" ]]; then
+        ppid_col=$i
+      fi
+    done
+    while read -ra row; do
+      if ((${row[$ppid_col]} == parent_pid)); then
+        printf "%d\n" "${row[$pid_col]}"
+      fi
+    done
+  } < <(ps -ef "$parent_pid")
 }
 
 bats_kill_childprocesses_of() { # <parent-pid>
@@ -248,7 +248,7 @@ bats_kill_childprocesses_of() { # <parent-pid>
 # Ruled out:
 # USR1/2 - not available on Windows
 # SIGALRM - interferes with sleep:
-#           "sleep(3) may be implemented using SIGALRM; mixing calls to alarm() 
+#           "sleep(3) may be implemented using SIGALRM; mixing calls to alarm()
 #           and sleep(3) is a bad idea." ~ https://linux.die.net/man/2/alarm
 bats_start_timeout_countdown() { # <timeout>
   local -ri timeout=$1
@@ -261,16 +261,16 @@ bats_start_timeout_countdown() { # <timeout>
   fi
   # Start another process to kill the children of this process
   (
-     sleep "$timeout" &
-     # sleep won't recieve signals, so we use wait below
-     # and kill sleep explicitly when signalled to do so
-     # shellcheck disable=SC2064
-     trap "kill $!; exit 0" ABRT
-     wait
-     if kill -ABRT "$target_pid"; then
-        # get rid of signal blocking child processes (like sleep)
-        bats_kill_childprocesses_of "$target_pid"
-     fi  &> /dev/null
+    sleep "$timeout" &
+    # sleep won't recieve signals, so we use wait below
+    # and kill sleep explicitly when signalled to do so
+    # shellcheck disable=SC2064
+    trap "kill $!; exit 0" ABRT
+    wait
+    if kill -ABRT "$target_pid"; then
+      # get rid of signal blocking child processes (like sleep)
+      bats_kill_childprocesses_of "$target_pid"
+    fi &>/dev/null
   ) &
 }
 
@@ -283,9 +283,9 @@ get_mills_since_epoch() {
   local ms_since_epoch
   ms_since_epoch=$(date +%s%N)
   if [[ "$ms_since_epoch" == *N || "${#ms_since_epoch}" -lt 19 ]]; then
-        ms_since_epoch=$(( $(date +%s) * 1000 ))
+    ms_since_epoch=$(($(date +%s) * 1000))
   else
-        ms_since_epoch=$(( ms_since_epoch / 1000000 ))
+    ms_since_epoch=$((ms_since_epoch / 1000000))
   fi
 
   printf "%d\n" "$ms_since_epoch"

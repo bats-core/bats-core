@@ -5,5 +5,5 @@
 }
 
 teardown() {
-	skip "This is not working (https://github.com/clearcontainers/runtime/issues/1042)"
+  skip "This is not working (https://github.com/clearcontainers/runtime/issues/1042)"
 }

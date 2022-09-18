@@ -1,8 +1,8 @@
-@test "empty" { }
+@test "empty" {; }
 
 @test "passing" { true; }
 
-@test "input redirection" { diff - <( echo hello ); } <<EOS
+@test "input redirection" { diff - <(echo hello); } <<EOS
 hello
 EOS
 

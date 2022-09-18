@@ -81,14 +81,14 @@ EOF
 }
 
 @test "absolute paths load external formatters" {
-    bats_require_minimum_version 1.5.0
-    reentrant_run -0 bats "$FIXTURE_ROOT/passing.bats"  --formatter "$FIXTURE_ROOT/dummy-formatter"
-    [ "$output" = "Dummy Formatter!" ]
+  bats_require_minimum_version 1.5.0
+  reentrant_run -0 bats "$FIXTURE_ROOT/passing.bats" --formatter "$FIXTURE_ROOT/dummy-formatter"
+  [ "$output" = "Dummy Formatter!" ]
 }
 
 @test "specifying nonexistent external formatter is an error" {
   bats_require_minimum_version 1.5.0
-  reentrant_run -1 bats "$FIXTURE_ROOT/passing.bats"  --formatter "$FIXTURE_ROOT/non-existing-file"
+  reentrant_run -1 bats "$FIXTURE_ROOT/passing.bats" --formatter "$FIXTURE_ROOT/non-existing-file"
   [ "$output" = "ERROR: Formatter '$FIXTURE_ROOT/non-existing-file' is not readable!" ]
 }
 
@@ -96,6 +96,6 @@ EOF
   bats_require_minimum_version 1.5.0
   local non_executable="$BATS_TEST_TMPDIR/non-executable"
   touch "$non_executable"
-  reentrant_run -1 bats "$FIXTURE_ROOT/passing.bats"  --formatter "$non_executable"
+  reentrant_run -1 bats "$FIXTURE_ROOT/passing.bats" --formatter "$non_executable"
   [ "$output" = "ERROR: Formatter '$non_executable' is not executable!" ]
 }

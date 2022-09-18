@@ -26,8 +26,8 @@ fallback_to_readlinkf_posix() {
     while [ "$max_symlinks" -ge 0 ] && max_symlinks=$((max_symlinks - 1)); do
       if [ ! "$target" = "${target%/*}" ]; then
         case $target in
-          /*) cd -P "${target%/*}/" 2>/dev/null || break ;;
-          *) cd -P "./${target%/*}" 2>/dev/null || break ;;
+        /*) cd -P "${target%/*}/" 2>/dev/null || break ;;
+        *) cd -P "./${target%/*}" 2>/dev/null || break ;;
         esac
         target=${target##*/}
       fi

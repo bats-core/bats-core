@@ -1,3 +1,3 @@
 @test "another test" {
-    true
+  true
 }

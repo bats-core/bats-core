@@ -1,7 +1,7 @@
 teardown() {
-    load 'test_helper'
+  load 'test_helper'
 }
 
 @test failed {
-    false
+  false
 }

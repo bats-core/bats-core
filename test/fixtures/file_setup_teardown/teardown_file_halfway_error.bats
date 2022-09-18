@@ -1,9 +1,9 @@
 teardown_file() {
-    true
-    false
-    true
+  true
+  false
+  true
 }
 
 @test "empty" {
-    true
+  true
 }

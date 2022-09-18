@@ -91,7 +91,10 @@ expand_path() {
   printf -v "$result" '%s/%s' "$dirname" "${path##*/}"
 }
 
-BATS_LIBEXEC="$(cd "$(dirname "$(bats_readlinkf "${BASH_SOURCE[0]}")")"; pwd)"
+BATS_LIBEXEC="$(
+  cd "$(dirname "$(bats_readlinkf "${BASH_SOURCE[0]}")")"
+  pwd
+)"
 export BATS_LIBEXEC
 export BATS_CWD="$PWD"
 export BATS_TEST_FILTER=
@@ -104,10 +107,10 @@ export BATS_GUARANTEED_MINIMUM_VERSION=0.0.0
 export BATS_LIB_PATH=${BATS_LIB_PATH-/usr/lib/bats}
 BATS_REPORT_OUTPUT_DIR=${BATS_REPORT_OUTPUT_DIR-.}
 
-if [[ ! -d "${BATS_TMPDIR}" ]];then
+if [[ ! -d "${BATS_TMPDIR}" ]]; then
   printf "Error: BATS_TMPDIR (%s) does not exist or is not a directory" "${BATS_TMPDIR}" >&2
   exit 1
-elif [[ ! -w "${BATS_TMPDIR}" ]];then
+elif [[ ! -w "${BATS_TMPDIR}" ]]; then
   printf "Error: BATS_TMPDIR (%s) is not writable" "${BATS_TMPDIR}" >&2
   exit 1
 fi
@@ -134,7 +137,7 @@ set -- "${arguments[@]}"
 arguments=()
 
 unset flags recursive formatter_flags
-flags=('--dummy-flag') # add a dummy flag to prevent unset variable errors on empty array expansion in old bash versions
+flags=('--dummy-flag')           # add a dummy flag to prevent unset variable errors on empty array expansion in old bash versions
 formatter_flags=('--dummy-flag') # add a dummy flag to prevent unset variable errors on empty array expansion in old bash versions
 formatter=${BATS_FORMATTER:-'tap'}
 report_formatter=''
@@ -204,8 +207,8 @@ while [[ "$#" -ne 0 ]]; do
     formatter_flags+=('-T')
     ;;
   # this flag is now a no-op, as it is the parallel default
-  --parallel-preserve-environment)
-    ;;
+  --parallel-preserve-environment) ;;
+
   --no-parallelize-across-files)
     flags+=("--no-parallelize-across-files")
     ;;
@@ -250,7 +253,7 @@ while [[ "$#" -ne 0 ]]; do
   --code-quote-style)
     shift
     BATS_CODE_QUOTE_STYLE="$1"
-  ;;
+    ;;
   --filter-status)
     shift
     flags+=('--filter-status' "$1")
@@ -269,16 +272,16 @@ while [[ "$#" -ne 0 ]]; do
   shift
 done
 
-if [[ -n "${BATS_RUN_TMPDIR:-}" ]];then
+if [[ -n "${BATS_RUN_TMPDIR:-}" ]]; then
   if [[ -d "$BATS_RUN_TMPDIR" ]]; then
     printf "Error: BATS_RUN_TMPDIR (%s) already exists\n" "$BATS_RUN_TMPDIR" >&2
     printf "Reusing old run directories can lead to unexpected results ... aborting!\n" >&2
     exit 1
-  elif ! mkdir -p "$BATS_RUN_TMPDIR" ;then
+  elif ! mkdir -p "$BATS_RUN_TMPDIR"; then
     printf "Error: Failed to create BATS_RUN_TMPDIR (%s)\n" "$BATS_RUN_TMPDIR" >&2
     exit 1
   fi
-elif ! BATS_RUN_TMPDIR=$(mktemp -d "${BATS_TMPDIR}/bats-run-XXXXXX");then
+elif ! BATS_RUN_TMPDIR=$(mktemp -d "${BATS_TMPDIR}/bats-run-XXXXXX"); then
   printf "Error: Failed to create BATS_RUN_TMPDIR (%s) with mktemp\n" "${BATS_TMPDIR}/bats-run-XXXXXX" >&2
   exit 1
 fi
@@ -361,15 +364,15 @@ if [[ -n "$report_formatter" ]]; then
   # only set BATS_REPORT_FILENAME if none was given
   if [[ -z "${BATS_REPORT_FILENAME:-}" ]]; then
     case "$report_formatter" in
-      tap|tap13)
-        BATS_REPORT_FILENAME="report.tap"
-        ;;
-      junit)
-        BATS_REPORT_FILENAME="report.xml"
-        ;;
-      *)
-        BATS_REPORT_FILENAME="report.log"
-        ;;
+    tap | tap13)
+      BATS_REPORT_FILENAME="report.tap"
+      ;;
+    junit)
+      BATS_REPORT_FILENAME="report.xml"
+      ;;
+    *)
+      BATS_REPORT_FILENAME="report.log"
+      ;;
     esac
   fi
 fi
@@ -386,21 +389,21 @@ if [[ "${BATS_CODE_QUOTE_STYLE-BATS_CODE_QUOTE_STYLE_UNSET}" == BATS_CODE_QUOTE_
 fi
 
 case "${BATS_CODE_QUOTE_STYLE}" in
-  ??)
-    BATS_BEGIN_CODE_QUOTE="${BATS_CODE_QUOTE_STYLE::1}"
-    BATS_END_CODE_QUOTE="${BATS_CODE_QUOTE_STYLE:1:1}"
-    export BATS_BEGIN_CODE_QUOTE BATS_END_CODE_QUOTE
+??)
+  BATS_BEGIN_CODE_QUOTE="${BATS_CODE_QUOTE_STYLE::1}"
+  BATS_END_CODE_QUOTE="${BATS_CODE_QUOTE_STYLE:1:1}"
+  export BATS_BEGIN_CODE_QUOTE BATS_END_CODE_QUOTE
   ;;
-  custom)
-    if [[ ${BATS_BEGIN_CODE_QUOTE-BATS_BEGIN_CODE_QUOTE_UNSET} == BATS_BEGIN_CODE_QUOTE_UNSET 
-        || ${BATS_END_CODE_QUOTE-BATS_BEGIN_CODE_QUOTE_UNSET} == BATS_BEGIN_CODE_QUOTE_UNSET ]]; then
-      printf "ERROR: BATS_CODE_QUOTE_STYLE=custom requires BATS_BEGIN_CODE_QUOTE and BATS_END_CODE_QUOTE to be set\n" >&2
-      exit 1
-    fi
-  ;;
-  *)
-    printf "ERROR: Unknown BATS_CODE_QUOTE_STYLE: %s\n" "$BATS_CODE_QUOTE_STYLE" >&2
+custom)
+  if [[ ${BATS_BEGIN_CODE_QUOTE-BATS_BEGIN_CODE_QUOTE_UNSET} == BATS_BEGIN_CODE_QUOTE_UNSET ||
+    ${BATS_END_CODE_QUOTE-BATS_BEGIN_CODE_QUOTE_UNSET} == BATS_BEGIN_CODE_QUOTE_UNSET ]]; then
+    printf "ERROR: BATS_CODE_QUOTE_STYLE=custom requires BATS_BEGIN_CODE_QUOTE and BATS_END_CODE_QUOTE to be set\n" >&2
     exit 1
+  fi
+  ;;
+*)
+  printf "ERROR: Unknown BATS_CODE_QUOTE_STYLE: %s\n" "$BATS_CODE_QUOTE_STYLE" >&2
+  exit 1
   ;;
 esac
 
@@ -453,12 +456,12 @@ trap 'BATS_INTERRUPTED=true' INT # let the lower levels handle the interruption
 set -o pipefail execfail
 
 if [[ -n "$report_formatter" ]]; then
-  exec bats-exec-suite "${flags[@]}" "${filenames[@]}" | \
-    tee >("$interpolated_report_formatter" "${report_formatter_flags[@]}" >"${BATS_REPORT_OUTPUT_DIR}/${BATS_REPORT_FILENAME}") | \
-    bats_test_count_validator | \
+  exec bats-exec-suite "${flags[@]}" "${filenames[@]}" |
+    tee >("$interpolated_report_formatter" "${report_formatter_flags[@]}" >"${BATS_REPORT_OUTPUT_DIR}/${BATS_REPORT_FILENAME}") |
+    bats_test_count_validator |
     "$interpolated_formatter" "${formatter_flags[@]}"
 else
-  exec bats-exec-suite "${flags[@]}" "${filenames[@]}" | \
-    bats_test_count_validator | \
+  exec bats-exec-suite "${flags[@]}" "${filenames[@]}" |
+    bats_test_count_validator |
     "$interpolated_formatter" "${formatter_flags[@]}"
 fi

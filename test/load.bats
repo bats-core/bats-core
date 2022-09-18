@@ -82,7 +82,7 @@ setup() {
   mkdir -p "$path_dir/on_path"
   cp "${FIXTURE_ROOT}/test_helper.bash" "${path_dir}/on_path/load.bash"
   # shellcheck disable=SC2030,SC2031
-  export BATS_LIB_PATH="${path_dir}"  HELPER_NAME="on_path" 
+  export BATS_LIB_PATH="${path_dir}" HELPER_NAME="on_path"
   reentrant_run ! bats "$FIXTURE_ROOT/load.bats"
   reentrant_run -0 bats "$FIXTURE_ROOT/bats_load_library.bats"
 }
@@ -92,7 +92,7 @@ setup() {
   {
     echo "plain_variable='value of plain variable'"
     echo "plain_array=(test me hard)"
-  } > "${helper}"
+  } >"${helper}"
 
   load "${helper}"
   # shellcheck disable=SC2154
@@ -111,13 +111,13 @@ setup() {
     echo "declare -i an_integer=0x7e4"
     echo "declare -a an_array=(test me hard)"
     echo "declare -x exported_variable='value of exported variable'"
-  } > "${helper}"
+  } >"${helper}"
 
   load "${helper}"
 
   [ "${declared_variable:-}" != 'value of declared variable' ]
   [ "${a_constant:-}" != 'constant value' ]
-  (( "${an_integer:-2019}" != 2020 ))
+  (("${an_integer:-2019}" != 2020))
   [ "${an_array[2]:-}" != 'hard' ]
   [ "${exported_variable:-}" != 'value of exported variable' ]
 
@@ -129,7 +129,7 @@ setup() {
   mkdir -p "$path_dir"
   cp "${FIXTURE_ROOT}/test_helper.bash" "${path_dir}/on_path"
   # shellcheck disable=SC2030,SC2031
-  export PATH="${path_dir}:$PATH"  HELPER_NAME="on_path"
+  export PATH="${path_dir}:$PATH" HELPER_NAME="on_path"
   reentrant_run -0 bats "$FIXTURE_ROOT/load.bats"
 }
 
@@ -147,8 +147,8 @@ setup() {
 @test "bats_load_library supports libraries with loaders on the BATS_LIB_PATH with multiple libraries" {
   path_dir="$BATS_TEST_TMPDIR/libraries/"
   for lib in liba libb libc; do
-      mkdir -p "$path_dir/$lib"
-      cp "${FIXTURE_ROOT}/exit1.bash" "$path_dir/$lib/load.bash"
+    mkdir -p "$path_dir/$lib"
+    cp "${FIXTURE_ROOT}/exit1.bash" "$path_dir/$lib/load.bash"
   done
   mkdir -p "$path_dir/$BATS_TEST_NAME"
   cp "${FIXTURE_ROOT}/test_helper.bash" "$path_dir/$BATS_TEST_NAME/load.bash"
@@ -161,8 +161,8 @@ setup() {
 @test "bats_load_library can handle whitespaces in BATS_LIB_PATH" {
   path_dir="$BATS_TEST_TMPDIR/libraries with spaces/"
   for lib in liba libb libc; do
-      mkdir -p "$path_dir/$lib"
-      cp "${FIXTURE_ROOT}/exit1.bash" "$path_dir/$lib/load.bash"
+    mkdir -p "$path_dir/$lib"
+    cp "${FIXTURE_ROOT}/exit1.bash" "$path_dir/$lib/load.bash"
   done
   mkdir -p "$path_dir/$BATS_TEST_NAME"
   cp "${FIXTURE_ROOT}/test_helper.bash" "$path_dir/$BATS_TEST_NAME/load.bash"

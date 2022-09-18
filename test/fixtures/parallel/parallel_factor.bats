@@ -1,10 +1,10 @@
 setup() {
   load '../../concurrent-coordination'
-  echo setup "$BATS_TEST_NUMBER" >> "${MARKER_FILE?}"
+  echo setup "$BATS_TEST_NUMBER" >>"${MARKER_FILE?}"
 }
 
 teardown() {
-  echo teardown "$BATS_TEST_NUMBER" >> "${MARKER_FILE?}"
+  echo teardown "$BATS_TEST_NUMBER" >>"${MARKER_FILE?}"
 }
 
 @test "slow test 1" {

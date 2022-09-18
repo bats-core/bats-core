@@ -1,3 +1,3 @@
 @test "test" {
-    [[ "${SETUP_FILE_VAR-"NOT_SET"}" == "NOT_SET" ]]
+  [[ "${SETUP_FILE_VAR-"NOT_SET"}" == "NOT_SET" ]]
 }

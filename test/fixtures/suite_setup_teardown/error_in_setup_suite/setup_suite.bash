@@ -1,3 +1,3 @@
 setup_suite() {
-    call-to-undefined-command
+  call-to-undefined-command
 }

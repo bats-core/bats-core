@@ -30,57 +30,57 @@ bats_tap_stream_plan() {
 }
 
 bats_tap_stream_begin() { #<test index> <test name>
-    :
+  :
 }
 
 bats_tap_stream_ok() { # <test index> <test name>
-    close_previous_yaml_block
-    number_of_printed_log_lines_for_this_test_so_far=0
-    printf "ok %d %s\n" "$1" "$2"
-    if [[ "${BATS_FORMATTER_TEST_DURATION-x}" != x ]]; then
-        add_yaml_entry "duration_ms" "${BATS_FORMATTER_TEST_DURATION}"
-    fi
+  close_previous_yaml_block
+  number_of_printed_log_lines_for_this_test_so_far=0
+  printf "ok %d %s\n" "$1" "$2"
+  if [[ "${BATS_FORMATTER_TEST_DURATION-x}" != x ]]; then
+    add_yaml_entry "duration_ms" "${BATS_FORMATTER_TEST_DURATION}"
+  fi
 }
 
 pass_on_optional_data() {
-    if [[ "${BATS_FORMATTER_TEST_DURATION-x}" != x ]]; then
-        add_yaml_entry "duration_ms" "${BATS_FORMATTER_TEST_DURATION}"
-    fi
-    if [[ "${BATS_FORMATTER_TEST_TIMEOUT-x}" != x ]]; then
-        add_yaml_entry "timeout_sec" "${BATS_FORMATTER_TEST_TIMEOUT}"
-    fi
+  if [[ "${BATS_FORMATTER_TEST_DURATION-x}" != x ]]; then
+    add_yaml_entry "duration_ms" "${BATS_FORMATTER_TEST_DURATION}"
+  fi
+  if [[ "${BATS_FORMATTER_TEST_TIMEOUT-x}" != x ]]; then
+    add_yaml_entry "timeout_sec" "${BATS_FORMATTER_TEST_TIMEOUT}"
+  fi
 }
 
 bats_tap_stream_not_ok() { # <test index> <test name>
-    close_previous_yaml_block
-    number_of_printed_log_lines_for_this_test_so_far=0
-    
-    printf "not ok %d %s\n" "$1" "$2"
-    pass_on_optional_data
+  close_previous_yaml_block
+  number_of_printed_log_lines_for_this_test_so_far=0
+
+  printf "not ok %d %s\n" "$1" "$2"
+  pass_on_optional_data
 }
 
 bats_tap_stream_skipped() { # <test index> <test name> <reason>
-    close_previous_yaml_block
-    number_of_printed_log_lines_for_this_test_so_far=0
-    
-    printf "not ok %d %s # SKIP %s\n" "$1" "$2" "$3"
-    pass_on_optional_data
+  close_previous_yaml_block
+  number_of_printed_log_lines_for_this_test_so_far=0
+
+  printf "not ok %d %s # SKIP %s\n" "$1" "$2" "$3"
+  pass_on_optional_data
 }
 
 bats_tap_stream_comment() { # <comment text without leading '# '>
-    if [[ $number_of_printed_log_lines_for_this_test_so_far -eq 0 ]]; then
-      add_yaml_entry "message" "|" # use a multiline string for this entry
-    fi
-    ((++number_of_printed_log_lines_for_this_test_so_far))
-    printf "    %s\n" "$1"
+  if [[ $number_of_printed_log_lines_for_this_test_so_far -eq 0 ]]; then
+    add_yaml_entry "message" "|" # use a multiline string for this entry
+  fi
+  ((++number_of_printed_log_lines_for_this_test_so_far))
+  printf "    %s\n" "$1"
 }
 
 bats_tap_stream_suite() { # <file name>
-    :
+  :
 }
 
-bats_tap_stream_unknown() { # <full line>       
-    :
+bats_tap_stream_unknown() { # <full line>
+  :
 }
 
 bats_parse_internal_extended_tap

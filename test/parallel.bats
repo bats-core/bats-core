@@ -18,15 +18,15 @@ check_parallel_tests() { # <expected maximum parallelity>
   started_tests=0
   read_lines=0
   while IFS= read -r line; do
-    (( ++read_lines ))
+    ((++read_lines))
     case "$line" in
-      "start "*)
-        if (( ++started_tests > max_parallel_tests )); then
-          max_parallel_tests="$started_tests"
-        fi
+    "start "*)
+      if ((++started_tests > max_parallel_tests)); then
+        max_parallel_tests="$started_tests"
+      fi
       ;;
-      "stop "*)
-        (( started_tests-- ))
+    "stop "*)
+      ((started_tests--))
       ;;
     esac
   done <"$FILE_MARKER"
@@ -46,7 +46,7 @@ check_parallel_tests() { # <expected maximum parallelity>
   # shellcheck disable=SC2030
   export PARALLELITY=3
   reentrant_run bats --jobs $PARALLELITY "$FIXTURE_ROOT/parallel.bats"
-  
+
   [ "$status" -eq 0 ]
   # Make sure the lines are in-order.
   [[ "${lines[0]}" == "1..3" ]]
@@ -74,7 +74,7 @@ check_parallel_tests() { # <expected maximum parallelity>
 
   # file parallelization is needed for maximum parallelity!
   # If we got over the skip (if no GNU parallel) in setup() we can reenable it safely!
-  unset BATS_NO_PARALLELIZE_ACROSS_FILES 
+  unset BATS_NO_PARALLELIZE_ACROSS_FILES
   reentrant_run bash -c "bats --jobs $PARALLELITY \"${FIXTURE_ROOT}/suite/\" 2> >(grep -v '^parallel: Warning: ')"
 
   echo "$output"
@@ -102,11 +102,14 @@ check_parallel_tests() { # <expected maximum parallelity>
 
   # file parallelization is needed for this test!
   # If we got over the skip (if no GNU parallel) in setup() we can reenable it safely!
-  unset BATS_NO_PARALLELIZE_ACROSS_FILES 
+  unset BATS_NO_PARALLELIZE_ACROSS_FILES
   # run 4 files with parallelity of 2 -> serialize 2
   reentrant_run bats --jobs $PARALLELITY "$FIXTURE_ROOT/setup_file"
 
-  [[ $status -eq 0 ]] || (echo "$output"; false)
+  [[ $status -eq 0 ]] || (
+    echo "$output"
+    false
+  )
 
   cat "$FILE_MARKER"
 
@@ -132,20 +135,20 @@ check_parallel_tests() { # <expected maximum parallelity>
   bats --jobs $PARALLELITY "$FIXTURE_ROOT/parallel_factor.bats"
   local current_parallel_count=0 maximum_parallel_count=0 total_count=0
   while read -r line; do
-    case "$line" in 
-      setup*)
-        ((++current_parallel_count))
-        ((++total_count))
+    case "$line" in
+    setup*)
+      ((++current_parallel_count))
+      ((++total_count))
       ;;
-      teardown*)
-        ((current_parallel_count--))
-      ;; 
+    teardown*)
+      ((current_parallel_count--))
+      ;;
     esac
-    if (( current_parallel_count > maximum_parallel_count )); then
+    if ((current_parallel_count > maximum_parallel_count)); then
       maximum_parallel_count=$current_parallel_count
     fi
-  done < "$MARKER_FILE"
-  
+  done <"$MARKER_FILE"
+
   cat "$MARKER_FILE" # for debugging purposes
   [[ "$maximum_parallel_count" -eq $PARALLELITY ]]
   [[ "$current_parallel_count" -eq 0 ]]

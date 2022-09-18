@@ -1,3 +1,3 @@
-@test "foo" {
-  echo "foo"
-}
+@test "foo" {
+  echo "foo"
+}

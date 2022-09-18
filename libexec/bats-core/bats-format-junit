@@ -6,12 +6,11 @@ source "$BATS_ROOT/lib/bats-core/formatter.bash"
 
 BASE_PATH=.
 
-
 while [[ "$#" -ne 0 ]]; do
   case "$1" in
-    --base-path)
-      shift
-      normalize_base_path BASE_PATH "$1"
+  --base-path)
+    shift
+    normalize_base_path BASE_PATH "$1"
     ;;
   esac
   shift
@@ -19,7 +18,7 @@ done
 
 init_suite() {
   suite_test_exec_time=0
-  # since we have to print the suite header before its contents but we don't know the contents before the header, 
+  # since we have to print the suite header before its contents but we don't know the contents before the header,
   # we have to buffer the contents
   _suite_buffer=""
   test_result_state="" # declare for the first flush, when no test has been encountered
@@ -68,7 +67,7 @@ suite_header() {
 file_header() {
   timestamp=$(date -u +"%Y-%m-%dT%H:%M:%S")
   printf "<testsuite name=\"%s\" tests=\"%s\" failures=\"%s\" errors=\"0\" skipped=\"%s\" time=\"%s\" timestamp=\"%s\" hostname=\"%s\">\n" \
-                     "$(xml_escape "${class}")" "${file_count}" "${file_failures}" "${file_skipped}" "$(milliseconds_to_seconds "${file_exec_time}")" "${timestamp}" "$(host)"
+    "$(xml_escape "${class}")" "${file_count}" "${file_failures}" "${file_skipped}" "$(milliseconds_to_seconds "${file_exec_time}")" "${timestamp}" "$(host)"
 }
 
 file_footer() {
@@ -111,7 +110,10 @@ xml_escape() {
 
 suite_buffer() {
   local output
-  output="$("$@"; printf "x")" # use x marker to avoid losing trailing newlines
+  output="$(
+    "$@"
+    printf "x"
+  )" # use x marker to avoid losing trailing newlines
   _suite_buffer="${_suite_buffer}${output%x}"
 }
 
@@ -122,7 +124,10 @@ suite_flush() {
 
 buffer() {
   local output
-  output="$("$@"; printf "x")" # use x marker to avoid losing trailing newlines
+  output="$(
+    "$@"
+    printf "x"
+  )" # use x marker to avoid losing trailing newlines
   _buffer="${_buffer}${output%x}"
 }
 
@@ -216,17 +221,17 @@ bats_tap_stream_not_ok() { # <test index> <test name>
 bats_tap_stream_comment() { # <comment text without leading '# '> <scope>
   local comment="$1" scope="$2"
   case "$scope" in
-    begin)
-      # everything that happens between begin and [not] ok is FD3 output from the test
-      log_system_out "$comment"
+  begin)
+    # everything that happens between begin and [not] ok is FD3 output from the test
+    log_system_out "$comment"
     ;;
-    ok)
-      # non failed tests can produce FD3 output
-      log_system_out "$comment"
+  ok)
+    # non failed tests can produce FD3 output
+    log_system_out "$comment"
     ;;
-    *)
-      # everything else is considered error output
-      log "$1"
+  *)
+    # everything else is considered error output
+    log "$1"
     ;;
   esac
 }
@@ -235,7 +240,7 @@ bats_tap_stream_suite() { # <file name>
   flush_log
   suite_buffer finish_file
   init_file
-  class="${1/$BASE_PATH}"
+  class="${1/$BASE_PATH/}"
 }
 
 bats_tap_stream_unknown() { # <full line>

@@ -1,9 +1,9 @@
 setup_file() {
-    true
-    false
-    true
+  true
+  false
+  true
 }
 
 @test "test" {
-    true
+  true
 }

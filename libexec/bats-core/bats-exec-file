@@ -6,7 +6,7 @@ num_jobs=${BATS_NUMBER_OF_PARALLEL_JOBS:-1}
 extended_syntax=''
 BATS_TRACE_LEVEL="${BATS_TRACE_LEVEL:-0}"
 declare -r BATS_RETRY_RETURN_CODE=126
-export BATS_TEST_RETRIES=0 # no retries by default 
+export BATS_TEST_RETRIES=0 # no retries by default
 
 while [[ "$#" -ne 0 ]]; do
   case "$1" in
@@ -25,8 +25,8 @@ while [[ "$#" -ne 0 ]]; do
     # use singular to allow for users to override in file
     BATS_NO_PARALLELIZE_WITHIN_FILE=1
     ;;
-  --dummy-flag)
-    ;;
+  --dummy-flag) ;;
+
   --trace)
     flags+=('--trace')
     ;;
@@ -76,7 +76,7 @@ bats_run_setup_file() {
 
   # these are defined only to avoid errors when referencing undefined variables down the line
   # shellcheck disable=2034
-  BATS_TEST_NAME=      # used in tracing.bash
+  BATS_TEST_NAME= # used in tracing.bash
   # shellcheck disable=2034
   BATS_TEST_COMPLETED= # used in tracing.bash
 
@@ -92,7 +92,7 @@ bats_run_setup_file() {
   local status=0
   # get the setup_file/teardown_file functions for this file (if it has them)
   # shellcheck disable=SC1090
-  source "$BATS_TEST_SOURCE"  >>"$BATS_OUT" 2>&1
+  source "$BATS_TEST_SOURCE" >>"$BATS_OUT" 2>&1
 
   BATS_SOURCE_FILE_COMPLETED=1
 
@@ -109,7 +109,7 @@ bats_run_teardown_file() {
   # rely on bats_error_trap to catch failures
   teardown_file >>"$BATS_OUT" 2>&1 || bats_teardown_file_status=$?
 
-  if (( bats_teardown_file_status == 0 )); then
+  if ((bats_teardown_file_status == 0)); then
     BATS_TEARDOWN_FILE_COMPLETED=1
   elif [[ -n "${BATS_SETUP_FILE_COMPLETED:-}" ]]; then
     BATS_DEBUG_LAST_STACK_TRACE_IS_VALID=1
@@ -133,13 +133,13 @@ bats_file_exit_trap() {
   fi
   trap - ERR EXIT
   local failure_reason
-  local -i failure_test_index=$(( BATS_FILE_FIRST_TEST_NUMBER_IN_SUITE + 1 ))
+  local -i failure_test_index=$((BATS_FILE_FIRST_TEST_NUMBER_IN_SUITE + 1))
   if [[ -z "$BATS_SETUP_FILE_COMPLETED" || -z "$BATS_TEARDOWN_FILE_COMPLETED" ]]; then
     if [[ -z "$BATS_SETUP_FILE_COMPLETED" ]]; then
       failure_reason='setup_file'
     elif [[ -z "$BATS_TEARDOWN_FILE_COMPLETED" ]]; then
       failure_reason='teardown_file'
-      failure_test_index=$(( BATS_FILE_FIRST_TEST_NUMBER_IN_SUITE + ${#tests_to_run[@]} + 1 ))
+      failure_test_index=$((BATS_FILE_FIRST_TEST_NUMBER_IN_SUITE + ${#tests_to_run[@]} + 1))
     elif [[ -z "$BATS_SOURCE_FILE_COMPLETED" ]]; then
       failure_reason='source'
     else
@@ -150,7 +150,7 @@ bats_file_exit_trap() {
     bats_get_failure_stack_trace stack_trace
     bats_print_stack_trace "${stack_trace[@]}" >&3
     bats_print_failed_command "${stack_trace[@]}" >&3
-    bats_prefix_lines_for_tap_output < "$BATS_OUT" | bats_replace_filename >&3
+    bats_prefix_lines_for_tap_output <"$BATS_OUT" | bats_replace_filename >&3
     rm -rf "$BATS_OUT"
     bats_exec_file_status=1
   fi
@@ -183,7 +183,7 @@ bats_forward_output_of_parallel_test() {
 bats_is_next_parallel_test_finished() {
   local PID
   # get the pid of the next potentially finished test
-  PID=$(cat "$output_folder/$(( test_number_in_suite_of_last_finished_test + 1 ))/pid")
+  PID=$(cat "$output_folder/$((test_number_in_suite_of_last_finished_test + 1))/pid")
   # try to send a signal to this process
   # if it fails, the process exited,
   # if it succeeds, the process is still running
@@ -198,10 +198,10 @@ bats_is_next_parallel_test_finished() {
 bats_forward_output_for_parallel_tests() {
   local status=0
   # was the next test already started?
-  while (( test_number_in_suite_of_last_finished_test + 1 <= test_number_in_suite )); do
+  while ((test_number_in_suite_of_last_finished_test + 1 <= test_number_in_suite)); do
     # if we are okay with waiting or if the test has already been finished
-    if [[ "$1" == "blocking" ]] || bats_is_next_parallel_test_finished ; then
-      (( ++test_number_in_suite_of_last_finished_test ))
+    if [[ "$1" == "blocking" ]] || bats_is_next_parallel_test_finished; then
+      ((++test_number_in_suite_of_last_finished_test))
       bats_forward_output_of_parallel_test "$test_number_in_suite_of_last_finished_test" || status=$?
     else
       # non-blocking and the process has not finished -> abort the printing
@@ -214,7 +214,7 @@ bats_forward_output_for_parallel_tests() {
 bats_run_test_with_retries() { # <args>
   local status=0
   local should_try_again=1 try_number
-  for ((try_number=1; should_try_again; ++try_number)); do
+  for ((try_number = 1; should_try_again; ++try_number)); do
     if "$BATS_LIBEXEC/bats-exec-test" "$@" "$try_number"; then
       should_try_again=0
     else
@@ -247,8 +247,8 @@ bats_run_tests_in_parallel() {
       ((++test_number_in_file))
       mkdir -p "$output_folder/$test_number_in_suite"
       bats_semaphore_run "$output_folder/$test_number_in_suite" \
-                          bats_run_test_with_retries "${flags[@]}" "$filename" "$test_name" "$test_number_in_suite" "$test_number_in_file" \
-                          > "$output_folder/$test_number_in_suite/pid"
+        bats_run_test_with_retries "${flags[@]}" "$filename" "$test_name" "$test_number_in_suite" "$test_number_in_file" \
+        >"$output_folder/$test_number_in_suite/pid"
     fi
     # print results early to get interactive feedback
     bats_forward_output_for_parallel_tests non-blocking || status=1 # ignore if we did not finish yet
@@ -268,7 +268,7 @@ bats_read_tests_list_file() {
     # use simple string operations to work around that issue
     if [[ "$filename" == "${test_line::${#filename}}" ]]; then
       # get the rest of the line without the separator \t
-      test_name=${test_line:$((1 + ${#filename} ))}
+      test_name=${test_line:$((1 + ${#filename}))}
       tests_to_run+=("$test_name")
       # save the first test's number for later iteration
       # this assumes that tests for a file are stored consecutive in the file!
@@ -290,7 +290,7 @@ bats_run_tests() {
     bats_run_tests_in_parallel "$BATS_RUN_TMPDIR/parallel_output" || bats_exec_file_status=1
   else
     local test_number_in_suite=$BATS_FILE_FIRST_TEST_NUMBER_IN_SUITE \
-          test_number_in_file=0
+      test_number_in_file=0
     for test_name in "${tests_to_run[@]}"; do
       if [[ "${BATS_INTERRUPTED-NOTSET}" != NOTSET ]]; then
         bats_exec_file_status=130 # bash's code for SIGINT exits
@@ -301,7 +301,7 @@ bats_run_tests() {
         ((++test_number_in_suite))
         ((++test_number_in_file))
         bats_run_test_with_retries "${flags[@]}" "$filename" "$test_name" \
-                                    "$test_number_in_suite" "$test_number_in_file" || bats_exec_file_status=$?
+          "$test_number_in_suite" "$test_number_in_file" || bats_exec_file_status=$?
       fi
     done
   fi

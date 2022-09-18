@@ -17,12 +17,12 @@ bats_test_count_validator() {
       # forward line
       printf "%s\n" "$line"
       case "$line" in
-        'ok '*)
-          (( ++actual_number_of_tests ))
-          ;;
-        'not ok'*)
-          (( ++actual_number_of_tests ))
-          ;;
+      'ok '*)
+        ((++actual_number_of_tests))
+        ;;
+      'not ok'*)
+        ((++actual_number_of_tests))
+        ;;
       esac
     done
     # ... and error if they are not the same

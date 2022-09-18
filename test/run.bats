@@ -3,84 +3,84 @@ fixtures run
 bats_require_minimum_version 1.5.0
 
 @test "run --keep-empty-lines preserves leading empty lines" {
-    run --keep-empty-lines -- echo -n $'\na'
-    printf "'%s'\n" "${lines[@]}"
-    [ "${lines[0]}" == '' ]
-    [ "${lines[1]}" == a ]
-    [ ${#lines[@]} -eq 2 ]
+  run --keep-empty-lines -- echo -n $'\na'
+  printf "'%s'\n" "${lines[@]}"
+  [ "${lines[0]}" == '' ]
+  [ "${lines[1]}" == a ]
+  [ ${#lines[@]} -eq 2 ]
 }
 
 @test "run --keep-empty-lines preserves inner empty lines" {
-    run --keep-empty-lines -- echo -n $'a\n\nb'
-    printf "'%s'\n" "${lines[@]}"
-    [ "${lines[0]}" == a ]
-    [ "${lines[1]}" == '' ]
-    [ "${lines[2]}" == b ]
-    [ ${#lines[@]} -eq 3 ]
+  run --keep-empty-lines -- echo -n $'a\n\nb'
+  printf "'%s'\n" "${lines[@]}"
+  [ "${lines[0]}" == a ]
+  [ "${lines[1]}" == '' ]
+  [ "${lines[2]}" == b ]
+  [ ${#lines[@]} -eq 3 ]
 }
 
 @test "run --keep-empty-lines preserves trailing empty lines" {
-    run --keep-empty-lines -- echo -n $'a\n'
-    printf "'%s'\n" "${lines[@]}"
-    [ "${lines[0]}" == a ]
-    [ "${lines[1]}" == '' ]
-    [ ${#lines[@]} -eq 2 ]
+  run --keep-empty-lines -- echo -n $'a\n'
+  printf "'%s'\n" "${lines[@]}"
+  [ "${lines[0]}" == a ]
+  [ "${lines[1]}" == '' ]
+  [ ${#lines[@]} -eq 2 ]
 }
 
 @test "run --keep-empty-lines preserves multiple trailing empty lines" {
-    run --keep-empty-lines -- echo -n $'a\n\n'
-    printf "'%s'\n" "${lines[@]}"
-    [ "${lines[0]}" == a ]
-    [ "${lines[1]}" == '' ]
-    [ "${lines[2]}" == '' ]
-    [ ${#lines[@]} -eq 3 ]
+  run --keep-empty-lines -- echo -n $'a\n\n'
+  printf "'%s'\n" "${lines[@]}"
+  [ "${lines[0]}" == a ]
+  [ "${lines[1]}" == '' ]
+  [ "${lines[2]}" == '' ]
+  [ ${#lines[@]} -eq 3 ]
 }
 
 @test "run --keep-empty-lines preserves non-empty trailing line" {
-    run --keep-empty-lines -- echo -n $'a\nb'
-    printf "'%s'\n" "${lines[@]}"
-    [ "${lines[0]}" == a ]
-    [ "${lines[1]}" == b ]
-    [ ${#lines[@]} -eq 2 ]
+  run --keep-empty-lines -- echo -n $'a\nb'
+  printf "'%s'\n" "${lines[@]}"
+  [ "${lines[0]}" == a ]
+  [ "${lines[1]}" == b ]
+  [ ${#lines[@]} -eq 2 ]
 }
 
 @test "--keep-empty-lines has zero lines for empty output (see #573)" {
-    run --keep-empty-lines true
-    printf "'%s'\n" "${lines[@]}"
-    [ ${#lines[@]} -eq 0 ]
+  run --keep-empty-lines true
+  printf "'%s'\n" "${lines[@]}"
+  [ ${#lines[@]} -eq 0 ]
 }
 
 print-stderr-stdout() {
-    printf stdout
-    printf stderr >&2
+  printf stdout
+  printf stderr >&2
 }
 
 @test "run --separate-stderr splits output" {
-    local stderr stderr_lines # silence shellcheck
-    run --separate-stderr -- print-stderr-stdout
-    echo "output='$output' stderr='$stderr'"
-    [ "$output" = stdout ]
-    [ ${#lines[@]} -eq 1 ]
+  local stderr stderr_lines # silence shellcheck
+  run --separate-stderr -- print-stderr-stdout
+  echo "output='$output' stderr='$stderr'"
+  [ "$output" = stdout ]
+  [ ${#lines[@]} -eq 1 ]
 
-    [ "$stderr" = stderr ]
-    [ ${#stderr_lines[@]} -eq 1 ]
+  [ "$stderr" = stderr ]
+  [ ${#stderr_lines[@]} -eq 1 ]
 }
 
 @test "run does not change set flags" {
-    old_flags="$-"
-    run true
-    echo -- "$-" == "$old_flags"
-    [ "$-" == "$old_flags" ]
+  old_flags="$-"
+  run true
+  echo -- "$-" == "$old_flags"
+  [ "$-" == "$old_flags" ]
 }
 
 # Positive assertions: each of these should succeed
 @test "basic return-code checking" {
-  run      true
-  run -0   true
-  run '!'  false
-  run -1   false
-  run -3   exit 3
-  run -5   exit 5
+  run true
+  run -0 true
+  run '!' false
+  run -1 false
+  run -3 exit 3
+  run -5 exit 5
   run -111 exit 111
   run -255 exit 255
   run -127 /no/such/command

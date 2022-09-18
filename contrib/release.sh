@@ -65,14 +65,14 @@ git commit -m "feat: release Bats v${NEW_BATS_VERSION}"
 # changelog start
 EOF
 
-local DELIM
-DELIM=$(echo -en "\001");
-sed -E -n "\\${DELIM}^## \[${NEW_BATS_VERSION}\]${DELIM},\\${DELIM}^## ${DELIM}p" docs/CHANGELOG.md \
-  | head -n -1 \
-  | sed -E \
-    -e 's,^## \[([0-9\.]+)] - (.*),Bats \1\n\nReleased: \2,' \
-    -e 's,^### (.*),\1:,g' \
-  | tee "${BATS_RELEASE_NOTES}"
+  local DELIM
+  DELIM=$(echo -en "\001")
+  sed -E -n "\\${DELIM}^## \[${NEW_BATS_VERSION}\]${DELIM},\\${DELIM}^## ${DELIM}p" docs/CHANGELOG.md |
+    head -n -1 |
+    sed -E \
+      -e 's,^## \[([0-9\.]+)] - (.*),Bats \1\n\nReleased: \2,' \
+      -e 's,^### (.*),\1:,g' |
+    tee "${BATS_RELEASE_NOTES}"
 
   cat <<EOF
 # changelog end

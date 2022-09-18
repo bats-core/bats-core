@@ -1,3 +1,3 @@
 setup_suite() {
-    load test_helper
+  load test_helper
 }

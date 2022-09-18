@@ -1,7 +1,7 @@
 setup_suite() {
-    echo setup_suite >> "$LOGFILE"
+  echo setup_suite >>"$LOGFILE"
 }
 
 teardown_suite() {
-    echo teardown_suite >> "$LOGFILE"
+  echo teardown_suite >>"$LOGFILE"
 }
