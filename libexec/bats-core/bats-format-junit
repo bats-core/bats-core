@@ -104,7 +104,7 @@ xml_escape() {
   output=${output//'"'/\&quot;}
   output=${output//\'/\&#39;}
   local CONTROL_CHAR=$'\033'
-  output="${output//$CONTROL_CHAR/\&#27;}"
+  output=${output//$CONTROL_CHAR/\&#27;}
   printf "%s" "$output"
 }
 
