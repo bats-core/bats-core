@@ -391,4 +391,5 @@ bats_interrupt_trap_in_run() {
   BATS_INTERRUPTED=true
   BATS_ERROR_STATUS=130
   BATS_DEBUG_LAST_STACK_TRACE_IS_VALID=true
+  exit 130
 }
