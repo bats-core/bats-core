@@ -145,7 +145,7 @@ jobs:
   bash-version:
     strategy:
       matrix:
-        version: ['3.2', '4.0', '4.1', '4.2', '4.3', '4.4', '4', '5.0', '5.1', '5', 'latest']
+        version: ['3.2', '4.0', '4.1', '4.2', '4.3', '4.4', '4', '5.0', '5.1', '5', 'rc']
         env_vars:
             - ''
             # also test running (recursively!) in parallel
