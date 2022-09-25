@@ -285,6 +285,11 @@ bats_read_tests_list_file() {
 bats_run_tests() {
   bats_exec_file_status=0
 
+  if [[ "$num_jobs" -lt 1 ]]; then
+    printf 'Invalid number of jobs: %s\n' "$num_jobs" >&2
+    exit 1
+  fi
+
   if [[ "$num_jobs" != 1 && "${BATS_NO_PARALLELIZE_WITHIN_FILE-False}" == False ]]; then
     export BATS_SEMAPHORE_NUMBER_OF_SLOTS="$num_jobs"
     bats_run_tests_in_parallel "$BATS_RUN_TMPDIR/parallel_output" || bats_exec_file_status=1
