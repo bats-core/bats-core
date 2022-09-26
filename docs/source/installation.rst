@@ -22,6 +22,7 @@ work on without issues.
 
   * Arch Linux
   * Alpine Linux
+  * Debian Linux
   * Gentoo Linux
   * Ubuntu Linux
   * FreeBSD ``10.x`` and ``11.x``
