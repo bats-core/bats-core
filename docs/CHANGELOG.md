@@ -14,6 +14,7 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 
 * `shfmt` all files and enforce via CI (#651)
 * avoid kernel warning flood/hang with CTRL+C on Bash 5.2 RC (#656)
+* Fix infinite wait with (invalid) `-j<n>` (without space) (#657)
 
 ## [1.8.0] - 2022-09-15
 
