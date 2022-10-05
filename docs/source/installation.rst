@@ -35,9 +35,15 @@ Following Linux distributions provide Bats via their package manager:
 
 * Arch Linux: `community/bash-bats <https://archlinux.org/packages/community/any/bash-bats/>`_
 * Alpine Linux: `bats <https://pkgs.alpinelinux.org/package/edge/main/x86/bats>`_
-* Debian Linux: `shells/bats <https://packages.debian.org/search?keywords=bats>`_ (beware of old versions!)
+* Debian Linux: `shells/bats <https://packages.debian.org/search?keywords=bats>`_
+* Fedora Linux: `rpms/bats <https://src.fedoraproject.org/rpms/bats>`_
 * Gentoo Linux `dev-util/bats <https://packages.gentoo.org/packages/dev-util/bats>`_
-* Ubuntu Linux `shells/bats <https://packages.ubuntu.com/search?keywords=bats>`_ (beware of old versions!)
+* OpenSUSE Linux: `bats <https://software.opensuse.org/package/bats>`_
+* Ubuntu Linux `shells/bats <https://packages.ubuntu.com/search?keywords=bats>`_
+
+**Note**: Bats versions pre 1.0 are from sstephenson's original project.
+Consider using one of the other installation methods below to get the latest Bats release.
+The test matrix above only applies to the latest Bats version.
 
 If your favorite distribution is not listed above,
 you can try one of the following package managers or install from source.
