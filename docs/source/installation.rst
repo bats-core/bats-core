@@ -10,36 +10,40 @@ This list is composed of platforms that Bats has been tested on and is known to
 work on without issues.
 
 
-* 
-  Bash versions:
+* Bash versions:
 
 
-  * Everything from ``3.2.57(1)`` and higher (macOS's highest version)
+  * 3.2.57(1) (macOS's highest bundled version)
+  * 4.0, 4.1, 4.2, 4.3, 4.4
+  * 5.0, 5.1
 
-* 
-  Operating systems:
+* Tested Operating systems:
 
-
-  * Arch Linux
-  * Alpine Linux
-  * Debian Linux
-  * Gentoo Linux
-  * Ubuntu Linux
-  * FreeBSD ``10.x`` and ``11.x``
-  * macOS
-  * Windows 10
-
-* 
-  Latest version for the following Windows platforms:
-
-
+ * Linux: Alpine (CI), Alma 8 (CI), Arch Linux (manual), Ubuntu 20.04/22.04 (CI)
+ * FreeBSD: 11 (CI)
+ * macOS: 11 (CI), 12 (CI)
+ * Windows: Server 2019 (CI), 10 (manual)
   * Git for Windows Bash (MSYS2 based)
   * Windows Subsystem for Linux
   * MSYS2
   * Cygwin
 
-Homebrew
-^^^^^^^^
+Linux: Distribition Package Manager
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Following Linux distributions provide Bats via their package manager:
+
+* Arch Linux: `community/bash-bats <https://archlinux.org/packages/community/any/bash-bats/>`_
+* Alpine Linux: `bats <https://pkgs.alpinelinux.org/package/edge/main/x86/bats>`_
+* Debian Linux: `shells/bats <https://packages.debian.org/search?keywords=bats>`_ (beware of old versions!)
+* Gentoo Linux `dev-util/bats <https://packages.gentoo.org/packages/dev-util/bats>`_
+* Ubuntu Linux `shells/bats <https://packages.ubuntu.com/search?keywords=bats>`_ (beware of old versions!)
+
+If your favorite distribution is not listed above,
+you can try one of the following package managers or install from source.
+
+MacOS: Homebrew
+^^^^^^^^^^^^^^^
 
 On macOS, you can install `Homebrew <https://brew.sh/>`_ if you haven't already,
 then run:
@@ -48,8 +52,8 @@ then run:
 
    $ brew install bats-core
 
-npm
-^^^
+Any OS: npm
+^^^^^^^^^^^
 
 You can install the `Bats npm package <https://www.npmjs.com/package/bats>`_ via:
 
@@ -62,8 +66,8 @@ You can install the `Bats npm package <https://www.npmjs.com/package/bats>`_ via
    # your package.json:
    $ npm install --save-dev bats
 
-Installing Bats from source
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Any OS: Installing Bats from source
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Check out a copy of the Bats repository. Then, either add the Bats ``bin``
 directory to your ``$PATH``\ , or run the provided ``install.sh`` command with the
@@ -80,7 +84,7 @@ install Bats into ``/usr/local``\ ,
 **Note:** You may need to run ``install.sh`` with ``sudo`` if you do not have
 permission to write to the installation prefix.
 
-Installing Bats from source onto Windows Git Bash
+Windows: Installing Bats from source via Git Bash
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Check out a copy of the Bats repository and install it to ``$HOME``. This
