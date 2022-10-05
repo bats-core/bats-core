@@ -23,3 +23,7 @@ bats_require_minimum_version 1.5.0
   [ "${lines[3]}" == "#   \`sleep \"\${SLEEP?}\"' failed due to timeout" ]
   ((SECONDS < 10)) || false
 }
+
+@test "sleep in run" {
+    run sleep 10
+}
