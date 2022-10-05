@@ -8,6 +8,12 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 [kac]: https://keepachangelog.com/en/1.0.0/
 [semver]: https://semver.org/
 
+## [Unreleased]
+
+### Added
+
+* added installation instructions for Debian, Fedora, Gentoo, and OpenSUSE (#659)
+
 ## [1.8.2] - 2022-10-19
 
 ### Fixed
