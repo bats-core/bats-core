@@ -102,6 +102,8 @@ Options:
                 split stderr and stdout
        --keep-empty-lines
                 retain empty lines in `${lines[@]}`/`${stderr_lines[@]}`
+       --output-processor
+                pipe command output through processor before storing in `output`
 
 Many Bats tests need to run a command and then make assertions about
 its exit status and output. Bats includes a `run` helper that invokes
@@ -149,6 +151,17 @@ By default `run` leaves out empty lines in `${lines[@]}`. Use `run --keep-empty-
 
 Additionally, you can use `--separate-stderr` to split stdout and stderr
 into `$output`/`$stderr` and `${lines[@]}`/`${stderr_lines[@]}`.
+
+The output of the command can be processed by using the `--output-processor`
+argument. This is especially helpful when the output needs to be modified in
+some way (e.g. the command outputs binary data into stdout, which cannot be
+stored as-is in an environment variable).
+
+    @test "invoking foo that returns binary data" {
+      run --output-processor "hexdump -v --format '1/1 \"0x%02X \"'" foo
+      [ $status -eq 17 ]
+      [[ "${output}" =~ 0xDE\ 0xAD ]]
+    }
 
 All additional parameters to run should come before the command.
 If you want to run a command that starts with `-`, prefix it with `--` to

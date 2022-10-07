@@ -137,3 +137,65 @@ print-stderr-stdout() {
   run true
   [ "${IFS-(unset)}" = '(unset)' ]
 }
+
+@test "run output incomplete with binary data" {
+  command_under_test() {
+    printf '\x41\x42\x0\x43'
+  }
+
+  run command_under_test
+
+  [ $status -eq 0 ]
+  # Note that the command actually printed 4 bytes, where 1 gets ignored.
+  [ "${#output}" -eq 3 ]
+  [ "$output" = "ABC" ]
+
+  # Other bytes would not be so tame and would lead to:
+  # warning: command substitution: ignored null byte in input
+}
+
+@test "run using output processor on ascii data" {
+  command_under_test() {
+    printf 'some string'
+  }
+
+  run --output-processor "xargs -0 printf '~%s~'" command_under_test
+
+  [ $status -eq 0 ]
+  [ "$output" = "~some string~" ]
+}
+
+@test "run using output processor on ascii data with non-zero exit code" {
+  command_under_test() {
+    printf 'some string'
+    return 42
+  }
+
+  run --output-processor "xargs -0 printf '~%s~'" command_under_test
+
+  [ $status -eq 42 ]
+  [ "$output" = "~some string~" ]
+}
+
+@test "run using output processor on binary data" {
+  command_under_test() {
+    printf '\x00\xDE\xAD\xF0\x0D'
+  }
+
+  run --output-processor "hexdump -v --format '1/1 \"0x%02X \"'" command_under_test
+
+  [ $status -eq 0 ]
+  [ "$output" = "0x00 0xDE 0xAD 0xF0 0x0D " ]
+}
+
+@test "run using output processor on binary data with non-zero exit code" {
+  command_under_test() {
+    printf '\x00\xDE\xAD\xF0\x0D'
+    return 42
+  }
+
+  run --output-processor "hexdump -v --format '1/1 \"0x%02X \"'" command_under_test
+
+  [ $status -eq 42 ]
+  [ "$output" = "0x00 0xDE 0xAD 0xF0 0x0D " ]
+}

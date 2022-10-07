@@ -154,11 +154,27 @@ load() {
 }
 
 bats_redirect_stderr_into_file() {
-  "$@" 2>>"$bats_run_separate_stderr_file" # use >> to see collisions' content
+  local output_processor="$1"
+  shift
+
+  if [ -z "$output_processor" ]; then
+    "$@" 2>>"$bats_run_separate_stderr_file" # use >> to see collisions' content
+  else
+    "$@" 2>>"$bats_run_separate_stderr_file" | bash -c "$output_processor"
+    return "${PIPESTATUS[0]}"
+  fi
 }
 
 bats_merge_stdout_and_stderr() {
-  "$@" 2>&1
+  local output_processor="$1"
+  shift
+
+  if [ -z "$output_processor" ]; then
+    "$@" 2>&1
+  else
+    "$@" 2>&1 | bash -c "$output_processor"
+    return "${PIPESTATUS[0]}"
+  fi
 }
 
 # write separate lines from <input-var> into <output-array>
@@ -182,7 +198,7 @@ bats_separate_lines() { # <output-array> <input-var>
   fi
 }
 
-run() { # [!|-N] [--keep-empty-lines] [--separate-stderr] [--] <command to run...>
+run() { # [!|-N] [--keep-empty-lines] [--separate-stderr] [--output-processor process_command_str] [--] <command to run...>
   # This has to be restored on exit from this function to avoid leaking our trap INT into surrounding code.
   # Non zero exits won't restore under the assumption that they will fail the test before it can be aborted,
   # which allows us to avoid duplicating the restore code on every exit path
@@ -191,6 +207,7 @@ run() { # [!|-N] [--keep-empty-lines] [--separate-stderr] [--] <command to run..
   local keep_empty_lines=
   local output_case=merged
   local has_flags=
+  local output_processor=
   # parse options starting with -
   while [[ $# -gt 0 ]] && [[ $1 == -* || $1 == '!' ]]; do
     has_flags=1
@@ -213,6 +230,10 @@ run() { # [!|-N] [--keep-empty-lines] [--separate-stderr] [--] <command to run..
       ;;
     --separate-stderr)
       output_case="separate"
+      ;;
+    --output-processor)
+      output_processor="$2"
+      shift # eat the extra arg
       ;;
     --)
       shift # eat the -- before breaking away
@@ -250,7 +271,7 @@ run() { # [!|-N] [--keep-empty-lines] [--separate-stderr] [--] <command to run..
     # preserve trailing newlines by appending . and removing it later
     # shellcheck disable=SC2034
     output="$(
-      "$pre_command" "$@"
+      "$pre_command" "$output_processor" "$@"
       status=$?
       printf .
       exit $status
@@ -259,7 +280,7 @@ run() { # [!|-N] [--keep-empty-lines] [--separate-stderr] [--] <command to run..
   else
     # 'output', 'status', 'lines' are global variables available to tests.
     # shellcheck disable=SC2034
-    output="$("$pre_command" "$@")" && status=0 || status=$?
+    output="$("$pre_command" "$output_processor" "$@")" && status=0 || status=$?
   fi
 
   bats_separate_lines lines output

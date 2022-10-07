@@ -185,6 +185,11 @@ By default `run` leaves out empty lines in `${lines[@]}`. Use
 Additionally, you can use `--separate-stderr` to split stdout and stderr
 into `$output`/`$stderr` and `${lines[@]}`/`${stderr_lines[@]}`.
 
+The output of the command can be processed by using the `--output-processor`
+argument. This is especially helpful when the output needs to be modified in
+some way (e.g. the command outputs binary data into stdout, which cannot be
+stored as-is in an environment variable).
+
 All additional parameters to run should come before the command.
 If you want to run a command that starts with `-`, prefix it with `--` to
 prevent `run` from parsing it as an option.

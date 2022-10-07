@@ -82,6 +82,13 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 * avoid kernel warning flood/hang with CTRL+C on Bash 5.2 RC (#656)
 * Fix infinite wait with (invalid) `-j<n>` (without space) (#657)
 
+### Added
+
+* add `run` flag `--output-processor '<process command string>'` which
+  processes the output of the command before put into `output` global variable.
+  The `run` command will handle properly forwarding the proper status (via the
+  normal `status` global variable).
+
 ## [1.8.0] - 2022-09-15
 
 ### Added
