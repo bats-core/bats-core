@@ -84,10 +84,13 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 
 ### Added
 
-* add `run` flag `--output-processor '<process command string>'` which
-  processes the output of the command before put into `output` global variable.
-  The `run` command will handle properly forwarding the proper status (via the
-  normal `status` global variable).
+* add `bats_pipe` helper function which parses `\|` as pipes to allow piping of
+  output between multiple commands. This is largely intended to extend the
+  functionality of the `run` helper function (e.g.
+  `run bats_pipe command0 \| command1`). Unlike existing workaround suggestions
+  (like using `run bash -c "command0 | command1"`), the bats_pipe command will 
+  properly forward the status of the piped commands; which gets set in normal
+  `status` global variable when used with `run`.
 
 ## [1.8.0] - 2022-09-15
 

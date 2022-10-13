@@ -154,27 +154,11 @@ load() {
 }
 
 bats_redirect_stderr_into_file() {
-  local output_processor="$1"
-  shift
-
-  if [ -z "$output_processor" ]; then
-    "$@" 2>>"$bats_run_separate_stderr_file" # use >> to see collisions' content
-  else
-    "$@" 2>>"$bats_run_separate_stderr_file" | bash -c "$output_processor"
-    return "${PIPESTATUS[0]}"
-  fi
+  "$@" 2>>"$bats_run_separate_stderr_file" # use >> to see collisions' content
 }
 
 bats_merge_stdout_and_stderr() {
-  local output_processor="$1"
-  shift
-
-  if [ -z "$output_processor" ]; then
-    "$@" 2>&1
-  else
-    "$@" 2>&1 | bash -c "$output_processor"
-    return "${PIPESTATUS[0]}"
-  fi
+  "$@" 2>&1
 }
 
 # write separate lines from <input-var> into <output-array>
@@ -198,7 +182,176 @@ bats_separate_lines() { # <output-array> <input-var>
   fi
 }
 
-run() { # [!|-N] [--keep-empty-lines] [--separate-stderr] [--output-processor process_command_str] [--] <command to run...>
+bats_pipe() { # [-N] [--] command0 [ \| command1 [ \| command2 [...]]]
+  # This will run each command given, piping them appropriately.
+  # Meant to be used in combination with `run` helper to allow piped commands
+  # to be used.
+  # Note that `\|` must be used, not `|`.
+  # By default, the exit code of this command will be the last failure in the
+  # chain of piped commands (similar to `set -o pipefail`).
+  # Supplying -N (e.g. -0) will instead always use the exit code of the command
+  # at that position in the chain.
+
+  local pipefail_position=
+
+  # parse options starting with -
+  while [[ $# -gt 0 ]] && [[ $1 == -* || $1 == '!' ]]; do
+    case "$1" in
+    -[0-9]*)
+      pipefail_position="${1#-}"
+      ;;
+    --)
+      shift # eat the -- before breaking away
+      break
+      ;;
+    *)
+      printf "Usage error: unknown flag '%s'" "$1" >&2
+      return 1
+      ;;
+    esac
+    shift
+  done
+
+  # parse arguments and find pipes
+  local commands_and_args=("$@")
+  local pipe_positions=()
+  local previous_pipe=-1
+  for (( index = 0; index < $#; index++ )); do
+    local current_command_or_arg="${commands_and_args[$index]}"
+    if [ "$current_command_or_arg" = "|" ]; then
+      if [ "$index" -eq 0 ]; then
+        printf 'Usage error: Cannot have leading `\|`.\n' >&2
+        return 1
+      fi
+      if [ "$(( previous_pipe + 1 ))" -ge "$index" ]; then
+        printf "Usage error: Cannot have consecutive \`\\|\`. Found at argument position '%s'.\n" "$index" >&2
+        return 1
+      fi
+      pipe_positions+=($index)
+      previous_pipe="$index"
+    fi
+  done
+
+  if [ "$previous_pipe" -gt 0 ] && [ "$previous_pipe" -eq "$(( $# - 1 ))" ]; then
+    printf 'Usage error: Cannot have trailing `\|`.\n' >&2
+    return 1
+  fi
+
+  if [ "${#pipe_positions[@]}" -eq 0 ]; then
+    # Don't allow for no pipes. This might be a typo in the test,
+    # e.g. `run bats_pipe command0 | command1`
+    # instead of `run bats_pipe command0 \| command1`
+    # Unfortunately, we can't catch `run bats_pipe command0 \| command1 | command2`.
+    # But this check is better than just allowing no pipes.
+    printf 'Usage error: No `\|`s found. Is this an error?\n' >&2
+    return 1
+  fi
+
+  if [ ! -z "$pipefail_position" ] && [ "$pipefail_position" -gt "${#pipe_positions[@]}" ]; then
+    printf "Usage error: Too large of -N argument given. Argument value: '%s'.\n" "$pipefail_position" >&2
+    return 1
+  fi
+
+  # we need to add on an extra "pipe position" so that the end can consistently find its arg length
+  pipe_positions+=($#)
+
+  # recursive base case to simply run a command with its args
+  # runs a command at the given position with appropriate arguments
+  run_command_at_position() {
+    local given_position="$1"
+
+    local command_position=
+    if [ "$given_position" -eq 0 ]; then
+      command_position=0
+    else
+      local associated_pipe="$(( given_position - 1 ))"
+      local associated_pipe_position="${pipe_positions[$associated_pipe]}"
+      command_position="$(( $associated_pipe_position + 1 ))"
+    fi
+    local command_to_run="${commands_and_args[$command_position]}"
+
+    local arguments_position="$(( $command_position + 1 ))"
+    local next_pipe_position="${pipe_positions[$given_position]}"
+    local arg_count="$(( next_pipe_position - command_position - 1 ))"
+
+    if [ "$arg_count" -eq 0 ]; then
+      $command_to_run
+    else
+      local arguments=("${commands_and_args[@]:$arguments_position:$arg_count}")
+      $command_to_run "${arguments[@]}"
+    fi
+  }
+
+  # recursive func to handle piping
+  # will run all commands before the given position, chaining piping.
+  # Ex: if "3" is given, this will run `command0 | command1 | command2`.
+  run_leading_commands_until_position() {
+    local exclusive_position="$1"
+
+    local result_status=
+    if [ "$exclusive_position" -le 1 ]; then
+      run_command_at_position 0
+      result_status="$?"
+    else
+      local last_position_to_run="$(( exclusive_position - 1 ))"
+
+      # recurse by calling earlier commands which will then be piped into the
+      # (local) last command to run.
+      run_leading_commands_until_position "$last_position_to_run" | run_command_at_position "$last_position_to_run"
+      # note that we are immediately grabbing PIPESTATUS, and not grabbing $?
+      # we can only grab one of the two, but we can get the equivalent of $?
+      # from PIPESTATUS (see below).
+      local pipe_status=("${PIPESTATUS[@]}")
+
+      # check if we are to return the status code from an exact position, or
+      # use "last fail" (like `set -o pipefail` would).
+      if [ ! -z "$pipefail_position" ]; then
+        # if the target pipefail is less than our "last_position_to_run", then
+        # it is being propagated through the left-hand command.
+        if [ "$pipefail_position" -lt "$last_position_to_run" ]; then
+          result_status="${pipe_status[0]}"
+        elif [ "$pipefail_position" -eq "$last_position_to_run" ]; then
+          # if the target pipefail is equal to our "last_position_to_run", then
+          # it is being returned through the right-hand command.
+          result_status="${pipe_status[1]}"
+        else
+          # if the target pipefail is greater than our "last_position_to_run",
+          # then it doesn't matter what we return, the recursive parent caller
+          # will not use this value. Just return 0.
+          result_status=0
+        fi
+      else
+        # if we need to return the "last failure",
+        # take the last pipe status, if it failed.
+        if [ "${pipe_status[1]}" -ne 0 ]; then
+          result_status="${pipe_status[1]}"
+        else
+          # if the last pipe status didn't fail,
+          # take whatever the first pipe status is.
+          result_status="${pipe_status[0]}"
+        fi
+      fi
+    fi
+
+    return "$result_status"
+  }
+
+  # run commands and handle appropriate piping
+  local result_status=
+
+  # no need to call `set -o pipefail` here (which also means we don't have to
+  # worry about setting it back).
+  # note that `pipefail_position` will be referenced in
+  # `run_leading_commands_until_position` for selecting the correct status code
+  # to propagate (which simulates `set -o pipefail`, see related comment
+  # there).
+  run_leading_commands_until_position "${#pipe_positions[@]}"
+  result_status="$?"
+
+  return $result_status
+}
+
+run() { # [!|-N] [--keep-empty-lines] [--separate-stderr] [--] <command to run...>
   # This has to be restored on exit from this function to avoid leaking our trap INT into surrounding code.
   # Non zero exits won't restore under the assumption that they will fail the test before it can be aborted,
   # which allows us to avoid duplicating the restore code on every exit path
@@ -207,7 +360,6 @@ run() { # [!|-N] [--keep-empty-lines] [--separate-stderr] [--output-processor pr
   local keep_empty_lines=
   local output_case=merged
   local has_flags=
-  local output_processor=
   # parse options starting with -
   while [[ $# -gt 0 ]] && [[ $1 == -* || $1 == '!' ]]; do
     has_flags=1
@@ -230,10 +382,6 @@ run() { # [!|-N] [--keep-empty-lines] [--separate-stderr] [--output-processor pr
       ;;
     --separate-stderr)
       output_case="separate"
-      ;;
-    --output-processor)
-      output_processor="$2"
-      shift # eat the extra arg
       ;;
     --)
       shift # eat the -- before breaking away
@@ -271,7 +419,7 @@ run() { # [!|-N] [--keep-empty-lines] [--separate-stderr] [--output-processor pr
     # preserve trailing newlines by appending . and removing it later
     # shellcheck disable=SC2034
     output="$(
-      "$pre_command" "$output_processor" "$@"
+      "$pre_command" "$@"
       status=$?
       printf .
       exit $status
@@ -280,7 +428,7 @@ run() { # [!|-N] [--keep-empty-lines] [--separate-stderr] [--output-processor pr
   else
     # 'output', 'status', 'lines' are global variables available to tests.
     # shellcheck disable=SC2034
-    output="$("$pre_command" "$output_processor" "$@")" && status=0 || status=$?
+    output="$("$pre_command" "$@")" && status=0 || status=$?
   fi
 
   bats_separate_lines lines output
