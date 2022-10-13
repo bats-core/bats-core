@@ -252,7 +252,8 @@ bats_pipe() { # [-N] [--] command0 [ \| command1 [ \| command2 [...]]]
     return 1
   fi
 
-  # we need to add on an extra "pipe position" so that the end can consistently find its arg length
+  # we need to add on an extra "pipe position" so that the end can consistently
+  # find its arg length.
   pipe_positions+=($#)
 
   # recursive base case to simply run a command with its args
