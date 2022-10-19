@@ -1433,6 +1433,7 @@ enforce_own_process_group() {
 }
 
 @test "BATS_TEST_RETRIES allows for retrying tests" {
+  # shellcheck disable=SC2030
   export LOG="$BATS_TEST_TMPDIR/call.log"
   bats_require_minimum_version 1.5.0
   reentrant_run ! bats "$FIXTURE_ROOT/retry.bats"
@@ -1482,6 +1483,7 @@ enforce_own_process_group() {
 }
 
 @test "Exit code is zero after successful retry (see #660)" {
+  # shellcheck disable=SC2031
   export LOG="$BATS_TEST_TMPDIR/call.log"
   bats_require_minimum_version 1.5.0
   reentrant_run -0 bats "$FIXTURE_ROOT/retry_success.bats"

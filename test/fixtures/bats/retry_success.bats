@@ -1,3 +1,4 @@
+# shellcheck disable=SC2034
 BATS_TEST_RETRIES=2 # means three tries per test
 
 @test "Fail once" {
