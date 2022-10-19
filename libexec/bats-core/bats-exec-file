@@ -221,6 +221,7 @@ bats_run_test_with_retries() { # <args>
       status=$?
       if ((status == BATS_RETRY_RETURN_CODE)); then
         should_try_again=1
+        status=0 # this is not the last try -> reset status
       else
         should_try_again=0
         bats_exec_file_status=$status
