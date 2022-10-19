@@ -1480,3 +1480,12 @@ enforce_own_process_group() {
   [ "${#lines[@]}" -eq 6 ]
 
 }
+
+@test "Exit code is zero after successful retry (see #660)" {
+  export LOG="$BATS_TEST_TMPDIR/call.log"
+  bats_require_minimum_version 1.5.0
+  reentrant_run -0 bats "$FIXTURE_ROOT/retry_success.bats"
+  [ "${lines[0]}" == '1..1' ]
+  [ "${lines[1]}" == 'ok 1 Fail once' ]
+  [ ${#lines[@]} == 2 ]
+}
