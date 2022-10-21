@@ -2,54 +2,40 @@
 Installation
 ============
 
-Supported Bash versions
-^^^^^^^^^^^^^^^^^^^^^^^
+Linux: Distribition Package Manager
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The following is a list of Bash versions that are currently supported by Bats.
-This list is composed of platforms that Bats has been tested on and is known to
-work on without issues.
+Following Linux distributions provide Bats via their package manager:
 
+* Arch Linux: `community/bash-bats <https://archlinux.org/packages/community/any/bash-bats/>`__
+* Alpine Linux: `bats <https://pkgs.alpinelinux.org/package/edge/main/x86/bats>`__
+* Debian Linux: `shells/bats <https://packages.debian.org/search?keywords=bats>`__
+* Fedora Linux: `rpms/bats <https://src.fedoraproject.org/rpms/bats>`__
+* Gentoo Linux `dev-util/bats <https://packages.gentoo.org/packages/dev-util/bats>`__
+* OpenSUSE Linux: `bats <https://software.opensuse.org/package/bats>`__
+* Ubuntu Linux `shells/bats <https://packages.ubuntu.com/search?keywords=bats>`__
 
-* 
-  Bash versions:
+**Note**: Bats versions pre 1.0 are from sstephenson's original project.
+Consider using one of the other installation methods below to get the latest Bats release.
+The test matrix above only applies to the latest Bats version.
 
+If your favorite distribution is not listed above,
+you can try one of the following package managers or install from source.
 
-  * Everything from ``3.2.57(1)`` and higher (macOS's highest version)
+MacOS: Homebrew
+^^^^^^^^^^^^^^^
 
-* 
-  Operating systems:
-
-
-  * Arch Linux
-  * Alpine Linux
-  * Ubuntu Linux
-  * FreeBSD ``10.x`` and ``11.x``
-  * macOS
-  * Windows 10
-
-* 
-  Latest version for the following Windows platforms:
-
-
-  * Git for Windows Bash (MSYS2 based)
-  * Windows Subsystem for Linux
-  * MSYS2
-  * Cygwin
-
-Homebrew
-^^^^^^^^
-
-On macOS, you can install `Homebrew <https://brew.sh/>`_ if you haven't already,
+On macOS, you can install `Homebrew <https://brew.sh/>`__ if you haven't already,
 then run:
 
 .. code-block:: bash
 
    $ brew install bats-core
 
-npm
-^^^
+Any OS: npm
+^^^^^^^^^^^
 
-You can install the `Bats npm package <https://www.npmjs.com/package/bats>`_ via:
+You can install the `Bats npm package <https://www.npmjs.com/package/bats>`__ via:
 
 .. code-block::
 
@@ -60,8 +46,8 @@ You can install the `Bats npm package <https://www.npmjs.com/package/bats>`_ via
    # your package.json:
    $ npm install --save-dev bats
 
-Installing Bats from source
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Any OS: Installing Bats from source
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Check out a copy of the Bats repository. Then, either add the Bats ``bin``
 directory to your ``$PATH``\ , or run the provided ``install.sh`` command with the
@@ -78,7 +64,7 @@ install Bats into ``/usr/local``\ ,
 **Note:** You may need to run ``install.sh`` with ``sudo`` if you do not have
 permission to write to the installation prefix.
 
-Installing Bats from source onto Windows Git Bash
+Windows: Installing Bats from source via Git Bash
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Check out a copy of the Bats repository and install it to ``$HOME``. This
@@ -115,7 +101,7 @@ Check out a copy of the Bats repository, then build a container image:
 
 
 This creates a local Docker image called ``bats/bats:latest`` based on `Alpine
-Linux <https://github.com/gliderlabs/docker-alpine/blob/master/docs/usage.md>`_
+Linux <https://github.com/gliderlabs/docker-alpine/blob/master/docs/usage.md>`__
 (to push to private registries, tag it with another organisation, e.g.
 ``my-org/bats:latest``\ ).
 
@@ -146,7 +132,7 @@ This is a minimal Docker image. If more tools are required this can be used as a
 base image in a Dockerfile using ``FROM <Docker image>``.  In the future there may
 be images based on Debian, and/or with more tools installed (\ ``curl`` and ``openssl``\ ,
 for example). If you require a specific configuration please search and +1 an
-issue or `raise a new issue <https://github.com/bats-core/bats-core/issues>`_.
+issue or `raise a new issue <https://github.com/bats-core/bats-core/issues>`__.
 
 Further usage examples are in
-`the wiki <https://github.com/bats-core/bats-core/wiki/Docker-Usage-Examples>`_.
+`the wiki <https://github.com/bats-core/bats-core/wiki/Docker-Usage-Examples>`__.
