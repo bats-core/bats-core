@@ -74,9 +74,9 @@ bats_print_stack_trace() {
     fi
 
     if [[ $index -eq $count ]]; then
-      printf 'in test file %s, line %d)\n' "$filename" "$lineno"
+      printf 'in test file file://%s:%d)\n' "$(realpath "$filename")" "$lineno"
     else
-      printf 'in file %s, line %d,\n' "$filename" "$lineno"
+      printf 'in file file://%s:%d)\n' "$(realpath "$filename")" "$lineno"
     fi
 
     ((++index))
