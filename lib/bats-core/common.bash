@@ -211,3 +211,23 @@ bats_append_arrays_as_args() { # <array...> -- <command ...>
     "$@"
   fi
 }
+
+bats_format_file_line_reference() { # <output> <file> <line>
+  # shellcheck disable=SC2034 # will be used in subimplementation
+  local output="${1?}"
+  shift
+  "bats_format_file_line_reference_${BATS_FILE_REFERENCE_FORMAT?}" "$@"
+}
+
+bats_format_file_line_reference_comma_line() {
+  printf -v "$output" "%s, line %d" "$@"
+}
+
+bats_format_file_line_reference_colon_separated() {
+  printf -v "$output" "%s:%d" "$@"
+}
+
+bats_format_file_line_reference_url_realpath() {
+  local filename=${1?} line=${2?}
+  printf -v "$output" "file://%s:%d" "$(realpath "$filename")" "$line"
+}
