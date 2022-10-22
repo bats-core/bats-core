@@ -227,7 +227,19 @@ bats_format_file_line_reference_colon_separated() {
   printf -v "$output" "%s:%d" "$@"
 }
 
+# approximate realpath without subshell
+bats_approx_realpath() { # <output-variable> <path>
+  local output=$1 path=$2
+  if [[ $path != /* ]]; then
+    path="$PWD/$path"
+  fi
+  # x/./y -> x/y
+  path=${path//\/.\//\/}
+  printf -v "$output" "%s" "$path"
+}
+
 bats_format_file_line_reference_url_realpath() {
   local filename=${1?} line=${2?}
-  printf -v "$output" "file://%s:%d" "$(realpath "$filename")" "$line"
+  bats_approx_realpath filename "$filename"
+  printf -v "$output" "file://%s:%d" "$filename" "$line"
 }
