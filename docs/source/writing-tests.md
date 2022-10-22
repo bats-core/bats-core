@@ -414,11 +414,11 @@ is not yet upgraded.
 
 ## Code outside of test cases
 
-In general you should avoid code outside tests, because it will be evaluated many times.
-However, there are situations in which this might be useful, e.g. when you want to check for dependencies and fail
-immediately if they're not present. 
+In general you should avoid code outside tests, because each test file will be evaluated many times.
+However, there are situations in which this might be useful, e.g. when you want to check for dependencies
+and fail immediately if they're not present. 
 
-However, you should avoid printing outside of `@test`, `setup*` or `teardown*` functions.
+In general, you should avoid printing outside of `@test`, `setup*` or `teardown*` functions.
 Have a look at section [printing to the terminal](#printing-to-the-terminal) for more details.
 ## File descriptor 3 (read this if Bats hangs)
 
@@ -474,10 +474,10 @@ your custom text. Here are some detailed guidelines to refer to:
     contexts (`setup_file`, multiple `@test`s)  of test files, output
     will be printed more than once.
 
-  - Regardless of where text is redirected to
-    (stdout, stderr or file descriptor 3) text is immediately visible in the terminal, as it is not piped into the formatter.
+  - Regardless of where text is redirected to (stdout, stderr or file descriptor 3)
+    text is immediately visible in the terminal, as it is not piped into the formatter.
 
-  - Text printed to stdout, may interfere with formatters as it can
+  - Text printed to stdout may interfere with formatters as it can
     make output non-compliant with the TAP spec. The reason for this is that
     such output will be produced before the [_plan line_][tap-plan] is printed,
     contrary to the spec that requires the _plan line_ to be either the first or

@@ -6,3 +6,5 @@
 # we don't have any deps; un-ignore if that changes
 /package-lock.json
 test/.bats/run-logs/
+# scratch file that should never be committed
+/test.bats
