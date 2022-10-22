@@ -14,6 +14,12 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 
 * added installation instructions for Debian, Fedora, Gentoo, and OpenSUSE (#659)
 
+### Fixed
+
+#### Documentation
+
+* improved clarity of section about output in free code (#671)
+
 ## [1.8.2] - 2022-10-19
 
 ### Fixed
