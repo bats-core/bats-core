@@ -40,6 +40,12 @@ HELP_TEXT_HEADER
                             A two character string of code quote delimiters
                             or 'custom' which requires setting $BATS_BEGIN_CODE_QUOTE and 
                             $BATS_END_CODE_QUOTE. Can also be set via $BATS_CODE_QUOTE_STYLE
+  --line-reference-format   Controls how file/line references e.g. in stack traces are printed:
+                              - comma_line (default): a.bats, line 1
+                              - colon:  a.bats:1
+                              - uri: file:///tests/a.bats:1
+                              - custom: provide your own via defining bats_format_file_line_reference_custom
+                                        with parameters <filename> <line>, store via `printf -v "$output"`
   -f, --filter <regex>      Only run tests that match the regular expression
   --filter-status <status>  Only run tests with the given status in the last completed (no CTRL+C/SIGINT) run.
                             Valid <status> values are:
@@ -106,6 +112,7 @@ export BATS_RUN_TMPDIR=
 export BATS_GUARANTEED_MINIMUM_VERSION=0.0.0
 export BATS_LIB_PATH=${BATS_LIB_PATH-/usr/lib/bats}
 BATS_REPORT_OUTPUT_DIR=${BATS_REPORT_OUTPUT_DIR-.}
+export BATS_LINE_REFERENCE_FORMAT=${BATS_LINE_REFERENCE_FORMAT-comma_line}
 
 if [[ ! -d "${BATS_TMPDIR}" ]]; then
   printf "Error: BATS_TMPDIR (%s) does not exist or is not a directory" "${BATS_TMPDIR}" >&2
@@ -262,6 +269,10 @@ while [[ "$#" -ne 0 ]]; do
     shift
     flags+=('--filter-tags' "$1")
     ;;
+  --line-reference-format)
+    shift
+    BATS_LINE_REFERENCE_FORMAT=$1
+    ;;
   -*)
     abort "Bad command line option '$1'"
     ;;
@@ -271,6 +282,11 @@ while [[ "$#" -ne 0 ]]; do
   esac
   shift
 done
+
+if [[ ! $BATS_LINE_REFERENCE_FORMAT =~ (custom|comma_line|colon|uri) ]]; then
+  abort "Invalid BATS_LINE_REFERENCE_FORMAT '$BATS_LINE_REFERENCE_FORMAT' (e.g. via --line-reference-format)"
+fi
+
 
 if [[ -n "${BATS_RUN_TMPDIR:-}" ]]; then
   if [[ -d "$BATS_RUN_TMPDIR" ]]; then

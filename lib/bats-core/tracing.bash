@@ -73,10 +73,12 @@ bats_print_stack_trace() {
       printf "from function %s " "$quoted_fn"
     fi
 
+    local reference
+    bats_format_file_line_reference reference "$filename" "$lineno"
     if [[ $index -eq $count ]]; then
-      printf 'in test file %s, line %d)\n' "$filename" "$lineno"
+      printf 'in test file %s)\n' "$reference"
     else
-      printf 'in file %s, line %d,\n' "$filename" "$lineno"
+      printf 'in file %s,\n' "$reference"
     fi
 
     ((++index))
@@ -187,7 +189,9 @@ bats_emit_trace() {
       fi
       local padding='$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$'
       if ((BATS_LAST_STACK_DEPTH != ${#BASH_LINENO[@]})); then
-        printf '%s [%s:%d]\n' "${padding::${#BASH_LINENO[@]}-4}" "${file##*/}" "$line" >&4
+        local reference
+        bats_format_file_line_reference reference "${file##*/}" "$line"
+        printf '%s [%s]\n' "${padding::${#BASH_LINENO[@]}-4}" "$reference" >&4
       fi
       printf '%s %s\n' "${padding::${#BASH_LINENO[@]}-4}" "$BASH_COMMAND" >&4
       BATS_LAST_BASH_COMMAND="$BASH_COMMAND"

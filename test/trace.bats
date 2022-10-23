@@ -16,11 +16,11 @@ setup() {
 }
 
 @test "--trace recurses into functions but not into run" {
-  reentrant_run -1 bats --trace "$FIXTURE_ROOT/failing_recursive.bats"
+  reentrant_run -1 bats --trace "$FIXTURE_ROOT/failing_recursive.bats" --line-reference-format colon
 
   [ "${lines[0]}" = '1..1' ]
   [ "${lines[1]}" = 'not ok 1 a recursive failing test' ]
-  [ "${lines[2]}" = "# (in test file $RELATIVE_FIXTURE_ROOT/failing_recursive.bats, line 12)" ]
+  [ "${lines[2]}" = "# (in test file $RELATIVE_FIXTURE_ROOT/failing_recursive.bats:12)" ]
   [ "${lines[3]}" = "#   \`false' failed" ]
   [ "${lines[4]}" = '# $ [failing_recursive.bats:9]' ]
   [ "${lines[5]}" = '# $ echo Outer' ]

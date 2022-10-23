@@ -211,3 +211,35 @@ bats_append_arrays_as_args() { # <array...> -- <command ...>
     "$@"
   fi
 }
+
+bats_format_file_line_reference() { # <output> <file> <line>
+  # shellcheck disable=SC2034 # will be used in subimplementation
+  local output="${1?}"
+  shift
+  "bats_format_file_line_reference_${BATS_LINE_REFERENCE_FORMAT?}" "$@"
+}
+
+bats_format_file_line_reference_comma_line() {
+  printf -v "$output" "%s, line %d" "$@"
+}
+
+bats_format_file_line_reference_colon() {
+  printf -v "$output" "%s:%d" "$@"
+}
+
+# approximate realpath without subshell
+bats_approx_realpath() { # <output-variable> <path>
+  local output=$1 path=$2
+  if [[ $path != /* ]]; then
+    path="$PWD/$path"
+  fi
+  # x/./y -> x/y
+  path=${path//\/.\//\/}
+  printf -v "$output" "%s" "$path"
+}
+
+bats_format_file_line_reference_uri() {
+  local filename=${1?} line=${2?}
+  bats_approx_realpath filename "$filename"
+  printf -v "$output" "file://%s:%d" "$filename" "$line"
+}

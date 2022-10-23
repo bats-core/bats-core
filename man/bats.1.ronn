@@ -54,6 +54,13 @@ OPTIONS
     which requires setting `$BATS_BEGIN_CODE_QUOTE` and 
     `$BATS_END_CODE_QUOTE`. 
     Can also be set via `$BATS_CODE_QUOTE_STYLE`.
+  * `--line-reference-format`
+    Controls how file/line references e.g. in stack traces are printed:
+      - comma_line (default): a.bats, line 1
+      - colon:  a.bats:1
+      - uri: file:///tests/a.bats:1
+      - custom: provide your own via defining bats_format_file_line_reference_custom
+                with parameters <filename> <line>, store via `printf -v "$output"`
   * `-f`, `--filter <regex>`:
     Filter test cases by names matching the regular expression
   * `-F`, `--formatter <type>`:

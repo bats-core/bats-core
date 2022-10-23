@@ -12,7 +12,12 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 
 ### Added
 
-* added installation instructions for Debian, Fedora, Gentoo, and OpenSUSE (#659)
+* add installation instructions for Debian, Fedora, Gentoo, and OpenSUSE (#659)
+* add `--line-reference-format` to switch file/line references in stack traces (#665)
+  * `comma_line` (default): `file.bats, line 1`
+  * `colon`: `file.bats:1`
+  * `uri`: `file:///path/to/file.bats:1`
+  * `custom`: define your own formatter in `bats_format_file_line_reference_custom`
 
 ### Fixed
 

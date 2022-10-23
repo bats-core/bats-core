@@ -259,6 +259,8 @@ setup() {
 
 @test "extended syntax" {
   emulate_bats_env
+  # shellcheck disable=SC2030,SC2031
+  REENTRANT_RUN_PRESERVE+=(BATS_LINE_REFERENCE_FORMAT)
   reentrant_run bats-exec-suite -x "$FIXTURE_ROOT/failing_and_passing.bats"
   echo "$output"
   [ $status -eq 1 ]
@@ -281,6 +283,8 @@ setup() {
 
 @test "extended timing syntax" {
   emulate_bats_env
+  # shellcheck disable=SC2030,SC2031
+  REENTRANT_RUN_PRESERVE+=(BATS_LINE_REFERENCE_FORMAT)
   reentrant_run bats-exec-suite -x -T "$FIXTURE_ROOT/failing_and_passing.bats"
   echo "$output"
   [ $status -eq 1 ]
@@ -294,6 +298,8 @@ setup() {
 
 @test "time is greater than 0ms for long test" {
   emulate_bats_env
+  # shellcheck disable=SC2030,SC2031
+  REENTRANT_RUN_PRESERVE+=(BATS_LINE_REFERENCE_FORMAT)
   reentrant_run bats-exec-suite -x -T "$FIXTURE_ROOT/run_long_command.bats"
   echo "$output"
   [ $status -eq 0 ]
@@ -1490,4 +1496,28 @@ enforce_own_process_group() {
   [ "${lines[0]}" == '1..1' ]
   [ "${lines[1]}" == 'ok 1 Fail once' ]
   [ ${#lines[@]} == 2 ]
+}
+
+@test "Error on invalid --line-reference-format" {
+  bats_require_minimum_version 1.5.0
+
+  reentrant_run -1 bats --line-reference-format invalid "$FIXTURE_ROOT/passing.bats"
+  [ "${lines[0]}" == "Error: Invalid BATS_LINE_REFERENCE_FORMAT 'invalid' (e.g. via --line-reference-format)" ]
+}
+
+@test "--line-reference-format switches format" {
+  bats_require_minimum_version 1.5.0
+
+  reentrant_run -1 bats --line-reference-format colon "$FIXTURE_ROOT/failing.bats"
+  [ "${lines[2]}" == "# (in test file $RELATIVE_FIXTURE_ROOT/failing.bats:4)" ]
+
+  reentrant_run -1 bats --line-reference-format uri "$FIXTURE_ROOT/failing.bats"
+  [ "${lines[2]}" == "# (in test file file://$FIXTURE_ROOT/failing.bats:4)" ]
+
+  bats_format_file_line_reference_custom() {
+    printf -v "$output" "%s<-%d" "$1" "$2"
+  }
+  export -f bats_format_file_line_reference_custom
+  reentrant_run -1 bats --line-reference-format custom "$FIXTURE_ROOT/failing.bats"
+  [ "${lines[2]}" == "# (in test file $RELATIVE_FIXTURE_ROOT/failing.bats<-4)" ]
 }

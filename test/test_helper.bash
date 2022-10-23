@@ -5,6 +5,7 @@ emulate_bats_env() {
   export BATS_RUN_TMPDIR
   BATS_RUN_TMPDIR=$(mktemp -d "${BATS_RUN_TMPDIR}/emulated-tmpdir-${BATS_ROOT_PID}-XXXXXX")
   REENTRANT_RUN_PRESERVE+=(BATS_CWD BATS_TEST_FILTER BATS_ROOT_PID BATS_RUN_TMPDIR)
+  export BATS_LINE_REFERENCE_FORMAT=comma_line
 }
 
 fixtures() {
