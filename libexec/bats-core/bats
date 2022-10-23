@@ -40,7 +40,7 @@ HELP_TEXT_HEADER
                             A two character string of code quote delimiters
                             or 'custom' which requires setting $BATS_BEGIN_CODE_QUOTE and 
                             $BATS_END_CODE_QUOTE. Can also be set via $BATS_CODE_QUOTE_STYLE
-  --file-reference-format   Controls how file/line references e.g. in stack traces are printed:
+  --line-reference-format   Controls how file/line references e.g. in stack traces are printed:
                               - comma_line (default): a.bats, line 1
                               - colon:  a.bats:1
                               - uri: file:///tests/a.bats:1
@@ -112,7 +112,7 @@ export BATS_RUN_TMPDIR=
 export BATS_GUARANTEED_MINIMUM_VERSION=0.0.0
 export BATS_LIB_PATH=${BATS_LIB_PATH-/usr/lib/bats}
 BATS_REPORT_OUTPUT_DIR=${BATS_REPORT_OUTPUT_DIR-.}
-export BATS_FILE_REFERENCE_FORMAT=${BATS_FILE_REFERENCE_FORMAT-comma_line}
+export BATS_LINE_REFERENCE_FORMAT=${BATS_LINE_REFERENCE_FORMAT-comma_line}
 
 if [[ ! -d "${BATS_TMPDIR}" ]]; then
   printf "Error: BATS_TMPDIR (%s) does not exist or is not a directory" "${BATS_TMPDIR}" >&2
@@ -269,9 +269,9 @@ while [[ "$#" -ne 0 ]]; do
     shift
     flags+=('--filter-tags' "$1")
     ;;
-  --file-reference-format)
+  --line-reference-format)
     shift
-    BATS_FILE_REFERENCE_FORMAT=$1
+    BATS_LINE_REFERENCE_FORMAT=$1
     ;;
   -*)
     abort "Bad command line option '$1'"
@@ -283,8 +283,8 @@ while [[ "$#" -ne 0 ]]; do
   shift
 done
 
-if [[ ! $BATS_FILE_REFERENCE_FORMAT =~ (custom|comma_line|colon|uri) ]]; then
-  abort "Invalid BATS_FILE_REFERENCE_FORMAT '$BATS_FILE_REFERENCE_FORMAT' (e.g. via --file-reference-format)"
+if [[ ! $BATS_LINE_REFERENCE_FORMAT =~ (custom|comma_line|colon|uri) ]]; then
+  abort "Invalid BATS_LINE_REFERENCE_FORMAT '$BATS_LINE_REFERENCE_FORMAT' (e.g. via --line-reference-format)"
 fi
 
 

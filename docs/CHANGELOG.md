@@ -13,7 +13,7 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 ### Added
 
 * add installation instructions for Debian, Fedora, Gentoo, and OpenSUSE (#659)
-* add `--file-reference-format` to switch file/line references in stack traces (#665)
+* add `--line-reference-format` to switch file/line references in stack traces (#665)
   * `comma_line` (default): `file.bats, line 1`
   * `colon`: `file.bats:1`
   * `uri`: `file:///path/to/file.bats:1`

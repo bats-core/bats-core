@@ -216,7 +216,7 @@ bats_format_file_line_reference() { # <output> <file> <line>
   # shellcheck disable=SC2034 # will be used in subimplementation
   local output="${1?}"
   shift
-  "bats_format_file_line_reference_${BATS_FILE_REFERENCE_FORMAT?}" "$@"
+  "bats_format_file_line_reference_${BATS_LINE_REFERENCE_FORMAT?}" "$@"
 }
 
 bats_format_file_line_reference_comma_line() {
