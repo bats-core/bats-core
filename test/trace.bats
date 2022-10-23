@@ -16,7 +16,7 @@ setup() {
 }
 
 @test "--trace recurses into functions but not into run" {
-  reentrant_run -1 bats --trace "$FIXTURE_ROOT/failing_recursive.bats" --file-reference-format colon_separated
+  reentrant_run -1 bats --trace "$FIXTURE_ROOT/failing_recursive.bats" --file-reference-format colon
 
   [ "${lines[0]}" = '1..1' ]
   [ "${lines[1]}" = 'not ok 1 a recursive failing test' ]

@@ -223,7 +223,7 @@ bats_format_file_line_reference_comma_line() {
   printf -v "$output" "%s, line %d" "$@"
 }
 
-bats_format_file_line_reference_colon_separated() {
+bats_format_file_line_reference_colon() {
   printf -v "$output" "%s:%d" "$@"
 }
 
@@ -238,7 +238,7 @@ bats_approx_realpath() { # <output-variable> <path>
   printf -v "$output" "%s" "$path"
 }
 
-bats_format_file_line_reference_url_realpath() {
+bats_format_file_line_reference_uri() {
   local filename=${1?} line=${2?}
   bats_approx_realpath filename "$filename"
   printf -v "$output" "file://%s:%d" "$filename" "$line"

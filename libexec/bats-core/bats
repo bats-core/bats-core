@@ -42,8 +42,8 @@ HELP_TEXT_HEADER
                             $BATS_END_CODE_QUOTE. Can also be set via $BATS_CODE_QUOTE_STYLE
   --file-reference-format   Controls how file/line references e.g. in stack traces are printed:
                               - comma_line (default): a.bats, line 1
-                              - colon_separated:  a.bats:1
-                              - url_realpath: file:///tests/a.bats:1
+                              - colon:  a.bats:1
+                              - uri: file:///tests/a.bats:1
                               - custom: provide your own via defining bats_format_file_line_reference_custom
                                         with parameters <filename> <line>, store via `printf -v "$output"`
   -f, --filter <regex>      Only run tests that match the regular expression
@@ -283,7 +283,7 @@ while [[ "$#" -ne 0 ]]; do
   shift
 done
 
-if [[ ! $BATS_FILE_REFERENCE_FORMAT =~ (custom|comma_line|colon_separated|url_realpath) ]]; then
+if [[ ! $BATS_FILE_REFERENCE_FORMAT =~ (custom|comma_line|colon|uri) ]]; then
   abort "Invalid BATS_FILE_REFERENCE_FORMAT '$BATS_FILE_REFERENCE_FORMAT' (e.g. via --file-reference-format)"
 fi
 

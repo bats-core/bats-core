@@ -1508,10 +1508,10 @@ enforce_own_process_group() {
 @test "--file-reference-format switches format" {
   bats_require_minimum_version 1.5.0
 
-  reentrant_run -1 bats --file-reference-format colon_separated "$FIXTURE_ROOT/failing.bats"
+  reentrant_run -1 bats --file-reference-format colon "$FIXTURE_ROOT/failing.bats"
   [ "${lines[2]}" == "# (in test file $RELATIVE_FIXTURE_ROOT/failing.bats:4)" ]
 
-  reentrant_run -1 bats --file-reference-format url_realpath "$FIXTURE_ROOT/failing.bats"
+  reentrant_run -1 bats --file-reference-format uri "$FIXTURE_ROOT/failing.bats"
   [ "${lines[2]}" == "# (in test file file://$FIXTURE_ROOT/failing.bats:4)" ]
 
   bats_format_file_line_reference_custom() {
