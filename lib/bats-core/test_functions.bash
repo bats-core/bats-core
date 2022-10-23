@@ -271,24 +271,36 @@ run() { # [!|-N] [--keep-empty-lines] [--separate-stderr] [--] <command to run..
   BATS_RUN_COMMAND="${*}"
   set "-$origFlags"
 
-  if [[ ${BATS_VERBOSE_RUN:-} ]]; then
-    printf "%s\n" "$output"
-  fi
+  bats_run_print_output() {
+    if [[ -n "$output" ]]; then
+      printf "%s\n" "$output"
+    fi
+    if [[ "$output_case" == separate && -n "$stderr" ]]; then
+      printf "stderr:\n%s\n" "$stderr"
+    fi
+  }
 
   if [[ -n "$expected_rc" ]]; then
     if [[ "$expected_rc" = "-1" ]]; then
       if [[ "$status" -eq 0 ]]; then
         BATS_ERROR_SUFFIX=", expected nonzero exit code!"
+        bats_run_print_output
         return 1
       fi
     elif [ "$status" -ne "$expected_rc" ]; then
       # shellcheck disable=SC2034
       BATS_ERROR_SUFFIX=", expected exit code $expected_rc, got $status"
+      bats_run_print_output
       return 1
     fi
   elif [[ "$status" -eq 127 ]]; then # "command not found"
     bats_generate_warning 1 "$BATS_RUN_COMMAND"
   fi
+
+  if [[ ${BATS_VERBOSE_RUN:-} ]]; then
+    bats_run_print_output
+  fi
+  
   # don't leak our trap into surrounding code
   trap bats_interrupt_trap INT
 }
