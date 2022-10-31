@@ -14,7 +14,7 @@ For sample test files, see [examples](https://github.com/bats-core/bats-core/tre
 
 ## Tagging tests
 
-Startig with version 1.8.0, Bats comes with a tagging system, that allows users
+Starting with version 1.8.0, Bats comes with a tagging system that allows users
 to categorize their tests and filter according to those categories.
 
 Each test has a list of tags attached to it. Without specification, this list is empty.
