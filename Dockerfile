@@ -12,7 +12,7 @@ LABEL maintainer="Bats-core Team"
 LABEL org.opencontainers.image.authors="Bats-core Team"
 LABEL org.opencontainers.image.title="Bats"
 LABEL org.opencontainers.image.description="Bash Automated Testing System"
-LABEL org.opencontainers.image.url="https://hub.docker.com/_/bash"
+LABEL org.opencontainers.image.url="https://hub.docker.com/r/bats/bats"
 LABEL org.opencontainers.image.source="https://github.com/bats-core/bats-core"
 LABEL org.opencontainers.image.base.name="docker.io/bash"
 
