@@ -1521,3 +1521,11 @@ enforce_own_process_group() {
   reentrant_run -1 bats --line-reference-format custom "$FIXTURE_ROOT/failing.bats"
   [ "${lines[2]}" == "# (in test file $RELATIVE_FIXTURE_ROOT/failing.bats<-4)" ]
 }
+
+@test "Focused tests filter out other tests" {
+  bats_require_minimum_version 1.5.0
+  reentrant_run -0 bats "$FIXTURE_ROOT/focus.bats"
+  [ "${lines[0]}" == '1..1' ]
+  [ "${lines[1]}" == 'ok 1 focused' ]
+  [ "${#lines[@]}" == 2 ]
+}

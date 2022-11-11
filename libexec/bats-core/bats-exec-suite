@@ -108,7 +108,7 @@ fi
 
 # create a file that contains all (filtered) tests to run from all files
 TESTS_LIST_FILE="${BATS_RUN_TMPDIR}/test_list_file.txt"
-
+focus_mode=
 bats_gather_tests() {
   local line test_line tags
   all_tests=()
@@ -131,6 +131,23 @@ bats_gather_tests() {
         line="${BASH_REMATCH[2]}"
       else
         tags=()
+      fi
+      # is this test focused?
+      if bats_all_in tags 'bats:focus'; then
+        if [[ $focus_mode == 1 ]]; then
+          # focused tests in focus mode should just be registered
+          :
+        else
+          # the current test enables focus mode ...
+          focus_mode=1
+          # ... -> remove previously found, unfocused tests
+          all_tests=()
+          : > "$TESTS_LIST_FILE"
+        fi
+      elif [[ $focus_mode == 1 ]]; then
+        # the current test is not focused but focus mode is enabled -> filter out
+        continue
+        # no else -> unfocused tests outside focus mode should just be registered
       fi
       if [[ ${#filter_tags_list[@]} -gt 0 ]]; then
         local match=
