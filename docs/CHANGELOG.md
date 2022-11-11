@@ -24,6 +24,7 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 #### Documentation
 
 * improved clarity of section about output in free code (#671)
+* fixed typos (#673)
 
 ## [1.8.2] - 2022-10-19
 
