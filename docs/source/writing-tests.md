@@ -176,6 +176,67 @@ All additional parameters to run should come before the command.
 If you want to run a command that starts with `-`, prefix it with `--` to
 prevent `run` from parsing it as an option.
 
+### When not to use `run`
+
+In case you only need to check the command succeeded, it is better to not use `run`, since the following code
+
+```bash
+run -0 command args ...
+```
+
+is equivalent to
+
+```bash
+command args ...
+```
+
+(because bats sets `set -e` for all tests).
+
+__Note__: In contrast to the above, testing that a command failed is best done via
+
+```bash
+run ! command args ...
+```
+
+because 
+
+```bash
+! command args ...
+```
+
+will only fail the test if it is the last command and thereby determines the test function's exit code.
+This is due to Bash's decision to (counterintuitively?) not trigger `set -e` on `!` commands.
+(See also [the associated gotcha](https://bats-core.readthedocs.io/en/stable/gotchas.html#my-negated-statement-e-g-true-does-not-fail-the-test-even-when-it-should))
+
+
+### `run` and pipes
+
+Don't fool yourself with pipes when using `run`. Bash parses the pipe outside of `run`, not internal to its command. Take this example:
+
+```bash
+run command args ... | jq -e '.limit == 42'
+```
+
+Here, `jq` receives no input (which is captured by `run`), 
+executes no filters, and always succeeds, so the test does not work as 
+expected.
+
+Instead use a Bash subshell:
+
+```bash
+run bash -c "command args ... | jq -e '.limit == 42'"
+```
+
+This subshell is a fresh Bash environment, and will only inherit variables 
+and functions that are exported into it.
+
+```bash
+limit() { jq -e '.limit == 42'; }
+export -f limit
+run bash -c "command args ... | limit"
+```
+
+
 ## `load`: Share common code
 
 You may want to share common code across multiple test files. Bats
