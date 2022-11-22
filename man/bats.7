@@ -1,18 +1,12 @@
-.\" generated with Ronn/v0.7.3
-.\" http://github.com/rtomayko/ronn/tree/0.7.3
-.
-.TH "BATS" "7" "July 2022" "bats-core" "Bash Automated Testing System"
-.
+.\" generated with Ronn-NG/v0.9.1
+.\" http://github.com/apjanke/ronn-ng/tree/0.9.1
+.TH "BATS" "7" "November 2022" "bats-core" "Bash Automated Testing System"
 .SH "NAME"
 \fBbats\fR \- Bats test file format
-.
 .SH "DESCRIPTION"
 A Bats test file is a Bash script with special syntax for defining test cases\. Under the hood, each test case is just a function with a description\.
-.
 .IP "" 4
-.
 .nf
-
 #!/usr/bin/env bats
 
 @test "addition using bc" {
@@ -24,196 +18,165 @@ A Bats test file is a Bash script with special syntax for defining test cases\. 
   result="$(echo 2 2+p | dc)"
   [ "$result" \-eq 4 ]
 }
-.
 .fi
-.
 .IP "" 0
-.
 .P
 Each Bats test file is evaluated n+1 times, where \fIn\fR is the number of test cases in the file\. The first run counts the number of test cases, then iterates over the test cases and executes each one in its own process\.
-.
+.SH "Tagging tests"
+Each test has a list of tags attached to it\. Without specification, this list is empty\. Tags can be defined in two ways\. The first being \fB# bats test_tags=\fR:
+.P
+# bats test_tags=tag:1, tag:2, tag:3 @test "second test" { # \|\.\|\.\|\. }
+.P
+@test "second test" { # \|\.\|\.\|\. }
+.P
+These tags (\fBtag:1\fR, \fBtag:2\fR, \fBtag:3\fR) will be attached to the test \fBfirst test\fR\. The second test will have no tags attached\. Values defined in the \fB# bats test_tags=\fR directive will be assigned to the next \fB@test\fR that is being encountered in the file and forgotten after that\. Only the value of the last \fB# bats test_tags=\fR directive before a given test will be used\.
+.P
+Sometimes, we want to give all tests in a file a set of the same tags\. This can be achieved via \fB# bats file_tags=\fR\. They will be added to all tests in the file after that directive\. An additional \fB# bats file_tags=\fR directive will override the previously defined values:
+.IP "" 4
+.nf
+@test "Zeroth test" {
+  # will have no tags
+}
+
+# bats file_tags=a:b
+# bats test_tags=c:d
+
+@test "First test" {
+  # will be tagged a:b, c:d
+}
+
+# bats file_tags=
+
+@test "Second test" {
+  # will have no tags
+}
+.fi
+.IP "" 0
+.P
+Tags are case sensitive and must only consist of alphanumeric characters and \fB_\fR, \fB\-\fR, or \fB:\fR\. They must not contain whitespaces! The colon is intended as a separator for (recursive) namespacing\.
+.P
+Tag lists must be separated by commas and are allowed to contain whitespace\. They must not contain empty tags like \fBtest_tags=,b\fR (first tag is empty), \fBtest_tags=a,,c\fR, \fBtest_tags=a, ,c\fR (second tag is only whitespace/empty), \fBtest_tags=a,b,\fR (third tag is empty)\.
+.P
+Every tag starting with \fBbats:\fR (case insensitive!) is reserved for Bats\' internal use:
+.TP
+\fBbats:focus\fR
+If any test with the tag \fBbats:focus\fR is encountered in a test suite, only those tagged with this tag will be executed\. To prevent the CI from silently running on a subset of tests due to an accidentally commited \fBbats:focus\fR tag, the exit code of successful runs will be overriden to 1\.
+.IP
+Should you require the true exit code, e\.g\. for a \fBgit bisect\fR operation, you can disable this behavior by setting \fBBATS_NO_FAIL_FOCUS_RUN=1\fR when running \fBbats\fR, but make sure to not commit this to CI!
 .SH "THE RUN HELPER"
-Usage: run [OPTIONS] [\-\-] <command\.\.\.> Options: ! check for non zero exit code \-\fIN\fR check that exit code is \fIN\fR \-\-separate\-stderr split stderr and stdout \-\-keep\-empty\-lines retain empty lines in \fB${lines[@]}\fR/\fB${stderr_lines[@]}\fR
-.
+Usage: run [OPTIONS] [\-\-]
 .P
 Many Bats tests need to run a command and then make assertions about its exit status and output\. Bats includes a \fBrun\fR helper that invokes its arguments as a command, saves the exit status and output into special global variables, and (optionally) checks exit status against a given expected value\. If successful, \fBrun\fR returns with a \fB0\fR status code so you can continue to make assertions in your test case\.
-.
 .P
 For example, let\'s say you\'re testing that the \fBfoo\fR command, when passed a nonexistent filename, exits with a \fB1\fR status code and prints an error message\.
-.
 .IP "" 4
-.
 .nf
-
 @test "invoking foo with a nonexistent file prints an error" {
   run \-1 foo nonexistent_filename
   [ "$output" = "foo: no such file \'nonexistent_filename\'" ]
 }
-.
 .fi
-.
 .IP "" 0
-.
 .P
 The \fB\-1\fR as first argument tells \fBrun\fR to expect 1 as an exit status, and to fail if the command exits with any other value\. On failure, both actual and expected values will be displayed, along with the invoked command and its output:
-.
 .IP "" 4
-.
 .nf
-
 (in test file test\.bats, line 2)
  `run \-1 foo nonexistent_filename\' failed, expected exit code 1, got 127
-.
 .fi
-.
 .IP "" 0
-.
 .P
 This error indicates a possible problem with the installation or configuration of \fBfoo\fR; note that a simple \fB[ $status != 0 ]\fR test would not have caught this kind of failure\.
-.
 .P
 The \fB$status\fR variable contains the status code of the command, and the \fB$output\fR variable contains the combined contents of the command\'s standard output and standard error streams\.
-.
 .P
 A third special variable, the \fB$lines\fR array, is available for easily accessing individual lines of output\. For example, if you want to test that invoking \fBfoo\fR without any arguments prints usage information on the first line:
-.
 .IP "" 4
-.
 .nf
-
 @test "invoking foo without arguments prints usage" {
   run \-1 foo
   [ "${lines[0]}" = "usage: foo <filename>" ]
 }
-.
 .fi
-.
 .IP "" 0
-.
 .P
 By default \fBrun\fR leaves out empty lines in \fB${lines[@]}\fR\. Use \fBrun \-\-keep\-empty\-lines\fR to retain them\.
-.
 .P
 Additionally, you can use \fB\-\-separate\-stderr\fR to split stdout and stderr into \fB$output\fR/\fB$stderr\fR and \fB${lines[@]}\fR/\fB${stderr_lines[@]}\fR\.
-.
 .P
 All additional parameters to run should come before the command\. If you want to run a command that starts with \fB\-\fR, prefix it with \fB\-\-\fR to prevent \fBrun\fR from parsing it as an option\.
-.
 .SH "THE LOAD COMMAND"
 You may want to share common code across multiple test files\. Bats includes a convenient \fBload\fR command for sourcing a Bash source file relative to the location of the current test file\. For example, if you have a Bats test in \fBtest/foo\.bats\fR, the command
-.
 .IP "" 4
-.
 .nf
-
 load test_helper
-.
 .fi
-.
 .IP "" 0
-.
 .P
 will source the script \fBtest/test_helper\.bash\fR in your test file\. This can be useful for sharing functions to set up your environment or load fixtures\.
-.
 .SH "THE BATS_LOAD_LIBRARY COMMAND"
 Some libraries are installed on the system, e\.g\. by \fBnpm\fR or \fBbrew\fR\. These should not be \fBload\fRed, as their path depends on the installation method\. Instead, one should use \fBbats_load_library\fR together with setting \fBBATS_LIB_PATH\fR, a \fBPATH\fR\-like colon\-delimited variable\.
-.
 .P
 \fBbats_load_library\fR has two modes of resolving requests:
-.
 .IP "1." 4
 by relative path from the \fBBATS_LIB_PATH\fR to a file in the library
-.
 .IP "2." 4
 by library name, expecting libraries to have a \fBload\.bash\fR entrypoint
-.
 .IP "" 0
-.
 .P
 For example if your \fBBATS_LIB_PATH\fR is set to \fB~/\.bats/libs:/usr/lib/bats\fR, then \fBbats_load_library test_helper\fR would look for existing files with the following paths:
-.
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB~/\.bats/libs/test_helper\fR
-.
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB~/\.bats/libs/test_helper/load\.bash\fR
-.
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB/usr/lib/bats/test_helper\fR
-.
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB/usr/lib/bats/test_helper/load\.bash\fR
-.
 .IP "" 0
-.
 .P
 The first existing file in this list will be sourced\.
-.
 .P
 If you want to load only part of a library or the entry point is not named \fBload\.bash\fR, you have to include it in the argument: \fBbats_load_library library_name/file_to_load\fR will try
-.
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB~/\.bats/libs/library_name/file_to_load\fR
-.
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB~/\.bats/libs/library_name/file_to_load/load\.bash\fR
-.
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB/usr/lib/bats/library_name/file_to_load\fR
-.
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB/usr/lib/bats/library_name/file_to_load/load\.bash\fR
-.
 .IP "" 0
-.
 .P
 Apart from the changed lookup rules, \fBbats_load_library\fR behaves like \fBload\fR\.
-.
 .P
 \fBNote\fR: As seen above \fBload\.bash\fR is the entry point for libraries and meant to load more files from its directory or other libraries\.
-.
 .P
 \fBNote\fR: Obviously, the actual \fBBATS_LIB_PATH\fR is highly dependent on the environment\. To maintain a uniform location across systems, (distribution) package maintainers are encouraged to use \fB/usr/lib/bats/\fR as the install path for libraries where possible\. However, if the package manager has another preferred location, like \fBnpm\fR or \fBbrew\fR, you should use this instead\.
-.
 .SH "THE SKIP COMMAND"
 Tests can be skipped by using the \fBskip\fR command at the point in a test you wish to skip\.
-.
 .IP "" 4
-.
 .nf
-
 @test "A test I don\'t want to execute for now" {
   skip
   run \-0 foo
 }
-.
 .fi
-.
 .IP "" 0
-.
 .P
 Optionally, you may include a reason for skipping:
-.
 .IP "" 4
-.
 .nf
-
 @test "A test I don\'t want to execute for now" {
   skip "This command will return zero soon, but not now"
   run \-0 foo
 }
-.
 .fi
-.
 .IP "" 0
-.
 .P
 Or you can skip conditionally:
-.
 .IP "" 4
-.
 .nf
-
 @test "A test which should run" {
   if [ foo != bar ]; then
     skip "foo isn\'t bar"
@@ -221,81 +184,56 @@ Or you can skip conditionally:
 
   run \-0 foo
 }
-.
 .fi
-.
 .IP "" 0
-.
 .SH "THE BATS_REQUIRE_MINIMUM_VERSION COMMAND"
 Code for newer versions of Bats can be incompatible with older versions\. In the best case this will lead to an error message and a failed test suite\. In the worst case, the tests will pass erroneously, potentially masking a failure\.
-.
 .P
 Use \fBbats_require_minimum_version <Bats version number>\fR to avoid this\. It communicates in a concise manner, that you intend the following code to be run under the given Bats version or higher\.
-.
 .P
 Additionally, this function will communicate the current Bats version floor to subsequent code, allowing e\.g\. Bats\' internal warning to give more informed warnings\.
-.
 .P
 \fBNote\fR: By default, calling \fBbats_require_minimum_version\fR with versions before Bats 1\.7\.0 will fail regardless of the required version as the function is not available\. However, you can use the bats\-backports plugin (https://github\.com/bats\-core/bats\-backports) to make your code usable with older versions, e\.g\. during migration while your CI system is not yet upgraded\.
-.
 .SH "SETUP AND TEARDOWN FUNCTIONS"
 You can define special \fBsetup\fR and \fBteardown\fR functions which run before and after each test case, respectively\. Use these to load fixtures, set up your environment, and clean up when you\'re done\.
-.
 .SH "CODE OUTSIDE OF TEST CASES"
 You can include code in your test file outside of \fB@test\fR functions\. For example, this may be useful if you want to check for dependencies and fail immediately if they\'re not present\. However, any output that you print in code outside of \fB@test\fR, \fBsetup\fR or \fBteardown\fR functions must be redirected to \fBstderr\fR (\fB>&2\fR)\. Otherwise, the output may cause Bats to fail by polluting the TAP stream on \fBstdout\fR\.
-.
 .SH "SPECIAL VARIABLES"
 There are several global variables you can use to introspect on Bats tests:
-.
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB$BATS_TEST_FILENAME\fR is the fully expanded path to the Bats test file\.
-.
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB$BATS_TEST_DIRNAME\fR is the directory in which the Bats test file is located\.
-.
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB$BATS_TEST_NAMES\fR is an array of function names for each test case\.
-.
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB$BATS_TEST_NAME\fR is the name of the function containing the current test case\.
-.
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fBBATS_TEST_NAME_PREFIX\fR will be prepended to the description of each test on stdout and in reports\.
-.
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB$BATS_TEST_DESCRIPTION\fR is the description of the current test case\.
-.
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fBBATS_TEST_RETRIES\fR is the maximum number of additional attempts that will be made on a failed test before it is finally considered failed\. The default of 0 means the test must pass on the first attempt\.
-.
-.IP "\(bu" 4
+.IP "\[ci]" 4
+\fBBATS_TEST_TIMEOUT\fR is the number of seconds after which a test (including setup) will be aborted and marked as failed\. Updates to this value in \fBsetup()\fR or \fB@test\fR cannot change the running timeout countdown, so the latest useful update location is \fBsetup_file()\fR\.
+.IP "\[ci]" 4
 \fB$BATS_TEST_NUMBER\fR is the (1\-based) index of the current test case in the test file\.
-.
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB$BATS_SUITE_TEST_NUMBER\fR is the (1\-based) index of the current test case in the test suite (over all files)\.
-.
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB$BATS_TMPDIR\fR is the base temporary directory used by bats to create its temporary files / directories\. (default: \fB$TMPDIR\fR\. If \fB$TMPDIR\fR is not set, \fB/tmp\fR is used\.)
-.
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB$BATS_RUN_TMPDIR\fR is the location to the temporary directory used by bats to store all its internal temporary files during the tests\. (default: \fB$BATS_TMPDIR/bats\-run\-$BATS_ROOT_PID\-XXXXXX\fR)
-.
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB$BATS_FILE_EXTENSION\fR (default: \fBbats\fR) specifies the extension of test files that should be found when running a suite (via \fBbats [\-r] suite_folder/\fR)
-.
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB$BATS_SUITE_TMPDIR\fR is a temporary directory common to all tests of a suite\. Could be used to create files required by multiple tests\.
-.
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB$BATS_FILE_TMPDIR\fR is a temporary directory common to all tests of a test file\. Could be used to create files required by multiple tests in the same test file\.
-.
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB$BATS_TEST_TMPDIR\fR is a temporary directory unique for each test\. Could be used to create files required only for specific tests\.
-.
-.IP "\(bu" 4
+.IP "\[ci]" 4
 \fB$BATS_VERSION\fR is the version of Bats running the test\.
-.
 .IP "" 0
-.
 .SH "SEE ALSO"
 \fBbash\fR(1), \fBbats\fR(1)

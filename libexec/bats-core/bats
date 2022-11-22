@@ -51,6 +51,11 @@ HELP_TEXT_HEADER
                             Valid <status> values are:
                               failed - runs tests that failed or were not present in the last run
                               missed - runs tests that were not present in the last run
+  --filter-tags <comma-separated-tag-list>
+                            Only run tests that match all the tags in the list (&&).
+                            You can negate a tag via prepending '!'.
+                            Specifying this flag multiple times allows for logical or (||):
+                            `--filter-tags A,B --filter-tags A,!C` matches tags (A && B) || (A && !C)
   -F, --formatter <type>    Switch between formatters: pretty (default),
                               tap (default w/o term), tap13, junit, /<absolute path to formatter>
   --gather-test-outputs-in <directory>
