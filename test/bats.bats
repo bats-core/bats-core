@@ -1522,14 +1522,6 @@ enforce_own_process_group() {
   [ "${lines[2]}" == "# (in test file $RELATIVE_FIXTURE_ROOT/failing.bats<-4)" ]
 }
 
-@test "Focused tests filter out other tests" {
-  bats_require_minimum_version 1.5.0
-  reentrant_run -0 bats "$FIXTURE_ROOT/focus.bats"
-  [ "${lines[0]}" == '1..1' ]
-  [ "${lines[1]}" == 'ok 1 focused' ]
-  [ "${#lines[@]}" == 2 ]
-}
-
 @test "Focus tests filter out other tests and override exit code" {
   bats_require_minimum_version 1.5.0
   # expect exit 1: focus mode always fails tests 
@@ -1537,7 +1529,7 @@ enforce_own_process_group() {
   [ "${lines[0]}" == "WARNING: This test run only contains tests tagged \`bats:focus\`!" ]
   [ "${lines[1]}" == '1..1' ]
   [ "${lines[2]}" == 'ok 1 focused' ]
-  [ "${lines[3]}" == "Marking test run as failed due to \`bats:focus\` tag. (Set \BATS_NO_FAIL_FOCUS_RUN=1\ to disable.)" ]
+  [ "${lines[3]}" == "Marking test run as failed due to \`bats:focus\` tag. (Set \`BATS_NO_FAIL_FOCUS_RUN=1\` to disable.)" ]
   [ "${#lines[@]}" == 4 ]
 }
 
