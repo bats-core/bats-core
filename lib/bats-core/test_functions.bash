@@ -327,6 +327,15 @@ skip() {
       # and then do the exit (at the end of this function)
     fi
     # if we aren't in exit trap, the normal exit handling should suffice
+  elif [[ -n "${BATS_SOURCE_FILE_COMPLETED-}" ]]; then
+    # ... this is skeip in setup_file
+    # shellcheck disable=SC2034
+    BATS_SETUP_FILE_COMPLETED=1
+    # shellcheck disable=SC2034
+    BATS_RUN_TESTS_SKIPPED=1
+    # shellcheck disable=SC2034
+    BATS_RUN_TESTS_SKIPPED_REASON="${1:-}"
+    return 0
   else
     # ... this is either skip in test or skip in setup.
     # Following variables are used in bats-exec-test which sources this file
