@@ -143,3 +143,11 @@ setup() {
   [ "${lines[5]}" = "# teardown_suite" ]
   [ "${#lines[@]}" -eq 6 ]
 }
+
+@test "skip in setup_file skips all tests in file" {
+  reentrant_run -0 bats "$FIXTURE_ROOT/skip_in_setup_file.bats"
+  [ "${lines[0]}" = '1..2' ]
+  [ "${lines[1]}" = 'ok 1 first # skip Reason' ]
+  [ "${lines[2]}" = 'ok 2 second # skip Reason' ]
+  [ "${#lines[@]}" -eq 3 ]
+}
