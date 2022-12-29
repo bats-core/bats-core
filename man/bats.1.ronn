@@ -43,6 +43,35 @@ or with a path to a directory containing multiple `.bats` files. Bats
 will run each test file individually and aggregate the results. If any
 test case fails, `bats` exits with a `1` status code.
 
+FILTERING TESTS
+---------------
+
+There are multiple mechanisms to filter which tests to execute:
+
+* `--filter <regex>` to filter by test name
+* `--filter-status <status>` to filter by the test's status in the last run
+* `--filter-tags <tag-list>` to filter by the tags of a test
+
+--FILTER-TAGS <TAG-LIST>
+------------------------
+
+Tags can be used for finegrained filtering of which tests to run via `--filter-tags`.
+This accepts a comma separated list of tags. Only tests that match all of these
+tags will be executed. For example, `bats --filter-tags a,b,c` will pick up tests
+with tags `a,b,c`, but not tests that miss one or more of those tags.
+
+Additionally, you can specify negative tags via `bats --filter-tags a,!b,c`,
+which now won't match tests with tags `a,b,c`, due to the `b`, but will select `a,c`.
+To put it more formally, `--filter-tags` is a boolean conjunction.
+
+To allow for more complex queries, you can specify multiple `--filter-tags`.
+A test will be executed, if it matches at least one of them.
+This means multiple `--filter-tags` form a boolean disjunction.
+
+A query of `--filter-tags a,!b --filter-tags b,c` can be translated to:
+Execute only tests that (have tag a, but not tag b) or (have tag b and c).
+
+An empty tag list matches tests without tags.
 
 OPTIONS
 -------
@@ -66,11 +95,16 @@ OPTIONS
   * `-F`, `--formatter <type>`:
     Switch between formatters: pretty (default), tap (default w/o term), tap13, junit,
     `/<absolute path to formatter>`
-  * `--filter-status <status>`
+  * `--filter-status <status>`:
     Only run tests with the given status in the last completed (no CTRL+C/SIGINT) run.
     Valid <status> values are:
       failed - runs tests that failed or were not present in the last run
       missed - runs tests that were not present in the last run
+  * `--filter-tags <comma-separated-tag-list>`:
+    Only run tests that match all the tags in the list (`&&`). You can negate a 
+    tag via prepending `!`.
+    Specifying this flag multiple times allows for logical or (`||`):
+    `--filter-tags A,B --filter-tags A,!C` matches tags `(A && B) || (A && !C)`
   * `--gather-test-outputs-in <directory>`:
     Gather the output of failing *and* passing tests as files in directory
   * `-h`, `--help`:
@@ -79,9 +113,9 @@ OPTIONS
     Number of parallel jobs (requires GNU parallel)
   * `--no-tempdir-cleanup`:
     Preserve test output temporary directory
-  * `--no-parallelize-across-files`
+  * `--no-parallelize-across-files`:
     Serialize test file execution instead of running them in parallel (requires --jobs >1)
-  * `--no-parallelize-within-files`
+  * `--no-parallelize-within-files`:
     Serialize test execution within files instead of running them in parallel (requires --jobs >1)
   * `--report-formatter <type>`:
     Switch between reporters (same options as --formatter)
@@ -93,7 +127,7 @@ OPTIONS
     Automatically print the value of `$output` on failed tests
   * `-r`, `--recursive`:
     Include tests in subdirectories
-  * `--show-output-of-passing-tests`
+  * `--show-output-of-passing-tests`:
     Print output of passing tests
   * `-t`, `--tap`:
     Shorthand for "--formatter tap"
@@ -149,7 +183,7 @@ Bats wiki: _https://github.com/bats\-core/bats\-core/wiki/_
 COPYRIGHT
 ---------
 
-(c) 2017-2021 bats-core organization<br/>
+(c) 2017-2022 bats-core organization<br/>
 (c) 2011-2016 Sam Stephenson
 
 Bats is released under the terms of an MIT-style license.

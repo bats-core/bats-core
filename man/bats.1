@@ -1,149 +1,143 @@
-.\" generated with Ronn/v0.7.3
-.\" http://github.com/rtomayko/ronn/tree/0.7.3
-.
-.TH "BATS" "1" "November 2021" "bats-core" "Bash Automated Testing System"
-.
+.\" generated with Ronn-NG/v0.9.1
+.\" http://github.com/apjanke/ronn-ng/tree/0.9.1
+.TH "BATS" "1" "November 2022" "bats-core" "Bash Automated Testing System"
 .SH "NAME"
 \fBbats\fR \- Bash Automated Testing System
-.
 .SH "SYNOPSIS"
 Usage: bats [OPTIONS] \fItests\fR bats [\-h | \-v]
-.
 .P
 \fItests\fR is the path to a Bats test file, or the path to a directory containing Bats test files (ending with "\.bats")
-.
 .SH "DESCRIPTION"
 Bats is a TAP\-compliant testing framework for Bash\. It provides a simple way to verify that the UNIX programs you write behave as expected\.
-.
 .P
 A Bats test file is a Bash script with special syntax for defining test cases\. Under the hood, each test case is just a function with a description\.
-.
 .P
 Test cases consist of standard shell commands\. Bats makes use of Bash\'s \fBerrexit\fR (\fBset \-e\fR) option when running test cases\. If every command in the test case exits with a \fB0\fR status code (success), the test passes\. In this way, each line is an assertion of truth\.
-.
 .P
 See \fBbats\fR(7) for more information on writing Bats tests\.
-.
 .SH "RUNNING TESTS"
 To run your tests, invoke the \fBbats\fR interpreter with a path to a test file\. The file\'s test cases are run sequentially and in isolation\. If all the test cases pass, \fBbats\fR exits with a \fB0\fR status code\. If there are any failures, \fBbats\fR exits with a \fB1\fR status code\.
-.
 .P
 You can invoke the \fBbats\fR interpreter with multiple test file arguments, or with a path to a directory containing multiple \fB\.bats\fR files\. Bats will run each test file individually and aggregate the results\. If any test case fails, \fBbats\fR exits with a \fB1\fR status code\.
-.
-.SH "OPTIONS"
-.
-.IP "\(bu" 4
-\fB\-c\fR, \fB\-\-count\fR: Count the number of test cases without running any tests
-.
-.IP "\(bu" 4
-\fB\-\-code\-quote\-style <style>\fR: A two character string of code quote delimiters or \fBcustom\fR which requires setting \fB$BATS_BEGIN_CODE_QUOTE\fR and \fB$BATS_END_CODE_QUOTE\fR\. Can also be set via \fB$BATS_CODE_QUOTE_STYLE\fR\.
-.
-.IP "\(bu" 4
-\fB\-f\fR, \fB\-\-filter <regex>\fR: Filter test cases by names matching the regular expression
-.
-.IP "\(bu" 4
-\fB\-F\fR, \fB\-\-formatter <type>\fR: Switch between formatters: pretty (default), tap (default w/o term), tap13, junit
-.
-.IP "\(bu" 4
-\fB\-\-gather\-test\-outputs\-in <directory>\fR: Gather the output of failing \fIand\fR passing tests as files in directory
-.
-.IP "\(bu" 4
-\fB\-h\fR, \fB\-\-help\fR: Display this help message
-.
-.IP "\(bu" 4
-\fB\-j\fR, \fB\-\-jobs <jobs>\fR: Number of parallel jobs (requires GNU parallel)
-.
-.IP "\(bu" 4
-\fB\-\-no\-tempdir\-cleanup\fR: Preserve test output temporary directory
-.
-.IP "\(bu" 4
-\fB\-\-no\-parallelize\-across\-files\fR Serialize test file execution instead of running them in parallel (requires \-\-jobs >1)
-.
-.IP "\(bu" 4
-\fB\-\-no\-parallelize\-within\-files\fR Serialize test execution within files instead of running them in parallel (requires \-\-jobs >1)
-.
-.IP "\(bu" 4
-\fB\-\-report\-formatter <type>\fR: Switch between reporters (same options as \-\-formatter)
-.
-.IP "\(bu" 4
-\fB\-o\fR, \fB\-\-output <dir>\fR: Directory to write report files
-.
-.IP "\(bu" 4
-\fB\-p\fR, \fB\-\-pretty\fR: Shorthand for "\-\-formatter pretty"
-.
-.IP "\(bu" 4
-\fB\-\-print\-output\-on\-failure\fR: Automatically print the value of \fB$output\fR on failed tests
-.
-.IP "\(bu" 4
-\fB\-r\fR, \fB\-\-recursive\fR: Include tests in subdirectories
-.
-.IP "\(bu" 4
-\fB\-\-show\-output\-of\-passing\-tests\fR Print output of passing tests
-.
-.IP "\(bu" 4
-\fB\-t\fR, \fB\-\-tap\fR: Shorthand for "\-\-formatter tap"
-.
-.IP "\(bu" 4
-\fB\-T\fR, \fB\-\-timing\fR: Add timing information to tests
-.
-.IP "\(bu" 4
-\fB\-x\fR, \fB\-\-trace\fR: Print test commands as they are executed (like \fBset \-x\fR)
-.
-.IP "\(bu" 4
-\fB\-\-verbose\-run\fR: Make \fBrun\fR print \fB$output\fR by default
-.
-.IP "\(bu" 4
-\fB\-v\fR, \fB\-\-version\fR: Display the version number
-.
+.SH "FILTERING TESTS"
+There are multiple mechanisms to filter which tests to execute:
+.IP "\[ci]" 4
+\fB\-\-filter <regex>\fR to filter by test name
+.IP "\[ci]" 4
+\fB\-\-filter\-status <status>\fR to filter by the test\'s status in the last run
+.IP "\[ci]" 4
+\fB\-\-filter\-tags <tag\-list>\fR to filter by the tags of a test
 .IP "" 0
-.
+.SH "\-\-FILTER\-TAGS <var>TAG\-LIST</var>"
+Tags can be used for finegrained filtering of which tests to run via \fB\-\-filter\-tags\fR\. This accepts a comma separated list of tags\. Only tests that match all of these tags will be executed\. For example, \fBbats \-\-filter\-tags a,b,c\fR will pick up tests with tags \fBa,b,c\fR, but not tests that miss one or more of those tags\.
+.P
+Additionally, you can specify negative tags via \fBbats \-\-filter\-tags a,!b,c\fR, which now won\'t match tests with tags \fBa,b,c\fR, due to the \fBb\fR, but will select \fBa,c\fR\. To put it more formally, \fB\-\-filter\-tags\fR is a boolean conjunction\.
+.P
+To allow for more complex queries, you can specify multiple \fB\-\-filter\-tags\fR\. A test will be executed, if it matches at least one of them\. This means multiple \fB\-\-filter\-tags\fR form a boolean disjunction\.
+.P
+A query of \fB\-\-filter\-tags a,!b \-\-filter\-tags b,c\fR can be translated to: Execute only tests that (have tag a, but not tag b) or (have tag b and c)\.
+.P
+An empty tag list matches tests without tags\.
+.SH "OPTIONS"
+.TP
+\fB\-c\fR, \fB\-\-count\fR
+Count the number of test cases without running any tests
+.TP
+\fB\-\-code\-quote\-style <style>\fR
+A two character string of code quote delimiters or \fBcustom\fR which requires setting \fB$BATS_BEGIN_CODE_QUOTE\fR and \fB$BATS_END_CODE_QUOTE\fR\. Can also be set via \fB$BATS_CODE_QUOTE_STYLE\fR\.
+.TP
+\fB\-f\fR, \fB\-\-filter <regex>\fR
+Filter test cases by names matching the regular expression
+.TP
+\fB\-F\fR, \fB\-\-formatter <type>\fR
+Switch between formatters: pretty (default), tap (default w/o term), tap13, junit, \fB/<absolute path to formatter>\fR
+.TP
+\fB\-\-filter\-status <status>\fR
+Only run tests with the given status in the last completed (no CTRL+C/SIGINT) run\. Valid \fIstatus\fR values are: failed \- runs tests that failed or were not present in the last run missed \- runs tests that were not present in the last run
+.TP
+\fB\-\-filter\-tags <comma\-separated\-tag\-list>\fR
+Only run tests that match all the tags in the list (\fB&&\fR)\. You can negate a tag via prepending \fB!\fR\. Specifying this flag multiple times allows for logical or (\fB||\fR): \fB\-\-filter\-tags A,B \-\-filter\-tags A,!C\fR matches tags \fB(A && B) || (A && !C)\fR
+.TP
+\fB\-\-gather\-test\-outputs\-in <directory>\fR
+Gather the output of failing \fIand\fR passing tests as files in directory
+.TP
+\fB\-h\fR, \fB\-\-help\fR
+Display this help message
+.TP
+\fB\-j\fR, \fB\-\-jobs <jobs>\fR
+Number of parallel jobs (requires GNU parallel)
+.TP
+\fB\-\-no\-tempdir\-cleanup\fR
+Preserve test output temporary directory
+.TP
+\fB\-\-no\-parallelize\-across\-files\fR
+Serialize test file execution instead of running them in parallel (requires \-\-jobs >1)
+.TP
+\fB\-\-no\-parallelize\-within\-files\fR
+Serialize test execution within files instead of running them in parallel (requires \-\-jobs >1)
+.TP
+\fB\-\-report\-formatter <type>\fR
+Switch between reporters (same options as \-\-formatter)
+.TP
+\fB\-o\fR, \fB\-\-output <dir>\fR
+Directory to write report files
+.TP
+\fB\-p\fR, \fB\-\-pretty\fR
+Shorthand for "\-\-formatter pretty"
+.TP
+\fB\-\-print\-output\-on\-failure\fR
+Automatically print the value of \fB$output\fR on failed tests
+.TP
+\fB\-r\fR, \fB\-\-recursive\fR
+Include tests in subdirectories
+.TP
+\fB\-\-show\-output\-of\-passing\-tests\fR
+Print output of passing tests
+.TP
+\fB\-t\fR, \fB\-\-tap\fR
+Shorthand for "\-\-formatter tap"
+.TP
+\fB\-T\fR, \fB\-\-timing\fR
+Add timing information to tests
+.TP
+\fB\-x\fR, \fB\-\-trace\fR
+Print test commands as they are executed (like \fBset \-x\fR)
+.TP
+\fB\-\-verbose\-run\fR
+Make \fBrun\fR print \fB$output\fR by default
+.TP
+\fB\-v\fR, \fB\-\-version\fR
+Display the version number
 .SH "OUTPUT"
 When you run Bats from a terminal, you\'ll see output as each test is performed, with a check\-mark next to the test\'s name if it passes or an "X" if it fails\.
-.
 .IP "" 4
-.
 .nf
-
 $ bats addition\.bats
  ✓ addition using bc
  ✓ addition using dc
 
 2 tests, 0 failures
-.
 .fi
-.
 .IP "" 0
-.
 .P
 If Bats is not connected to a terminal\-\-in other words, if you run it from a continuous integration system or redirect its output to a file\-\-the results are displayed in human\-readable, machine\-parsable TAP format\. You can force TAP output from a terminal by invoking Bats with the \fB\-\-tap\fR option\.
-.
 .IP "" 4
-.
 .nf
-
 $ bats \-\-tap addition\.bats
 1\.\.2
 ok 1 addition using bc
 ok 2 addition using dc
-.
 .fi
-.
 .IP "" 0
-.
 .SH "EXIT STATUS"
 The \fBbats\fR interpreter exits with a value of \fB0\fR if all test cases pass, or \fB1\fR if one or more test cases fail\.
-.
 .SH "SEE ALSO"
 Bats wiki: \fIhttps://github\.com/bats\-core/bats\-core/wiki/\fR
-.
 .P
 \fBbash\fR(1), \fBbats\fR(7)
-.
 .SH "COPYRIGHT"
-(c) 2017\-2021 bats\-core organization
-.
+(c) 2017\-2022 bats\-core organization
 .br
 (c) 2011\-2016 Sam Stephenson
-.
 .P
 Bats is released under the terms of an MIT\-style license\.

@@ -108,7 +108,7 @@ fi
 
 # create a file that contains all (filtered) tests to run from all files
 TESTS_LIST_FILE="${BATS_RUN_TMPDIR}/test_list_file.txt"
-
+focus_mode=
 bats_gather_tests() {
   local line test_line tags
   all_tests=()
@@ -131,6 +131,23 @@ bats_gather_tests() {
         line="${BASH_REMATCH[2]}"
       else
         tags=()
+      fi
+      # is this test focused?
+      if bats_all_in tags 'bats:focus'; then
+        if [[ $focus_mode == 1 ]]; then
+          # focused tests in focus mode should just be registered
+          :
+        else
+          # the current test enables focus mode ...
+          focus_mode=1
+          # ... -> remove previously found, unfocused tests
+          all_tests=()
+          : > "$TESTS_LIST_FILE"
+        fi
+      elif [[ $focus_mode == 1 ]]; then
+        # the current test is not focused but focus mode is enabled -> filter out
+        continue
+        # no else -> unfocused tests outside focus mode should just be registered
       fi
       if [[ ${#filter_tags_list[@]} -gt 0 ]]; then
         local match=
@@ -300,6 +317,10 @@ fi
 # only abort on the lowest levels
 trap 'BATS_INTERRUPTED=true' INT
 
+if [[ -n "$focus_mode" ]]; then
+  printf "WARNING: This test run only contains tests tagged \`bats:focus\`!\n"
+fi
+
 bats_exec_suite_status=0
 printf '1..%d\n' "${test_count}"
 
@@ -431,4 +452,13 @@ fi
 set -eET
 bats_run_teardown_suite
 
-exit "$bats_exec_suite_status"
+if [[ "$focus_mode" == 1 && $bats_exec_suite_status -eq 0 ]]; then 
+  if [[ ${BATS_NO_FAIL_FOCUS_RUN-} == 1 ]]; then
+    printf "WARNING: This test run only contains tests tagged \`bats:focus\`!\n"
+  else
+    printf "Marking test run as failed due to \`bats:focus\` tag. (Set \`BATS_NO_FAIL_FOCUS_RUN=1\` to disable.)\n" >&2
+    bats_exec_suite_status=1
+  fi
+fi
+
+exit "$bats_exec_suite_status" # the actual exit code will be set by the exit trap using bats_exec_suite_status

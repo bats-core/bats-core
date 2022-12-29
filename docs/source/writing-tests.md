@@ -70,8 +70,19 @@ They must not contain empty tags like `test_tags=,b` (first tag is empty),
 `test_tags=a,,c`, `test_tags=a,  ,c` (second tag is only whitespace/empty),
 `test_tags=a,b,` (third tag is empty).
 
-Every tag starting with a `bats:` (case insensitive!) is reserved for Bats'
+Every tag starting with `bats:` (case insensitive!) is reserved for Bats'
 internal use.
+
+### Special tags
+
+#### Focusing on tests with `bats:focus` tag
+
+If a test with the tag `bats:focus` is encountered in a test suite,
+all other tests will be filtered out and only those tagged with this tag will be executed.
+
+In focus mode, the exit code of successful runs will be overriden to 1 to prevent CI from silently running on a subset of tests due to an accidentally commited `bats:focus` tag.    
+Should you require the true exit code, e.g. for a `git bisect` operation, you can disable this behavior by setting
+`BATS_NO_FAIL_FOCUS_RUN=1` when running `bats`, but make sure not to commit this to CI!
 
 ### Filtering execution
 
@@ -90,6 +101,8 @@ This means multiple `--filter-tags` form a boolean disjunction.
 
 A query of `--filter-tags a,!b --filter-tags b,c` can be translated to:
 Execute only tests that (have tag a, but not tag b) or (have tag b and c).
+
+An empty tag list matches tests without tags.
 
 ## Comment syntax
 
