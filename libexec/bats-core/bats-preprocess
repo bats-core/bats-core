@@ -84,7 +84,7 @@ exit_code=0
       name="${name%[\'\"]}"
       body="${BASH_REMATCH[2]:-}"
       bats_encode_test_name "$name" 'encoded_name'
-      printf '%s() { bats_test_begin "%s"; %s\n' "${encoded_name:?}" "$name" "$body" || :
+      printf '%s() { bats_test_begin "%s" || return $?; %s\n' "${encoded_name:?}" "$name" "$body" || :
 
       bats_append_arrays_as_args \
         test_tags file_tags \

@@ -286,6 +286,19 @@ bats_read_tests_list_file() {
 bats_run_tests() {
   bats_exec_file_status=0
 
+  if [[ "${BATS_RUN_TESTS_SKIPPED-}" ]]; then
+    bats_test_begin() {
+      printf "ok %d %s # skip %s\n" "$test_number_in_suite" "$1" "$BATS_RUN_TESTS_SKIPPED_REASON"  >&3
+      return 1
+    }
+    local test_number_in_suite=0
+    for test_name in "${tests_to_run[@]}"; do
+      ((++test_number_in_suite))
+      eval "$test_name" || true
+    done
+    exit 0
+  fi
+
   if [[ "$num_jobs" -lt 1 ]]; then
     printf 'Invalid number of jobs: %s\n' "$num_jobs" >&2
     exit 1
@@ -328,24 +341,6 @@ bats_create_file_tempdirs() {
   export BATS_FILE_TMPDIR
 }
 
-bats_print_skipped_tests() {
-  local index=0
-  local line name
-
-	local BATS_TEST_PATTERN="^[[:blank:]]*@test[[:blank:]]+(.*[^[:blank:]])[[:blank:]]+\{(.*)\$"
-	local BATS_TEST_PATTERN_COMMENT="[[:blank:]]*([^[:blank:]()]+)[[:blank:]]*\(?\)?[[:blank:]]+\{[[:blank:]]+#[[:blank:]]*@test[[:blank:]]*\$"
-
-  while IFS= read -r line; do
-    line="${line//$'\r'/}"
-    if [[ "$line" =~ $BATS_TEST_PATTERN ]] || [[ "$line" =~ $BATS_TEST_PATTERN_COMMENT ]]; then
-      name="${BASH_REMATCH[1]#[\'\"]}"
-      name="${name%[\'\"]}"
-      printf 'ok 1 %s # skip %s\n' "$name" "${BATS_RUN_TESTS_SKIPPED_REASON:-}"
-      (( ++index ))
-    fi
-  done <<<"$(<"$filename")"$'\n'
-}
-
 trap 'BATS_INTERRUPTED=true' INT
 
 if [[ -n "$extended_syntax" ]]; then
@@ -369,14 +364,10 @@ bats_preprocess_source "$filename"
 trap bats_interrupt_trap INT
 bats_run_setup_file
 
-if [[ -n ${BATS_RUN_TESTS_SKIPPED-} ]]; then
-  bats_print_skipped_tests
-else
-  # during tests, we don't want to get backtraces from this level
-  # just wait for the test to be interrupted and display their trace
-  trap 'BATS_INTERRUPTED=true' INT
-  bats_run_tests
-fi
+# during tests, we don't want to get backtraces from this level
+# just wait for the test to be interrupted and display their trace
+trap 'BATS_INTERRUPTED=true' INT
+bats_run_tests
 
 trap bats_interrupt_trap INT
 bats_run_teardown_file
