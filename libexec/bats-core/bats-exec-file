@@ -136,7 +136,8 @@ bats_file_exit_trap() {
   local -i failure_test_index=$((BATS_FILE_FIRST_TEST_NUMBER_IN_SUITE + 1))
   if [[ -n "${BATS_TEST_SKIPPED-}" ]]; then
     export BATS_TEST_SKIPPED # indicate to exec-test that it should skip
-    bats_run_tests # print skip message for each test (use this to avoid reimplementing filtering)
+    # print skip message for each test (use this to avoid reimplementing filtering)
+    bats_run_tests 1<&3 # restore original stdout (this is running in setup_file's redirection to BATS_OUT)
     bats_exec_file_status=0 # this should not lead to errors
   elif [[ -z "$BATS_SETUP_FILE_COMPLETED" || -z "$BATS_TEARDOWN_FILE_COMPLETED" ]]; then
     if [[ -z "$BATS_SETUP_FILE_COMPLETED" ]]; then

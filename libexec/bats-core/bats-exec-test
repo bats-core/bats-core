@@ -335,6 +335,8 @@ trap bats_interrupt_trap INT
 # shellcheck source=lib/bats-core/preprocessing.bash
 source "$BATS_ROOT/lib/bats-core/preprocessing.bash"
 
+exec 3<&1
+
 bats_create_test_tmpdirs
 # Run the given test.
 bats_evaluate_preprocessed_source
