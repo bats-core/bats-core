@@ -299,13 +299,21 @@ bats_perform_test() {
     exit 1
   fi
 
+  # is this skipped from outside ?
+  if [[ -n "${BATS_TEST_SKIPPED-}" ]]; then
+    # forward skip (with message) by overriding setup
+    setup() {
+      skip "$BATS_TEST_SKIPPED"
+    }
+  fi
+
   local BATS_killer_pid=''
   if [[ -n "${BATS_TEST_TIMEOUT:-}" ]]; then
     bats_start_timeout_countdown "$BATS_TEST_TIMEOUT"
     BATS_killer_pid=$!
   fi
   BATS_TEST_COMPLETED=
-  BATS_TEST_SKIPPED=
+  BATS_TEST_SKIPPED=${BATS_TEST_SKIPPED-}
   BATS_TEARDOWN_COMPLETED=
   BATS_ERROR_STATUS=
   bats_setup_tracing

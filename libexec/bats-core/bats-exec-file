@@ -134,7 +134,12 @@ bats_file_exit_trap() {
   trap - ERR EXIT
   local failure_reason
   local -i failure_test_index=$((BATS_FILE_FIRST_TEST_NUMBER_IN_SUITE + 1))
-  if [[ -z "$BATS_SETUP_FILE_COMPLETED" || -z "$BATS_TEARDOWN_FILE_COMPLETED" ]]; then
+  if [[ -n "${BATS_TEST_SKIPPED-}" ]]; then
+    export BATS_TEST_SKIPPED # indicate to exec-test that it should skip
+    # print skip message for each test (use this to avoid reimplementing filtering)
+    bats_run_tests 1<&3 # restore original stdout (this is running in setup_file's redirection to BATS_OUT)
+    bats_exec_file_status=0 # this should not lead to errors
+  elif [[ -z "$BATS_SETUP_FILE_COMPLETED" || -z "$BATS_TEARDOWN_FILE_COMPLETED" ]]; then
     if [[ -z "$BATS_SETUP_FILE_COMPLETED" ]]; then
       failure_reason='setup_file'
     elif [[ -z "$BATS_TEARDOWN_FILE_COMPLETED" ]]; then
@@ -286,6 +291,19 @@ bats_read_tests_list_file() {
 bats_run_tests() {
   bats_exec_file_status=0
 
+  if [[ "${BATS_RUN_TESTS_SKIPPED-}" ]]; then
+    bats_test_begin() {
+      printf "ok %d %s # skip %s\n" "$test_number_in_suite" "$1" "$BATS_RUN_TESTS_SKIPPED_REASON"  >&3
+      return 1
+    }
+    local test_number_in_suite=0
+    for test_name in "${tests_to_run[@]}"; do
+      ((++test_number_in_suite))
+      eval "$test_name" || true
+    done
+    exit 0
+  fi
+
   if [[ "$num_jobs" -lt 1 ]]; then
     printf 'Invalid number of jobs: %s\n' "$num_jobs" >&2
     exit 1
@@ -303,7 +321,7 @@ bats_run_tests() {
         break
       fi
       # Only handle non-empty lines
-      if [[ $test_name ]]; then
+      if [[ -n ${test_name-} ]]; then
         ((++test_number_in_suite))
         ((++test_number_in_file))
         bats_run_test_with_retries "${flags[@]}" "$filename" "$test_name" \
