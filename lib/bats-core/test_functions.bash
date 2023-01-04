@@ -195,7 +195,7 @@ bats_pipe() { # [-N] [--] command0 [ \| command1 [ \| command2 [...]]]
   local pipefail_position=
 
   # parse options starting with -
-  while [[ $# -gt 0 ]] && [[ $1 == -* || $1 == '!' ]]; do
+  while [[ $# -gt 0 ]] && [[ $1 == -* ]]; do
     case "$1" in
     -[0-9]*)
       pipefail_position="${1#-}"
