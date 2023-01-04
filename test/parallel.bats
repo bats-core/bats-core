@@ -9,7 +9,7 @@ fixtures parallel
 BATS_TEST_TIMEOUT=10 # only intended for the "short form ..."" test
 
 setup() {
-  type -p parallel &>/dev/null || skip "--jobs requires GNU parallel"
+  (type -p parallel &>/dev/null && parallel --version &>/dev/null) || skip "--jobs requires GNU parallel"
   (type -p flock &>/dev/null || type -p shlock &>/dev/null) || skip "--jobs requires flock/shlock"
 }
 
