@@ -19,7 +19,11 @@ _log() {
 
 create_temp_dirs() {
     mkdir -p "${TMPDIR}/${1}"
-    [[ ${LIBNAME} != "detik" ]] && mkdir -p "${DESTDIR}/bats-${1}/src" || _log INFO "Skipping src 'cause Detik does not need it"
+    if [[ ${LIBNAME} != "detik" ]]; then
+        mkdir -p "${DESTDIR}/bats-${1}/src"
+    else
+        _log INFO "Skipping src 'cause Detik does not need it"
+    fi
 }
 
 download_extract_source() {
