@@ -13,6 +13,8 @@ USAGE="Please provide the bats libe name and version \nFor example: install_libs
 
 trap "test -d "${TMPDIR}" && rm -fr "${TMPDIR}"" EXIT ERR SIGINT SIGTERM
 
+[[ $# -ne 2 ]] && { _log FATAL "$USAGE"; exit 1; }
+
 _log() {
     printf "$(date "+%Y-%m-%d %H:%M:%S") - %s - %s\n" "${1}" "${2}"
 }
@@ -38,8 +40,6 @@ install_files() {
         for fn in "${TMPDIR}/${1}/lib/"*.bash; do install -Dm755 "$fn" "${DESTDIR}/bats-${1}/$(basename "$fn")"; done
     fi
 }
-
-[[ $# -ne 2 ]] && { _log FATAL "$USAGE"; exit 1; }
 
 _log INFO "Starting to install ${LIBNAME} ver ${LIVERSION}"
 _log INFO "Creating directories"
