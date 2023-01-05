@@ -11,7 +11,7 @@ DESTDIR="${BATS_LIBS_DEST_DIR:-/usr/lib}"
 TMPDIR=$(mktemp -d -t bats-libs-XXXXXX)
 USAGE="Please provide the bats libe name and version \nFor example: install_libs.sh support 2.0.0\n"
 
-trap "test -d "${TMPDIR}" && rm -fr "${TMPDIR}"" EXIT
+trap "test -d "${TMPDIR}" && rm -fr "${TMPDIR}"" EXIT ERR SIGINT SIGTERM
 
 _log() {
     printf "$(date "+%Y-%m-%d %H:%M:%S") - %s - %s\n" "${1}" "${2}"
@@ -45,4 +45,3 @@ download_extract_source "${LIBNAME}" "${LIVERSION}"
 _log INFO "Installation"
 install_files "${LIBNAME}"
 _log INFO "Done, cleaning.."
-test -d "${TMPDIR}" && rm -fr "${TMPDIR}"
