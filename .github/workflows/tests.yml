@@ -217,3 +217,18 @@ jobs:
         env:
           TERM: linux # fix tput for tty issue work around
         run: bats --print-output-on-failure --filter-tags !dep:install_sh test/
+
+  dockerfile:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v1
+
+      - uses: docker/build-push-action@v2
+        with:
+          platforms: linux/amd64
+          tags: bats:test
+          push: false
+
+      - run: docker run -v "$PWD":/code bats:test
