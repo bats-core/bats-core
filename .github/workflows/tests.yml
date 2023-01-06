@@ -229,6 +229,6 @@ jobs:
         with:
           platforms: linux/amd64
           tags: bats:test
-          push: false
+          load: true
 
-      - run: docker run -v "$PWD":/code bats:test
+      - run: docker run -v "$PWD":/code bats:test /code
