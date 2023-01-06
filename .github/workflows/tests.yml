@@ -221,6 +221,8 @@ jobs:
   dockerfile:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
+
       - name: Set up Docker Buildx
         id: buildx
         uses: docker/setup-buildx-action@v1
@@ -231,4 +233,27 @@ jobs:
           tags: bats:test
           load: true
 
-      - run: docker run -v "$PWD":/code bats:test /code
+      - run: docker run -itv "$PWD":/code bats:test test/
+        shell: 'script -q -e -c "bash {0}"' # work around tty issues
+        env:
+          TERM: linux # fix tput for tty issue work around
+
+      - uses: actions/checkout@v2
+        with:
+          repository: bats-core/bats-assert
+          path: bats-assert
+
+      - uses: actions/checkout@v2
+        with:
+          repository: bats-core/bats-support
+          path: bats-support
+
+      - uses: actions/checkout@v2
+        with:
+          repository: bats-core/bats-file
+          path: bats-file
+
+      - run: docker run -e BATS_LIB_PATH=/code -itv "$PWD":/code bats:test bats-*/test/
+        shell: 'script -q -e -c "bash {0}"' # work around tty issues
+        env:
+          TERM: linux # fix tput for tty issue work around
