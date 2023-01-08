@@ -7,6 +7,8 @@ ARG LIBS_VER_SUPPORT=0.3.0
 ARG LIBS_VER_FILE=0.3.0
 ARG LIBS_VER_ASSERT=2.1.0
 ARG LIBS_VER_DETIK=1.1.0
+ARG UID=1001
+ARG GID=115
 
 
 # https://github.com/opencontainers/image-spec/blob/main/annotations.md
@@ -31,8 +33,8 @@ RUN /tmp/docker/install_libs.sh detik ${LIBS_VER_DETIK}
 # context where it make sense to cite GNU Parallel).
 RUN apk add --no-cache parallel ncurses && \
     mkdir -p ~/.parallel && touch ~/.parallel/will-cite \
-    && addgroup -S bats \
-    && adduser -S bats -G bats -s "/bin/bash" \
+    && addgroup -g "$GID" -S bats \
+    && adduser -u "$UID" -S bats -G bats -s "/bin/bash" \
     && mkdir /code && chown bats:bats /code
 
 RUN ln -s /opt/bats/bin/bats /usr/local/bin/bats
