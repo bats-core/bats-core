@@ -233,7 +233,7 @@ jobs:
           tags: bats:test
           load: true
 
-      - run: docker run -itv "$PWD":/code bats:test test/
+      - run: docker run -itv "$PWD":/code bats:test  --tap --print-output-on-failure test/
         shell: 'script -q -e -c "bash {0}"' # work around tty issues
         env:
           TERM: linux # fix tput for tty issue work around
@@ -253,7 +253,7 @@ jobs:
           repository: bats-core/bats-file
           path: bats-file
 
-      - run: docker run -e BATS_LIB_PATH=/code -itv "$PWD":/code bats:test bats-*/test/
+      - run: docker run -e BATS_LIB_PATH=/code -itv "$PWD":/code bats:test --tap --print-output-on-failure bats-*/test/
         shell: 'script -q -e -c "bash {0}"' # work around tty issues
         env:
           TERM: linux # fix tput for tty issue work around
