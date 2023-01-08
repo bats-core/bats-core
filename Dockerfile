@@ -33,14 +33,11 @@ RUN /tmp/docker/install_libs.sh detik ${LIBS_VER_DETIK}
 # context where it make sense to cite GNU Parallel).
 RUN apk add --no-cache parallel ncurses && \
     mkdir -p ~/.parallel && touch ~/.parallel/will-cite \
-    && addgroup -g "$GID" -S bats \
-    && adduser -u "$UID" -S bats -G bats -s "/bin/bash" \
-    && mkdir /code && chown bats:bats /code
+    && mkdir /code
 
 RUN ln -s /opt/bats/bin/bats /usr/local/bin/bats
 COPY . /opt/bats/
 
 WORKDIR /code/
-USER bats
 
 ENTRYPOINT ["/tini", "--", "bash", "bats"]
