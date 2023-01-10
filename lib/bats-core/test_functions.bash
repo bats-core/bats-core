@@ -337,6 +337,62 @@ bats_pipe() { # [-N] [--] command0 [ \| command1 [ \| command2 [...]]]
     return "$result_status"
   }
 
+  bats_pipe_recurse() {
+    local relative_result_position="$1"
+    shift
+    # collect left hand side command of (first) pipe
+    local first_command=()
+    while (( $# > 0 )) && [[ "$1" != '|' ]]; do
+      first_command+=("$1")
+      shift
+    done
+
+    local result_status=
+    # if there is at least 1 remaining pipe, we need to call recursively.
+    if (( $# > 0 )); then
+      # consume pipe symbol '|', (originally passed as '\|')
+      # this leaves only the recursive parameters to be called.
+      shift
+      "${first_command[@]}" | bats_pipe_recurse "$(($relative_result_position - 1))" "$@"
+      # note that we are immediately grabbing PIPESTATUS, and not grabbing $?.
+      # we can only grab one of the two, but we can get the equivalent of $?
+      # from PIPESTATUS (see below).
+      local pipe_status=("${PIPESTATUS[@]}")
+
+      if [[ "$relative_result_position" -eq 0 ]]; then
+        # If this is the targeted position, return the result of the first command run.
+        result_status="${pipe_status[0]}"
+      elif [[ "$relative_result_position" -gt 0 ]]; then
+        # If the targeted position isn't reached yet, return the result of the recursive call.
+        # The targeted position's result will come from there.
+        result_status="${pipe_status[1]}"
+      else
+        # If the received target position is negative, one of the following is true:
+        # the target is already passed in a shallower recusrive call
+        # or we are performing default "last failure" behavior.
+
+        # in the former case, it doesn't matter what we return.
+        # so just do the "last failure" logic.
+
+        # if we need to return the "last failure",
+        # take the last pipe status, if it failed.
+        if [ "${pipe_status[1]}" -ne 0 ]; then
+          result_status="${pipe_status[1]}"
+        else
+          # if the last pipe status didn't fail,
+          # take whatever the first pipe status is.
+          result_status="${pipe_status[0]}"
+        fi
+      fi
+    else
+      # no more pipes -> execute command
+      "${first_command[@]}"
+      result_status="$?"
+    fi
+
+    return "$result_status"
+  }
+
   # run commands and handle appropriate piping
   local result_status=
 
@@ -346,10 +402,15 @@ bats_pipe() { # [-N] [--] command0 [ \| command1 [ \| command2 [...]]]
   # `run_leading_commands_until_position` for selecting the correct status code
   # to propagate (which simulates `set -o pipefail`, see related comment
   # there).
-  run_leading_commands_until_position "${#pipe_positions[@]}"
+  #run_leading_commands_until_position "${#pipe_positions[@]}"
+  #result_status="$?"
+
+  # call recurse with full set of arguemnts.
+  # note: if $pipefail_position was not given, we want to do "last failure" logic (done with negative values).
+  bats_pipe_recurse "${pipefail_position:--1}" "$@"
   result_status="$?"
 
-  return $result_status
+  return "$result_status"
 }
 
 run() { # [!|-N] [--keep-empty-lines] [--separate-stderr] [--] <command to run...>
