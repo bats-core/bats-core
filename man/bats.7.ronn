@@ -159,7 +159,7 @@ THE BATS_PIPE HELPER
 
 Usage: bats_pipe [OPTIONS] [--] <command0...> [ \| <command1...> [ \| <command2...> [...] ] ]
 Options:
-       -<N>     return that exit code from the <N>th command in the chain
+       -<N>     return the exit code from the <N>th command in the chain
                 of piped commands, instead of default behavior of "the last
                 non-zero status".
 
