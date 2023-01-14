@@ -217,3 +217,49 @@ jobs:
         env:
           TERM: linux # fix tput for tty issue work around
         run: bats --print-output-on-failure --filter-tags !dep:install_sh test/
+
+  dockerfile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v1
+
+      - uses: docker/build-push-action@v2
+        with:
+          platforms: linux/amd64
+          tags: bats:test
+          load: true
+
+      - run: docker run -itv "$PWD":/code bats:test  --tap --print-output-on-failure test/
+        shell: 'script -q -e -c "bash {0}"' # work around tty issues
+        env:
+          TERM: linux # fix tput for tty issue work around
+
+      - uses: actions/checkout@v2
+        with:
+          repository: bats-core/bats-assert
+          path: bats-assert
+
+      - uses: actions/checkout@v2
+        with:
+          repository: bats-core/bats-support
+          path: bats-support
+
+      - uses: actions/checkout@v2
+        with:
+          repository: bats-core/bats-file
+          path: bats-file
+
+      - run: |
+          <<EOF cat >test.sh
+            apk add sudo python3 # install bats-file's dependencies
+            ln -sf python3 /usr/bin/python # bats-file uses python without version
+            bats --tap --print-output-on-failure bats-*/test/"
+          EOF
+          docker run -itv "$PWD":/code --entrypoint bash bats:test test.sh
+        shell: 'script -q -e -c "bash {0}"' # work around tty issues
+        env:
+          TERM: linux # fix tput for tty issue work around

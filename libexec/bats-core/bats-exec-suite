@@ -214,6 +214,10 @@ else
   # use UTC (-u) to avoid problems with TZ changes
   BATS_RUNLOG_DATE=$(date -u '+%Y-%m-%d %H:%M:%S UTC')
   export BATS_RUNLOG_FILE="$BATS_RUN_LOGS_DIRECTORY/${BATS_RUNLOG_DATE}.log"
+  if [[ ! -w "$BATS_RUN_LOGS_DIRECTORY" ]]; then
+    printf "WARNING: Cannot write in %s. This run will not write a log!\n" "$BATS_RUN_LOGS_DIRECTORY" >&2
+    BATS_RUNLOG_FILE='/dev/null' # disable runlog file
+  fi
 fi
 
 bats_gather_tests "$@"
@@ -375,7 +379,7 @@ bats_suite_exit_trap() {
 
   if [[ -d "$BATS_RUN_LOGS_DIRECTORY" && -n "${BATS_INTERRUPTED:-}" ]]; then
     # aborting a test run with CTRL+C does not save the runlog file
-    rm "$BATS_RUNLOG_FILE"
+    [[ "$BATS_RUNLOG_FILE" != /dev/null ]] && rm "$BATS_RUNLOG_FILE"
   fi
   exit "$bats_exec_suite_status"
 } >&3

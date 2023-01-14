@@ -90,7 +90,11 @@ HELP_TEXT_BODY
 expand_path() {
   local path="${1%/}"
   local dirname="${path%/*}"
+  if [[ -z "$dirname" ]]; then
+    dirname=/
+  fi
   local result="$2"
+  local OLDPWD="$PWD"
 
   if [[ "$dirname" == "$path" ]]; then
     dirname="$PWD"
