@@ -7,7 +7,7 @@ set -o nounset
 LIBNAME="${1:-support}"
 LIVERSION="${2:-0.3.0}"
 BASEURL='https://github.com/bats-core'
-DESTDIR="${BATS_LIBS_DEST_DIR:-/usr/lib}"
+DESTDIR="${BATS_LIBS_DEST_DIR:-/usr/lib/bats}"
 TMPDIR=$(mktemp -d -t bats-libs-XXXXXX)
 USAGE="Please provide the bats libe name and version \nFor example: install_libs.sh support 2.0.0\n"
 

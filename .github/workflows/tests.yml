@@ -259,7 +259,7 @@ jobs:
             ln -sf python3 /usr/bin/python # bats-file uses python without version
             bats --tap --print-output-on-failure bats-*/test/"
           EOF
-          docker run -e BATS_LIB_PATH=/code -itv "$PWD":/code --entrypoint bash bats:test test.sh
+          docker run -itv "$PWD":/code --entrypoint bash bats:test test.sh
         shell: 'script -q -e -c "bash {0}"' # work around tty issues
         env:
           TERM: linux # fix tput for tty issue work around
