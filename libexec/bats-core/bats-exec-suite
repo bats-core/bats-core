@@ -97,7 +97,7 @@ while [[ "$#" -ne 0 ]]; do
 done
 
 if [[ "$num_jobs" != 1 ]]; then
-  if ! type -p parallel >/dev/null && [[ -z "$bats_no_parallelize_across_files" ]]; then
+  if ! type -p parallel >/dev/null && parallel --version &>/dev/null && [[ -z "$bats_no_parallelize_across_files" ]]; then
     abort "Cannot execute \"${num_jobs}\" jobs without GNU parallel"
     exit 1
   fi

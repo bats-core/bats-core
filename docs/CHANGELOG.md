@@ -26,6 +26,8 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 
 ### Fixed
 
+* explicitly check for GNU parallel (#691)
+
 #### Documentation
 
 * improved clarity of section about output in free code (#671)
