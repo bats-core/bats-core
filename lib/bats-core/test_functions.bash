@@ -220,20 +220,20 @@ bats_pipe() { # [-N] [--] command0 [ \| command1 [ \| command2 [...]]]
     local current_command_or_arg="${commands_and_args[$index]}"
     if [ "$current_command_or_arg" = "|" ]; then
       if [ "$index" -eq 0 ]; then
-        printf 'Usage error: Cannot have leading `\|`.\n' >&2
+        printf "Usage error: Cannot have leading \`\\|\`.\n" >&2
         return 1
       fi
       if [ "$(( previous_pipe + 1 ))" -ge "$index" ]; then
         printf "Usage error: Cannot have consecutive \`\\|\`. Found at argument position '%s'.\n" "$index" >&2
         return 1
       fi
-      pipe_positions+=($index)
+      pipe_positions+=("$index")
       previous_pipe="$index"
     fi
   done
 
   if [ "$previous_pipe" -gt 0 ] && [ "$previous_pipe" -eq "$(( $# - 1 ))" ]; then
-    printf 'Usage error: Cannot have trailing `\|`.\n' >&2
+    printf "Usage error: Cannot have trailing \`\\|\`.\n" >&2
     return 1
   fi
 
@@ -243,11 +243,11 @@ bats_pipe() { # [-N] [--] command0 [ \| command1 [ \| command2 [...]]]
     # instead of `run bats_pipe command0 \| command1`
     # Unfortunately, we can't catch `run bats_pipe command0 \| command1 | command2`.
     # But this check is better than just allowing no pipes.
-    printf 'Usage error: No `\|`s found. Is this an error?\n' >&2
+    printf "Usage error: No \`\\|\`s found. Is this an error?\n" >&2
     return 1
   fi
 
-  if [ ! -z "$pipefail_position" ] && [ "$pipefail_position" -gt "${#pipe_positions[@]}" ]; then
+  if [ -n "$pipefail_position" ] && [ "$pipefail_position" -gt "${#pipe_positions[@]}" ]; then
     printf "Usage error: Too large of -N argument given. Argument value: '%s'.\n" "$pipefail_position" >&2
     return 1
   fi
@@ -267,11 +267,11 @@ bats_pipe() { # [-N] [--] command0 [ \| command1 [ \| command2 [...]]]
     else
       local associated_pipe="$(( given_position - 1 ))"
       local associated_pipe_position="${pipe_positions[$associated_pipe]}"
-      command_position="$(( $associated_pipe_position + 1 ))"
+      command_position="$(( associated_pipe_position + 1 ))"
     fi
     local command_to_run="${commands_and_args[$command_position]}"
 
-    local arguments_position="$(( $command_position + 1 ))"
+    local arguments_position="$(( command_position + 1 ))"
     local next_pipe_position="${pipe_positions[$given_position]}"
     local arg_count="$(( next_pipe_position - command_position - 1 ))"
 
@@ -306,7 +306,7 @@ bats_pipe() { # [-N] [--] command0 [ \| command1 [ \| command2 [...]]]
 
       # check if we are to return the status code from an exact position, or
       # use "last fail" (like `set -o pipefail` would).
-      if [ ! -z "$pipefail_position" ]; then
+      if [ -n "$pipefail_position" ]; then
         # if the target pipefail is less than our "last_position_to_run", then
         # it is being propagated through the left-hand command.
         if [ "$pipefail_position" -lt "$last_position_to_run" ]; then
@@ -353,7 +353,7 @@ bats_pipe() { # [-N] [--] command0 [ \| command1 [ \| command2 [...]]]
       # consume pipe symbol '|', (originally passed as '\|')
       # this leaves only the recursive parameters to be called.
       shift
-      "${first_command[@]}" | bats_pipe_recurse "$(($relative_result_position - 1))" "$@"
+      "${first_command[@]}" | bats_pipe_recurse "$(( relative_result_position - 1 ))" "$@"
       # note that we are immediately grabbing PIPESTATUS, and not grabbing $?.
       # we can only grab one of the two, but we can get the equivalent of $?
       # from PIPESTATUS (see below).

@@ -18,12 +18,12 @@ describe_input() {
   describe_args "$@"
 
   local given_stdin=
-  read -d $'\0' -t 1 given_stdin
-  if [ ! -z "$given_stdin" ]; then
+  read -rd $'\0' -t 1 given_stdin
+  if [ -n "$given_stdin" ]; then
     echo 'stdin:'
     local _oldIFS="$IFS"
     IFS=$'\n'
-    printf '\t%s\n' $given_stdin
+    printf '\t%s\n' "$given_stdin"
     IFS="$_oldIFS"
   fi
 }
@@ -39,6 +39,8 @@ consume_stdin_and_returns_with_given_code() {
   echo "Will return status $1."
 
   local unused=
+  # ignore unused.
+  # shellcheck disable=2162
   read -d $'\0' -t 1 unused
 
   return "$1"
@@ -58,7 +60,7 @@ output_binary_data_and_returns_with_given_code() {
 
   [ "$status" -eq 1 ]
   [ "${#lines[@]}" -eq 1 ]
-  [ "${lines[0]}" = 'Usage error: No `\|`s found. Is this an error?' ]
+  [ "${lines[0]}" = "Usage error: No \`\\|\`s found. Is this an error?" ]
 }
 
 @test "run bats_pipe with single command with no args" {
@@ -66,7 +68,7 @@ output_binary_data_and_returns_with_given_code() {
 
   [ "$status" -eq 1 ]
   [ "${#lines[@]}" -eq 1 ]
-  [ "${lines[0]}" = 'Usage error: No `\|`s found. Is this an error?' ]
+  [ "${lines[0]}" = "Usage error: No \`\\|\`s found. Is this an error?" ]
 }
 
 @test "run bats_pipe with single command with no args with arg separator" {
@@ -74,7 +76,7 @@ output_binary_data_and_returns_with_given_code() {
 
   [ "$status" -eq 1 ]
   [ "${#lines[@]}" -eq 1 ]
-  [ "${lines[0]}" = 'Usage error: No `\|`s found. Is this an error?' ]
+  [ "${lines[0]}" = "Usage error: No \`\\|\`s found. Is this an error?" ]
 }
 
 @test "run bats_pipe with single command with one arg" {
@@ -82,7 +84,7 @@ output_binary_data_and_returns_with_given_code() {
 
   [ "$status" -eq 1 ]
   [ "${#lines[@]}" -eq 1 ]
-  [ "${lines[0]}" = 'Usage error: No `\|`s found. Is this an error?' ]
+  [ "${lines[0]}" = "Usage error: No \`\\|\`s found. Is this an error?" ]
 }
 
 @test "run bats_pipe with single command with two args" {
@@ -90,7 +92,7 @@ output_binary_data_and_returns_with_given_code() {
 
   [ "$status" -eq 1 ]
   [ "${#lines[@]}" -eq 1 ]
-  [ "${lines[0]}" = 'Usage error: No `\|`s found. Is this an error?' ]
+  [ "${lines[0]}" = "Usage error: No \`\\|\`s found. Is this an error?" ]
 }
 
 @test "run bats_pipe with single command with two args with arg separator" {
@@ -98,7 +100,7 @@ output_binary_data_and_returns_with_given_code() {
 
   [ "$status" -eq 1 ]
   [ "${#lines[@]}" -eq 1 ]
-  [ "${lines[0]}" = 'Usage error: No `\|`s found. Is this an error?' ]
+  [ "${lines[0]}" = "Usage error: No \`\\|\`s found. Is this an error?" ]
 }
 
 @test "run bats_pipe piping between two command with zero and zero args" {
@@ -307,7 +309,7 @@ output_binary_data_and_returns_with_given_code() {
 
   [ "$status" -eq 1 ]
   [ "${#lines[@]}" -eq 1 ]
-  [ "${lines[0]}" = 'Usage error: Cannot have leading `\|`.' ]
+  [ "${lines[0]}" = "Usage error: Cannot have leading \`\\|\`." ]
 }
 
 @test "run bats_pipe with leading | on two piped commands" {
@@ -315,7 +317,7 @@ output_binary_data_and_returns_with_given_code() {
 
   [ "$status" -eq 1 ]
   [ "${#lines[@]}" -eq 1 ]
-  [ "${lines[0]}" = 'Usage error: Cannot have leading `\|`.' ]
+  [ "${lines[0]}" = "Usage error: Cannot have leading \`\\|\`." ]
 }
 
 @test "run bats_pipe with trailing | on single command" {
@@ -323,7 +325,7 @@ output_binary_data_and_returns_with_given_code() {
 
   [ "$status" -eq 1 ]
   [ "${#lines[@]}" -eq 1 ]
-  [ "${lines[0]}" = 'Usage error: Cannot have trailing `\|`.' ]
+  [ "${lines[0]}" = "Usage error: Cannot have trailing \`\\|\`." ]
 }
 
 @test "run bats_pipe with trailing | on two piped commands" {
@@ -331,7 +333,7 @@ output_binary_data_and_returns_with_given_code() {
 
   [ "$status" -eq 1 ]
   [ "${#lines[@]}" -eq 1 ]
-  [ "${lines[0]}" = 'Usage error: Cannot have trailing `\|`.' ]
+  [ "${lines[0]}" = "Usage error: Cannot have trailing \`\\|\`." ]
 }
 
 @test "run bats_pipe with consecutive |s after single command" {
