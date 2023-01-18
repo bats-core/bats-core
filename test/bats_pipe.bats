@@ -18,11 +18,13 @@ describe_input() {
   describe_args "$@"
 
   local given_stdin=
-  read -d $'\0' -t 1 given_stdin
+  read -rd $'\0' -t 1 given_stdin
   if [ -n "$given_stdin" ]; then
     echo 'stdin:'
     local _oldIFS="$IFS"
     IFS=$'\n'
+    # purposefully unquoted to tab multi-line output (per-line).
+    # shellcheck disable=2086
     printf '\t%s\n' $given_stdin
     IFS="$_oldIFS"
   fi
@@ -161,7 +163,6 @@ output_binary_data_and_returns_with_given_code() {
 @test "run bats_pipe piping between two command with one and zero args" {
   run bats_pipe describe_args a \| describe_input
 
-  echo "$output" >&2
   [ "$status" -eq 0 ]
   [ "${#lines[@]}" -eq 4 ]
   [ "${lines[0]}" = 'Got 0 args.' ]
