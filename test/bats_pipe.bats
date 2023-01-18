@@ -43,7 +43,7 @@ consume_stdin_and_returns_with_given_code() {
   local unused=
   # ignore unused.
   # shellcheck disable=2034
-  read -d $'\0' -t 1 unused
+  read -rd $'\0' -t 1 unused
 
   return "$1"
 }
