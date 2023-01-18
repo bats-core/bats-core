@@ -1544,3 +1544,20 @@ enforce_own_process_group() {
   [ "${lines[3]}" == "WARNING: This test run only contains tests tagged \`bats:focus\`!" ]
   [ "${#lines[@]}" == 4 ]
 }
+
+@test "Bats waits for report formatter to finish" {
+  local REPORT_FORMATTER="$BATS_TEST_TMPDIR/report-formatter"
+  cat - >"$REPORT_FORMATTER" <<HEREDOC 
+    #/usr/bin/bash
+    cat >/dev/null # eat up all input
+    sleep 1
+    echo "Finished" # mark finish
+HEREDOC
+  chmod a+x "$REPORT_FORMATTER"
+
+  bats_require_minimum_version 1.5.0
+  reentrant_run -0 bats "$FIXTURE_ROOT/passing.bats" --report-formatter "$REPORT_FORMATTER" --output "$BATS_TEST_TMPDIR"
+
+  echo "'$(< "$BATS_TEST_TMPDIR/report.log")'"
+  [ $(< "$BATS_TEST_TMPDIR/report.log") = Finished ]
+}
