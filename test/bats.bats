@@ -532,7 +532,7 @@ END_OF_ERR_MSG
   [ "$status" -eq 1 ]
 
   expectedNumberOfTests=12
-  linesPerTest=5
+  linesPerTest=6
 
   outputOffset=1
   currentErrorLine=9
