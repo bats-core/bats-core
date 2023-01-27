@@ -109,9 +109,10 @@ bats_sort() { # <result-array-name> <values to sort...>
   fi
 
   local -a sorted_array=()
-  local -i i current_value
+  local -i i
   while (( $# > 0 )); do # loop over input values
-    current_value=$1
+    local current_value="$1"
+    shift
     for ((i = ${#sorted_array[@]}; i >= 0; --i)); do # loop over output array from end
       if (( i == 0 )) || [[ ${sorted_array[i - 1]} < $current_value ]]; then
         # shift bigger elements one position to the end
