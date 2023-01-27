@@ -1548,7 +1548,7 @@ enforce_own_process_group() {
 @test "Bats waits for report formatter to finish" {
   local REPORT_FORMATTER="$BATS_TEST_TMPDIR/report-formatter"
   cat - >"$REPORT_FORMATTER" <<HEREDOC 
-    #/usr/bin/bash
+    #!/usr/bin/bash
     cat >/dev/null # eat up all input
     sleep 1
     echo "Finished" # mark finish
@@ -1565,7 +1565,7 @@ HEREDOC
 @test "Failing report formatter fails test run" {
   local REPORT_FORMATTER="$BATS_TEST_TMPDIR/report-formatter"
   cat - >"$REPORT_FORMATTER" <<HEREDOC 
-    #/usr/bin/bash
+    #!/usr/bin/bash
     exit 11
 HEREDOC
   chmod a+x "$REPORT_FORMATTER"
