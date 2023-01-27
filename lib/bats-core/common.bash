@@ -112,11 +112,11 @@ bats_sort() { # <result-array-name> <values to sort...>
   local -i j i=0
   for ((j = 1; j <= $#; ++j)); do
     for ((i = ${#sorted_array[@]}; i >= 0; --i)); do
-      if [[ $i -eq 0 || ${sorted_array[$((i - 1))]} < ${!j} ]]; then
-        sorted_array[$i]=${!j}
+      if (( i == 0 || sorted_array[i - 1] < ${!j} )); then
+        sorted_array[i]=${!j}
         break
       else
-        sorted_array[$i]=${sorted_array[$((i - 1))]}
+        sorted_array[i]=${sorted_array[i - 1]}
       fi
     done
   done
