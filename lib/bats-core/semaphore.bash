@@ -1,17 +1,10 @@
 #!/usr/bin/env bash
 
-# setup the semaphore environment for the loading file
-bats_semaphore_setup() {
-  export -f bats_semaphore_get_free_slot_count
-  export -f bats_semaphore_acquire_while_locked
-  export BATS_SEMAPHORE_DIR="$BATS_RUN_TMPDIR/semaphores"
+bats_run_under_flock() {
+  flock "$BATS_SEMAPHORE_DIR" "$@"
+}
 
-  if command -v flock >/dev/null; then
-    bats_run_under_lock() {
-      flock "$BATS_SEMAPHORE_DIR" "$@"
-    }
-  elif command -v shlock >/dev/null; then
-    bats_run_under_lock() {
+bats_run_under_shlock() {
       local lockfile="$BATS_SEMAPHORE_DIR/shlock.lock"
       while ! shlock -p $$ -f "$lockfile"; do
         sleep 1
@@ -23,6 +16,17 @@ bats_semaphore_setup() {
       rm -f "$lockfile"
       return $status
     }
+
+# setup the semaphore environment for the loading file
+bats_semaphore_setup() {
+  export -f bats_semaphore_get_free_slot_count
+  export -f bats_semaphore_acquire_while_locked
+  export BATS_SEMAPHORE_DIR="$BATS_RUN_TMPDIR/semaphores"
+
+  if command -v flock >/dev/null; then
+    BATS_LOCKING_IMPLEMENTATION=flock
+  elif command -v shlock >/dev/null; then
+    BATS_LOCKING_IMPLEMENTATION=shlock
   else
     printf "ERROR: flock/shlock is required for parallelization within files!\n" >&2
     exit 1
@@ -87,7 +91,9 @@ bats_semaphore_acquire_slot() {
   while true; do
     # don't lock for reading, we are fine with spuriously getting no free slot
     if [[ $(bats_semaphore_get_free_slot_count) -gt 0 ]]; then
-      bats_run_under_lock bash -c bats_semaphore_acquire_while_locked && break
+      bats_run_under_"$BATS_LOCKING_IMPLEMENTATION" \
+        bash -c bats_semaphore_acquire_while_locked \
+      && break
     fi
     sleep 1
   done

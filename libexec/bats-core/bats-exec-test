@@ -203,6 +203,7 @@ bats_exit_trap() {
 # Marks the test as failed due to timeout.
 # The actual termination of subprocesses is done via pkill in the background
 # process in bats_start_timeout_countdown
+# shellcheck disable=SC2317
 bats_timeout_trap() {
   BATS_TIMED_OUT=1
   BATS_DEBUG_LAST_STACK_TRACE_IS_VALID=
@@ -302,6 +303,7 @@ bats_perform_test() {
   # is this skipped from outside ?
   if [[ -n "${BATS_TEST_SKIPPED-}" ]]; then
     # forward skip (with message) by overriding setup
+    # shellcheck disable=SC2317
     setup() {
       skip "$BATS_TEST_SKIPPED"
     }
