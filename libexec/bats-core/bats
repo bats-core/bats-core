@@ -487,8 +487,8 @@ bats_tee() { # <output-file> <command...>
   exec 3<&1 # use FD3 to get around pipe
   {
     while IFS= read -r line; do
-      printf "%s\n" "$line"     # write to command/file
-      printf "%s\n" "$line" >&3 # write to our stdout
+      printf "%s\n" "$line" || exit 1 # write to command/file
+      printf "%s\n" "$line" >&3       # write to our stdout
     done
     if [[ -n "$line" ]]; then
       printf "%s\n" "$line"     # write to command/file
