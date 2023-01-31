@@ -485,16 +485,7 @@ bats_tee() { # <output-file> <command...>
   local output_file=$1 status=0
   shift
   exec 3<&1 # use FD3 to get around pipe
-  {
-    while IFS= read -r line; do
-      printf "%s\n" "$line" || exit 1 # write to command/file
-      printf "%s\n" "$line" >&3       # write to our stdout
-    done
-    if [[ -n "$line" ]]; then
-      printf "%s\n" "$line"     # write to command/file
-      printf "%s\n" "$line" >&3 # write to our stdout
-    fi
-  } | "$@" >"$output_file" || status=$?
+  tee >(cat >&3) | "$@" >"$output_file" || status=$?
   if (( status != 0 )); then
     printf "ERROR: command \`%s\` failed with status %d\n" "$*" "$status" >&2
   fi
