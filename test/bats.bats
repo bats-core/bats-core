@@ -1572,7 +1572,7 @@ HEREDOC
   chmod a+x "$REPORT_FORMATTER"
 
   bats_require_minimum_version 1.5.0
-  reentrant_run -1 bats "$FIXTURE_ROOT/passing.bats" --report-formatter "$REPORT_FORMATTER" --output "$BATS_TEST_TMPDIR"
+  reentrant_run ! bats "$FIXTURE_ROOT/passing.bats" --report-formatter "$REPORT_FORMATTER" --output "$BATS_TEST_TMPDIR"
 
   [ "${lines[0]}" = "ERROR: command \`$REPORT_FORMATTER\` failed with status 11" ]
 }
