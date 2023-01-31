@@ -140,7 +140,7 @@ setup() {
   [ "$status" -eq 1 ]
   [ "${#lines[@]}" -eq 4 ]
   [ "${lines[1]}" = 'not ok 1 a failing test' ]
-  [ "${lines[2]}" = "# (in test file $RELATIVE_FIXTURE_ROOT/failing_with_negated_command.bats, line 3)" ]
+  [ "${lines[2]}" = "# (in test file $RELATIVE_FIXTURE_ROOT/failing_with_negated_command.bats, line 4)" ]
   [ "${lines[3]}" = "#   \`! true' failed" ]
 }
 
@@ -538,6 +538,7 @@ END_OF_ERR_MSG
   currentErrorLine=9
 
   for t in $(seq $expectedNumberOfTests); do
+    echo t=$t outputOffset=$outputOffset currentErrorLine=$currentErrorLine
     # shellcheck disable=SC2076
     [[ "${lines[$outputOffset]}" =~ "not ok $t " ]]
 

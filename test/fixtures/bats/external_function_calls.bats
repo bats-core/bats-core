@@ -15,7 +15,6 @@ load test_helper
   help_me && return 1
 }
 
-
 @test "Call true function and invert stackdepth=2" {
   help_me
   # shellcheck disable=SC2314
@@ -40,6 +39,7 @@ load test_helper
   failing_helper
 }
 
+
 @test "Call return_0 function && false stackdepth=1" {
   return_0
   return_0 && false
@@ -50,7 +50,6 @@ load test_helper
   return_0
   return_0 && return 1
 }
-
 
 @test "Call return_0 function and invert stackdepth=2" {
   return_0
