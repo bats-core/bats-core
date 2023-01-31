@@ -538,7 +538,7 @@ END_OF_ERR_MSG
   currentErrorLine=9
 
   for t in $(seq $expectedNumberOfTests); do
-    echo t=$t outputOffset=$outputOffset currentErrorLine=$currentErrorLine
+    echo "t=$t outputOffset=$outputOffset currentErrorLine=$currentErrorLine"
     # shellcheck disable=SC2076
     [[ "${lines[$outputOffset]}" =~ "not ok $t " ]]
 
