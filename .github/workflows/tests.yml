@@ -79,7 +79,7 @@ jobs:
         run: |
           npm pack ./
           sudo npm install -g ./bats-*.tgz
-          bats test  
+          bats test --print-output-on-failure
 
   windows:
     runs-on: windows-2019
