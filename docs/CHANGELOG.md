@@ -28,6 +28,8 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 ### Fixed
 
 * explicitly check for GNU parallel (#691)
+* wait for report-formatter to finish before ending `bats`' execution,
+  to fix empty files with `--report-fomatter junit` under Docker (#692)
 
 #### Documentation
 

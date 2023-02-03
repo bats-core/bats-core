@@ -194,7 +194,7 @@ while [[ "$#" -ne 0 ]]; do
     ;;
   --report-formatter)
     shift
-    if [[ $1 =~ ^(cat|pretty|junit|tap|tap13)$ ]]; then
+    if [[ $1 =~ ^(cat|pretty|junit|tap|tap13|/.*)$ ]]; then
       report_formatter="$1"
     else
       printf "Unknown report formatter '%s', valid options are %s\n" "$1" "${VALID_FORMATTERS}"
@@ -295,7 +295,6 @@ done
 if [[ ! $BATS_LINE_REFERENCE_FORMAT =~ (custom|comma_line|colon|uri) ]]; then
   abort "Invalid BATS_LINE_REFERENCE_FORMAT '$BATS_LINE_REFERENCE_FORMAT' (e.g. via --line-reference-format)"
 fi
-
 
 if [[ -n "${BATS_RUN_TMPDIR:-}" ]]; then
   if [[ -d "$BATS_RUN_TMPDIR" ]]; then
@@ -480,9 +479,22 @@ trap 'BATS_INTERRUPTED=true' INT # let the lower levels handle the interruption
 
 set -o pipefail execfail
 
+# pipe stdin into command and to stdout
+# pipe command stdout to file
+bats_tee() { # <output-file> <command...>
+  local output_file=$1 status=0
+  shift
+  exec 3<&1 # use FD3 to get around pipe
+  tee >(cat >&3) | "$@" >"$output_file" || status=$?
+  if (( status != 0 )); then
+    printf "ERROR: command \`%s\` failed with status %d\n" "$*" "$status" >&2
+  fi
+  return $status
+}
+
 if [[ -n "$report_formatter" ]]; then
   exec bats-exec-suite "${flags[@]}" "${filenames[@]}" |
-    tee >("$interpolated_report_formatter" "${report_formatter_flags[@]}" >"${BATS_REPORT_OUTPUT_DIR}/${BATS_REPORT_FILENAME}") |
+    bats_tee "${BATS_REPORT_OUTPUT_DIR}/${BATS_REPORT_FILENAME}" "$interpolated_report_formatter" "${report_formatter_flags[@]}" |
     bats_test_count_validator |
     "$interpolated_formatter" "${formatter_flags[@]}"
 else

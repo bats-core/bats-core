@@ -97,8 +97,8 @@ bats_binary_search() { # <search-value> <array-name>
   return 1
 }
 
-# store the values in ascending order in result array
-# Intended for short lists!
+# store the values in ascending (string!) order in result array
+# Intended for short lists! (uses insertion sort)
 bats_sort() { # <result-array-name> <values to sort...>
   local -r result_name=$1
   shift
@@ -109,14 +109,18 @@ bats_sort() { # <result-array-name> <values to sort...>
   fi
 
   local -a sorted_array=()
-  local -i j i=0
-  for ((j = 1; j <= $#; ++j)); do
-    for ((i = ${#sorted_array[@]}; i >= 0; --i)); do
-      if [[ $i -eq 0 || ${sorted_array[$((i - 1))]} < ${!j} ]]; then
-        sorted_array[$i]=${!j}
+  local -i i
+  while (( $# > 0 )); do # loop over input values
+    local current_value="$1"
+    shift
+    for ((i = ${#sorted_array[@]}; i >= 0; --i)); do # loop over output array from end
+      if (( i == 0 )) || [[ ${sorted_array[i - 1]} < $current_value ]]; then
+        # shift bigger elements one position to the end
+        sorted_array[i]=$current_value
         break
       else
-        sorted_array[$i]=${sorted_array[$((i - 1))]}
+        # insert new element at (freed) desired location
+        sorted_array[i]=${sorted_array[i - 1]}
       fi
     done
   done

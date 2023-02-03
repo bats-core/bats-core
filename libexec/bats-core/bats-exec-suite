@@ -99,7 +99,6 @@ done
 if [[ "$num_jobs" != 1 ]]; then
   if ! type -p parallel >/dev/null && parallel --version &>/dev/null && [[ -z "$bats_no_parallelize_across_files" ]]; then
     abort "Cannot execute \"${num_jobs}\" jobs without GNU parallel"
-    exit 1
   fi
   # shellcheck source=lib/bats-core/semaphore.bash
   source "${BATS_ROOT}/lib/bats-core/semaphore.bash"
@@ -310,12 +309,10 @@ fi
 
 if [[ -n "$bats_no_parallelize_across_files" ]] && [[ ! "$num_jobs" -gt 1 ]]; then
   abort "The flag --no-parallelize-across-files requires at least --jobs 2"
-  exit 1
 fi
 
 if [[ -n "$bats_no_parallelize_within_files" ]] && [[ ! "$num_jobs" -gt 1 ]]; then
   abort "The flag --no-parallelize-across-files requires at least --jobs 2"
-  exit 1
 fi
 
 # only abort on the lowest levels
@@ -353,6 +350,7 @@ trap bats_suite_exit_trap EXIT
 
 exec 3<&1
 
+# shellcheck disable=SC2317
 bats_suite_exit_trap() {
   local print_bats_out="${BATS_SHOW_OUTPUT_OF_SUCCEEDING_TESTS}"
   if [[ -z "${BATS_SETUP_SUITE_COMPLETED}" || -z "${BATS_TEARDOWN_SUITE_COMPLETED}" ]]; then
@@ -400,6 +398,7 @@ bats_run_teardown_suite() {
   fi
 }
 
+# shellcheck disable=SC2317
 bats_teardown_suite_trap() {
   bats_run_teardown_suite
   bats_suite_exit_trap

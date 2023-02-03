@@ -140,7 +140,7 @@ setup() {
   [ "$status" -eq 1 ]
   [ "${#lines[@]}" -eq 4 ]
   [ "${lines[1]}" = 'not ok 1 a failing test' ]
-  [ "${lines[2]}" = "# (in test file $RELATIVE_FIXTURE_ROOT/failing_with_negated_command.bats, line 3)" ]
+  [ "${lines[2]}" = "# (in test file $RELATIVE_FIXTURE_ROOT/failing_with_negated_command.bats, line 4)" ]
   [ "${lines[3]}" = "#   \`! true' failed" ]
 }
 
@@ -532,12 +532,13 @@ END_OF_ERR_MSG
   [ "$status" -eq 1 ]
 
   expectedNumberOfTests=12
-  linesPerTest=5
+  linesPerTest=6
 
   outputOffset=1
   currentErrorLine=9
 
   for t in $(seq $expectedNumberOfTests); do
+    echo "t=$t outputOffset=$outputOffset currentErrorLine=$currentErrorLine"
     # shellcheck disable=SC2076
     [[ "${lines[$outputOffset]}" =~ "not ok $t " ]]
 
@@ -1543,4 +1544,21 @@ enforce_own_process_group() {
   [ "${lines[2]}" == 'ok 1 focused' ]
   [ "${lines[3]}" == "WARNING: This test run only contains tests tagged \`bats:focus\`!" ]
   [ "${#lines[@]}" == 4 ]
+}
+
+@test "Bats waits for report formatter to finish" {
+  REPORT_FORMATTER=$FIXTURE_ROOT/gobble_up_stdin_sleep_and_print_finish.bash
+  bats_require_minimum_version 1.5.0
+  reentrant_run -0 bats "$FIXTURE_ROOT/passing.bats" --report-formatter "$REPORT_FORMATTER" --output "$BATS_TEST_TMPDIR"
+
+  echo "'$(< "$BATS_TEST_TMPDIR/report.log")'"
+  [ "$(< "$BATS_TEST_TMPDIR/report.log")" = Finished ]
+}
+
+@test "Failing report formatter fails test run" {
+  REPORT_FORMATTER=$FIXTURE_ROOT/exit_11.bash
+  bats_require_minimum_version 1.5.0
+  reentrant_run ! bats "$FIXTURE_ROOT/passing.bats" --report-formatter "$REPORT_FORMATTER" --output "$BATS_TEST_TMPDIR"
+
+  [[ "${output}" = *"ERROR: command \`$REPORT_FORMATTER\` failed with status 11"* ]] || false
 }

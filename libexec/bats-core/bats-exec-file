@@ -118,6 +118,7 @@ bats_run_teardown_file() {
   fi
 }
 
+# shellcheck disable=SC2317
 bats_file_teardown_trap() {
   bats_run_teardown_file
   bats_file_exit_trap in-teardown_trap
@@ -126,6 +127,7 @@ bats_file_teardown_trap() {
 # shellcheck source=lib/bats-core/common.bash
 source "$BATS_ROOT/lib/bats-core/common.bash"
 
+# shellcheck disable=SC2317
 bats_file_exit_trap() {
   local -r last_return_code=$?
   if [[ ${1:-} != in-teardown_trap ]]; then
@@ -165,7 +167,7 @@ bats_file_exit_trap() {
     bats_generate_warning 3 --no-stacktrace "$BATS_TEST_FILENAME"
   fi
 
-  exit $bats_exec_file_status
+  exit "$bats_exec_file_status"
 }
 
 function setup_file() {
@@ -292,6 +294,7 @@ bats_run_tests() {
   bats_exec_file_status=0
 
   if [[ "${BATS_RUN_TESTS_SKIPPED-}" ]]; then
+    # shellcheck disable=SC2317
     bats_test_begin() {
       printf "ok %d %s # skip %s\n" "$test_number_in_suite" "$1" "$BATS_RUN_TESTS_SKIPPED_REASON"  >&3
       return 1
