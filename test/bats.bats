@@ -1547,15 +1547,7 @@ enforce_own_process_group() {
 }
 
 @test "Bats waits for report formatter to finish" {
-  local REPORT_FORMATTER="$BATS_TEST_TMPDIR/report-formatter"
-  cat - >"$REPORT_FORMATTER" <<HEREDOC 
-    #!/usr/bin/bash
-    cat >/dev/null # eat up all input
-    sleep 1
-    echo "Finished" # mark finish
-HEREDOC
-  chmod a+x "$REPORT_FORMATTER"
-
+  REPORT_FORMATTER=$FIXTURE_ROOT/gobble_up_stdin_sleep_and_print_finish.bash
   bats_require_minimum_version 1.5.0
   reentrant_run -0 bats "$FIXTURE_ROOT/passing.bats" --report-formatter "$REPORT_FORMATTER" --output "$BATS_TEST_TMPDIR"
 
@@ -1564,13 +1556,7 @@ HEREDOC
 }
 
 @test "Failing report formatter fails test run" {
-  local REPORT_FORMATTER="$BATS_TEST_TMPDIR/report-formatter"
-  cat - >"$REPORT_FORMATTER" <<HEREDOC 
-    #!/usr/bin/bash
-    exit 11
-HEREDOC
-  chmod a+x "$REPORT_FORMATTER"
-
+  REPORT_FORMATTER=$FIXTURE_ROOT/exit_11.bash
   bats_require_minimum_version 1.5.0
   reentrant_run ! bats "$FIXTURE_ROOT/passing.bats" --report-formatter "$REPORT_FORMATTER" --output "$BATS_TEST_TMPDIR"
 
