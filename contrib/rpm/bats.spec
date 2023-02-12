@@ -3,7 +3,7 @@
 %global repo            bats-core
 
 Name:           bats
-Version:        1.8.2
+Version:        1.9.0
 Release:        1%{?dist}
 Summary:        Bash Automated Testing System
 
