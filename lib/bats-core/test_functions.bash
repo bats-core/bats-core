@@ -347,6 +347,9 @@ bats_test_begin() {
 }
 
 bats_test_function() {
+  if [[ "$1" == --tags ]]; then
+    shift 2
+  fi
   local test_name="$1"
   BATS_TEST_NAMES+=("$test_name")
 }
