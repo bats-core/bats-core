@@ -18,6 +18,6 @@
 }
 
 @test "BATS_TEST_NAMES is per file" {
-  echo "${#BATS_TEST_NAMES[@]}"
-  [[ "${#BATS_TEST_NAMES[@]}" == 4 ]]
+  echo "${#BATS_TEST_NAMES[@]} ${BATS_TEST_NAMES[0]}"
+  [ "${BATS_TEST_NAMES[0]}" == test_first_test_in_file_2 ]
 }
