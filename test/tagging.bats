@@ -73,3 +73,7 @@ setup() {
   [ "${lines[2]}" = 'ok 2 Only test tags' ]
   [ "${#lines[@]}" -eq 3 ]
 }
+
+@test "BATS_TEST_TAGS are set correctly" {
+  run -0 bats "$FIXTURE_ROOT/BATS_TEST_TAGS.bats"
+}

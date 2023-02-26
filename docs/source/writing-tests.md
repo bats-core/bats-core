@@ -582,6 +582,7 @@ There are several global variables you can use to introspect on Bats tests:
   is `setup_file()`.
 - `$BATS_TEST_NUMBER` is the (1-based) index of the current test case in the test file.
 - `$BATS_SUITE_TEST_NUMBER` is the (1-based) index of the current test case in the test suite (over all files).
+- `$BATS_TEST_TAGS` the tags of the current test.
 - `$BATS_TMPDIR` is the base temporary directory used by bats to create its
    temporary files / directories.
    (default: `$TMPDIR`. If `$TMPDIR` is not set, `/tmp` is used.)
