@@ -77,3 +77,9 @@ setup() {
 @test "BATS_TEST_TAGS are set correctly" {
   run -0 bats "$FIXTURE_ROOT/BATS_TEST_TAGS.bats"
 }
+
+@test "Print tags on error" {
+  run -1 bats "$FIXTURE_ROOT/print_tags_on_error.bats"
+
+  [ "${lines[2]}" = '# tags: file_tag test_tag' ]
+}
