@@ -347,4 +347,5 @@ exec 3<&1
 bats_create_test_tmpdirs
 # Run the given test.
 bats_evaluate_preprocessed_source
+readonly BATS_TEST_TAGS
 bats_perform_test
