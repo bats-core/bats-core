@@ -356,7 +356,7 @@ bats_test_function() {
   BATS_TEST_NAMES+=("$test_name")
   if [[ "$test_name" == "$BATS_TEST_NAME" ]]; then
     # shellcheck disable=SC2034
-    readonly BATS_TEST_TAGS=("${tags[@]}")
+    BATS_TEST_TAGS=("${tags[@]+${tags[@]}}")
   fi
 }
 
