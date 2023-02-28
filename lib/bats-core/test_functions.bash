@@ -347,8 +347,17 @@ bats_test_begin() {
 }
 
 bats_test_function() {
+  local tags=()
+  if [[ "$1" == --tags ]]; then
+    IFS=',' read -ra tags <<<"$2"
+    shift 2
+  fi
   local test_name="$1"
   BATS_TEST_NAMES+=("$test_name")
+  if [[ "$test_name" == "$BATS_TEST_NAME" ]]; then
+    # shellcheck disable=SC2034
+    BATS_TEST_TAGS=("${tags[@]+${tags[@]}}")
+  fi
 }
 
 # decides whether a failed test should be run again
