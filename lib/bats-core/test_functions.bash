@@ -163,14 +163,17 @@ bats_merge_stdout_and_stderr() {
 
 # write separate lines from <input-var> into <output-array>
 bats_separate_lines() { # <output-array> <input-var>
-  local output_array_name="$1"
-  local input_var_name="$2"
+  local -r output_array_name="$1"
+  local -r input_var_name="$2"
+  local input="${!input_var_name}"
   if [[ $keep_empty_lines ]]; then
     local bats_separate_lines_lines=()
-    if [[ -n "${!input_var_name}" ]]; then # avoid getting an empty line for empty input
+    if [[ -n "$input" ]]; then # avoid getting an empty line for empty input
+      # remove one trailing \n if it exists to compensate its addition by <<<
+      input=${input%$'\n'}
       while IFS= read -r line; do
         bats_separate_lines_lines+=("$line")
-      done <<<"${!input_var_name}"
+      done <<<"${input}"
     fi
     eval "${output_array_name}=(\"\${bats_separate_lines_lines[@]}\")"
   else
