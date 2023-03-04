@@ -14,6 +14,8 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 
 * add `${BATS_TEST_TAGS[@]}` for querying the tags during a test (#705)
 * print tags on failing tests (#705)
+* test for negative arguments to `--jobs` (#693)
+
 ### Fixed
 
 * fix `${BATS_TEST_NAMES[@]}` containing only `--tags` instead of test name since Bats v1.8.0 (#705)
