@@ -94,7 +94,7 @@ OPTIONS
     Filter test cases by names matching the regular expression
   * `-F`, `--formatter <type>`:
     Switch between formatters: pretty (default), tap (default w/o term), tap13, junit,
-    cat, `/<absolute path to formatter>`
+    `/<absolute path to formatter>`
   * `--filter-status <status>`:
     Only run tests with the given status in the last completed (no CTRL+C/SIGINT) run.
     Valid <status> values are:
