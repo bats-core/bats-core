@@ -50,3 +50,25 @@ FLOAT_REGEX='[0-9]+(\.[0-9]+)?'
   [ "${lines[5]}" == "#   \`eval \"( exit \${STATUS:-1} )\"' failed" ]
   [ "${#lines[@]}" -eq 6 ]
 }
+
+@test "Cat formatter prints the extended tap stream" {
+  cd "$BATS_ROOT/libexec/bats-core/"
+  
+  local formatter="bats-format-cat"
+
+  reentrant_run bash -u "$formatter" <<EOF
+1..1
+suite "$FIXTURE_ROOT/failing.bats"
+# output from setup_file
+begin 1 test_a_failing_test
+# fd3 output from test
+not ok 1 a failing test
+# (in test file test/fixtures/bats/failing.bats, line 4)
+#   \`eval "( exit ${STATUS:-1} )"' failed
+begin 2 test_a_successful_test
+ok 2 a succesful test
+unknown line
+EOF
+
+  [[ "${#lines[@]}" -eq 11 ]]
+}
