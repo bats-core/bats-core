@@ -57,7 +57,7 @@ HELP_TEXT_HEADER
                             Specifying this flag multiple times allows for logical or (||):
                             `--filter-tags A,B --filter-tags A,!C` matches tags (A && B) || (A && !C)
   -F, --formatter <type>    Switch between formatters: pretty (default),
-                              tap (default w/o term), tap13, junit, cat, /<absolute path to formatter>
+                              tap (default w/o term), tap13, junit, /<absolute path to formatter>
   --gather-test-outputs-in <directory>
                             Gather the output of failing *and* passing tests
                             as files in directory (if existing, must be empty)
