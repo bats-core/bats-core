@@ -4,8 +4,6 @@ fixtures bats # reuse bats fixtures
 @test "passing test" {
   reentrant_run bats --formatter cat "${FIXTURE_ROOT}/passing.bats"
 
-  echo ${BATS_TEST_FILENAME}
-
   [ "${lines[0]}" == '1..1' ]
   [ "${lines[1]}" == "suite ${FIXTURE_ROOT}/passing.bats" ]
   [ "${lines[2]}" == 'begin 1 a passing test' ]
