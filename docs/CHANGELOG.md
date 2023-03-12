@@ -24,6 +24,11 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 ### Fixed
 
 * fix `${BATS_TEST_NAMES[@]}` containing only `--tags` instead of test name since Bats v1.8.0 (#705)
+* fix `run --keep-empty-lines` counting trailing `\n` as (empty) new line (#711)
+
+#### Documentation
+
+* typos, minor edits (#704)
 
 ## [1.9.0] - 2023-02-12
 

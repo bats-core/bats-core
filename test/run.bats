@@ -19,21 +19,19 @@ bats_require_minimum_version 1.5.0
   [ ${#lines[@]} -eq 3 ]
 }
 
-@test "run --keep-empty-lines preserves trailing empty lines" {
+@test "run --keep-empty-lines does not count trailing newline as extra line (see #708)" {
   run --keep-empty-lines -- echo -n $'a\n'
   printf "'%s'\n" "${lines[@]}"
   [ "${lines[0]}" == a ]
-  [ "${lines[1]}" == '' ]
-  [ ${#lines[@]} -eq 2 ]
+  [ ${#lines[@]} -eq 1 ]
 }
 
-@test "run --keep-empty-lines preserves multiple trailing empty lines" {
+@test "run --keep-empty-lines preserves trailing empty line" {
   run --keep-empty-lines -- echo -n $'a\n\n'
   printf "'%s'\n" "${lines[@]}"
   [ "${lines[0]}" == a ]
   [ "${lines[1]}" == '' ]
-  [ "${lines[2]}" == '' ]
-  [ ${#lines[@]} -eq 3 ]
+  [ ${#lines[@]} -eq 2 ]
 }
 
 @test "run --keep-empty-lines preserves non-empty trailing line" {
