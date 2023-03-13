@@ -15,6 +15,11 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 * add `${BATS_TEST_TAGS[@]}` for querying the tags during a test (#705)
 * print tags on failing tests (#705)
 * test for negative arguments to `--jobs` (#693)
+* add tests for `--formatter cat` (#710)
+
+### Documentation
+
+* clarify use cases of `--formatter cat` (#710)
 
 ### Fixed
 

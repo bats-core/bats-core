@@ -194,6 +194,22 @@ your own fork of the repository and issuing pull requests to the original.
 
 - Continuous integration status: [![Tests](https://github.com/bats-core/bats-core/workflows/Tests/badge.svg)](https://github.com/bats-core/bats-core/actions?query=workflow%3ATests)
 
+To run all tests:
+```sh
+bin/bats test
+```
+
+To run a single test file:
+```sh
+bin/bats test/file.bats
+```
+
+When running from a teminal, Bats uses the *pretty* formatter by default.
+However, to debug Bats you might need to see the raw test output. 
+The **cat** formatter is intended as an internal debugging tool because
+it does not process test outputs.
+To use it, run Bats with the `--formatter cat` option.
+
 ## Coding conventions
 
 - [Formatting](#formatting)
