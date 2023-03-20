@@ -263,3 +263,35 @@ jobs:
         shell: 'script -q -e -c "bash {0}"' # work around tty issues
         env:
           TERM: linux # fix tput for tty issue work around
+  
+  coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - run: sudo apt-get install -y kcov
+      - run: kcov --exclude-path=/tmp $PWD/coverage ./bin/bats --filter-tags '!no-kcov' test/ 
+      - name: Archive code coverage results
+        uses: actions/upload-artifact@v3
+        with:
+          name: code-coverage-report
+          path: coverage/*
+
+      - name: Print the Total Coverage
+        id: coverage-percent
+        shell: bash
+        run: |
+          value=$(jq '.percent_covered' <coverage/bats/coverage.json)
+          echo "::set-output name=coverage::$value"
+          echo $value
+
+      - name: Add Coverage Label
+        uses: actions/github-script@v2
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            github.issues.setLabels({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: ['COVERAGE: ${{steps.coverage-percent.outputs.coverage}}']
+            })

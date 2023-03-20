@@ -667,6 +667,7 @@ END_OF_ERR_MSG
   [ "${lines[4]}" = "# /usr/local/bin:/usr/bin:/bin" ]
 }
 
+# bats test_tags=no-kcov
 @test "Test nounset does not trip up bats' internals (see #385)" {
   # don't export nounset within this file or we might trip up the testsuite itself,
   # getting bad diagnostics
