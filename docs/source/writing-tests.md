@@ -609,6 +609,7 @@ Bats supports loading external assertion libraries and helpers. Those under `bat
 
 and some external libraries, supported on a "best-effort" basis:
 
+- <https://github.com/hyperupcall/bats-all> - `git-subtree(1)`-managed aggregation of `bats-{support,assert,file}`
 - <https://github.com/ztombol/bats-docs> (still relevant? Requires review)
 - <https://github.com/grayhemp/bats-mock> (as per #147)
 - <https://github.com/jasonkarns/bats-mock> (how is this different from grayhemp/bats-mock?)
