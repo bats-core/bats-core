@@ -93,7 +93,7 @@ To run a single test file:
 bin/bats test/file.bats
 ```
 
-When running from a teminal, Bats uses the *pretty* formatter by default.
+When running from a terminal, Bats uses the *pretty* formatter by default.
 However, to debug Bats you might need to see the raw test output. 
 The **cat** formatter is intended as an internal debugging tool because
 it does not process test outputs.
