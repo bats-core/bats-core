@@ -397,7 +397,16 @@ bats_pipe() { # [-N] [--] command0 [ \| command1 [ \| command2 [...]]]
     local pipefail_position="$1"
     shift
 
-    eval "$@" '; __bats_pipe_eval_pipe_status=(${PIPESTATUS[@]})'
+    local -a escaped_args=()
+    for raw_arg in "$@"; do
+      local escaped_arg="$raw_arg"
+      if [[ $raw_arg != '|' ]]; then
+        printf -v escaped_arg "%q" "$raw_arg"
+      fi
+      escaped_args+=("$escaped_arg")
+    done
+
+    eval "${escaped_args[@]}" '; __bats_pipe_eval_pipe_status=(${PIPESTATUS[@]})'
 
     local result_status=
     if (( $pipefail_position < 0 )); then
