@@ -61,6 +61,7 @@ output_binary_data_and_returns_with_given_code() {
   run bats_pipe
 
   [ "$status" -eq 1 ]
+  echo "$output" >&2
   [ "${#lines[@]}" -eq 1 ]
   [ "${lines[0]}" = "Usage error: No \`\\|\`s found. Is this an error?" ]
 }
@@ -69,6 +70,7 @@ output_binary_data_and_returns_with_given_code() {
   run bats_pipe describe_args
 
   [ "$status" -eq 1 ]
+  echo "$output" >&2
   [ "${#lines[@]}" -eq 1 ]
   [ "${lines[0]}" = "Usage error: No \`\\|\`s found. Is this an error?" ]
 }
@@ -77,6 +79,7 @@ output_binary_data_and_returns_with_given_code() {
   run bats_pipe -- describe_args
 
   [ "$status" -eq 1 ]
+  echo "$output" >&2
   [ "${#lines[@]}" -eq 1 ]
   [ "${lines[0]}" = "Usage error: No \`\\|\`s found. Is this an error?" ]
 }
@@ -85,6 +88,7 @@ output_binary_data_and_returns_with_given_code() {
   run bats_pipe describe_args a
 
   [ "$status" -eq 1 ]
+  echo "$output" >&2
   [ "${#lines[@]}" -eq 1 ]
   [ "${lines[0]}" = "Usage error: No \`\\|\`s found. Is this an error?" ]
 }
@@ -93,6 +97,7 @@ output_binary_data_and_returns_with_given_code() {
   run bats_pipe describe_args a b
 
   [ "$status" -eq 1 ]
+  echo "$output" >&2
   [ "${#lines[@]}" -eq 1 ]
   [ "${lines[0]}" = "Usage error: No \`\\|\`s found. Is this an error?" ]
 }
@@ -101,6 +106,7 @@ output_binary_data_and_returns_with_given_code() {
   run bats_pipe -- describe_args a b
 
   [ "$status" -eq 1 ]
+  echo "$output" >&2
   [ "${#lines[@]}" -eq 1 ]
   [ "${lines[0]}" = "Usage error: No \`\\|\`s found. Is this an error?" ]
 }
@@ -109,6 +115,7 @@ output_binary_data_and_returns_with_given_code() {
   run bats_pipe describe_args \| describe_input
 
   [ "$status" -eq 0 ]
+  echo "$output" >&2
   [ "${#lines[@]}" -eq 3 ]
   [ "${lines[0]}" = 'Got 0 args.' ]
   [ "${lines[1]}" = 'stdin:' ]
@@ -119,6 +126,7 @@ output_binary_data_and_returns_with_given_code() {
   run bats_pipe -- describe_args \| describe_input
 
   [ "$status" -eq 0 ]
+  echo "$output" >&2
   [ "${#lines[@]}" -eq 3 ]
   [ "${lines[0]}" = 'Got 0 args.' ]
   [ "${lines[1]}" = 'stdin:' ]
@@ -129,6 +137,7 @@ output_binary_data_and_returns_with_given_code() {
   run bats_pipe describe_args \| describe_input a
 
   [ "$status" -eq 0 ]
+  echo "$output" >&2
   [ "${#lines[@]}" -eq 4 ]
   [ "${lines[0]}" = 'Got 1 args.' ]
   [ "${lines[1]}" = 'arg: a' ]
@@ -140,6 +149,7 @@ output_binary_data_and_returns_with_given_code() {
   run bats_pipe describe_args \| describe_input a b
 
   [ "$status" -eq 0 ]
+  echo "$output" >&2
   [ "${#lines[@]}" -eq 5 ]
   [ "${lines[0]}" = 'Got 2 args.' ]
   [ "${lines[1]}" = 'arg: a' ]
@@ -152,6 +162,7 @@ output_binary_data_and_returns_with_given_code() {
   run bats_pipe -- describe_args \| describe_input a b
 
   [ "$status" -eq 0 ]
+  echo "$output" >&2
   [ "${#lines[@]}" -eq 5 ]
   [ "${lines[0]}" = 'Got 2 args.' ]
   [ "${lines[1]}" = 'arg: a' ]
@@ -164,6 +175,7 @@ output_binary_data_and_returns_with_given_code() {
   run bats_pipe describe_args a \| describe_input
 
   [ "$status" -eq 0 ]
+  echo "$output" >&2
   [ "${#lines[@]}" -eq 4 ]
   [ "${lines[0]}" = 'Got 0 args.' ]
   [ "${lines[1]}" = 'stdin:' ]
@@ -175,6 +187,7 @@ output_binary_data_and_returns_with_given_code() {
   run bats_pipe -- describe_args a \| describe_input
 
   [ "$status" -eq 0 ]
+  echo "$output" >&2
   [ "${#lines[@]}" -eq 4 ]
   [ "${lines[0]}" = 'Got 0 args.' ]
   [ "${lines[1]}" = 'stdin:' ]
@@ -182,10 +195,23 @@ output_binary_data_and_returns_with_given_code() {
   [ "${lines[3]}" = $'\targ: a' ]
 }
 
-@test "run bats_pipe piping between two command with one and one args" {
+@test "run bats_pipe piping between two command with one with spaces and zero args" {
+  run bats_pipe describe_args 'a x' \| describe_input
+
+  [ "$status" -eq 0 ]
+  echo "$output" >&2
+  [ "${#lines[@]}" -eq 4 ]
+  [ "${lines[0]}" = 'Got 0 args.' ]
+  [ "${lines[1]}" = 'stdin:' ]
+  [ "${lines[2]}" = $'\tGot 1 args.' ]
+  [ "${lines[3]}" = $'\targ: a x' ]
+}
+
+@test "run bats_pipe piping between two command with one and one arg" {
   run bats_pipe describe_args a \| describe_input b
 
   [ "$status" -eq 0 ]
+  echo "$output" >&2
   [ "${#lines[@]}" -eq 5 ]
   [ "${lines[0]}" = 'Got 1 args.' ]
   [ "${lines[1]}" = 'arg: b' ]
@@ -194,10 +220,24 @@ output_binary_data_and_returns_with_given_code() {
   [ "${lines[4]}" = $'\targ: a' ]
 }
 
+@test "run bats_pipe piping between two command with one with space and one arg with spaces" {
+  run bats_pipe describe_args 'a x' \| describe_input 'b y'
+
+  [ "$status" -eq 0 ]
+  echo "$output" >&2
+  [ "${#lines[@]}" -eq 5 ]
+  [ "${lines[0]}" = 'Got 1 args.' ]
+  [ "${lines[1]}" = 'arg: b y' ]
+  [ "${lines[2]}" = 'stdin:' ]
+  [ "${lines[3]}" = $'\tGot 1 args.' ]
+  [ "${lines[4]}" = $'\targ: a x' ]
+}
+
 @test "run bats_pipe piping between two command with one and two args" {
   run bats_pipe describe_args a \| describe_input b c
 
   [ "$status" -eq 0 ]
+  echo "$output" >&2
   [ "${#lines[@]}" -eq 6 ]
   [ "${lines[0]}" = 'Got 2 args.' ]
   [ "${lines[1]}" = 'arg: b' ]
@@ -207,10 +247,25 @@ output_binary_data_and_returns_with_given_code() {
   [ "${lines[5]}" = $'\targ: a' ]
 }
 
+@test "run bats_pipe piping between two command with one and two args with spaces" {
+  run bats_pipe describe_args 'a x' \| describe_input 'b y' 'c z'
+
+  [ "$status" -eq 0 ]
+  echo "$output" >&2
+  [ "${#lines[@]}" -eq 6 ]
+  [ "${lines[0]}" = 'Got 2 args.' ]
+  [ "${lines[1]}" = 'arg: b y' ]
+  [ "${lines[2]}" = 'arg: c z' ]
+  [ "${lines[3]}" = 'stdin:' ]
+  [ "${lines[4]}" = $'\tGot 1 args.' ]
+  [ "${lines[5]}" = $'\targ: a x' ]
+}
+
 @test "run bats_pipe piping between two command with two and zero args" {
   run bats_pipe describe_args a b \| describe_input
 
   [ "$status" -eq 0 ]
+  echo "$output" >&2
   [ "${#lines[@]}" -eq 5 ]
   [ "${lines[0]}" = 'Got 0 args.' ]
   [ "${lines[1]}" = 'stdin:' ]
@@ -223,6 +278,7 @@ output_binary_data_and_returns_with_given_code() {
   run bats_pipe describe_args a b \| describe_input c
 
   [ "$status" -eq 0 ]
+  echo "$output" >&2
   [ "${#lines[@]}" -eq 6 ]
   [ "${lines[0]}" = 'Got 1 args.' ]
   [ "${lines[1]}" = 'arg: c' ]
@@ -232,10 +288,25 @@ output_binary_data_and_returns_with_given_code() {
   [ "${lines[5]}" = $'\targ: b' ]
 }
 
+@test "run bats_pipe piping between two command with two and one args with spaces" {
+  run bats_pipe describe_args 'a x' 'b y' \| describe_input 'c z'
+
+  [ "$status" -eq 0 ]
+  echo "$output" >&2
+  [ "${#lines[@]}" -eq 6 ]
+  [ "${lines[0]}" = 'Got 1 args.' ]
+  [ "${lines[1]}" = 'arg: c z' ]
+  [ "${lines[2]}" = 'stdin:' ]
+  [ "${lines[3]}" = $'\tGot 2 args.' ]
+  [ "${lines[4]}" = $'\targ: a x' ]
+  [ "${lines[5]}" = $'\targ: b y' ]
+}
+
 @test "run bats_pipe piping between two command with two and two args" {
   run bats_pipe describe_args a b \| describe_input c d
 
   [ "$status" -eq 0 ]
+  echo "$output" >&2
   [ "${#lines[@]}" -eq 7 ]
   [ "${lines[0]}" = 'Got 2 args.' ]
   [ "${lines[1]}" = 'arg: c' ]
@@ -246,10 +317,26 @@ output_binary_data_and_returns_with_given_code() {
   [ "${lines[6]}" = $'\targ: b' ]
 }
 
+@test "run bats_pipe piping between two command with two and two args with spaces" {
+  run bats_pipe describe_args 'a x' 'b y' \| describe_input 'c z' 'd w'
+
+  [ "$status" -eq 0 ]
+  echo "$output" >&2
+  [ "${#lines[@]}" -eq 7 ]
+  [ "${lines[0]}" = 'Got 2 args.' ]
+  [ "${lines[1]}" = 'arg: c z' ]
+  [ "${lines[2]}" = 'arg: d w' ]
+  [ "${lines[3]}" = 'stdin:' ]
+  [ "${lines[4]}" = $'\tGot 2 args.' ]
+  [ "${lines[5]}" = $'\targ: a x' ]
+  [ "${lines[6]}" = $'\targ: b y' ]
+}
+
 @test "run bats_pipe piping between three command with zero args each" {
   run bats_pipe describe_args \| describe_input \| describe_input
 
   [ "$status" -eq 0 ]
+  echo "$output" >&2
   [ "${#lines[@]}" -eq 5 ]
   [ "${lines[0]}" = 'Got 0 args.' ]
   [ "${lines[1]}" = 'stdin:' ]
@@ -262,6 +349,7 @@ output_binary_data_and_returns_with_given_code() {
   run bats_pipe describe_args a \| describe_input b \| describe_input c
 
   [ "$status" -eq 0 ]
+  echo "$output" >&2
   [ "${#lines[@]}" -eq 8 ]
   [ "${lines[0]}" = 'Got 1 args.' ]
   [ "${lines[1]}" = 'arg: c' ]
@@ -277,6 +365,7 @@ output_binary_data_and_returns_with_given_code() {
   run bats_pipe -- describe_args a \| describe_input b \| describe_input c
 
   [ "$status" -eq 0 ]
+  echo "$output" >&2
   [ "${#lines[@]}" -eq 8 ]
   [ "${lines[0]}" = 'Got 1 args.' ]
   [ "${lines[1]}" = 'arg: c' ]
@@ -292,6 +381,7 @@ output_binary_data_and_returns_with_given_code() {
   run bats_pipe describe_args a b \| describe_input c d \| describe_input e f
 
   [ "$status" -eq 0 ]
+  echo "$output" >&2
   [ "${#lines[@]}" -eq 11 ]
   [ "${lines[0]}" = 'Got 2 args.' ]
   [ "${lines[1]}" = 'arg: e' ]
@@ -310,6 +400,7 @@ output_binary_data_and_returns_with_given_code() {
   run bats_pipe \| describe_args
 
   [ "$status" -eq 1 ]
+  echo "$output" >&2
   [ "${#lines[@]}" -eq 1 ]
   [ "${lines[0]}" = "Usage error: Cannot have leading \`\\|\`." ]
 }
@@ -318,6 +409,7 @@ output_binary_data_and_returns_with_given_code() {
   run bats_pipe \| describe_args \| describe_input
 
   [ "$status" -eq 1 ]
+  echo "$output" >&2
   [ "${#lines[@]}" -eq 1 ]
   [ "${lines[0]}" = "Usage error: Cannot have leading \`\\|\`." ]
 }
@@ -326,6 +418,7 @@ output_binary_data_and_returns_with_given_code() {
   run bats_pipe describe_args \|
 
   [ "$status" -eq 1 ]
+  echo "$output" >&2
   [ "${#lines[@]}" -eq 1 ]
   [ "${lines[0]}" = "Usage error: Cannot have trailing \`\\|\`." ]
 }
@@ -334,6 +427,7 @@ output_binary_data_and_returns_with_given_code() {
   run bats_pipe describe_args \| describe_input \|
 
   [ "$status" -eq 1 ]
+  echo "$output" >&2
   [ "${#lines[@]}" -eq 1 ]
   [ "${lines[0]}" = "Usage error: Cannot have trailing \`\\|\`." ]
 }
@@ -342,6 +436,7 @@ output_binary_data_and_returns_with_given_code() {
   run bats_pipe describe_args \| \|
 
   [ "$status" -eq 1 ]
+  echo "$output" >&2
   [ "${#lines[@]}" -eq 1 ]
   [ "${lines[0]}" = "Usage error: Cannot have consecutive \`\\|\`. Found at argument position '2'." ]
 }
@@ -350,6 +445,7 @@ output_binary_data_and_returns_with_given_code() {
   run bats_pipe describe_args \| \| describe_input
 
   [ "$status" -eq 1 ]
+  echo "$output" >&2
   [ "${#lines[@]}" -eq 1 ]
   [ "${lines[0]}" = "Usage error: Cannot have consecutive \`\\|\`. Found at argument position '2'." ]
 }
@@ -358,6 +454,7 @@ output_binary_data_and_returns_with_given_code() {
   run bats_pipe describe_args \| describe_input \| \|
 
   [ "$status" -eq 1 ]
+  echo "$output" >&2
   [ "${#lines[@]}" -eq 1 ]
   [ "${lines[0]}" = "Usage error: Cannot have consecutive \`\\|\`. Found at argument position '4'." ]
 }
@@ -366,6 +463,7 @@ output_binary_data_and_returns_with_given_code() {
   run bats_pipe describe_args \| \| describe_input \| describe_input
 
   [ "$status" -eq 1 ]
+  echo "$output" >&2
   [ "${#lines[@]}" -eq 1 ]
   [ "${lines[0]}" = "Usage error: Cannot have consecutive \`\\|\`. Found at argument position '2'." ]
 }
@@ -374,6 +472,7 @@ output_binary_data_and_returns_with_given_code() {
   run bats_pipe describe_args \| describe_input \| \| describe_input
 
   [ "$status" -eq 1 ]
+  echo "$output" >&2
   [ "${#lines[@]}" -eq 1 ]
   [ "${lines[0]}" = "Usage error: Cannot have consecutive \`\\|\`. Found at argument position '4'." ]
 }
@@ -382,6 +481,7 @@ output_binary_data_and_returns_with_given_code() {
   run bats_pipe describe_args \| describe_input \| describe_input \| \|
 
   [ "$status" -eq 1 ]
+  echo "$output" >&2
   [ "${#lines[@]}" -eq 1 ]
   [ "${lines[0]}" = "Usage error: Cannot have consecutive \`\\|\`. Found at argument position '6'." ]
 }
@@ -390,6 +490,7 @@ output_binary_data_and_returns_with_given_code() {
   run bats_pipe --idklol describe_args
 
   [ "$status" -eq 1 ]
+  echo "$output" >&2
   [ "${#lines[@]}" -eq 1 ]
   [ "${lines[0]}" = "Usage error: unknown flag '--idklol'" ]
 }
@@ -398,6 +499,7 @@ output_binary_data_and_returns_with_given_code() {
   run bats_pipe returns_with_given_code 42 \| describe_input
 
   [ "$status" -eq 42 ]
+  echo "$output" >&2
   [ "${#lines[@]}" -eq 3 ]
   [ "${lines[0]}" = 'Got 0 args.' ]
   [ "${lines[1]}" = 'stdin:' ]
@@ -408,6 +510,7 @@ output_binary_data_and_returns_with_given_code() {
   run bats_pipe returns_with_given_code 0 \| consume_stdin_and_returns_with_given_code 84
 
   [ "$status" -eq 84 ]
+  echo "$output" >&2
   [ "${#lines[@]}" -eq 1 ]
   [ "${lines[0]}" = $'Will return status 84.' ]
 }
@@ -416,6 +519,7 @@ output_binary_data_and_returns_with_given_code() {
   run bats_pipe returns_with_given_code 42 \| consume_stdin_and_returns_with_given_code 84
 
   [ "$status" -eq 84 ]
+  echo "$output" >&2
   [ "${#lines[@]}" -eq 1 ]
   [ "${lines[0]}" = 'Will return status 84.' ]
 }
@@ -424,6 +528,7 @@ output_binary_data_and_returns_with_given_code() {
   run bats_pipe returns_with_given_code 42 \| describe_input \| describe_input
 
   [ "$status" -eq 42 ]
+  echo "$output" >&2
   [ "${#lines[@]}" -eq 5 ]
   [ "${lines[0]}" = 'Got 0 args.' ]
   [ "${lines[1]}" = 'stdin:' ]
@@ -436,6 +541,7 @@ output_binary_data_and_returns_with_given_code() {
   run bats_pipe returns_with_given_code 0 \| consume_stdin_and_returns_with_given_code 42 \| describe_input
 
   [ "$status" -eq 42 ]
+  echo "$output" >&2
   [ "${#lines[@]}" -eq 3 ]
   [ "${lines[0]}" = 'Got 0 args.' ]
   [ "${lines[1]}" = 'stdin:' ]
@@ -446,6 +552,7 @@ output_binary_data_and_returns_with_given_code() {
   run bats_pipe returns_with_given_code 0 \| consume_stdin_and_returns_with_given_code 0 \| consume_stdin_and_returns_with_given_code 42
 
   [ "$status" -eq 42 ]
+  echo "$output" >&2
   [ "${#lines[@]}" -eq 1 ]
   [ "${lines[0]}" = $'Will return status 42.' ]
 }
@@ -454,6 +561,7 @@ output_binary_data_and_returns_with_given_code() {
   run bats_pipe returns_with_given_code 42 \| consume_stdin_and_returns_with_given_code 84 \| describe_input
 
   [ "$status" -eq 84 ]
+  echo "$output" >&2
   [ "${#lines[@]}" -eq 3 ]
   [ "${lines[0]}" = 'Got 0 args.' ]
   [ "${lines[1]}" = 'stdin:' ]
@@ -464,6 +572,7 @@ output_binary_data_and_returns_with_given_code() {
   run bats_pipe returns_with_given_code 0 \| consume_stdin_and_returns_with_given_code 42 \| consume_stdin_and_returns_with_given_code 4
 
   [ "$status" -eq 4 ]
+  echo "$output" >&2
   [ "${#lines[@]}" -eq 1 ]
   [ "${lines[0]}" = $'Will return status 4.' ]
 }
@@ -472,6 +581,7 @@ output_binary_data_and_returns_with_given_code() {
   run bats_pipe returns_with_given_code 42 \| consume_stdin_and_returns_with_given_code 84 \| consume_stdin_and_returns_with_given_code 4
 
   [ "$status" -eq 4 ]
+  echo "$output" >&2
   [ "${#lines[@]}" -eq 1 ]
   [ "${lines[0]}" = $'Will return status 4.' ]
 }
@@ -480,6 +590,7 @@ output_binary_data_and_returns_with_given_code() {
   run bats_pipe -0 returns_with_given_code 42 \| describe_input
 
   [ "$status" -eq 42 ]
+  echo "$output" >&2
   [ "${#lines[@]}" -eq 3 ]
   [ "${lines[0]}" = 'Got 0 args.' ]
   [ "${lines[1]}" = 'stdin:' ]
@@ -490,6 +601,7 @@ output_binary_data_and_returns_with_given_code() {
   run bats_pipe -0 -- returns_with_given_code 42 \| describe_input
 
   [ "$status" -eq 42 ]
+  echo "$output" >&2
   [ "${#lines[@]}" -eq 3 ]
   [ "${lines[0]}" = 'Got 0 args.' ]
   [ "${lines[1]}" = 'stdin:' ]
@@ -500,6 +612,7 @@ output_binary_data_and_returns_with_given_code() {
   run bats_pipe -0 returns_with_given_code 0 \| consume_stdin_and_returns_with_given_code 42
 
   [ "$status" -eq 0 ]
+  echo "$output" >&2
   [ "${#lines[@]}" -eq 1 ]
   [ "${lines[0]}" = 'Will return status 42.' ]
 }
@@ -508,6 +621,7 @@ output_binary_data_and_returns_with_given_code() {
   run bats_pipe -0 returns_with_given_code 42 \| consume_stdin_and_returns_with_given_code 84
 
   [ "$status" -eq 42 ]
+  echo "$output" >&2
   [ "${#lines[@]}" -eq 1 ]
   [ "${lines[0]}" = 'Will return status 84.' ]
 }
@@ -516,6 +630,7 @@ output_binary_data_and_returns_with_given_code() {
   run bats_pipe -0 returns_with_given_code 42 \| describe_input \| describe_input
 
   [ "$status" -eq 42 ]
+  echo "$output" >&2
   [ "${#lines[@]}" -eq 5 ]
   [ "${lines[0]}" = 'Got 0 args.' ]
   [ "${lines[1]}" = 'stdin:' ]
@@ -528,6 +643,7 @@ output_binary_data_and_returns_with_given_code() {
   run bats_pipe -0 returns_with_given_code 0 \| consume_stdin_and_returns_with_given_code 42 \| describe_input
 
   [ "$status" -eq 0 ]
+  echo "$output" >&2
   [ "${#lines[@]}" -eq 3 ]
   [ "${lines[0]}" = 'Got 0 args.' ]
   [ "${lines[1]}" = 'stdin:' ]
@@ -538,6 +654,7 @@ output_binary_data_and_returns_with_given_code() {
   run bats_pipe -0 returns_with_given_code 0 \| consume_stdin_and_returns_with_given_code 0 \| consume_stdin_and_returns_with_given_code 42
 
   [ "$status" -eq 0 ]
+  echo "$output" >&2
   [ "${#lines[@]}" -eq 1 ]
   [ "${lines[0]}" = 'Will return status 42.' ]
 }
@@ -546,6 +663,7 @@ output_binary_data_and_returns_with_given_code() {
   run bats_pipe -0 returns_with_given_code 42 \| consume_stdin_and_returns_with_given_code 84 \| consume_stdin_and_returns_with_given_code 4
 
   [ "$status" -eq 42 ]
+  echo "$output" >&2
   [ "${#lines[@]}" -eq 1 ]
   [ "${lines[0]}" = 'Will return status 4.' ]
 }
@@ -554,6 +672,7 @@ output_binary_data_and_returns_with_given_code() {
   run bats_pipe -1 returns_with_given_code 42 \| describe_input
 
   [ "$status" -eq 0 ]
+  echo "$output" >&2
   [ "${#lines[@]}" -eq 3 ]
   [ "${lines[0]}" = 'Got 0 args.' ]
   [ "${lines[1]}" = 'stdin:' ]
@@ -564,6 +683,7 @@ output_binary_data_and_returns_with_given_code() {
   run bats_pipe -1 -- returns_with_given_code 42 \| describe_input
 
   [ "$status" -eq 0 ]
+  echo "$output" >&2
   [ "${#lines[@]}" -eq 3 ]
   [ "${lines[0]}" = 'Got 0 args.' ]
   [ "${lines[1]}" = 'stdin:' ]
@@ -574,6 +694,7 @@ output_binary_data_and_returns_with_given_code() {
   run bats_pipe -1 returns_with_given_code 0 \| consume_stdin_and_returns_with_given_code 42
 
   [ "$status" -eq 42 ]
+  echo "$output" >&2
   [ "${#lines[@]}" -eq 1 ]
   [ "${lines[0]}" = 'Will return status 42.' ]
 }
@@ -582,6 +703,7 @@ output_binary_data_and_returns_with_given_code() {
   run bats_pipe -1 returns_with_given_code 42 \| consume_stdin_and_returns_with_given_code 84
 
   [ "$status" -eq 84 ]
+  echo "$output" >&2
   [ "${#lines[@]}" -eq 1 ]
   [ "${lines[0]}" = 'Will return status 84.' ]
 }
@@ -590,6 +712,7 @@ output_binary_data_and_returns_with_given_code() {
   run bats_pipe -1 returns_with_given_code 42 \| describe_input \| describe_input
 
   [ "$status" -eq 0 ]
+  echo "$output" >&2
   [ "${#lines[@]}" -eq 5 ]
   [ "${lines[0]}" = 'Got 0 args.' ]
   [ "${lines[1]}" = 'stdin:' ]
@@ -602,6 +725,7 @@ output_binary_data_and_returns_with_given_code() {
   run bats_pipe -1 returns_with_given_code 0 \| consume_stdin_and_returns_with_given_code 42 \| describe_input
 
   [ "$status" -eq 42 ]
+  echo "$output" >&2
   [ "${#lines[@]}" -eq 3 ]
   [ "${lines[0]}" = 'Got 0 args.' ]
   [ "${lines[1]}" = 'stdin:' ]
@@ -612,6 +736,7 @@ output_binary_data_and_returns_with_given_code() {
   run bats_pipe -1 returns_with_given_code 0 \| consume_stdin_and_returns_with_given_code 0 \| consume_stdin_and_returns_with_given_code 42
 
   [ "$status" -eq 0 ]
+  echo "$output" >&2
   [ "${#lines[@]}" -eq 1 ]
   [ "${lines[0]}" = 'Will return status 42.' ]
 }
@@ -620,6 +745,7 @@ output_binary_data_and_returns_with_given_code() {
   run bats_pipe -1 returns_with_given_code 42 \| consume_stdin_and_returns_with_given_code 84 \| consume_stdin_and_returns_with_given_code 4
 
   [ "$status" -eq 84 ]
+  echo "$output" >&2
   [ "${#lines[@]}" -eq 1 ]
   [ "${lines[0]}" = 'Will return status 4.' ]
 }
@@ -628,6 +754,7 @@ output_binary_data_and_returns_with_given_code() {
   run bats_pipe -2 returns_with_given_code 42 \| describe_input \| describe_input
 
   [ "$status" -eq 0 ]
+  echo "$output" >&2
   [ "${#lines[@]}" -eq 5 ]
   [ "${lines[0]}" = 'Got 0 args.' ]
   [ "${lines[1]}" = 'stdin:' ]
@@ -640,6 +767,7 @@ output_binary_data_and_returns_with_given_code() {
   run bats_pipe -2 -- returns_with_given_code 42 \| describe_input \| describe_input
 
   [ "$status" -eq 0 ]
+  echo "$output" >&2
   [ "${#lines[@]}" -eq 5 ]
   [ "${lines[0]}" = 'Got 0 args.' ]
   [ "${lines[1]}" = 'stdin:' ]
@@ -652,6 +780,7 @@ output_binary_data_and_returns_with_given_code() {
   run bats_pipe -2 returns_with_given_code 0 \| consume_stdin_and_returns_with_given_code 42 \| describe_input
 
   [ "$status" -eq 0 ]
+  echo "$output" >&2
   [ "${#lines[@]}" -eq 3 ]
   [ "${lines[0]}" = 'Got 0 args.' ]
   [ "${lines[1]}" = 'stdin:' ]
@@ -662,6 +791,7 @@ output_binary_data_and_returns_with_given_code() {
   run bats_pipe -2 returns_with_given_code 0 \| consume_stdin_and_returns_with_given_code 0 \| consume_stdin_and_returns_with_given_code 42
 
   [ "$status" -eq 42 ]
+  echo "$output" >&2
   [ "${#lines[@]}" -eq 1 ]
   [ "${lines[0]}" = 'Will return status 42.' ]
 }
@@ -670,6 +800,7 @@ output_binary_data_and_returns_with_given_code() {
   run bats_pipe -2 returns_with_given_code 42 \| consume_stdin_and_returns_with_given_code 84 \| consume_stdin_and_returns_with_given_code 4
 
   [ "$status" -eq 4 ]
+  echo "$output" >&2
   [ "${#lines[@]}" -eq 1 ]
   [ "${lines[0]}" = 'Will return status 4.' ]
 }
@@ -678,20 +809,21 @@ output_binary_data_and_returns_with_given_code() {
   run bats_pipe -8 returns_with_given_code 42 \| consume_stdin_and_returns_with_given_code 84
 
   [ "$status" -eq 1 ]
+  echo "$output" >&2
   [ "${#lines[@]}" -eq 1 ]
   [ "${lines[0]}" = "Usage error: Too large of -N argument given. Argument value: '8'." ]
 }
 
 @test "run bats_pipe with stdout as binary data" {
-  run bats_pipe output_binary_data_and_returns_with_given_code 0 \| hexdump -v -e "1/1 \"0x%02X \""
+  run bats_pipe output_binary_data_and_returns_with_given_code 0 \| od -v -t x1 -An
 
   [ "$status" -eq 0 ]
-  [ "$output" = "0x00 0xDE 0xAD 0xF0 0x0D " ]
+  [ "$output" = " 00 de ad f0 0d" ]
 }
 
 @test "run bats_pipe with stdout as binary data with non-zero status" {
-  run bats_pipe output_binary_data_and_returns_with_given_code 42 \| hexdump -v -e "1/1 \"0x%02X \""
+  run bats_pipe output_binary_data_and_returns_with_given_code 42 \| od -v -t x1 -An
 
   [ "$status" -eq 42 ]
-  [ "$output" = "0x00 0xDE 0xAD 0xF0 0x0D " ]
+  [ "$output" = " 00 de ad f0 0d" ]
 }
