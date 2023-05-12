@@ -368,7 +368,7 @@ bats_pipe() { # [-N] [--] command0 [ \| command1 [ \| command2 [...]]]
         result_status="${pipe_status[1]}"
       else
         # If the received target position is negative, one of the following is true:
-        # the target is already passed in a shallower recusrive call
+        # the target is already passed in a shallower recursive call
         # or we are performing default "last failure" behavior.
 
         # in the former case, it doesn't matter what we return.
@@ -393,6 +393,32 @@ bats_pipe() { # [-N] [--] command0 [ \| command1 [ \| command2 [...]]]
     return "$result_status"
   }
 
+  bats_pipe_eval() {
+    local pipefail_position="$1"
+    shift
+
+    eval "$@" '; __bats_pipe_eval_pipe_status=(${PIPESTATUS[@]})'
+
+    local result_status=
+    if (( $pipefail_position < 0 )); then
+      # if we are performing default "last failure" behavior,
+      # iterate backwards through pipe_status to find the last error.
+      result_status=0
+      for index in "${!__bats_pipe_eval_pipe_status[@]}"; do
+        local negative_index="-$((index + 1))"
+        local status_at_negative_index="${__bats_pipe_eval_pipe_status[$negative_index]}"
+        if (( status_at_negative_index != 0 )); then
+          result_status="$status_at_negative_index"
+          break;
+        fi
+      done
+    else
+      result_status="${__bats_pipe_eval_pipe_status[$pipefail_position]}"
+    fi
+
+    return "$result_status"
+  }
+
   # run commands and handle appropriate piping
   local result_status=
 
@@ -405,9 +431,12 @@ bats_pipe() { # [-N] [--] command0 [ \| command1 [ \| command2 [...]]]
   #run_leading_commands_until_position "${#pipe_positions[@]}"
   #result_status="$?"
 
-  # call recurse with full set of arguemnts.
-  # note: if $pipefail_position was not given, we want to do "last failure" logic (done with negative values).
-  bats_pipe_recurse "${pipefail_position:--1}" "$@"
+  # # call recurse with full set of arguemnts.
+  # # note: if $pipefail_position was not given, we want to do "last failure" logic (done with negative values).
+  # bats_pipe_recurse "${pipefail_position:--1}" "$@"
+  # result_status="$?"
+
+  bats_pipe_eval "${pipefail_position:--1}" "$@"
   result_status="$?"
 
   return "$result_status"
