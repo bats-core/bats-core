@@ -4,6 +4,7 @@ bats_require_minimum_version 1.5.0
 
 #########
 # Test Helpers
+#########
 
 describe_args() {
   echo "Got $# args."
@@ -56,6 +57,7 @@ output_binary_data_and_returns_with_given_code() {
 
 #########
 # Tests
+#########
 
 @test "run bats_pipe with no commands" {
   run bats_pipe

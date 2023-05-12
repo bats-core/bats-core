@@ -18,6 +18,7 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 * add tests for `--formatter cat` (#710)
 * test coverage in CI (#718)
 * Support for [rush](https://github.com/shenwei356/rush) as alternative to GNU parallel (#729)
+* add `bats_pipe` helper function for `run` that executes `\|` as pipes (#663)
 
 ### Documentation
 
@@ -81,16 +82,6 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 * `shfmt` all files and enforce via CI (#651)
 * avoid kernel warning flood/hang with CTRL+C on Bash 5.2 RC (#656)
 * Fix infinite wait with (invalid) `-j<n>` (without space) (#657)
-
-### Added
-
-* add `bats_pipe` helper function which parses `\|` as pipes to allow piping of
-  output between multiple commands. This is largely intended to extend the
-  functionality of the `run` helper function (e.g.
-  `run bats_pipe command0 \| command1`). Unlike existing workaround suggestions
-  (like using `run bash -c "command0 | command1"`), the bats_pipe command will 
-  properly forward the status of the piped commands; which gets set in normal
-  `status` global variable when used with `run`.
 
 ## [1.8.0] - 2022-09-15
 
