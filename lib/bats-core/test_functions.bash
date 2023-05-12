@@ -192,13 +192,13 @@ bats_pipe() { # [-N] [--] command0 [ \| command1 [ \| command2 [...]]]
   # Supplying -N (e.g. -0) will instead always use the exit code of the command
   # at that position in the chain.
 
-  local pipefail_position=
+  local pipestatus_position=-1
 
   # parse options starting with -
   while [[ $# -gt 0 ]] && [[ $1 == -* ]]; do
     case "$1" in
     -[0-9]*)
-      pipefail_position="${1#-}"
+      pipestatus_position="${1#-}"
       ;;
     --)
       shift # eat the -- before breaking away
@@ -212,32 +212,38 @@ bats_pipe() { # [-N] [--] command0 [ \| command1 [ \| command2 [...]]]
     shift
   done
 
-  # parse arguments and find pipes
-  local commands_and_args=("$@")
-  local pipe_positions=()
-  local previous_pipe=-1
+  # parse and validate arguments, escape as necessary
+  local -a commands_and_args=("$@")
+  local -a escaped_args=()
+  local pipe_count=0
+  local previous_pipe_index=-1
   for (( index = 0; index < $#; index++ )); do
     local current_command_or_arg="${commands_and_args[$index]}"
-    if [ "$current_command_or_arg" = "|" ]; then
+    local escaped_arg="$current_command_or_arg"
+    if [[ "$current_command_or_arg" != '|' ]]; then
+      # escape args to protect them when eval'd (e.g. if they contain whitespace).
+      printf -v escaped_arg "%q" "$current_command_or_arg"
+    elif [ "$current_command_or_arg" = "|" ]; then
       if [ "$index" -eq 0 ]; then
         printf "Usage error: Cannot have leading \`\\|\`.\n" >&2
         return 1
       fi
-      if [ "$(( previous_pipe + 1 ))" -ge "$index" ]; then
+      if [ "$(( previous_pipe_index + 1 ))" -ge "$index" ]; then
         printf "Usage error: Cannot have consecutive \`\\|\`. Found at argument position '%s'.\n" "$index" >&2
         return 1
       fi
-      pipe_positions+=("$index")
-      previous_pipe="$index"
+      (( ++pipe_count ))
+      previous_pipe_index="$index"
     fi
+    escaped_args+=("$escaped_arg")
   done
 
-  if [ "$previous_pipe" -gt 0 ] && [ "$previous_pipe" -eq "$(( $# - 1 ))" ]; then
+  if [ "$previous_pipe_index" -gt 0 ] && [ "$previous_pipe_index" -eq "$(( $# - 1 ))" ]; then
     printf "Usage error: Cannot have trailing \`\\|\`.\n" >&2
     return 1
   fi
 
-  if [ "${#pipe_positions[@]}" -eq 0 ]; then
+  if [ "$pipe_count" -eq 0 ]; then
     # Don't allow for no pipes. This might be a typo in the test,
     # e.g. `run bats_pipe command0 | command1`
     # instead of `run bats_pipe command0 \| command1`
@@ -247,206 +253,30 @@ bats_pipe() { # [-N] [--] command0 [ \| command1 [ \| command2 [...]]]
     return 1
   fi
 
-  if [ -n "$pipefail_position" ] && [ "$pipefail_position" -gt "${#pipe_positions[@]}" ]; then
-    printf "Usage error: Too large of -N argument given. Argument value: '%s'.\n" "$pipefail_position" >&2
+  if [ "$pipestatus_position" -gt "$pipe_count" ]; then
+    printf "Usage error: Too large of -N argument given. Argument value: '%s'.\n" "$pipestatus_position" >&2
     return 1
   fi
 
-  # we need to add on an extra "pipe position" so that the end can consistently
-  # find its arg length.
-  pipe_positions+=($#)
+  # run commands and return appropriate pipe status
+  eval "${escaped_args[@]}" '; __bats_pipe_eval_pipe_status=(${PIPESTATUS[@]})'
 
-  # recursive base case to simply run a command with its args
-  # runs a command at the given position with appropriate arguments
-  run_command_at_position() {
-    local given_position="$1"
-
-    local command_position=
-    if [ "$given_position" -eq 0 ]; then
-      command_position=0
-    else
-      local associated_pipe="$(( given_position - 1 ))"
-      local associated_pipe_position="${pipe_positions[$associated_pipe]}"
-      command_position="$(( associated_pipe_position + 1 ))"
-    fi
-    local command_to_run="${commands_and_args[$command_position]}"
-
-    local arguments_position="$(( command_position + 1 ))"
-    local next_pipe_position="${pipe_positions[$given_position]}"
-    local arg_count="$(( next_pipe_position - command_position - 1 ))"
-
-    if [ "$arg_count" -eq 0 ]; then
-      $command_to_run
-    else
-      local arguments=("${commands_and_args[@]:$arguments_position:$arg_count}")
-      $command_to_run "${arguments[@]}"
-    fi
-  }
-
-  # recursive func to handle piping
-  # will run all commands before the given position, chaining piping.
-  # Ex: if "3" is given, this will run `command0 | command1 | command2`.
-  run_leading_commands_until_position() {
-    local exclusive_position="$1"
-
-    local result_status=
-    if [ "$exclusive_position" -le 1 ]; then
-      run_command_at_position 0
-      result_status="$?"
-    else
-      local last_position_to_run="$(( exclusive_position - 1 ))"
-
-      # recurse by calling earlier commands which will then be piped into the
-      # (local) last command to run.
-      run_leading_commands_until_position "$last_position_to_run" | run_command_at_position "$last_position_to_run"
-      # note that we are immediately grabbing PIPESTATUS, and not grabbing $?
-      # we can only grab one of the two, but we can get the equivalent of $?
-      # from PIPESTATUS (see below).
-      local pipe_status=("${PIPESTATUS[@]}")
-
-      # check if we are to return the status code from an exact position, or
-      # use "last fail" (like `set -o pipefail` would).
-      if [ -n "$pipefail_position" ]; then
-        # if the target pipefail is less than our "last_position_to_run", then
-        # it is being propagated through the left-hand command.
-        if [ "$pipefail_position" -lt "$last_position_to_run" ]; then
-          result_status="${pipe_status[0]}"
-        elif [ "$pipefail_position" -eq "$last_position_to_run" ]; then
-          # if the target pipefail is equal to our "last_position_to_run", then
-          # it is being returned through the right-hand command.
-          result_status="${pipe_status[1]}"
-        else
-          # if the target pipefail is greater than our "last_position_to_run",
-          # then it doesn't matter what we return, the recursive parent caller
-          # will not use this value. Just return 0.
-          result_status=0
-        fi
-      else
-        # if we need to return the "last failure",
-        # take the last pipe status, if it failed.
-        if [ "${pipe_status[1]}" -ne 0 ]; then
-          result_status="${pipe_status[1]}"
-        else
-          # if the last pipe status didn't fail,
-          # take whatever the first pipe status is.
-          result_status="${pipe_status[0]}"
-        fi
-      fi
-    fi
-
-    return "$result_status"
-  }
-
-  bats_pipe_recurse() {
-    local relative_result_position="$1"
-    shift
-    # collect left hand side command of (first) pipe
-    local first_command=()
-    while (( $# > 0 )) && [[ "$1" != '|' ]]; do
-      first_command+=("$1")
-      shift
-    done
-
-    local result_status=
-    # if there is at least 1 remaining pipe, we need to call recursively.
-    if (( $# > 0 )); then
-      # consume pipe symbol '|', (originally passed as '\|')
-      # this leaves only the recursive parameters to be called.
-      shift
-      "${first_command[@]}" | bats_pipe_recurse "$(( relative_result_position - 1 ))" "$@"
-      # note that we are immediately grabbing PIPESTATUS, and not grabbing $?.
-      # we can only grab one of the two, but we can get the equivalent of $?
-      # from PIPESTATUS (see below).
-      local pipe_status=("${PIPESTATUS[@]}")
-
-      if [[ "$relative_result_position" -eq 0 ]]; then
-        # If this is the targeted position, return the result of the first command run.
-        result_status="${pipe_status[0]}"
-      elif [[ "$relative_result_position" -gt 0 ]]; then
-        # If the targeted position isn't reached yet, return the result of the recursive call.
-        # The targeted position's result will come from there.
-        result_status="${pipe_status[1]}"
-      else
-        # If the received target position is negative, one of the following is true:
-        # the target is already passed in a shallower recursive call
-        # or we are performing default "last failure" behavior.
-
-        # in the former case, it doesn't matter what we return.
-        # so just do the "last failure" logic.
-
-        # if we need to return the "last failure",
-        # take the last pipe status, if it failed.
-        if [ "${pipe_status[1]}" -ne 0 ]; then
-          result_status="${pipe_status[1]}"
-        else
-          # if the last pipe status didn't fail,
-          # take whatever the first pipe status is.
-          result_status="${pipe_status[0]}"
-        fi
-      fi
-    else
-      # no more pipes -> execute command
-      "${first_command[@]}"
-      result_status="$?"
-    fi
-
-    return "$result_status"
-  }
-
-  bats_pipe_eval() {
-    local pipefail_position="$1"
-    shift
-
-    local -a escaped_args=()
-    for raw_arg in "$@"; do
-      local escaped_arg="$raw_arg"
-      if [[ $raw_arg != '|' ]]; then
-        printf -v escaped_arg "%q" "$raw_arg"
-      fi
-      escaped_args+=("$escaped_arg")
-    done
-
-    eval "${escaped_args[@]}" '; __bats_pipe_eval_pipe_status=(${PIPESTATUS[@]})'
-
-    local result_status=
-    if (( $pipefail_position < 0 )); then
-      # if we are performing default "last failure" behavior,
-      # iterate backwards through pipe_status to find the last error.
-      result_status=0
-      for index in "${!__bats_pipe_eval_pipe_status[@]}"; do
-        local negative_index="-$((index + 1))"
-        local status_at_negative_index="${__bats_pipe_eval_pipe_status[$negative_index]}"
-        if (( status_at_negative_index != 0 )); then
-          result_status="$status_at_negative_index"
-          break;
-        fi
-      done
-    else
-      result_status="${__bats_pipe_eval_pipe_status[$pipefail_position]}"
-    fi
-
-    return "$result_status"
-  }
-
-  # run commands and handle appropriate piping
   local result_status=
-
-  # no need to call `set -o pipefail` here (which also means we don't have to
-  # worry about setting it back).
-  # note that `pipefail_position` will be referenced in
-  # `run_leading_commands_until_position` for selecting the correct status code
-  # to propagate (which simulates `set -o pipefail`, see related comment
-  # there).
-  #run_leading_commands_until_position "${#pipe_positions[@]}"
-  #result_status="$?"
-
-  # # call recurse with full set of arguemnts.
-  # # note: if $pipefail_position was not given, we want to do "last failure" logic (done with negative values).
-  # bats_pipe_recurse "${pipefail_position:--1}" "$@"
-  # result_status="$?"
-
-  bats_pipe_eval "${pipefail_position:--1}" "$@"
-  result_status="$?"
+  if (( $pipestatus_position < 0 )); then
+    # if we are performing default "last failure" behavior,
+    # iterate backwards through pipe_status to find the last error.
+    result_status=0
+    for index in "${!__bats_pipe_eval_pipe_status[@]}"; do
+      local negative_index="-$((index + 1))"
+      local status_at_negative_index="${__bats_pipe_eval_pipe_status[$negative_index]}"
+      if (( status_at_negative_index != 0 )); then
+        result_status="$status_at_negative_index"
+        break;
+      fi
+    done
+  else
+    result_status="${__bats_pipe_eval_pipe_status[$pipestatus_position]}"
+  fi
 
   return "$result_status"
 }
