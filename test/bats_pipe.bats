@@ -823,7 +823,10 @@ output_binary_data_and_returns_with_given_code() {
   run bats_pipe output_binary_data_and_returns_with_given_code 0 \| od -v -t x1 -An
 
   [ "$status" -eq 0 ]
-  [ "$output" = " 00 de ad f0 0d" ]
+  # OSX's od prints slightly differently from linux's.
+  # Remove leading / trailing whitespace.
+  local consistent_output="$(echo "$output" | sed -E 's/^[ \t]*|[ \t]*$//g' | head -1)"
+  [ "$consistent_output" = "00 de ad f0 0d" ]
 }
 
 @test "run bats_pipe with stdout as binary data with non-zero status" {
@@ -833,5 +836,8 @@ output_binary_data_and_returns_with_given_code() {
   run bats_pipe output_binary_data_and_returns_with_given_code 42 \| od -v -t x1 -An
 
   [ "$status" -eq 42 ]
-  [ "$output" = " 00 de ad f0 0d" ]
+  # OSX's od prints slightly differently from linux's.
+  # Remove leading / trailing whitespace.
+  local consistent_output="$(echo "$output" | sed -E 's/^[ \t]*|[ \t]*$//g' | head -1)"
+  [ "$consistent_output" = "00 de ad f0 0d" ]
 }
