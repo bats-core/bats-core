@@ -268,10 +268,11 @@ bats_pipe() { # [-N] [--] command0 [ \| command1 [ \| command2 [...]]]
     # iterate backwards through pipe_status to find the last error.
     result_status=0
     for index in "${!__bats_pipe_eval_pipe_status[@]}"; do
-      local negative_index="-$((index + 1))"
-      local status_at_negative_index="${__bats_pipe_eval_pipe_status[$negative_index]}"
-      if (( status_at_negative_index != 0 )); then
-        result_status="$status_at_negative_index"
+      # OSX bash doesn't support negative indexing.
+      local backward_iter_index="$((${#__bats_pipe_eval_pipe_status[@]} - index - 1))"
+      local status_at_backward_iter_index="${__bats_pipe_eval_pipe_status[$backward_iter_index]}"
+      if (( status_at_backward_iter_index != 0 )); then
+        result_status="$status_at_backward_iter_index"
         break;
       fi
     done
