@@ -825,7 +825,7 @@ output_binary_data_and_returns_with_given_code() {
   [ "$status" -eq 0 ]
   # OSX's od prints slightly differently from linux's.
   # Remove leading / trailing whitespace.
-  local consistent_output="$(echo "$output" | sed -E 's/^[ \t]*|[ \t]*$//g' | head -1)"
+  local -r consistent_output="$(echo "$output" | sed -E 's/^[ \t]*|[ \t]*$//g' | head -1)"
   [ "$consistent_output" = "00 de ad f0 0d" ]
 }
 
@@ -838,6 +838,6 @@ output_binary_data_and_returns_with_given_code() {
   [ "$status" -eq 42 ]
   # OSX's od prints slightly differently from linux's.
   # Remove leading / trailing whitespace.
-  local consistent_output="$(echo "$output" | sed -E 's/^[ \t]*|[ \t]*$//g' | head -1)"
+  local -r consistent_output="$(echo "$output" | sed -E 's/^[ \t]*|[ \t]*$//g' | head -1)"
   [ "$consistent_output" = "00 de ad f0 0d" ]
 }
