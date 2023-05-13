@@ -259,10 +259,11 @@ bats_pipe() { # [-N] [--] command0 [ \| command1 [ \| command2 [...]]]
   fi
 
   # run commands and return appropriate pipe status
-  eval "${escaped_args[@]}" '; __bats_pipe_eval_pipe_status=(${PIPESTATUS[@]})'
+  local -a __bats_pipe_eval_pipe_status=()
+  eval "${escaped_args[*]}" '; __bats_pipe_eval_pipe_status=(${PIPESTATUS[@]})'
 
   local result_status=
-  if (( $pipestatus_position < 0 )); then
+  if (( pipestatus_position < 0 )); then
     # if we are performing default "last failure" behavior,
     # iterate backwards through pipe_status to find the last error.
     result_status=0
