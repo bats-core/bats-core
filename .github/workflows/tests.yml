@@ -271,6 +271,7 @@ jobs:
       - run: |
           wget https://github.com/SimonKagstrom/kcov/releases/download/v40/kcov-amd64.tar.gz
           tar -xf kcov-amd64.tar.gz
+          sudo apt-get install -y libbinutils
       - run: ./usr/local/bin/kcov --exclude-path=/tmp $PWD/coverage ./bin/bats --filter-tags '!no-kcov' test/ 
       - name: Archive code coverage results
         uses: actions/upload-artifact@v3
