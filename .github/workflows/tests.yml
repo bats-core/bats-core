@@ -7,7 +7,7 @@ jobs:
   changelog:
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Check that PR is mentioned in Changelog
         run: |
           if ! ./.github/workflows/check_pr_label.sh "${{github.event.pull_request.number}}" "no changelog"; then
@@ -18,7 +18,7 @@ jobs:
   shfmt:
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - run: |
           curl https://github.com/mvdan/sh/releases/download/v3.5.1/shfmt_v3.5.1_linux_amd64 -o shfmt
           chmod a+x shfmt
@@ -27,7 +27,7 @@ jobs:
   shellcheck:
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Run shellcheck
         run: |
           sudo apt-get update -y
@@ -44,7 +44,7 @@ jobs:
           - 'BATS_NO_PARALLELIZE_ACROSS_FILES=1 BATS_NUMBER_OF_PARALLEL_JOBS=2'
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Run test on OS ${{ matrix.os }}
         shell: 'script -q -e -c "bash {0}"' # work around tty issues
         env:
@@ -56,7 +56,7 @@ jobs:
   unset_variables:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Check unset variables
         shell: 'script -q -e -c "bash {0}"' # work around tty issues
         env:
@@ -70,7 +70,7 @@ jobs:
         os: ['ubuntu-20.04', 'ubuntu-22.04']
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: actions/setup-node@v2
       - name: Run test on OS ${{ matrix.os }}
         shell: 'script -q -e -c "bash {0}"' # work around tty issues
@@ -84,7 +84,7 @@ jobs:
   windows:
     runs-on: windows-2019
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - run: |
           bash --version
           bash -c "time bin/bats  --print-output-on-failure --formatter tap test"
@@ -95,7 +95,7 @@ jobs:
         os: ['windows-2019']
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: actions/setup-node@v2
       - run: npm pack ./
       - run: npm install -g (get-item .\bats-*.tgz).FullName
@@ -111,7 +111,7 @@ jobs:
           - 'BATS_NO_PARALLELIZE_ACROSS_FILES=1 BATS_NUMBER_OF_PARALLEL_JOBS=2'
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Install unbuffer via expect
         run: brew install expect
       - name: Run test on OS ${{ matrix.os }}
@@ -128,7 +128,7 @@ jobs:
         os: ['macos-11', 'macos-12']
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: actions/setup-node@v2
       - name: Install unbuffer via expect
         run: brew install expect
@@ -152,7 +152,7 @@ jobs:
             - '-e BATS_NUMBER_OF_PARALLEL_JOBS=2'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Run test on bash version ${{ matrix.version }}
         shell: 'script -q -e -c "bash {0}"' # work around tty issues
         run: |
@@ -165,7 +165,7 @@ jobs:
     runs-on: ubuntu-latest
     container: alpine:latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Install dependencies
         run: apk add bash ncurses util-linux
       - name: Run test on bash version ${{ matrix.version }}
@@ -183,7 +183,7 @@ jobs:
           - flock
           - ""
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: vmactions/freebsd-vm@v0
         with:
           prepare: pkg install -y bash parallel ${{ matrix.packages }}
@@ -193,7 +193,7 @@ jobs:
   find_broken_symlinks:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       # list symlinks that are broken and force non-zero exit if there are any
       - run: "! find . -xtype l | grep ."
     
@@ -201,7 +201,7 @@ jobs:
     runs-on: ubuntu-latest
     container: almalinux:8
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - run: dnf install -y rpm-build rpmdevtools
       - name: Build and install RPM and dependencies
         run: |
@@ -221,7 +221,7 @@ jobs:
   dockerfile:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Set up Docker Buildx
         id: buildx
@@ -238,17 +238,17 @@ jobs:
         env:
           TERM: linux # fix tput for tty issue work around
 
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           repository: bats-core/bats-assert
           path: bats-assert
 
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           repository: bats-core/bats-support
           path: bats-support
 
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           repository: bats-core/bats-file
           path: bats-file
@@ -267,7 +267,7 @@ jobs:
   coverage:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - run: |
           curl https://github.com/SimonKagstrom/kcov/releases/download/v40/kcov-amd64.tar.gz
           tar -xf kcov-amd64.tar.gz
