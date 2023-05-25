@@ -39,6 +39,7 @@ bats_version_lt() { # <version1> <version2>
   IFS=. read -ra version1_parts <<<"$1"
   IFS=. read -ra version2_parts <<<"$2"
 
+  local -i i
   for i in {0..2}; do
     if ((version1_parts[i] < version2_parts[i])); then
       return 0
@@ -139,6 +140,7 @@ bats_all_in() { # <sorted-array> <sorted search values...>
 
   local -i haystack_index=0         # initialize only here to continue from last search position
   local search_value haystack_value # just to appease shellcheck
+  local -i i
   for ((i = 1; i <= $#; ++i)); do
     eval "local search_value=${!i}"
     for (( ; haystack_index < haystack_length; ++haystack_index)); do
@@ -168,6 +170,7 @@ bats_any_in() { # <sorted-array> <sorted search values>
 
   local -i haystack_index=0         # initialize only here to continue from last search position
   local search_value haystack_value # just to appease shellcheck
+  local -i i
   for ((i = 1; i <= $#; ++i)); do
     eval "local search_value=${!i}"
     for (( ; haystack_index < haystack_length; ++haystack_index)); do
