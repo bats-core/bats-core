@@ -203,16 +203,6 @@ $ LC_CTYPE=tr_TR.UTF-8 LC_MESSAGES=C bash -c 'trap - INT && echo success'
 success
 ```
 
-### Gotchas
-
-- To work around a bug in some versions of Bash whereby arrays declared with
-  `declare -g` or `export` and initialized in the same statement eventually go
-  out of scope, always `export` the array name on one line and initialize it the
-  next line. See:
-  - https://lists.gnu.org/archive/html/bug-bash/2012-06/msg00068.html
-  - ftp://ftp.gnu.org/gnu/bash/bash-4.2-patches/bash42-025
-  - http://lists.gnu.org/archive/html/help-bash/2012-03/msg00078.html
-
 
 ## Credits
 
