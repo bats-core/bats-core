@@ -272,6 +272,10 @@ jobs:
           wget https://github.com/SimonKagstrom/kcov/releases/download/v40/kcov-amd64.tar.gz
           tar -xf kcov-amd64.tar.gz
       - run: ./usr/local/bin/kcov --exclude-path=/tmp $PWD/coverage ./bin/bats --filter-tags '!no-kcov' test/ 
+        shell: 'script -q -e -c "bash {0}"' # work around tty issues
+        env:
+          TERM: linux # fix tput for tty issue work around
+
       - name: Archive code coverage results
         uses: actions/upload-artifact@v3
         with:
