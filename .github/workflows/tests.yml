@@ -266,6 +266,8 @@ jobs:
   
   coverage:
     runs-on: ubuntu-20.04
+    permissions:
+      pull-requests: write|read
     steps:
       - uses: actions/checkout@v3
       - run: |
