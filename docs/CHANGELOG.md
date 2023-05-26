@@ -16,6 +16,7 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 * print tags on failing tests (#705)
 * test for negative arguments to `--jobs` (#693)
 * add tests for `--formatter cat` (#710)
+* test coverage in CI (#718)
 
 ### Documentation
 
@@ -30,6 +31,7 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 #### Documentation
 
 * typos, minor edits (#704)
+* simplified contributing.md (#718)
 
 ## [1.9.0] - 2023-02-12
 
