@@ -1,6 +1,6 @@
 name: Tests
 
-# Controls when the action will run. 
+# Controls when the action will run.
 on: [push, pull_request, workflow_dispatch]
 
 jobs:
@@ -42,9 +42,14 @@ jobs:
           - ''
           # allow for some parallelity without GNU parallel, since it is not installed by default
           - 'BATS_NO_PARALLELIZE_ACROSS_FILES=1 BATS_NUMBER_OF_PARALLEL_JOBS=2'
+          - 'BATS_PARALLEL_BINARY_NAME=rush'
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
+      - name: Install rush
+        run: |
+          curl -sSfL https://github.com/shenwei356/rush/releases/download/v0.5.0/rush_linux_amd64.tar.gz | sudo tar xzf - -C /usr/local/bin
+        if: contains(matrix.env_vars, 'rush')
       - name: Run test on OS ${{ matrix.os }}
         shell: 'script -q -e -c "bash {0}"' # work around tty issues
         env:
@@ -99,7 +104,7 @@ jobs:
       - uses: actions/setup-node@v3
       - run: npm pack ./
       - run: npm install -g (get-item .\bats-*.tgz).FullName
-      - run: bats  -T --print-output-on-failure test        
+      - run: bats  -T --print-output-on-failure test
 
   macos:
     strategy:
@@ -109,11 +114,16 @@ jobs:
           - ''
           # allow for some parallelity without GNU parallel, since it is not installed by default
           - 'BATS_NO_PARALLELIZE_ACROSS_FILES=1 BATS_NUMBER_OF_PARALLEL_JOBS=2'
+          - 'BATS_PARALLEL_BINARY_NAME=rush'
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
       - name: Install unbuffer via expect
         run: brew install expect
+      - name: Install rush
+        run: |
+          curl -sSfL https://github.com/shenwei356/rush/releases/download/v0.5.0/rush_darwin_amd64.tar.gz | sudo tar xzf - -C /usr/local/bin
+        if: contains(matrix.env_vars, 'rush')
       - name: Run test on OS ${{ matrix.os }}
         shell: 'unbuffer bash {0}' # work around tty issues
         env:
@@ -140,7 +150,7 @@ jobs:
           npm pack ./
           # somehow there is already an installed bats version around
           npm install --force -g ./bats-*.tgz
-          bats  --print-output-on-failure test  
+          bats  --print-output-on-failure test
 
   bash-version:
     strategy:
@@ -160,7 +170,7 @@ jobs:
           docker build --build-arg bashver="${{ matrix.version }}" --tag "bats/bats:bash-${{ matrix.version }}" .
           docker run -it "bash:${{ matrix.version }}" --version
           time docker run -it ${{ matrix.env_vars }} "bats/bats:bash-${{ matrix.version }}"  --print-output-on-failure --tap /opt/bats/test
-  
+
   alpine:
     runs-on: ubuntu-latest
     container: alpine:latest
@@ -196,7 +206,7 @@ jobs:
       - uses: actions/checkout@v3
       # list symlinks that are broken and force non-zero exit if there are any
       - run: "! find . -xtype l | grep ."
-    
+
   rpm:
     runs-on: ubuntu-latest
     container: almalinux:8
@@ -263,7 +273,7 @@ jobs:
         shell: 'script -q -e -c "bash {0}"' # work around tty issues
         env:
           TERM: linux # fix tput for tty issue work around
-  
+
   coverage:
     runs-on: ubuntu-20.04
     permissions:
@@ -275,7 +285,7 @@ jobs:
           wget https://github.com/SimonKagstrom/kcov/releases/download/v40/kcov-amd64.tar.gz
           tar -xf kcov-amd64.tar.gz
       - run: |
-          ./usr/local/bin/kcov --exclude-path=/tmp $PWD/coverage ./bin/bats --filter-tags '!no-kcov' test/ 
+          ./usr/local/bin/kcov --exclude-path=/tmp $PWD/coverage ./bin/bats --filter-tags '!no-kcov' test/
         shell: 'script -q -e -c "bash {0}"' # work around tty issues
         env:
           TERM: linux # fix tput for tty issue work around

@@ -17,6 +17,7 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 * test for negative arguments to `--jobs` (#693)
 * add tests for `--formatter cat` (#710)
 * test coverage in CI (#718)
+* Support for [rush](https://github.com/shenwei356/rush) as alternative to GNU parallel (#710)
 
 ### Documentation
 

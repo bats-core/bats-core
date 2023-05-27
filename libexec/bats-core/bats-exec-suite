@@ -4,6 +4,7 @@ set -e
 count_only_flag=''
 filter=''
 num_jobs=${BATS_NUMBER_OF_PARALLEL_JOBS:-1}
+parallel_binary_name=${BATS_PARALLEL_BINARY_NAME:-"parallel"}
 bats_no_parallelize_across_files=${BATS_NO_PARALLELIZE_ACROSS_FILES-}
 bats_no_parallelize_within_files=
 filter_status=''
@@ -34,6 +35,10 @@ while [[ "$#" -ne 0 ]]; do
     shift
     num_jobs="$1"
     flags+=('-j' "$num_jobs")
+    ;;
+  --parallel-binary-name)
+    shift
+    parallel_binary_name="$1"
     ;;
   -T)
     flags+=('-T')
@@ -97,7 +102,7 @@ while [[ "$#" -ne 0 ]]; do
 done
 
 if [[ "$num_jobs" != 1 ]]; then
-  if ! type -p parallel >/dev/null && parallel --version &>/dev/null && [[ -z "$bats_no_parallelize_across_files" ]]; then
+  if ! type -p "${parallel_binary_name}" >/dev/null && "${parallel_binary_name}" --version &>/dev/null && [[ -z "$bats_no_parallelize_across_files" ]]; then
     abort "Cannot execute \"${num_jobs}\" jobs without GNU parallel"
   fi
   # shellcheck source=lib/bats-core/semaphore.bash
@@ -441,7 +446,7 @@ if [[ "$num_jobs" -gt 1 ]] && [[ -z "$bats_no_parallelize_across_files" ]]; then
   # shellcheck disable=SC2086,SC2068
   # we need to handle the quoting of ${flags[@]} ourselves,
   # because parallel can only quote it as one
-  parallel --keep-order --jobs "$num_jobs" bats-exec-file "$(printf "%q " "${flags[@]}")" "{}" "$TESTS_LIST_FILE" ::: "${BATS_UNIQUE_TEST_FILENAMES[@]}" 2>&1 || bats_exec_suite_status=1
+  "${parallel_binary_name}" --keep-order --jobs "$num_jobs" -- "bats-exec-file" "$(printf "%q " "${flags[@]}")" "{}" "$TESTS_LIST_FILE" <<< "$(printf "%s\n" "${BATS_UNIQUE_TEST_FILENAMES[@]}")" 2>&1 || bats_exec_suite_status=1
 else
   for filename in "${BATS_UNIQUE_TEST_FILENAMES[@]}"; do
     if [[ "${BATS_INTERRUPTED-NOTSET}" != NOTSET ]]; then
@@ -455,7 +460,7 @@ fi
 set -eET
 bats_run_teardown_suite
 
-if [[ "$focus_mode" == 1 && $bats_exec_suite_status -eq 0 ]]; then 
+if [[ "$focus_mode" == 1 && $bats_exec_suite_status -eq 0 ]]; then
   if [[ ${BATS_NO_FAIL_FOCUS_RUN-} == 1 ]]; then
     printf "WARNING: This test run only contains tests tagged \`bats:focus\`!\n"
   else
