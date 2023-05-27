@@ -274,7 +274,8 @@ jobs:
       - run: |
           wget https://github.com/SimonKagstrom/kcov/releases/download/v40/kcov-amd64.tar.gz
           tar -xf kcov-amd64.tar.gz
-      - run: ./usr/local/bin/kcov --exclude-path=/tmp $PWD/coverage ./bin/bats --filter-tags '!no-kcov' test/ 
+      - run: |
+          ./usr/local/bin/kcov --exclude-path=/tmp $PWD/coverage ./bin/bats --filter-tags '!no-kcov' test/ 
         shell: 'script -q -e -c "bash {0}"' # work around tty issues
         env:
           TERM: linux # fix tput for tty issue work around
@@ -288,19 +289,17 @@ jobs:
       - name: Print the Total Coverage
         id: coverage-percent
         shell: bash
+        env:
+          minimum_coverage: 86.39
         run: |
           value=$(jq '.percent_covered' <coverage/bats/coverage.json)
-          echo "coverage=$value" >> $GITHUB_OUTPUT
-          echo $value
-
-      - name: Add Coverage Label
-        uses: actions/github-script@v6
-        with:
-          github-token: ${{secrets.GITHUB_TOKEN}}
-          script: |
-            github.rest.issues.addLabels({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              labels: ['COVERAGE: ${{steps.coverage-percent.outputs.coverage}}']
-            })
+          fixd_point() { # <float val>
+            int=${value%.*}
+            decimals=${value#*.}
+            echo $int${decimals::2}
+          }
+          echo "Coverage: $value%" | tee "$GITHUB_STEP_SUMMARY"
+          if (( $(fixed_point $value) < $(fixed_point $expected) )); then
+            echo "  is below required minimum coverage ($minimum_coverage%)." | tee -a "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
