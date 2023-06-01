@@ -133,6 +133,9 @@ fi
 
 arguments=()
 
+# list of single char options that don't expect a value
+single_char_flags="hvcprtTx"
+
 # Unpack single-character options bundled together, e.g. -cr, -pr.
 for arg in "$@"; do
   if [[ "$arg" =~ ^-[^-]. ]]; then
@@ -140,6 +143,11 @@ for arg in "$@"; do
     while option="${arg:$((index++)):1}"; do
       if [[ -z "$option" ]]; then
         break
+      fi
+      if [[ "$single_char_flags" != *$option* && -n "${arg:index}" ]]; then
+        printf "Error: -%s is not allowed within pack of flags.\n" "$option"
+        printf "       Please put it last (e.g. `-rF junit` instead of `-Fr junit`), or on its own (`-r -F junit`)!\n"
+        exit 1
       fi
       arguments+=("-$option")
     done
