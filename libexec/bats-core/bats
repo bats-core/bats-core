@@ -146,7 +146,7 @@ for arg in "$@"; do
       fi
       if [[ "$single_char_flags" != *$option* && -n "${arg:index}" ]]; then
         printf "Error: -%s is not allowed within pack of flags.\n" "$option"
-        printf "       Please put it last (e.g. `-rF junit` instead of `-Fr junit`), or on its own (`-r -F junit`)!\n"
+        printf "       Please put it last (e.g. \`-rF junit\` instead of \`-Fr junit\`), or on its own (\`-r -F junit\`)!\n"
         exit 1
       fi
       arguments+=("-$option")
