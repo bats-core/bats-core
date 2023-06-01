@@ -1563,3 +1563,11 @@ enforce_own_process_group() {
 
   [[ "${output}" = *"ERROR: command \`$REPORT_FORMATTER\` failed with status 11"* ]] || false
 }
+
+@test "Short opt unpacker rejects valued options" {
+  bats_require_minimum_version 1.5.0
+  reentrant_run ! bats "$FIXTURE_ROOT/passing.bats" -Fr tap
+  [[ "${output}" == *"Error: -F is not allowed within pack of flags."* ]] || false
+
+  reentrant_run -0 bats "$FIXTURE_ROOT/passing.bats" -rF tap
+}
