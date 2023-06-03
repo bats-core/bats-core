@@ -54,12 +54,12 @@ function bats_parse_internal_extended_tap() {
       scope=begin
       begin_index=${line#begin }
       begin_index=${begin_index%% *}
-      if [[ $begin_index == $last_begin_index ]]; then
+      if [[ $begin_index == "$last_begin_index" ]]; then
         (( ++try_index ))
       else
         try_index=0
       fi
-      test_name="${line#begin $begin_index }"
+      test_name="${line#begin "$begin_index" }"
       bats_tap_stream_begin "$begin_index" "$test_name"
       ;;
     'ok '*)

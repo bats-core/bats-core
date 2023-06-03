@@ -108,7 +108,7 @@ EOF
   [ "${lines[2]}" = 'STREAM_BEGIN: index: 1, name: test foobar' ]
   [ "${lines[3]}" = 'STREAM_BEGIN: index: 1, name: test foobar' ]
   [ "${lines[4]}" = 'STREAM_NOT_OK: index 1, name test foobar' ]
-  [ "${lines[5]}" = "STREAM_COMMENT: comment (in test file $RELATIVE_FIXTURE_ROOT/retry.bats, line 6), scope not_ok" ]
+  [ "${lines[5]}" = "STREAM_COMMENT: comment (in test file $RELATIVE_FIXTURE_ROOT/retry.bats, line 7), scope not_ok" ]
   [ "${lines[6]}" = "STREAM_COMMENT: comment   \`false' failed, scope not_ok" ]
   [ "${#lines[@]}" -eq 7 ]
 }
