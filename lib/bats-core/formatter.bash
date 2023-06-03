@@ -41,17 +41,25 @@ function bats_parse_internal_extended_tap() {
   not_ok_line_regexpr="not ok ([0-9]+) (.*)"
 
   timing_expr="in ([0-9]+)ms$"
-  local test_name begin_index ok_index not_ok_index index scope
+  local test_name begin_index last_begin_index try_index ok_index not_ok_index index scope
   begin_index=0
+  last_begin_index=-1
+  try_index=0
   index=0
   scope=plan
   while IFS= read -r line; do
     unset BATS_FORMATTER_TEST_DURATION BATS_FORMATTER_TEST_TIMEOUT
     case "$line" in
     'begin '*) # this might only be called in extended tap output
-      ((++begin_index))
       scope=begin
-      test_name="${line#* "$begin_index" }"
+      begin_index=${line#begin }
+      begin_index=${begin_index%% *}
+      if [[ $begin_index == "$last_begin_index" ]]; then
+        (( ++try_index ))
+      else
+        try_index=0
+      fi
+      test_name="${line#begin "$begin_index" }"
       bats_tap_stream_begin "$begin_index" "$test_name"
       ;;
     'ok '*)

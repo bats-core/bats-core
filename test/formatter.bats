@@ -99,3 +99,16 @@ EOF
   reentrant_run -1 bats "$FIXTURE_ROOT/passing.bats" --formatter "$non_executable"
   [ "$output" = "ERROR: Formatter '$non_executable' is not executable!" ]
 }
+
+@test "retrying tests does not mess up test names" {
+  bats_require_minimum_version 1.5.0
+  reentrant_run -1 bats "$FIXTURE_ROOT/retry.bats" --formatter "$FIXTURE_ROOT/echo-formatter"
+  [ "${lines[0]}" = 'STREAM_PLAN: 1' ]
+  [ "${lines[1]}" = "STREAM_SUITE: file $FIXTURE_ROOT/retry.bats" ]
+  [ "${lines[2]}" = 'STREAM_BEGIN: index: 1, name: test foobar' ]
+  [ "${lines[3]}" = 'STREAM_BEGIN: index: 1, name: test foobar' ]
+  [ "${lines[4]}" = 'STREAM_NOT_OK: index 1, name test foobar' ]
+  [ "${lines[5]}" = "STREAM_COMMENT: comment (in test file $RELATIVE_FIXTURE_ROOT/retry.bats, line 7), scope not_ok" ]
+  [ "${lines[6]}" = "STREAM_COMMENT: comment   \`false' failed, scope not_ok" ]
+  [ "${#lines[@]}" -eq 7 ]
+}
