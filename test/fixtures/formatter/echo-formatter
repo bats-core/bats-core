@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+
+set -e
+
+# shellcheck source=lib/bats-core/formatter.bash
+source "$BATS_ROOT/lib/bats-core/formatter.bash"
+
+bats_tap_stream_plan() {
+  echo "STREAM_PLAN: $1"
+}
+
+bats_tap_stream_begin() {
+  echo "STREAM_BEGIN: index: ${1}, name: ${2}"
+}
+
+bats_tap_stream_ok() {
+  echo "STREAM_OK: index ${1}, name: ${2}"
+}
+
+bats_tap_stream_skipped() {
+  echo "STREAM_SKIPPED: index ${1}, name ${2}, reason ${3}"
+}
+
+bats_tap_stream_not_ok() {
+  echo "STREAM_NOT_OK: index ${1}, name ${2}"
+}
+
+bats_tap_stream_comment() { # <comment> <scope>
+  echo "STREAM_COMMENT: comment ${1}, scope ${2}"
+}
+
+bats_tap_stream_suite() {
+  echo "STREAM_SUITE: file ${1}"
+}
+
+bats_tap_stream_unknown() { # <full line> <scope>
+  echo "STREAM_UNKNOWN: ${1}, scope: ${2}"
+}
+
+bats_parse_internal_extended_tap
