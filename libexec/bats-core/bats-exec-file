@@ -351,10 +351,6 @@ bats_create_file_tempdirs() {
 
 trap 'BATS_INTERRUPTED=true' INT
 
-if [[ -n "$extended_syntax" ]]; then
-  printf "suite %s\n" "$filename"
-fi
-
 BATS_FILE_FIRST_TEST_NUMBER_IN_SUITE=0 # predeclare as Bash 3.2 does not support declare -g
 bats_read_tests_list_file
 
@@ -362,6 +358,10 @@ bats_read_tests_list_file
 # when there are no tests to run
 if [[ ${#tests_to_run[@]} -eq 0 ]]; then
   exit 0
+fi
+
+if [[ -n "$extended_syntax" ]]; then
+  printf "suite %s\n" "$filename"
 fi
 
 # requires the test list to be read but not empty
