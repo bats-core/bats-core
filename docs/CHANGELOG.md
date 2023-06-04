@@ -29,6 +29,7 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 * fix `run --keep-empty-lines` counting trailing `\n` as (empty) new line (#711)
 * fix short flag unpacker creating bogus command lines with valued flags (#732)
 * fix formatter becoming confused with retries (#734)
+* fix `--gather-test-outputs-in` fails on tests with `/` (#735)
 
 #### Documentation
 
