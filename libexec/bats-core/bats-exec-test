@@ -199,7 +199,7 @@ bats_exit_trap() {
     if [[ -n "$should_retry" ]]; then
       try_suffix="-try$BATS_TEST_TRY_NUMBER"
     fi
-    cp "$BATS_OUT" "$BATS_GATHER_TEST_OUTPUTS_IN/$BATS_SUITE_TEST_NUMBER$try_suffix-$BATS_TEST_DESCRIPTION.log"
+    cp "$BATS_OUT" "$BATS_GATHER_TEST_OUTPUTS_IN/$BATS_SUITE_TEST_NUMBER$try_suffix-${BATS_TEST_DESCRIPTION/\//%2F}.log"
   fi
   rm -f "$BATS_OUT"
   exit "$status"
