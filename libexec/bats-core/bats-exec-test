@@ -132,7 +132,8 @@ bats_exit_trap() {
 
   BATS_TEST_TIME=''
   if [[ -n "$BATS_ENABLE_TIMING" ]]; then
-    BATS_TEST_TIME=" in "$(($(get_mills_since_epoch) - BATS_TEST_START_TIME))"ms"
+    get_mills_since_epoch BATS_TEST_END_TIME
+    BATS_TEST_TIME=" in "$((BATS_TEST_END_TIME - BATS_TEST_START_TIME))"ms"
   fi
 
   local print_bats_out="${BATS_SHOW_OUTPUT_OF_SUCCEEDING_TESTS}"
@@ -285,16 +286,21 @@ bats_abort_timeout_countdown() {
   kill -ABRT "$1" &>/dev/null || true
 }
 
-get_mills_since_epoch() {
-  local ms_since_epoch
-  ms_since_epoch=$(date +%s%N)
-  if [[ "$ms_since_epoch" == *N || "${#ms_since_epoch}" -lt 19 ]]; then
-    ms_since_epoch=$(($(date +%s) * 1000))
-  else
-    ms_since_epoch=$((ms_since_epoch / 1000000))
-  fi
 
-  printf "%d\n" "$ms_since_epoch"
+get_mills_since_epoch() { # <output-variable>
+  readonly output_variable="$1"
+  local ms_since_epoch
+  if [[ "$EPOCHREALTIME" =~ ([0-9]+)[^0-9]([0-9]+) ]]; then
+       ms_since_epoch=${BASH_REMATCH[1]}${BASH_REMATCH[2]::3}
+  else
+    ms_since_epoch=$(bats_execute date +%s%N)
+    if [[ "$ms_since_epoch" == *N || "${#ms_since_epoch}" -lt 19 ]]; then
+      ms_since_epoch=$(($(bats_execute date +%s) * 1000))
+    else
+      ms_since_epoch=$((ms_since_epoch / 1000000))
+    fi
+  fi
+  printf -v "$output_variable" "%d" "$ms_since_epoch"
 }
 
 bats_perform_test() {
@@ -328,7 +334,7 @@ bats_perform_test() {
   # shellcheck disable=SC2064
   trap "bats_teardown_trap as-exit-trap $BATS_killer_pid" EXIT
 
-  BATS_TEST_START_TIME=$(get_mills_since_epoch)
+  get_mills_since_epoch BATS_TEST_START_TIME
   "$BATS_TEST_NAME" >>"$BATS_OUT" 2>&1 4>&1
 
   BATS_TEST_COMPLETED=1

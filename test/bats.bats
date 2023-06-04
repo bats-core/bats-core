@@ -1579,3 +1579,7 @@ enforce_own_process_group() {
 
   reentrant_run -0 bats "$FIXTURE_ROOT/passing.bats" -rF tap
 }
+
+@test "Test timing does not break when overriding date on path" {
+  bats "$FIXTURE_ROOT/override_date_on_path.bats"
+}
