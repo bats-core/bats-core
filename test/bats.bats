@@ -732,7 +732,7 @@ END_OF_ERR_MSG
 }
 
 @test "Parallel mode works on MacOS with over subscription (issue #433)" {
-  type -p parallel &>/dev/null || skip "--jobs requires GNU parallel"
+  type -p "${BATS_PARALLEL_BINARY_NAME:-"parallel"}" &>/dev/null || skip "--jobs requires GNU parallel"
   (type -p flock &>/dev/null || type -p shlock &>/dev/null) || skip "--jobs requires flock/shlock"
   reentrant_run bats -j 2 "$FIXTURE_ROOT/issue-433"
 
@@ -789,7 +789,7 @@ END_OF_ERR_MSG
 
   [ "${lines[1]}" == "not ok 1 test" ]
   # due to scheduling the exact line will vary but we should exit with 130
-  [[ "${lines[2]}" == "# (in test file "*")" ]] || false  
+  [[ "${lines[2]}" == "# (in test file "*")" ]] || false
   [[ "${lines[3]}" == *"failed with status 130" ]] || false
   [ "${lines[4]}" == "# Received SIGINT, aborting ..." ]
   [ ${#lines[@]} -eq 5 ]
@@ -1534,7 +1534,7 @@ enforce_own_process_group() {
 
 @test "Focus tests filter out other tests and override exit code" {
   bats_require_minimum_version 1.5.0
-  # expect exit 1: focus mode always fails tests 
+  # expect exit 1: focus mode always fails tests
   reentrant_run -1 bats "$FIXTURE_ROOT/focus.bats"
   [ "${lines[0]}" == "WARNING: This test run only contains tests tagged \`bats:focus\`!" ]
   [ "${lines[1]}" == '1..1' ]

@@ -38,7 +38,7 @@ HELP_TEXT_HEADER
   -c, --count               Count test cases without running any tests
   --code-quote-style <style>
                             A two character string of code quote delimiters
-                            or 'custom' which requires setting $BATS_BEGIN_CODE_QUOTE and 
+                            or 'custom' which requires setting $BATS_BEGIN_CODE_QUOTE and
                             $BATS_END_CODE_QUOTE. Can also be set via $BATS_CODE_QUOTE_STYLE
   --line-reference-format   Controls how file/line references e.g. in stack traces are printed:
                               - comma_line (default): a.bats, line 1
@@ -62,7 +62,8 @@ HELP_TEXT_HEADER
                             Gather the output of failing *and* passing tests
                             as files in directory (if existing, must be empty)
   -h, --help                Display this help message
-  -j, --jobs <jobs>         Number of parallel jobs (requires GNU parallel)
+  -j, --jobs <jobs>         Number of parallel jobs (requires GNU parallel or shenwei356/rush)
+  --parallel-binary-name    Name of parallel binary
   --no-tempdir-cleanup      Preserve test output temporary directory
   --no-parallelize-across-files
                             Serialize test file execution instead of running
@@ -219,6 +220,10 @@ while [[ "$#" -ne 0 ]]; do
   -j | --jobs)
     shift
     flags+=('-j' "$1")
+    ;;
+  --parallel-binary-name)
+    shift
+    flags+=('--parallel-binary-name' "$1")
     ;;
   -r | --recursive)
     recursive=1
