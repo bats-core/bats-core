@@ -17,6 +17,7 @@ setup() {
   [[ "${lines[0]}" == "nothing_special at-this-one" ]]
   [[ "${lines[1]}" == "don't fail on 'single' or \"Double\" quotes" ]]
   [[ "${lines[2]}" == "handles braces < [ } ({[]}) )(" ]]
+  # shellcheck disable=SC2016
   [[ "${lines[3]}" == 'handles `backticks`' ]]
   [[ "${lines[4]}" == 'handles \backslash incl sequences \n \r \t' ]]
 }

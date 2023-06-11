@@ -69,6 +69,7 @@ bats_decode_test_name() {
 @test "decode" {
   BATS_TEST_PATTERN="^[[:blank:]]*@test[[:blank:]]+(.*[^[:blank:]])[[:blank:]]+\{(.*)\$"
   local count=0
+  local encoded decoded
   while read -r line; do
     if [[ "$line" =~ $BATS_TEST_PATTERN ]]; then
       (( count += 1 ))
@@ -78,5 +79,5 @@ bats_decode_test_name() {
       bats_decode_test_name "$encoded" 'decoded'
       [[ "$name" == "$decoded" ]]
     fi
-  done < <(find $BATS_ROOT/test/fixtures/list_test_names -type f -name '*.bats' -print0 | xargs -0 grep -h '^@test')
+  done < <(find "$BATS_ROOT"/test/fixtures/list_test_names -type f -name '*.bats' -print0 | xargs -0 grep -h '^@test')
 }
