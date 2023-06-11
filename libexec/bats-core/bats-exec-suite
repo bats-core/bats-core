@@ -2,6 +2,7 @@
 set -e
 
 count_only_flag=''
+list_only_flag=0
 filter=''
 num_jobs=${BATS_NUMBER_OF_PARALLEL_JOBS:-1}
 parallel_binary_name=${BATS_PARALLEL_BINARY_NAME:-"parallel"}
@@ -39,6 +40,12 @@ while [[ "$#" -ne 0 ]]; do
   --parallel-binary-name)
     shift
     parallel_binary_name="$1"
+    ;;
+  -l)
+    list_only_flag=1
+    ;;
+  -L)
+    list_only_flag=2
     ;;
   -T)
     flags+=('-T')
@@ -309,6 +316,57 @@ fi
 
 if [[ -n "$count_only_flag" ]]; then
   printf '%d\n' "${test_count}"
+  exit
+fi
+
+bats_decode_test_name() {
+  local name="$1"
+  local length="${#name}"
+  name="${name#test_}"
+  local i=0
+  local result=''
+  local char=''
+  while (( i < length )); do
+    char="${name:$i:1}"
+    case $char in
+      '-')
+        (( i += 1 ))
+        if [[ "${name:$i:4}" == '2d5f' ]]; then
+          result+="_"
+          (( i += 4 ))
+        else
+          result+=$(printf "%b" "\x${name:$i:2}")
+          (( i += 2 ))
+        fi
+      ;;
+      '_')
+        result+=" "
+        (( i += 1 ))
+        ;;
+      *)
+        result+="$char"
+        (( i += 1 ))
+    ;;
+    esac
+  done
+  printf -v "$2" '%s' "$result"
+}
+
+if [[ "$list_only_flag" -gt 0 ]]; then
+  decoded_name=''
+  TEST_LINE_PATTERN="^(.*)\s+([^[:blank:]]+)$"
+  while read -r test_line; do
+    if [[ "$test_line" =~ $TEST_LINE_PATTERN ]]; then
+      filename="${BASH_REMATCH[1]}"
+      test_name="${BASH_REMATCH[2]}"
+      bats_decode_test_name "$test_name" 'decoded_name'
+      if [[ "$list_only_flag" -eq 1 ]]; then
+        printf "%s\n" "$decoded_name"
+      else
+        printf "%s : %s\n" "$filename" "$decoded_name"
+      fi
+    fi
+  done < "$TESTS_LIST_FILE"
   exit
 fi
 

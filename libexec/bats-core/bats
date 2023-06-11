@@ -64,6 +64,8 @@ HELP_TEXT_HEADER
   -h, --help                Display this help message
   -j, --jobs <jobs>         Number of parallel jobs (requires GNU parallel or shenwei356/rush)
   --parallel-binary-name    Name of parallel binary
+  -l, --list                list test names without running any tests
+  -L, --list-with-filename  Same as -l but print filenames, too
   --no-tempdir-cleanup      Preserve test output temporary directory
   --no-parallelize-across-files
                             Serialize test file execution instead of running
@@ -224,6 +226,12 @@ while [[ "$#" -ne 0 ]]; do
   --parallel-binary-name)
     shift
     flags+=('--parallel-binary-name' "$1")
+    ;;
+  -l | --list)
+    flags+=('-l')
+    ;;
+  -L | --list-with-filename)
+    flags+=('-L')
     ;;
   -r | --recursive)
     recursive=1
