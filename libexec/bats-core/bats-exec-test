@@ -287,7 +287,7 @@ bats_abort_timeout_countdown() {
 }
 
 
-if [[ -n "$EPOCHREALTIME"  ]]; then
+if [[ -n "${EPOCHREALTIME-}"  ]]; then
 get_mills_since_epoch() { # <output-variable>
   local -r output_variable="$1"
   local int frac
