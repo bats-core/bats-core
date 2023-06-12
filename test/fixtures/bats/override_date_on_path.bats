@@ -1,6 +1,6 @@
 setup() {
     export PATH
-    PATH="$(dirname "$BATS_TEST_FILENAME"):/usr/local/sbin:/usr/sbin:/usr/bin:/sbin:/bin"
+    PATH="$(dirname "$BATS_TEST_FILENAME"):$PATH"
 }
 
 @test "dummy" {
