@@ -250,3 +250,9 @@ bats_format_file_line_reference_uri() {
   bats_approx_realpath filename "$filename"
   printf -v "$output" "file://%s:%d" "$filename" "$line"
 }
+
+# execute command with backed up path
+# to prevent path mocks from interfering with our internals
+bats_execute() { # <command...>
+  PATH="${BATS_SAVED_PATH?}" "$@"
+}
