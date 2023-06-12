@@ -316,7 +316,7 @@ fi
 
 if [[ -n "$count_only_flag" ]]; then
   printf '%d\n' "${test_count}"
-  [[ "$list_only_flag" -eq 0 ]] && exit
+  [[ "$list_only_flag" -eq 0 ]] && exit 0
 fi
 
 bats_decode_test_name() {
