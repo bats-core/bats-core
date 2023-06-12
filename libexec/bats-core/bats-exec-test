@@ -287,24 +287,27 @@ bats_abort_timeout_countdown() {
 }
 
 
+if [[ -n "$EPOCHREALTIME"  ]]; then
+get_mills_since_epoch() { # <output-variable>
+  local -r output_variable="$1"
+  local int frac
+  # allow for different decimal separators
+  IFS=., read -r int frac <<<"$EPOCHREALTIME"
+  printf -v "$output_variable" "%d" "${int}${frac::3}"
+}
+else
 get_mills_since_epoch() { # <output-variable>
   local -r output_variable="$1"
   local ms_since_epoch
-  if [[ -n "$EPOCHREALTIME"  ]]; then
-      local int frac
-      # allow for different decimal separators
-      IFS=., read int frac <<<"$EPOCHREALTIME"
-      ms_since_epoch=${int}${frac::3}
+  ms_since_epoch=$(bats_execute date +%s%N)
+  if [[ "$ms_since_epoch" == *N || "${#ms_since_epoch}" -lt 19 ]]; then
+    ms_since_epoch=$(($(bats_execute date +%s) * 1000))
   else
-    ms_since_epoch=$(bats_execute date +%s%N)
-    if [[ "$ms_since_epoch" == *N || "${#ms_since_epoch}" -lt 19 ]]; then
-      ms_since_epoch=$(($(bats_execute date +%s) * 1000))
-    else
-      ms_since_epoch=$((ms_since_epoch / 1000000))
-    fi
+    ms_since_epoch=$((ms_since_epoch / 1000000))
   fi
   printf -v "$output_variable" "%d" "$ms_since_epoch"
 }
+fi
 
 bats_perform_test() {
   if ! declare -F "$BATS_TEST_NAME" &>/dev/null; then
