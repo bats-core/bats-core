@@ -254,5 +254,5 @@ bats_format_file_line_reference_uri() {
 # execute command with backed up path
 # to prevent path mocks from interfering with our internals
 bats_execute() { # <command...>
-  PATH="$BATS_SAVED_PATH" "$@"
+  PATH="${BATS_SAVED_PATH?}" "$@"
 }
