@@ -137,7 +137,7 @@ fi
 arguments=()
 
 # list of single char options that don't expect a value
-single_char_flags="hvcprtTx"
+single_char_flags="hvclLprtTx"
 
 # Unpack single-character options bundled together, e.g. -cr, -pr.
 for arg in "$@"; do
