@@ -290,8 +290,11 @@ bats_abort_timeout_countdown() {
 get_mills_since_epoch() { # <output-variable>
   local -r output_variable="$1"
   local ms_since_epoch
-  if [[ "$EPOCHREALTIME" =~ ([0-9]+)[^0-9]([0-9]+) ]]; then
-       ms_since_epoch=${BASH_REMATCH[1]}${BASH_REMATCH[2]::3}
+  if [[ -n "$EPOCHREALTIME"  ]]; then
+      local int frac
+      # allow for different decimal separators
+      IFS=., read int frac <<<"$EPOCHREALTIME"
+      ms_since_epoch=${int}${frac::3}
   else
     ms_since_epoch=$(bats_execute date +%s%N)
     if [[ "$ms_since_epoch" == *N || "${#ms_since_epoch}" -lt 19 ]]; then
