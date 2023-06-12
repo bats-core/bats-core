@@ -316,7 +316,7 @@ fi
 
 if [[ -n "$count_only_flag" ]]; then
   printf '%d\n' "${test_count}"
-  exit
+  [[ "$list_only_flag" -eq 0 ]] && exit
 fi
 
 bats_decode_test_name() {
@@ -353,6 +353,11 @@ bats_decode_test_name() {
 }
 
 if [[ "$list_only_flag" -gt 0 ]]; then
+  # No point on continuing if there's no test.
+  if [[ "${test_count}" -eq 0 ]]; then
+    exit 0
+  fi
+
   decoded_name=''
   TEST_LINE_PATTERN="^(.*)\s+([^[:blank:]]+)$"
   while read -r test_line; do
@@ -367,7 +372,7 @@ if [[ "$list_only_flag" -gt 0 ]]; then
       fi
     fi
   done < "$TESTS_LIST_FILE"
-  exit
+  exit 0
 fi
 
 if [[ -n "$bats_no_parallelize_across_files" ]] && [[ ! "$num_jobs" -gt 1 ]]; then
@@ -388,7 +393,7 @@ fi
 bats_exec_suite_status=0
 printf '1..%d\n' "${test_count}"
 
-# No point on continuing if there's no tests.
+# No point on continuing if there's no test.
 if [[ "${test_count}" == 0 ]]; then
   exit
 fi
