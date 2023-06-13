@@ -170,6 +170,7 @@ formatter=${BATS_FORMATTER:-'tap'}
 report_formatter=''
 recursive=
 setup_suite_file=''
+skip_formatter=
 export BATS_TEMPDIR_CLEANUP=1
 if [[ -z "${CI:-}" && -t 0 && -t 1 ]] && command -v tput >/dev/null; then
   formatter='pretty'
@@ -229,9 +230,11 @@ while [[ "$#" -ne 0 ]]; do
     ;;
   -l | --list)
     flags+=('-l')
+    skip_formatter=1
     ;;
   -L | --list-with-filename)
     flags+=('-L')
+    skip_formatter=1
     ;;
   -r | --recursive)
     recursive=1
@@ -513,7 +516,10 @@ bats_tee() { # <output-file> <command...>
   return $status
 }
 
-if [[ -n "$report_formatter" ]]; then
+# skip output formatting in case of we onyl print names (-l/-L)
+if [[ -n "$skip_formatter" ]]; then
+  exec bats-exec-suite "${flags[@]}" "${filenames[@]}"
+elif [[ -n "$report_formatter" ]]; then
   exec bats-exec-suite "${flags[@]}" "${filenames[@]}" |
     bats_tee "${BATS_REPORT_OUTPUT_DIR}/${BATS_REPORT_FILENAME}" "$interpolated_report_formatter" "${report_formatter_flags[@]}" |
     bats_test_count_validator |

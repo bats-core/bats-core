@@ -119,16 +119,14 @@ setup() {
   [[ "${lines[0]}" == "First Five test_tag failed" ]]
 }
 
-# should have status 0 but validator.bash fails on empty output
 @test "don't' print anything if no tests are found" {
-  run -1 bin/bats -l "$FIXTURE_ROOT"/empty.bats
+  run -0 bin/bats -l "$FIXTURE_ROOT"/empty.bats
   [[ "${#lines[@]}" -eq 0 ]]
   [[ "$output" -eq "" ]]
 }
 
-# should have status 1 but validator.bash fails on empty output
 @test "don't' print anything if all tests are filtered out" {
-  run -1 bin/bats -l --filter 'Oops' "$FIXTURE_ROOT"/file*
+  run -0 bin/bats -l --filter 'Oops' "$FIXTURE_ROOT"/file*
   [[ "${#lines[@]}" -eq 0 ]]
   [[ "$output" -eq "" ]]
 }
