@@ -215,8 +215,9 @@ bats_pipe() { # [-N] [--] command0 [ \| command1 [ \| command2 [...]]]
   # parse and validate arguments, escape as necessary
   local -a commands_and_args=("$@")
   local -a escaped_args=()
-  local pipe_count=0
-  local previous_pipe_index=-1
+  local -i pipe_count=0
+  local -i previous_pipe_index=-1
+  local -i index=0
   for (( index = 0; index < $#; index++ )); do
     local current_command_or_arg="${commands_and_args[$index]}"
     local escaped_arg="$current_command_or_arg"
@@ -228,7 +229,7 @@ bats_pipe() { # [-N] [--] command0 [ \| command1 [ \| command2 [...]]]
         printf "Usage error: Cannot have leading \`\\|\`.\n" >&2
         return 1
       fi
-      if [ "$(( previous_pipe_index + 1 ))" -ge "$index" ]; then
+      if (( (previous_pipe_index + 1) >= index )); then
         printf "Usage error: Cannot have consecutive \`\\|\`. Found at argument position '%s'.\n" "$index" >&2
         return 1
       fi
@@ -238,12 +239,12 @@ bats_pipe() { # [-N] [--] command0 [ \| command1 [ \| command2 [...]]]
     escaped_args+=("$escaped_arg")
   done
 
-  if [ "$previous_pipe_index" -gt 0 ] && [ "$previous_pipe_index" -eq "$(( $# - 1 ))" ]; then
+  if (( (previous_pipe_index > 0) && (previous_pipe_index == ($# - 1)) )); then
     printf "Usage error: Cannot have trailing \`\\|\`.\n" >&2
     return 1
   fi
 
-  if [ "$pipe_count" -eq 0 ]; then
+  if (( pipe_count == 0 )); then
     # Don't allow for no pipes. This might be a typo in the test,
     # e.g. `run bats_pipe command0 | command1`
     # instead of `run bats_pipe command0 \| command1`
@@ -253,14 +254,14 @@ bats_pipe() { # [-N] [--] command0 [ \| command1 [ \| command2 [...]]]
     return 1
   fi
 
-  if [ "$pipestatus_position" -gt "$pipe_count" ]; then
+  if (( pipestatus_position > pipe_count )); then
     printf "Usage error: Too large of -N argument given. Argument value: '%s'.\n" "$pipestatus_position" >&2
     return 1
   fi
 
   # run commands and return appropriate pipe status
   local -a __bats_pipe_eval_pipe_status=()
-  eval "${escaped_args[*]}" '; __bats_pipe_eval_pipe_status=(${PIPESTATUS[@]})'
+  eval "${escaped_args[@]}" '; __bats_pipe_eval_pipe_status=(${PIPESTATUS[@]})'
 
   local result_status=
   if (( pipestatus_position < 0 )); then
