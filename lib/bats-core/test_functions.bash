@@ -192,7 +192,7 @@ bats_pipe() { # [-N] [--] command0 [ \| command1 [ \| command2 [...]]]
   # Supplying -N (e.g. -0) will instead always use the exit code of the command
   # at that position in the chain.
 
-  local pipestatus_position=-1
+  local pipestatus_position=
 
   # parse options starting with -
   while [[ $# -gt 0 ]] && [[ $1 == -* ]]; do
@@ -254,7 +254,7 @@ bats_pipe() { # [-N] [--] command0 [ \| command1 [ \| command2 [...]]]
     return 1
   fi
 
-  if (( pipestatus_position > pipe_count )); then
+  if [ -n "$pipestatus_position" ] && (( pipestatus_position > pipe_count )); then
     printf "Usage error: Too large of -N argument given. Argument value: '%s'.\n" "$pipestatus_position" >&2
     return 1
   fi
@@ -264,7 +264,7 @@ bats_pipe() { # [-N] [--] command0 [ \| command1 [ \| command2 [...]]]
   eval "${escaped_args[@]}" '; __bats_pipe_eval_pipe_status=(${PIPESTATUS[@]})'
 
   local result_status=
-  if (( pipestatus_position < 0 )); then
+  if [ -z "$pipestatus_position" ]; then
     # if we are performing default "last failure" behavior,
     # iterate backwards through pipe_status to find the last error.
     result_status=0
