@@ -295,8 +295,9 @@ bats_pipe() { # [-N] [--] command0 [ \| command1 [ \| command2 [...]]]
   elif (( pipestatus_position >= 0 )); then
     result_status="${__bats_pipe_eval_pipe_status[$pipestatus_position]}"
   else
+    # Must use positive values for some bash's (like OSX).
     local backward_iter_index="$((${#__bats_pipe_eval_pipe_status[@]} + pipestatus_position))"
-    result_status="${__bats_pipe_eval_pipe_status[$pipestatus_position]}"
+    result_status="${__bats_pipe_eval_pipe_status[$backward_iter_index]}"
   fi
 
   return "$result_status"
