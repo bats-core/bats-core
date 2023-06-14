@@ -254,6 +254,8 @@ bats_pipe() { # [-N] [--] command0 [ \| command1 [ \| command2 [...]]]
     return 1
   fi
 
+  # there will be pipe_count + 1 entries in PIPE_STATUS (pipe_count number of \|'s between each entry).
+  # valid indices are [0;  pipe_count]
   if [ -n "$pipestatus_position" ] && (( pipestatus_position > pipe_count )); then
     printf "Usage error: Too large of -N argument given. Argument value: '%s'.\n" "$pipestatus_position" >&2
     return 1
