@@ -201,6 +201,17 @@ command of interest.
       [ "$output" = "bar output." ]
     }
 
+Similarly, --returned-status N (or --returned-status=N) can be used for similar
+functionality. This option supports negative values, which always return the
+of the command starting from the end and in reverse order.
+
+    @test "invoking foo piped to bar always return foo status" {
+      run bats_pipe --returned-status -2 foo \| bar
+      # status of bar is ignored, status is always from foo.
+      [ "$status" -eq 2 ]
+      [ "$output" = "bar output." ]
+    }
+
 Piping of command output is especially helpful when the output needs to be
 modified in some way (e.g. the command outputs binary data into stdout, which
 cannot be stored as-is in an environment variable).
