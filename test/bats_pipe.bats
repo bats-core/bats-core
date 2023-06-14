@@ -504,6 +504,42 @@ output_binary_data_and_returns_with_given_code() {
   [ "${lines[2]}" = $'\tWill return status 42.' ]
 }
 
+@test "run bats_pipe for 0th error status and fail on first of two. using --returned-status" {
+  run -42 bats_pipe --returned-status 0 returns_with_given_code 42 \| describe_input
+
+  [ "${#lines[@]}" -eq 3 ]
+  [ "${lines[0]}" = 'Got 0 args.' ]
+  [ "${lines[1]}" = 'stdin:' ]
+  [ "${lines[2]}" = $'\tWill return status 42.' ]
+}
+
+@test "run bats_pipe for 0th error status and fail on first of two. using --returned-status=" {
+  run -42 bats_pipe --returned-status=0 returns_with_given_code 42 \| describe_input
+
+  [ "${#lines[@]}" -eq 3 ]
+  [ "${lines[0]}" = 'Got 0 args.' ]
+  [ "${lines[1]}" = 'stdin:' ]
+  [ "${lines[2]}" = $'\tWill return status 42.' ]
+}
+
+@test "run bats_pipe for 0th error status and fail on first of two. using --returned-status neg" {
+  run -42 bats_pipe --returned-status -2 returns_with_given_code 42 \| describe_input
+
+  [ "${#lines[@]}" -eq 3 ]
+  [ "${lines[0]}" = 'Got 0 args.' ]
+  [ "${lines[1]}" = 'stdin:' ]
+  [ "${lines[2]}" = $'\tWill return status 42.' ]
+}
+
+@test "run bats_pipe for 0th error status and fail on first of two. using --returned-status=neg" {
+  run -42 bats_pipe --returned-status=-2 returns_with_given_code 42 \| describe_input
+
+  [ "${#lines[@]}" -eq 3 ]
+  [ "${lines[0]}" = 'Got 0 args.' ]
+  [ "${lines[1]}" = 'stdin:' ]
+  [ "${lines[2]}" = $'\tWill return status 42.' ]
+}
+
 @test "run bats_pipe for 0th error status and fail on first of two with arg separator" {
   run -42 bats_pipe -0 -- returns_with_given_code 42 \| describe_input
 
@@ -513,8 +549,72 @@ output_binary_data_and_returns_with_given_code() {
   [ "${lines[2]}" = $'\tWill return status 42.' ]
 }
 
+@test "run bats_pipe for 0th error status and fail on first of two with arg separator. using --returned-status" {
+  run -42 bats_pipe --returned-status 0 -- returns_with_given_code 42 \| describe_input
+
+  [ "${#lines[@]}" -eq 3 ]
+  [ "${lines[0]}" = 'Got 0 args.' ]
+  [ "${lines[1]}" = 'stdin:' ]
+  [ "${lines[2]}" = $'\tWill return status 42.' ]
+}
+
+@test "run bats_pipe for 0th error status and fail on first of two with arg separator. using --returned-status=" {
+  run -42 bats_pipe --returned-status=0 -- returns_with_given_code 42 \| describe_input
+
+  [ "${#lines[@]}" -eq 3 ]
+  [ "${lines[0]}" = 'Got 0 args.' ]
+  [ "${lines[1]}" = 'stdin:' ]
+  [ "${lines[2]}" = $'\tWill return status 42.' ]
+}
+
+@test "run bats_pipe for 0th error status and fail on first of two with arg separator. using --returned-status neg" {
+  run -42 bats_pipe --returned-status -2 -- returns_with_given_code 42 \| describe_input
+
+  [ "${#lines[@]}" -eq 3 ]
+  [ "${lines[0]}" = 'Got 0 args.' ]
+  [ "${lines[1]}" = 'stdin:' ]
+  [ "${lines[2]}" = $'\tWill return status 42.' ]
+}
+
+@test "run bats_pipe for 0th error status and fail on first of two with arg separator. using --returned-status=neg" {
+  run -42 bats_pipe --returned-status=-2 -- returns_with_given_code 42 \| describe_input
+
+  [ "${#lines[@]}" -eq 3 ]
+  [ "${lines[0]}" = 'Got 0 args.' ]
+  [ "${lines[1]}" = 'stdin:' ]
+  [ "${lines[2]}" = $'\tWill return status 42.' ]
+}
+
 @test "run bats_pipe for 0th error status and fail on second of two" {
   run -0 bats_pipe -0 returns_with_given_code 0 \| consume_stdin_and_returns_with_given_code 42
+
+  [ "${#lines[@]}" -eq 1 ]
+  [ "${lines[0]}" = 'Will return status 42.' ]
+}
+
+@test "run bats_pipe for 0th error status and fail on second of two. using --returned-status" {
+  run -0 bats_pipe --returned-status 0 returns_with_given_code 0 \| consume_stdin_and_returns_with_given_code 42
+
+  [ "${#lines[@]}" -eq 1 ]
+  [ "${lines[0]}" = 'Will return status 42.' ]
+}
+
+@test "run bats_pipe for 0th error status and fail on second of two. using --returned-status=" {
+  run -0 bats_pipe --returned-status=0 returns_with_given_code 0 \| consume_stdin_and_returns_with_given_code 42
+
+  [ "${#lines[@]}" -eq 1 ]
+  [ "${lines[0]}" = 'Will return status 42.' ]
+}
+
+@test "run bats_pipe for 0th error status and fail on second of two. using --returned-status neg" {
+  run -0 bats_pipe --returned-status -2 returns_with_given_code 0 \| consume_stdin_and_returns_with_given_code 42
+
+  [ "${#lines[@]}" -eq 1 ]
+  [ "${lines[0]}" = 'Will return status 42.' ]
+}
+
+@test "run bats_pipe for 0th error status and fail on second of two. using --returned-status=neg" {
+  run -0 bats_pipe --returned-status=-2 returns_with_given_code 0 \| consume_stdin_and_returns_with_given_code 42
 
   [ "${#lines[@]}" -eq 1 ]
   [ "${lines[0]}" = 'Will return status 42.' ]
@@ -538,8 +638,88 @@ output_binary_data_and_returns_with_given_code() {
   [ "${lines[4]}" = $'\t\tWill return status 42.' ]
 }
 
+@test "run bats_pipe for 0th error status and fail on first of three. using --returned-status" {
+  run -42 bats_pipe --returned-status 0 returns_with_given_code 42 \| describe_input \| describe_input
+
+  [ "${#lines[@]}" -eq 5 ]
+  [ "${lines[0]}" = 'Got 0 args.' ]
+  [ "${lines[1]}" = 'stdin:' ]
+  [ "${lines[2]}" = $'\tGot 0 args.' ]
+  [ "${lines[3]}" = $'\tstdin:' ]
+  [ "${lines[4]}" = $'\t\tWill return status 42.' ]
+}
+
+@test "run bats_pipe for 0th error status and fail on first of three. using --returned-status=" {
+  run -42 bats_pipe --returned-status=0 returns_with_given_code 42 \| describe_input \| describe_input
+
+  [ "${#lines[@]}" -eq 5 ]
+  [ "${lines[0]}" = 'Got 0 args.' ]
+  [ "${lines[1]}" = 'stdin:' ]
+  [ "${lines[2]}" = $'\tGot 0 args.' ]
+  [ "${lines[3]}" = $'\tstdin:' ]
+  [ "${lines[4]}" = $'\t\tWill return status 42.' ]
+}
+
+@test "run bats_pipe for 0th error status and fail on first of three. using --returned-status neg" {
+  run -42 bats_pipe --returned-status -3 returns_with_given_code 42 \| describe_input \| describe_input
+
+  [ "${#lines[@]}" -eq 5 ]
+  [ "${lines[0]}" = 'Got 0 args.' ]
+  [ "${lines[1]}" = 'stdin:' ]
+  [ "${lines[2]}" = $'\tGot 0 args.' ]
+  [ "${lines[3]}" = $'\tstdin:' ]
+  [ "${lines[4]}" = $'\t\tWill return status 42.' ]
+}
+
+@test "run bats_pipe for 0th error status and fail on first of three. using --returned-status=neg" {
+  run -42 bats_pipe --returned-status=-3 returns_with_given_code 42 \| describe_input \| describe_input
+
+  [ "${#lines[@]}" -eq 5 ]
+  [ "${lines[0]}" = 'Got 0 args.' ]
+  [ "${lines[1]}" = 'stdin:' ]
+  [ "${lines[2]}" = $'\tGot 0 args.' ]
+  [ "${lines[3]}" = $'\tstdin:' ]
+  [ "${lines[4]}" = $'\t\tWill return status 42.' ]
+}
+
 @test "run bats_pipe for 0th error status and fail on second of three" {
   run -0 bats_pipe -0 returns_with_given_code 0 \| consume_stdin_and_returns_with_given_code 42 \| describe_input
+
+  [ "${#lines[@]}" -eq 3 ]
+  [ "${lines[0]}" = 'Got 0 args.' ]
+  [ "${lines[1]}" = 'stdin:' ]
+  [ "${lines[2]}" = $'\tWill return status 42.' ]
+}
+
+@test "run bats_pipe for 0th error status and fail on second of three. using --returned-status" {
+  run -0 bats_pipe --returned-status 0 returns_with_given_code 0 \| consume_stdin_and_returns_with_given_code 42 \| describe_input
+
+  [ "${#lines[@]}" -eq 3 ]
+  [ "${lines[0]}" = 'Got 0 args.' ]
+  [ "${lines[1]}" = 'stdin:' ]
+  [ "${lines[2]}" = $'\tWill return status 42.' ]
+}
+
+@test "run bats_pipe for 0th error status and fail on second of three. using --returned-status=" {
+  run -0 bats_pipe --returned-status=0 returns_with_given_code 0 \| consume_stdin_and_returns_with_given_code 42 \| describe_input
+
+  [ "${#lines[@]}" -eq 3 ]
+  [ "${lines[0]}" = 'Got 0 args.' ]
+  [ "${lines[1]}" = 'stdin:' ]
+  [ "${lines[2]}" = $'\tWill return status 42.' ]
+}
+
+@test "run bats_pipe for 0th error status and fail on second of three. using --returned-status neg" {
+  run -0 bats_pipe --returned-status -3 returns_with_given_code 0 \| consume_stdin_and_returns_with_given_code 42 \| describe_input
+
+  [ "${#lines[@]}" -eq 3 ]
+  [ "${lines[0]}" = 'Got 0 args.' ]
+  [ "${lines[1]}" = 'stdin:' ]
+  [ "${lines[2]}" = $'\tWill return status 42.' ]
+}
+
+@test "run bats_pipe for 0th error status and fail on second of three. using --returned-status=neg" {
+  run -0 bats_pipe --returned-status=-3 returns_with_given_code 0 \| consume_stdin_and_returns_with_given_code 42 \| describe_input
 
   [ "${#lines[@]}" -eq 3 ]
   [ "${lines[0]}" = 'Got 0 args.' ]
@@ -554,6 +734,34 @@ output_binary_data_and_returns_with_given_code() {
   [ "${lines[0]}" = 'Will return status 42.' ]
 }
 
+@test "run bats_pipe for 0th error status and fail on third of three. using --returned-status" {
+  run -0 bats_pipe --returned-status 0 returns_with_given_code 0 \| consume_stdin_and_returns_with_given_code 0 \| consume_stdin_and_returns_with_given_code 42
+
+  [ "${#lines[@]}" -eq 1 ]
+  [ "${lines[0]}" = 'Will return status 42.' ]
+}
+
+@test "run bats_pipe for 0th error status and fail on third of three. using --returned-status=" {
+  run -0 bats_pipe --returned-status=0 returns_with_given_code 0 \| consume_stdin_and_returns_with_given_code 0 \| consume_stdin_and_returns_with_given_code 42
+
+  [ "${#lines[@]}" -eq 1 ]
+  [ "${lines[0]}" = 'Will return status 42.' ]
+}
+
+@test "run bats_pipe for 0th error status and fail on third of three. using --returned-status neg" {
+  run -0 bats_pipe --returned-status -3 returns_with_given_code 0 \| consume_stdin_and_returns_with_given_code 0 \| consume_stdin_and_returns_with_given_code 42
+
+  [ "${#lines[@]}" -eq 1 ]
+  [ "${lines[0]}" = 'Will return status 42.' ]
+}
+
+@test "run bats_pipe for 0th error status and fail on third of three. using --returned-status=neg" {
+  run -0 bats_pipe --returned-status=-3 returns_with_given_code 0 \| consume_stdin_and_returns_with_given_code 0 \| consume_stdin_and_returns_with_given_code 42
+
+  [ "${#lines[@]}" -eq 1 ]
+  [ "${lines[0]}" = 'Will return status 42.' ]
+}
+
 @test "run bats_pipe for 0th error status and fail on all of three" {
   run -42 bats_pipe -0 returns_with_given_code 42 \| consume_stdin_and_returns_with_given_code 84 \| consume_stdin_and_returns_with_given_code 4
 
@@ -561,8 +769,72 @@ output_binary_data_and_returns_with_given_code() {
   [ "${lines[0]}" = 'Will return status 4.' ]
 }
 
+@test "run bats_pipe for 0th error status and fail on all of three. using --returned-status" {
+  run -42 bats_pipe --returned-status 0 returns_with_given_code 42 \| consume_stdin_and_returns_with_given_code 84 \| consume_stdin_and_returns_with_given_code 4
+
+  [ "${#lines[@]}" -eq 1 ]
+  [ "${lines[0]}" = 'Will return status 4.' ]
+}
+
+@test "run bats_pipe for 0th error status and fail on all of three. using --returned-status=" {
+  run -42 bats_pipe --returned-status=0 returns_with_given_code 42 \| consume_stdin_and_returns_with_given_code 84 \| consume_stdin_and_returns_with_given_code 4
+
+  [ "${#lines[@]}" -eq 1 ]
+  [ "${lines[0]}" = 'Will return status 4.' ]
+}
+
+@test "run bats_pipe for 0th error status and fail on all of three. using --returned-status neg" {
+  run -42 bats_pipe --returned-status -3 returns_with_given_code 42 \| consume_stdin_and_returns_with_given_code 84 \| consume_stdin_and_returns_with_given_code 4
+
+  [ "${#lines[@]}" -eq 1 ]
+  [ "${lines[0]}" = 'Will return status 4.' ]
+}
+
+@test "run bats_pipe for 0th error status and fail on all of three. using --returned-status=neg" {
+  run -42 bats_pipe --returned-status=-3 returns_with_given_code 42 \| consume_stdin_and_returns_with_given_code 84 \| consume_stdin_and_returns_with_given_code 4
+
+  [ "${#lines[@]}" -eq 1 ]
+  [ "${lines[0]}" = 'Will return status 4.' ]
+}
+
 @test "run bats_pipe for 1st error status and fail on first of two" {
   run -0 bats_pipe -1 returns_with_given_code 42 \| describe_input
+
+  [ "${#lines[@]}" -eq 3 ]
+  [ "${lines[0]}" = 'Got 0 args.' ]
+  [ "${lines[1]}" = 'stdin:' ]
+  [ "${lines[2]}" = $'\tWill return status 42.' ]
+}
+
+@test "run bats_pipe for 1st error status and fail on first of two. using --returned-status" {
+  run -0 bats_pipe --returned-status 1 returns_with_given_code 42 \| describe_input
+
+  [ "${#lines[@]}" -eq 3 ]
+  [ "${lines[0]}" = 'Got 0 args.' ]
+  [ "${lines[1]}" = 'stdin:' ]
+  [ "${lines[2]}" = $'\tWill return status 42.' ]
+}
+
+@test "run bats_pipe for 1st error status and fail on first of two. using --returned-status=" {
+  run -0 bats_pipe --returned-status=1 returns_with_given_code 42 \| describe_input
+
+  [ "${#lines[@]}" -eq 3 ]
+  [ "${lines[0]}" = 'Got 0 args.' ]
+  [ "${lines[1]}" = 'stdin:' ]
+  [ "${lines[2]}" = $'\tWill return status 42.' ]
+}
+
+@test "run bats_pipe for 1st error status and fail on first of two. using --returned-status neg" {
+  run -0 bats_pipe --returned-status -1 returns_with_given_code 42 \| describe_input
+
+  [ "${#lines[@]}" -eq 3 ]
+  [ "${lines[0]}" = 'Got 0 args.' ]
+  [ "${lines[1]}" = 'stdin:' ]
+  [ "${lines[2]}" = $'\tWill return status 42.' ]
+}
+
+@test "run bats_pipe for 1st error status and fail on first of two. using --returned-status=neg" {
+  run -0 bats_pipe --returned-status=-1 returns_with_given_code 42 \| describe_input
 
   [ "${#lines[@]}" -eq 3 ]
   [ "${lines[0]}" = 'Got 0 args.' ]
@@ -579,8 +851,72 @@ output_binary_data_and_returns_with_given_code() {
   [ "${lines[2]}" = $'\tWill return status 42.' ]
 }
 
+@test "run bats_pipe for 1st error status and fail on first of two with arg separator. using --returned-status" {
+  run -0 bats_pipe --returned-status 1 -- returns_with_given_code 42 \| describe_input
+
+  [ "${#lines[@]}" -eq 3 ]
+  [ "${lines[0]}" = 'Got 0 args.' ]
+  [ "${lines[1]}" = 'stdin:' ]
+  [ "${lines[2]}" = $'\tWill return status 42.' ]
+}
+
+@test "run bats_pipe for 1st error status and fail on first of two with arg separator. using --returned-status=" {
+  run -0 bats_pipe --returned-status=1 -- returns_with_given_code 42 \| describe_input
+
+  [ "${#lines[@]}" -eq 3 ]
+  [ "${lines[0]}" = 'Got 0 args.' ]
+  [ "${lines[1]}" = 'stdin:' ]
+  [ "${lines[2]}" = $'\tWill return status 42.' ]
+}
+
+@test "run bats_pipe for 1st error status and fail on first of two with arg separator. using --returned-status neg" {
+  run -0 bats_pipe --returned-status -1 -- returns_with_given_code 42 \| describe_input
+
+  [ "${#lines[@]}" -eq 3 ]
+  [ "${lines[0]}" = 'Got 0 args.' ]
+  [ "${lines[1]}" = 'stdin:' ]
+  [ "${lines[2]}" = $'\tWill return status 42.' ]
+}
+
+@test "run bats_pipe for 1st error status and fail on first of two with arg separator. using --returned-status=neg" {
+  run -0 bats_pipe --returned-status=-1 -- returns_with_given_code 42 \| describe_input
+
+  [ "${#lines[@]}" -eq 3 ]
+  [ "${lines[0]}" = 'Got 0 args.' ]
+  [ "${lines[1]}" = 'stdin:' ]
+  [ "${lines[2]}" = $'\tWill return status 42.' ]
+}
+
 @test "run bats_pipe for 1st error status and fail on second of two" {
   run -42 bats_pipe -1 returns_with_given_code 0 \| consume_stdin_and_returns_with_given_code 42
+
+  [ "${#lines[@]}" -eq 1 ]
+  [ "${lines[0]}" = 'Will return status 42.' ]
+}
+
+@test "run bats_pipe for 1st error status and fail on second of two. using --returned-status" {
+  run -42 bats_pipe --returned-status 1 returns_with_given_code 0 \| consume_stdin_and_returns_with_given_code 42
+
+  [ "${#lines[@]}" -eq 1 ]
+  [ "${lines[0]}" = 'Will return status 42.' ]
+}
+
+@test "run bats_pipe for 1st error status and fail on second of two. using --returned-status=" {
+  run -42 bats_pipe --returned-status=1 returns_with_given_code 0 \| consume_stdin_and_returns_with_given_code 42
+
+  [ "${#lines[@]}" -eq 1 ]
+  [ "${lines[0]}" = 'Will return status 42.' ]
+}
+
+@test "run bats_pipe for 1st error status and fail on second of two. using --returned-status neg" {
+  run -42 bats_pipe --returned-status -1 returns_with_given_code 0 \| consume_stdin_and_returns_with_given_code 42
+
+  [ "${#lines[@]}" -eq 1 ]
+  [ "${lines[0]}" = 'Will return status 42.' ]
+}
+
+@test "run bats_pipe for 1st error status and fail on second of two. using --returned-status=neg" {
+  run -42 bats_pipe --returned-status=-1 returns_with_given_code 0 \| consume_stdin_and_returns_with_given_code 42
 
   [ "${#lines[@]}" -eq 1 ]
   [ "${lines[0]}" = 'Will return status 42.' ]
@@ -593,8 +929,80 @@ output_binary_data_and_returns_with_given_code() {
   [ "${lines[0]}" = 'Will return status 84.' ]
 }
 
+@test "run bats_pipe for 1st error status and fail on both of two. using --returned-status" {
+  run -84 bats_pipe --returned-status 1 returns_with_given_code 42 \| consume_stdin_and_returns_with_given_code 84
+
+  [ "${#lines[@]}" -eq 1 ]
+  [ "${lines[0]}" = 'Will return status 84.' ]
+}
+
+@test "run bats_pipe for 1st error status and fail on both of two. using --returned-status=" {
+  run -84 bats_pipe --returned-status=1 returns_with_given_code 42 \| consume_stdin_and_returns_with_given_code 84
+
+  [ "${#lines[@]}" -eq 1 ]
+  [ "${lines[0]}" = 'Will return status 84.' ]
+}
+
+@test "run bats_pipe for 1st error status and fail on both of two. using --returned-status neg" {
+  run -84 bats_pipe --returned-status -1 returns_with_given_code 42 \| consume_stdin_and_returns_with_given_code 84
+
+  [ "${#lines[@]}" -eq 1 ]
+  [ "${lines[0]}" = 'Will return status 84.' ]
+}
+
+@test "run bats_pipe for 1st error status and fail on both of two. using --returned-status=neg" {
+  run -84 bats_pipe --returned-status=-1 returns_with_given_code 42 \| consume_stdin_and_returns_with_given_code 84
+
+  [ "${#lines[@]}" -eq 1 ]
+  [ "${lines[0]}" = 'Will return status 84.' ]
+}
+
 @test "run bats_pipe for 1st error status and fail on first of three" {
   run -0 bats_pipe -1 returns_with_given_code 42 \| describe_input \| describe_input
+
+  [ "${#lines[@]}" -eq 5 ]
+  [ "${lines[0]}" = 'Got 0 args.' ]
+  [ "${lines[1]}" = 'stdin:' ]
+  [ "${lines[2]}" = $'\tGot 0 args.' ]
+  [ "${lines[3]}" = $'\tstdin:' ]
+  [ "${lines[4]}" = $'\t\tWill return status 42.' ]
+}
+
+@test "run bats_pipe for 1st error status and fail on first of three. using --returned-status" {
+  run -0 bats_pipe --returned-status 1 returns_with_given_code 42 \| describe_input \| describe_input
+
+  [ "${#lines[@]}" -eq 5 ]
+  [ "${lines[0]}" = 'Got 0 args.' ]
+  [ "${lines[1]}" = 'stdin:' ]
+  [ "${lines[2]}" = $'\tGot 0 args.' ]
+  [ "${lines[3]}" = $'\tstdin:' ]
+  [ "${lines[4]}" = $'\t\tWill return status 42.' ]
+}
+
+@test "run bats_pipe for 1st error status and fail on first of three. using --returned-status=" {
+  run -0 bats_pipe --returned-status=1 returns_with_given_code 42 \| describe_input \| describe_input
+
+  [ "${#lines[@]}" -eq 5 ]
+  [ "${lines[0]}" = 'Got 0 args.' ]
+  [ "${lines[1]}" = 'stdin:' ]
+  [ "${lines[2]}" = $'\tGot 0 args.' ]
+  [ "${lines[3]}" = $'\tstdin:' ]
+  [ "${lines[4]}" = $'\t\tWill return status 42.' ]
+}
+
+@test "run bats_pipe for 1st error status and fail on first of three. using --returned-status neg" {
+  run -0 bats_pipe --returned-status -2 returns_with_given_code 42 \| describe_input \| describe_input
+
+  [ "${#lines[@]}" -eq 5 ]
+  [ "${lines[0]}" = 'Got 0 args.' ]
+  [ "${lines[1]}" = 'stdin:' ]
+  [ "${lines[2]}" = $'\tGot 0 args.' ]
+  [ "${lines[3]}" = $'\tstdin:' ]
+  [ "${lines[4]}" = $'\t\tWill return status 42.' ]
+}
+
+@test "run bats_pipe for 1st error status and fail on first of three. using --returned-status=neg" {
+  run -0 bats_pipe --returned-status=-2 returns_with_given_code 42 \| describe_input \| describe_input
 
   [ "${#lines[@]}" -eq 5 ]
   [ "${lines[0]}" = 'Got 0 args.' ]
@@ -613,8 +1021,72 @@ output_binary_data_and_returns_with_given_code() {
   [ "${lines[2]}" = $'\tWill return status 42.' ]
 }
 
+@test "run bats_pipe for 1st error status and fail on second of three. using --returned-status" {
+  run -42 bats_pipe --returned-status 1 returns_with_given_code 0 \| consume_stdin_and_returns_with_given_code 42 \| describe_input
+
+  [ "${#lines[@]}" -eq 3 ]
+  [ "${lines[0]}" = 'Got 0 args.' ]
+  [ "${lines[1]}" = 'stdin:' ]
+  [ "${lines[2]}" = $'\tWill return status 42.' ]
+}
+
+@test "run bats_pipe for 1st error status and fail on second of three. using --returned-status=" {
+  run -42 bats_pipe --returned-status=1 returns_with_given_code 0 \| consume_stdin_and_returns_with_given_code 42 \| describe_input
+
+  [ "${#lines[@]}" -eq 3 ]
+  [ "${lines[0]}" = 'Got 0 args.' ]
+  [ "${lines[1]}" = 'stdin:' ]
+  [ "${lines[2]}" = $'\tWill return status 42.' ]
+}
+
+@test "run bats_pipe for 1st error status and fail on second of three. using --returned-status neg" {
+  run -42 bats_pipe --returned-status -2 returns_with_given_code 0 \| consume_stdin_and_returns_with_given_code 42 \| describe_input
+
+  [ "${#lines[@]}" -eq 3 ]
+  [ "${lines[0]}" = 'Got 0 args.' ]
+  [ "${lines[1]}" = 'stdin:' ]
+  [ "${lines[2]}" = $'\tWill return status 42.' ]
+}
+
+@test "run bats_pipe for 1st error status and fail on second of three. using --returned-status=neg" {
+  run -42 bats_pipe --returned-status=-2 returns_with_given_code 0 \| consume_stdin_and_returns_with_given_code 42 \| describe_input
+
+  [ "${#lines[@]}" -eq 3 ]
+  [ "${lines[0]}" = 'Got 0 args.' ]
+  [ "${lines[1]}" = 'stdin:' ]
+  [ "${lines[2]}" = $'\tWill return status 42.' ]
+}
+
 @test "run bats_pipe for 1st error status and fail on third of three" {
   run -0 bats_pipe -1 returns_with_given_code 0 \| consume_stdin_and_returns_with_given_code 0 \| consume_stdin_and_returns_with_given_code 42
+
+  [ "${#lines[@]}" -eq 1 ]
+  [ "${lines[0]}" = 'Will return status 42.' ]
+}
+
+@test "run bats_pipe for 1st error status and fail on third of three. using --returned-status" {
+  run -0 bats_pipe --returned-status 1 returns_with_given_code 0 \| consume_stdin_and_returns_with_given_code 0 \| consume_stdin_and_returns_with_given_code 42
+
+  [ "${#lines[@]}" -eq 1 ]
+  [ "${lines[0]}" = 'Will return status 42.' ]
+}
+
+@test "run bats_pipe for 1st error status and fail on third of three. using --returned-status=" {
+  run -0 bats_pipe --returned-status=1 returns_with_given_code 0 \| consume_stdin_and_returns_with_given_code 0 \| consume_stdin_and_returns_with_given_code 42
+
+  [ "${#lines[@]}" -eq 1 ]
+  [ "${lines[0]}" = 'Will return status 42.' ]
+}
+
+@test "run bats_pipe for 1st error status and fail on third of three. using --returned-status neg" {
+  run -0 bats_pipe --returned-status -2 returns_with_given_code 0 \| consume_stdin_and_returns_with_given_code 0 \| consume_stdin_and_returns_with_given_code 42
+
+  [ "${#lines[@]}" -eq 1 ]
+  [ "${lines[0]}" = 'Will return status 42.' ]
+}
+
+@test "run bats_pipe for 1st error status and fail on third of three. using --returned-status=neg" {
+  run -0 bats_pipe --returned-status=-2 returns_with_given_code 0 \| consume_stdin_and_returns_with_given_code 0 \| consume_stdin_and_returns_with_given_code 42
 
   [ "${#lines[@]}" -eq 1 ]
   [ "${lines[0]}" = 'Will return status 42.' ]
@@ -627,8 +1099,80 @@ output_binary_data_and_returns_with_given_code() {
   [ "${lines[0]}" = 'Will return status 4.' ]
 }
 
+@test "run bats_pipe for 1st error status and fail on all of three. using --returned-status" {
+  run -84 bats_pipe --returned-status 1 returns_with_given_code 42 \| consume_stdin_and_returns_with_given_code 84 \| consume_stdin_and_returns_with_given_code 4
+
+  [ "${#lines[@]}" -eq 1 ]
+  [ "${lines[0]}" = 'Will return status 4.' ]
+}
+
+@test "run bats_pipe for 1st error status and fail on all of three. using --returned-status=" {
+  run -84 bats_pipe --returned-status=1 returns_with_given_code 42 \| consume_stdin_and_returns_with_given_code 84 \| consume_stdin_and_returns_with_given_code 4
+
+  [ "${#lines[@]}" -eq 1 ]
+  [ "${lines[0]}" = 'Will return status 4.' ]
+}
+
+@test "run bats_pipe for 1st error status and fail on all of three. using --returned-status neg" {
+  run -84 bats_pipe --returned-status -2 returns_with_given_code 42 \| consume_stdin_and_returns_with_given_code 84 \| consume_stdin_and_returns_with_given_code 4
+
+  [ "${#lines[@]}" -eq 1 ]
+  [ "${lines[0]}" = 'Will return status 4.' ]
+}
+
+@test "run bats_pipe for 1st error status and fail on all of three. using --returned-status=neg" {
+  run -84 bats_pipe --returned-status=-2 returns_with_given_code 42 \| consume_stdin_and_returns_with_given_code 84 \| consume_stdin_and_returns_with_given_code 4
+
+  [ "${#lines[@]}" -eq 1 ]
+  [ "${lines[0]}" = 'Will return status 4.' ]
+}
+
 @test "run bats_pipe for 2nd error status and fail on first of three" {
   run -0 bats_pipe -2 returns_with_given_code 42 \| describe_input \| describe_input
+
+  [ "${#lines[@]}" -eq 5 ]
+  [ "${lines[0]}" = 'Got 0 args.' ]
+  [ "${lines[1]}" = 'stdin:' ]
+  [ "${lines[2]}" = $'\tGot 0 args.' ]
+  [ "${lines[3]}" = $'\tstdin:' ]
+  [ "${lines[4]}" = $'\t\tWill return status 42.' ]
+}
+
+@test "run bats_pipe for 2nd error status and fail on first of three. using --returned-status" {
+  run -0 bats_pipe --returned-status 2 returns_with_given_code 42 \| describe_input \| describe_input
+
+  [ "${#lines[@]}" -eq 5 ]
+  [ "${lines[0]}" = 'Got 0 args.' ]
+  [ "${lines[1]}" = 'stdin:' ]
+  [ "${lines[2]}" = $'\tGot 0 args.' ]
+  [ "${lines[3]}" = $'\tstdin:' ]
+  [ "${lines[4]}" = $'\t\tWill return status 42.' ]
+}
+
+@test "run bats_pipe for 2nd error status and fail on first of three. using --returned-status=" {
+  run -0 bats_pipe --returned-status=2 returns_with_given_code 42 \| describe_input \| describe_input
+
+  [ "${#lines[@]}" -eq 5 ]
+  [ "${lines[0]}" = 'Got 0 args.' ]
+  [ "${lines[1]}" = 'stdin:' ]
+  [ "${lines[2]}" = $'\tGot 0 args.' ]
+  [ "${lines[3]}" = $'\tstdin:' ]
+  [ "${lines[4]}" = $'\t\tWill return status 42.' ]
+}
+
+@test "run bats_pipe for 2nd error status and fail on first of three. using --returned-status neg" {
+  run -0 bats_pipe --returned-status -1 returns_with_given_code 42 \| describe_input \| describe_input
+
+  [ "${#lines[@]}" -eq 5 ]
+  [ "${lines[0]}" = 'Got 0 args.' ]
+  [ "${lines[1]}" = 'stdin:' ]
+  [ "${lines[2]}" = $'\tGot 0 args.' ]
+  [ "${lines[3]}" = $'\tstdin:' ]
+  [ "${lines[4]}" = $'\t\tWill return status 42.' ]
+}
+
+@test "run bats_pipe for 2nd error status and fail on first of three. using --returned-status=neg" {
+  run -0 bats_pipe --returned-status=-1 returns_with_given_code 42 \| describe_input \| describe_input
 
   [ "${#lines[@]}" -eq 5 ]
   [ "${lines[0]}" = 'Got 0 args.' ]
@@ -649,8 +1193,88 @@ output_binary_data_and_returns_with_given_code() {
   [ "${lines[4]}" = $'\t\tWill return status 42.' ]
 }
 
+@test "run bats_pipe for 2nd error status and fail on first of three with arg separator. using --returned-status" {
+  run -0 bats_pipe --returned-status 2 -- returns_with_given_code 42 \| describe_input \| describe_input
+
+  [ "${#lines[@]}" -eq 5 ]
+  [ "${lines[0]}" = 'Got 0 args.' ]
+  [ "${lines[1]}" = 'stdin:' ]
+  [ "${lines[2]}" = $'\tGot 0 args.' ]
+  [ "${lines[3]}" = $'\tstdin:' ]
+  [ "${lines[4]}" = $'\t\tWill return status 42.' ]
+}
+
+@test "run bats_pipe for 2nd error status and fail on first of three with arg separator. using --returned-status=" {
+  run -0 bats_pipe --returned-status=2 -- returns_with_given_code 42 \| describe_input \| describe_input
+
+  [ "${#lines[@]}" -eq 5 ]
+  [ "${lines[0]}" = 'Got 0 args.' ]
+  [ "${lines[1]}" = 'stdin:' ]
+  [ "${lines[2]}" = $'\tGot 0 args.' ]
+  [ "${lines[3]}" = $'\tstdin:' ]
+  [ "${lines[4]}" = $'\t\tWill return status 42.' ]
+}
+
+@test "run bats_pipe for 2nd error status and fail on first of three with arg separator. using --returned-status neg" {
+  run -0 bats_pipe --returned-status -1 -- returns_with_given_code 42 \| describe_input \| describe_input
+
+  [ "${#lines[@]}" -eq 5 ]
+  [ "${lines[0]}" = 'Got 0 args.' ]
+  [ "${lines[1]}" = 'stdin:' ]
+  [ "${lines[2]}" = $'\tGot 0 args.' ]
+  [ "${lines[3]}" = $'\tstdin:' ]
+  [ "${lines[4]}" = $'\t\tWill return status 42.' ]
+}
+
+@test "run bats_pipe for 2nd error status and fail on first of three with arg separator. using --returned-status=neg" {
+  run -0 bats_pipe --returned-status=-1 -- returns_with_given_code 42 \| describe_input \| describe_input
+
+  [ "${#lines[@]}" -eq 5 ]
+  [ "${lines[0]}" = 'Got 0 args.' ]
+  [ "${lines[1]}" = 'stdin:' ]
+  [ "${lines[2]}" = $'\tGot 0 args.' ]
+  [ "${lines[3]}" = $'\tstdin:' ]
+  [ "${lines[4]}" = $'\t\tWill return status 42.' ]
+}
+
 @test "run bats_pipe for 2nd error status and fail on second of three" {
   run -0 bats_pipe -2 returns_with_given_code 0 \| consume_stdin_and_returns_with_given_code 42 \| describe_input
+
+  [ "${#lines[@]}" -eq 3 ]
+  [ "${lines[0]}" = 'Got 0 args.' ]
+  [ "${lines[1]}" = 'stdin:' ]
+  [ "${lines[2]}" = $'\tWill return status 42.' ]
+}
+
+@test "run bats_pipe for 2nd error status and fail on second of three. using --returned-status" {
+  run -0 bats_pipe --returned-status 2 returns_with_given_code 0 \| consume_stdin_and_returns_with_given_code 42 \| describe_input
+
+  [ "${#lines[@]}" -eq 3 ]
+  [ "${lines[0]}" = 'Got 0 args.' ]
+  [ "${lines[1]}" = 'stdin:' ]
+  [ "${lines[2]}" = $'\tWill return status 42.' ]
+}
+
+@test "run bats_pipe for 2nd error status and fail on second of three. using --returned-status=" {
+  run -0 bats_pipe --returned-status=2 returns_with_given_code 0 \| consume_stdin_and_returns_with_given_code 42 \| describe_input
+
+  [ "${#lines[@]}" -eq 3 ]
+  [ "${lines[0]}" = 'Got 0 args.' ]
+  [ "${lines[1]}" = 'stdin:' ]
+  [ "${lines[2]}" = $'\tWill return status 42.' ]
+}
+
+@test "run bats_pipe for 2nd error status and fail on second of three. using --returned-status neg" {
+  run -0 bats_pipe --returned-status -1 returns_with_given_code 0 \| consume_stdin_and_returns_with_given_code 42 \| describe_input
+
+  [ "${#lines[@]}" -eq 3 ]
+  [ "${lines[0]}" = 'Got 0 args.' ]
+  [ "${lines[1]}" = 'stdin:' ]
+  [ "${lines[2]}" = $'\tWill return status 42.' ]
+}
+
+@test "run bats_pipe for 2nd error status and fail on second of three. using --returned-status=neg" {
+  run -0 bats_pipe --returned-status=-1 returns_with_given_code 0 \| consume_stdin_and_returns_with_given_code 42 \| describe_input
 
   [ "${#lines[@]}" -eq 3 ]
   [ "${lines[0]}" = 'Got 0 args.' ]
@@ -665,8 +1289,64 @@ output_binary_data_and_returns_with_given_code() {
   [ "${lines[0]}" = 'Will return status 42.' ]
 }
 
+@test "run bats_pipe for 2nd error status and fail on third of three. using --returned-status" {
+  run -42 bats_pipe --returned-status 2 returns_with_given_code 0 \| consume_stdin_and_returns_with_given_code 0 \| consume_stdin_and_returns_with_given_code 42
+
+  [ "${#lines[@]}" -eq 1 ]
+  [ "${lines[0]}" = 'Will return status 42.' ]
+}
+
+@test "run bats_pipe for 2nd error status and fail on third of three. using --returned-status=" {
+  run -42 bats_pipe --returned-status=2 returns_with_given_code 0 \| consume_stdin_and_returns_with_given_code 0 \| consume_stdin_and_returns_with_given_code 42
+
+  [ "${#lines[@]}" -eq 1 ]
+  [ "${lines[0]}" = 'Will return status 42.' ]
+}
+
+@test "run bats_pipe for 2nd error status and fail on third of three. using --returned-status neg" {
+  run -42 bats_pipe --returned-status -1 returns_with_given_code 0 \| consume_stdin_and_returns_with_given_code 0 \| consume_stdin_and_returns_with_given_code 42
+
+  [ "${#lines[@]}" -eq 1 ]
+  [ "${lines[0]}" = 'Will return status 42.' ]
+}
+
+@test "run bats_pipe for 2nd error status and fail on third of three. using --returned-status=neg" {
+  run -42 bats_pipe --returned-status=-1 returns_with_given_code 0 \| consume_stdin_and_returns_with_given_code 0 \| consume_stdin_and_returns_with_given_code 42
+
+  [ "${#lines[@]}" -eq 1 ]
+  [ "${lines[0]}" = 'Will return status 42.' ]
+}
+
 @test "run bats_pipe for 2nd error status and fail on all of three" {
   run -4 bats_pipe -2 returns_with_given_code 42 \| consume_stdin_and_returns_with_given_code 84 \| consume_stdin_and_returns_with_given_code 4
+
+  [ "${#lines[@]}" -eq 1 ]
+  [ "${lines[0]}" = 'Will return status 4.' ]
+}
+
+@test "run bats_pipe for 2nd error status and fail on all of three. using --returned-status" {
+  run -4 bats_pipe --returned-status 2 returns_with_given_code 42 \| consume_stdin_and_returns_with_given_code 84 \| consume_stdin_and_returns_with_given_code 4
+
+  [ "${#lines[@]}" -eq 1 ]
+  [ "${lines[0]}" = 'Will return status 4.' ]
+}
+
+@test "run bats_pipe for 2nd error status and fail on all of three. using --returned-status=" {
+  run -4 bats_pipe --returned-status=2 returns_with_given_code 42 \| consume_stdin_and_returns_with_given_code 84 \| consume_stdin_and_returns_with_given_code 4
+
+  [ "${#lines[@]}" -eq 1 ]
+  [ "${lines[0]}" = 'Will return status 4.' ]
+}
+
+@test "run bats_pipe for 2nd error status and fail on all of three. using --returned-status neg" {
+  run -4 bats_pipe --returned-status -1 returns_with_given_code 42 \| consume_stdin_and_returns_with_given_code 84 \| consume_stdin_and_returns_with_given_code 4
+
+  [ "${#lines[@]}" -eq 1 ]
+  [ "${lines[0]}" = 'Will return status 4.' ]
+}
+
+@test "run bats_pipe for 2nd error status and fail on all of three. using --returned-status=neg" {
+  run -4 bats_pipe --returned-status=-1 returns_with_given_code 42 \| consume_stdin_and_returns_with_given_code 84 \| consume_stdin_and_returns_with_given_code 4
 
   [ "${#lines[@]}" -eq 1 ]
   [ "${lines[0]}" = 'Will return status 4.' ]
@@ -676,7 +1356,35 @@ output_binary_data_and_returns_with_given_code() {
   run -1 bats_pipe -8 returns_with_given_code 42 \| consume_stdin_and_returns_with_given_code 84
 
   [ "${#lines[@]}" -eq 1 ]
-  [ "${lines[0]}" = "Usage error: Too large of -N argument given. Argument value: '8'." ]
+  [ "${lines[0]}" = "Usage error: Too large of -N argument (or --returned-status) given. Argument value: '8'." ]
+}
+
+@test "run bats_pipe for Nth error status too large. using --returned-status" {
+  run -1 bats_pipe --returned-status 8 returns_with_given_code 42 \| consume_stdin_and_returns_with_given_code 84
+
+  [ "${#lines[@]}" -eq 1 ]
+  [ "${lines[0]}" = "Usage error: Too large of -N argument (or --returned-status) given. Argument value: '8'." ]
+}
+
+@test "run bats_pipe for Nth error status too large. using --returned-status=" {
+  run -1 bats_pipe --returned-status=8 returns_with_given_code 42 \| consume_stdin_and_returns_with_given_code 84
+
+  [ "${#lines[@]}" -eq 1 ]
+  [ "${lines[0]}" = "Usage error: Too large of -N argument (or --returned-status) given. Argument value: '8'." ]
+}
+
+@test "run bats_pipe for Nth error status too large. using --returned-status neg" {
+  run -1 bats_pipe --returned-status -8 returns_with_given_code 42 \| consume_stdin_and_returns_with_given_code 84
+
+  [ "${#lines[@]}" -eq 1 ]
+  [ "${lines[0]}" = "Usage error: Too large of -N argument (or --returned-status) given. Argument value: '-8'." ]
+}
+
+@test "run bats_pipe for Nth error status too large. using --returned-status=neg" {
+  run -1 bats_pipe --returned-status=-8 returns_with_given_code 42 \| consume_stdin_and_returns_with_given_code 84
+
+  [ "${#lines[@]}" -eq 1 ]
+  [ "${lines[0]}" = "Usage error: Too large of -N argument (or --returned-status) given. Argument value: '-8'." ]
 }
 
 @test "run bats_pipe with stdout as binary data" {

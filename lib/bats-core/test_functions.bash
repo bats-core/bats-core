@@ -191,6 +191,8 @@ bats_pipe() { # [-N] [--] command0 [ \| command1 [ \| command2 [...]]]
   # chain of piped commands (similar to `set -o pipefail`).
   # Supplying -N (e.g. -0) will instead always use the exit code of the command
   # at that position in the chain.
+  # --returned-status=N could be used as an alternative to -N. This also allows
+  # for negative values (which count from the end in reverse order).
 
   local pipestatus_position=
 
@@ -199,6 +201,17 @@ bats_pipe() { # [-N] [--] command0 [ \| command1 [ \| command2 [...]]]
     case "$1" in
     -[0-9]*)
       pipestatus_position="${1#-}"
+      ;;
+    --returned-status*)
+      if [ "$1" = "--returned-status" ]; then
+        pipestatus_position="$2"
+        shift
+      elif [[ "$1" =~ ^--returned-status= ]]; then
+        pipestatus_position="${1#--returned-status=}"
+      else
+        printf "Usage error: unknown flag '%s'" "$1" >&2
+        return 1
+      fi
       ;;
     --)
       shift # eat the -- before breaking away
@@ -255,9 +268,9 @@ bats_pipe() { # [-N] [--] command0 [ \| command1 [ \| command2 [...]]]
   fi
 
   # there will be pipe_count + 1 entries in PIPE_STATUS (pipe_count number of \|'s between each entry).
-  # valid indices are [0;  pipe_count]
-  if [ -n "$pipestatus_position" ] && (( pipestatus_position > pipe_count )); then
-    printf "Usage error: Too large of -N argument given. Argument value: '%s'.\n" "$pipestatus_position" >&2
+  # valid indices are [-(pipe_count + 1), pipe_count]
+  if [ -n "$pipestatus_position" ] && (( (pipestatus_position > pipe_count) || (-pipestatus_position > (pipe_count + 1)) )); then
+    printf "Usage error: Too large of -N argument (or --returned-status) given. Argument value: '%s'.\n" "$pipestatus_position" >&2
     return 1
   fi
 
@@ -279,7 +292,10 @@ bats_pipe() { # [-N] [--] command0 [ \| command1 [ \| command2 [...]]]
         break;
       fi
     done
+  elif (( pipestatus_position >= 0 )); then
+    result_status="${__bats_pipe_eval_pipe_status[$pipestatus_position]}"
   else
+    local backward_iter_index="$((${#__bats_pipe_eval_pipe_status[@]} + pipestatus_position))"
     result_status="${__bats_pipe_eval_pipe_status[$pipestatus_position]}"
   fi
 
