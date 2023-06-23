@@ -8,7 +8,7 @@
   
 ## Basic Usage
 
-For test suites that are intended to run in isolation from the bats project, you can mount the test directory and run the [official bats docker image](https://hub.docker.com/r/bats/bats):
+For test suites that are intended to run in isolation from their project code, you can mount the test directory and run the [official bats docker image](https://hub.docker.com/r/bats/bats):
 
 ```bash
 $ docker run -it -v "$PWD:/code" bats/bats:latest /code/test
