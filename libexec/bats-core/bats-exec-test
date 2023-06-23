@@ -89,7 +89,7 @@ bats_teardown_trap() {
 
   # `bats_teardown_trap` is always called with one parameter (BATS_TEARDOWN_STARTED)
   # The second parameter is optional and corresponds for to the killer pid
-  # that will be forwarded to the exit trap to kill it if necesary
+  # that will be forwarded to the exit trap to kill it if necessary
   local killer_pid=${2:-}
 
   # mark the start of this function to distinguish where skip is called
@@ -269,7 +269,7 @@ bats_start_timeout_countdown() { # <timeout>
   # Start another process to kill the children of this process
   (
     sleep "$timeout" &
-    # sleep won't recieve signals, so we use wait below
+    # sleep won't receive signals, so we use wait below
     # and kill sleep explicitly when signalled to do so
     # shellcheck disable=SC2064
     trap "kill $!; exit 0" ABRT

@@ -1,6 +1,6 @@
 .\" generated with Ronn-NG/v0.9.1
 .\" http://github.com/apjanke/ronn-ng/tree/0.9.1
-.TH "BATS" "7" "November 2022" "bats-core" "Bash Automated Testing System"
+.TH "BATS" "7" "June 2023" "bats-core" "Bash Automated Testing System"
 .SH "NAME"
 \fBbats\fR \- Bats test file format
 .SH "DESCRIPTION"
@@ -60,9 +60,11 @@ Tag lists must be separated by commas and are allowed to contain whitespace\. Th
 Every tag starting with \fBbats:\fR (case insensitive!) is reserved for Bats\' internal use:
 .TP
 \fBbats:focus\fR
-If any test with the tag \fBbats:focus\fR is encountered in a test suite, only those tagged with this tag will be executed\. To prevent the CI from silently running on a subset of tests due to an accidentally commited \fBbats:focus\fR tag, the exit code of successful runs will be overriden to 1\.
+If any test with the tag \fBbats:focus\fR is encountered in a test suite, only those tagged with this tag will be executed\.
 .IP
-Should you require the true exit code, e\.g\. for a \fBgit bisect\fR operation, you can disable this behavior by setting \fBBATS_NO_FAIL_FOCUS_RUN=1\fR when running \fBbats\fR, but make sure to not commit this to CI!
+In focus mode, the exit code of successful runs will be overridden to 1 to prevent CI from silently running on a subset of tests due to an accidentally committed \fBbats:focus\fR tag\.
+.br
+Should you require the true exit code, e\.g\. for a \fBgit bisect\fR operation, you can disable this behavior by setting \fBBATS_NO_FAIL_FOCUS_RUN=1\fR when running \fBbats\fR, but make sure not to commit this to CI!
 .SH "THE RUN HELPER"
 Usage: run [OPTIONS] [\-\-]
 .P
@@ -226,6 +228,8 @@ There are several global variables you can use to introspect on Bats tests:
 \fB$BATS_RUN_TMPDIR\fR is the location to the temporary directory used by bats to store all its internal temporary files during the tests\. (default: \fB$BATS_TMPDIR/bats\-run\-$BATS_ROOT_PID\-XXXXXX\fR)
 .IP "\[ci]" 4
 \fB$BATS_FILE_EXTENSION\fR (default: \fBbats\fR) specifies the extension of test files that should be found when running a suite (via \fBbats [\-r] suite_folder/\fR)
+.IP "\[ci]" 4
+\fB$BATS_TEST_TAGS\fR the tags of the current test\.
 .IP "\[ci]" 4
 \fB$BATS_SUITE_TMPDIR\fR is a temporary directory common to all tests of a suite\. Could be used to create files required by multiple tests\.
 .IP "\[ci]" 4
