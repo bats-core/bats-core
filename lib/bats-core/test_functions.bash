@@ -182,6 +182,127 @@ bats_separate_lines() { # <output-array> <input-var>
   fi
 }
 
+bats_pipe() { # [-N] [--] command0 [ \| command1 [ \| command2 [...]]]
+  # This will run each command given, piping them appropriately.
+  # Meant to be used in combination with `run` helper to allow piped commands
+  # to be used.
+  # Note that `\|` must be used, not `|`.
+  # By default, the exit code of this command will be the last failure in the
+  # chain of piped commands (similar to `set -o pipefail`).
+  # Supplying -N (e.g. -0) will instead always use the exit code of the command
+  # at that position in the chain.
+  # --returned-status=N could be used as an alternative to -N. This also allows
+  # for negative values (which count from the end in reverse order).
+
+  local pipestatus_position=
+
+  # parse options starting with -
+  while [[ $# -gt 0 ]] && [[ $1 == -* ]]; do
+    case "$1" in
+    -[0-9]*)
+      pipestatus_position="${1#-}"
+      ;;
+    --returned-status*)
+      if [ "$1" = "--returned-status" ]; then
+        pipestatus_position="$2"
+        shift
+      elif [[ "$1" =~ ^--returned-status= ]]; then
+        pipestatus_position="${1#--returned-status=}"
+      else
+        printf "Usage error: unknown flag '%s'" "$1" >&2
+        return 1
+      fi
+      ;;
+    --)
+      shift # eat the -- before breaking away
+      break
+      ;;
+    *)
+      printf "Usage error: unknown flag '%s'" "$1" >&2
+      return 1
+      ;;
+    esac
+    shift
+  done
+
+  # parse and validate arguments, escape as necessary
+  local -a commands_and_args=("$@")
+  local -a escaped_args=()
+  local -i pipe_count=0
+  local -i previous_pipe_index=-1
+  local -i index=0
+  for (( index = 0; index < $#; index++ )); do
+    local current_command_or_arg="${commands_and_args[$index]}"
+    local escaped_arg="$current_command_or_arg"
+    if [[ "$current_command_or_arg" != '|' ]]; then
+      # escape args to protect them when eval'd (e.g. if they contain whitespace).
+      printf -v escaped_arg "%q" "$current_command_or_arg"
+    elif [ "$current_command_or_arg" = "|" ]; then
+      if [ "$index" -eq 0 ]; then
+        printf "Usage error: Cannot have leading \`\\|\`.\n" >&2
+        return 1
+      fi
+      if (( (previous_pipe_index + 1) >= index )); then
+        printf "Usage error: Cannot have consecutive \`\\|\`. Found at argument position '%s'.\n" "$index" >&2
+        return 1
+      fi
+      (( ++pipe_count ))
+      previous_pipe_index="$index"
+    fi
+    escaped_args+=("$escaped_arg")
+  done
+
+  if (( (previous_pipe_index > 0) && (previous_pipe_index == ($# - 1)) )); then
+    printf "Usage error: Cannot have trailing \`\\|\`.\n" >&2
+    return 1
+  fi
+
+  if (( pipe_count == 0 )); then
+    # Don't allow for no pipes. This might be a typo in the test,
+    # e.g. `run bats_pipe command0 | command1`
+    # instead of `run bats_pipe command0 \| command1`
+    # Unfortunately, we can't catch `run bats_pipe command0 \| command1 | command2`.
+    # But this check is better than just allowing no pipes.
+    printf "Usage error: No \`\\|\`s found. Is this an error?\n" >&2
+    return 1
+  fi
+
+  # there will be pipe_count + 1 entries in PIPE_STATUS (pipe_count number of \|'s between each entry).
+  # valid indices are [-(pipe_count + 1), pipe_count]
+  if [ -n "$pipestatus_position" ] && (( (pipestatus_position > pipe_count) || (-pipestatus_position > (pipe_count + 1)) )); then
+    printf "Usage error: Too large of -N argument (or --returned-status) given. Argument value: '%s'.\n" "$pipestatus_position" >&2
+    return 1
+  fi
+
+  # run commands and return appropriate pipe status
+  local -a __bats_pipe_eval_pipe_status=()
+  eval "${escaped_args[@]}" '; __bats_pipe_eval_pipe_status=(${PIPESTATUS[@]})'
+
+  local result_status=
+  if [ -z "$pipestatus_position" ]; then
+    # if we are performing default "last failure" behavior,
+    # iterate backwards through pipe_status to find the last error.
+    result_status=0
+    for index in "${!__bats_pipe_eval_pipe_status[@]}"; do
+      # OSX bash doesn't support negative indexing.
+      local backward_iter_index="$((${#__bats_pipe_eval_pipe_status[@]} - index - 1))"
+      local status_at_backward_iter_index="${__bats_pipe_eval_pipe_status[$backward_iter_index]}"
+      if (( status_at_backward_iter_index != 0 )); then
+        result_status="$status_at_backward_iter_index"
+        break;
+      fi
+    done
+  elif (( pipestatus_position >= 0 )); then
+    result_status="${__bats_pipe_eval_pipe_status[$pipestatus_position]}"
+  else
+    # Must use positive values for some bash's (like OSX).
+    local backward_iter_index="$((${#__bats_pipe_eval_pipe_status[@]} + pipestatus_position))"
+    result_status="${__bats_pipe_eval_pipe_status[$backward_iter_index]}"
+  fi
+
+  return "$result_status"
+}
+
 run() { # [!|-N] [--keep-empty-lines] [--separate-stderr] [--] <command to run...>
   # This has to be restored on exit from this function to avoid leaking our trap INT into surrounding code.
   # Non zero exits won't restore under the assumption that they will fail the test before it can be aborted,

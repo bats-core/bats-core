@@ -18,6 +18,7 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 * add tests for `--formatter cat` (#710)
 * test coverage in CI (#718)
 * Support for [rush](https://github.com/shenwei356/rush) as alternative to GNU parallel (#729)
+* add `bats_pipe` helper function for `run` that executes `\|` as pipes (#663)
 
 ### Documentation
 
