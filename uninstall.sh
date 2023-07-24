@@ -33,7 +33,7 @@ for elt in "$BATS_ROOT/lib/bats-core"/*; do
 done
 [[ -d "$d" ]] && rmdir "$d"
 
-rm -f "$PREFIX"/share/man/man1/bats.1
-rm -f "$PREFIX"/share/man/man7/bats.7
+rm -f "$PREFIX"/share/man/man1/bats.1.gz
+rm -f "$PREFIX"/share/man/man7/bats.7.gz
 
 echo "Uninstalled Bats from $PREFIX/bin/bats"

@@ -14,6 +14,8 @@ Source0:        https://%{provider}/%{project}/%{repo}/archive/v%{version}.tar.g
 
 BuildArch:      noarch
 
+BuildRequires:  make
+BuildRequires:  gzip
 Requires:       bash
 
 %description
@@ -23,6 +25,9 @@ Bats is most useful when testing software written in Bash, but you can use it to
 
 %prep
 %setup -q -n %{repo}-%{version}
+
+%build
+make -C man
 
 %install
 mkdir -p ${RPM_BUILD_ROOT}%{_prefix} ${RPM_BUILD_ROOT}%{_libexecdir} ${RPM_BUILD_ROOT}%{_mandir}

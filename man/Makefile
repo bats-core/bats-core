@@ -3,7 +3,7 @@
 # bats-core manpages
 #
 RONN := ronn -W
-PAGES := bats.1 bats.7
+PAGES := bats.1 bats.7 bats.1.gz bats.7.gz
 ORG := bats-core
 MANUAL := 'Bash Automated Testing System'
 ISOFMT := $(shell date -I)
@@ -18,6 +18,12 @@ bats.1: bats.1.ronn
 
 bats.7: bats.7.ronn
 	$(RONN) --date=$(ISOFMT) --manual=$(MANUAL) --organization=$(ORG) --roff $<
+
+bats.1.gz: bats.1
+	gzip -k $<
+
+bats.7.gz: bats.7
+	gzip -k $<
 
 clean:
 	$(RM) $(PAGES)

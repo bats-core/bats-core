@@ -17,7 +17,7 @@ install -d -m 755 "$PREFIX"/{bin,libexec/bats-core,"${LIBDIR}"/bats-core,share/m
 install -m 755 "$BATS_ROOT/bin"/* "$PREFIX/bin"
 install -m 755 "$BATS_ROOT/libexec/bats-core"/* "$PREFIX/libexec/bats-core"
 install -m 755 "$BATS_ROOT/lib/bats-core"/* "$PREFIX/${LIBDIR}/bats-core"
-install -m 644 "$BATS_ROOT/man/bats.1" "$PREFIX/share/man/man1"
-install -m 644 "$BATS_ROOT/man/bats.7" "$PREFIX/share/man/man7"
+install -m 644 "$BATS_ROOT/man/bats.1.gz" "$PREFIX/share/man/man1"
+install -m 644 "$BATS_ROOT/man/bats.7.gz" "$PREFIX/share/man/man7"
 
 echo "Installed Bats to $PREFIX/bin/bats"

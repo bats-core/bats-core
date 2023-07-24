@@ -29,8 +29,8 @@ setup() {
   [ -x "$INSTALL_DIR/libexec/bats-core/bats-format-junit" ]
   [ -x "$INSTALL_DIR/libexec/bats-core/bats-format-pretty" ]
   [ -x "$INSTALL_DIR/libexec/bats-core/bats-preprocess" ]
-  [ -f "$INSTALL_DIR/share/man/man1/bats.1" ]
-  [ -f "$INSTALL_DIR/share/man/man7/bats.7" ]
+  [ -f "$INSTALL_DIR/share/man/man1/bats.1.gz" ]
+  [ -f "$INSTALL_DIR/share/man/man7/bats.7.gz" ]
 
   reentrant_run "$INSTALL_DIR/bin/bats" -v
   [ "$status" -eq 0 ]
@@ -52,8 +52,8 @@ setup() {
   [ ! -x "$INSTALL_DIR/libexec/bats-core/bats-format-pretty" ]
   [ ! -x "$INSTALL_DIR/libexec/bats-core/bats-preprocess" ]
   [ ! -x "$INSTALL_DIR/libexec/bats-core" ]
-  [ ! -x "$INSTALL_DIR/share/man/man1/bats.1" ]
-  [ ! -x "$INSTALL_DIR/share/man/man7/bats.7" ]
+  [ ! -x "$INSTALL_DIR/share/man/man1/bats.1.gz" ]
+  [ ! -x "$INSTALL_DIR/share/man/man7/bats.7.gz" ]
 }
 
 @test "install.sh creates a multilib valid installation, and uninstall.sh undos it" {
@@ -75,8 +75,8 @@ setup() {
   [ -x "$INSTALL_DIR/libexec/bats-core/bats-format-junit" ]
   [ -x "$INSTALL_DIR/libexec/bats-core/bats-format-pretty" ]
   [ -x "$INSTALL_DIR/libexec/bats-core/bats-preprocess" ]
-  [ -f "$INSTALL_DIR/share/man/man1/bats.1" ]
-  [ -f "$INSTALL_DIR/share/man/man7/bats.7" ]
+  [ -f "$INSTALL_DIR/share/man/man1/bats.1.gz" ]
+  [ -f "$INSTALL_DIR/share/man/man7/bats.7.gz" ]
 
   reentrant_run "$INSTALL_DIR/bin/bats" -v
   [ "$status" -eq 0 ]
@@ -98,8 +98,8 @@ setup() {
   [ ! -x "$INSTALL_DIR/libexec/bats-core/bats-format-pretty" ]
   [ ! -x "$INSTALL_DIR/libexec/bats-core/bats-preprocess" ]
   [ ! -x "$INSTALL_DIR/libexec/bats-core" ]
-  [ ! -x "$INSTALL_DIR/share/man/man1/bats.1" ]
-  [ ! -x "$INSTALL_DIR/share/man/man7/bats.7" ]
+  [ ! -x "$INSTALL_DIR/share/man/man1/bats.1.gz" ]
+  [ ! -x "$INSTALL_DIR/share/man/man7/bats.7.gz" ]
 }
 
 @test "uninstall.sh works even if nothing is installed" {
