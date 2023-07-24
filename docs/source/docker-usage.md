@@ -2,10 +2,28 @@
 
 - [Docker Usage Guide](#docker-usage-guide)
   * [Basic Usage](#basic-usage)
+  * [Basic Usage for bats project](#basic-usage-for-bats-project)
   * [Docker Gotchas](#docker-gotchas)
   * [Extending from the base image](#extending-from-the-base-image)
   
 ## Basic Usage
+
+For test suites that are intended to run in isolation from their project code, you can mount the test directory and run the [official bats docker image](https://hub.docker.com/r/bats/bats):
+
+```bash
+$ docker run -it -v "$PWD:/code" bats/bats:latest /code/test
+```
+
+This Docker image includes libaries like [bats-support](https://github.com/bats-core/bats-support) and [bats-assert](https://github.com/bats-core/bats-assert), which can be loaded in `setup` like this:
+
+```bash
+setup() {
+    bats_load_library bats-support
+    bats_load_library bats-assert
+}
+```
+
+## Basic Usage for Bats Project
 
 To build and run `bats`' own tests:
 ```bash
@@ -28,12 +46,6 @@ To mount your tests into the container, first build the image as above. Then, fo
 $ docker run -it -v "$PWD:/opt/bats" bats/bats:latest /opt/bats/test
 ```
 This runs the `test/` directory from the bats-core repository inside the bats Docker container.
-
-For test suites that are intended to run in isolation from the project (i.e. the tests do not depend on project files outside of the test directory), you can mount the test directory by itself and execute the tests like so:
-
-```bash
-$ docker run -it -v "$PWD:/code" bats/bats:latest /code/test
-```
 
 ## Docker Gotchas
 

@@ -11,6 +11,12 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 
 ## [Unreleased]
 
+### Fixed
+
+#### Documentation
+
+* clarify docker usage (#741)
+
 ## [1.10.0] - 2023-07-15
 
 ### Added
