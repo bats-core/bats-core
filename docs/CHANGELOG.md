@@ -11,6 +11,10 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 
 ## [Unreleased]
 
+### Added
+
+* hardened CI scripts by using hashs instead of versions for actions (#754)
+
 ### Fixed
 
 #### Documentation
