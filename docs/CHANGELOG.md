@@ -14,6 +14,7 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 ### Added
 
 * hardened CI scripts by using hashs instead of versions for actions (#754)
+* add security.md (#762)
 
 ### Fixed
 
