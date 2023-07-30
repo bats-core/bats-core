@@ -14,7 +14,7 @@ For test suites that are intended to run in isolation from their project code, y
 $ docker run -it -v "$PWD:/code" bats/bats:latest /code/test
 ```
 
-This Docker image includes libaries like [bats-support](https://github.com/bats-core/bats-support) and [bats-assert](https://github.com/bats-core/bats-assert), which can be loaded in `setup` like this:
+This Docker image includes libraries like [bats-support](https://github.com/bats-core/bats-support) and [bats-assert](https://github.com/bats-core/bats-assert), which can be loaded in `setup` like this:
 
 ```bash
 setup() {
