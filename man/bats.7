@@ -60,7 +60,7 @@ Tag lists must be separated by commas and are allowed to contain whitespace\. Th
 Every tag starting with \fBbats:\fR (case insensitive!) is reserved for Bats\' internal use:
 .TP
 \fBbats:focus\fR
-If any test with the tag \fBbats:focus\fR is encountered in a test suite, only those tagged with this tag will be executed\. To prevent the CI from silently running on a subset of tests due to an accidentally commited \fBbats:focus\fR tag, the exit code of successful runs will be overriden to 1\.
+If any test with the tag \fBbats:focus\fR is encountered in a test suite, only those tagged with this tag will be executed\. To prevent the CI from silently running on a subset of tests due to an accidentally committed \fBbats:focus\fR tag, the exit code of successful runs will be overridden to 1\.
 .IP
 Should you require the true exit code, e\.g\. for a \fBgit bisect\fR operation, you can disable this behavior by setting \fBBATS_NO_FAIL_FOCUS_RUN=1\fR when running \fBbats\fR, but make sure to not commit this to CI!
 .SH "THE RUN HELPER"

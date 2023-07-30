@@ -158,7 +158,7 @@ bats_trim_filename() {
 }
 
 # normalize a windows path from e.g. C:/directory to /c/directory
-# The path must point to an existing/accessable directory, not a file!
+# The path must point to an existing/accessible directory, not a file!
 bats_normalize_windows_dir_path() { # <output-var> <path>
   local output_var="$1" path="$2"
   if [[ "$output_var" != NORMALIZED_INPUT ]]; then

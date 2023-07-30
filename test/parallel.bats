@@ -76,7 +76,7 @@ check_parallel_tests() { # <expected maximum parallelity>
   export PARALLELITY=12
 
   # file parallelization is needed for maximum parallelity!
-  # If we got over the skip (if no GNU parallel) in setup() we can reenable it safely!
+  # If we got over the skip (if no GNU parallel) in setup() we can re-enable it safely!
   unset BATS_NO_PARALLELIZE_ACROSS_FILES
   reentrant_run bash -c "bats --jobs $PARALLELITY \"${FIXTURE_ROOT}/suite/\" 2> >(grep -v '^parallel: Warning: ')"
 
@@ -104,7 +104,7 @@ check_parallel_tests() { # <expected maximum parallelity>
   export PARALLELITY=2
 
   # file parallelization is needed for this test!
-  # If we got over the skip (if no GNU parallel) in setup() we can reenable it safely!
+  # If we got over the skip (if no GNU parallel) in setup() we can re-enable it safely!
   unset BATS_NO_PARALLELIZE_ACROSS_FILES
   # run 4 files with parallelity of 2 -> serialize 2
   reentrant_run bats --jobs $PARALLELITY "$FIXTURE_ROOT/setup_file"

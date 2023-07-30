@@ -22,7 +22,7 @@ setup() {
   [[ "$output" == "Invalid Bats warning number 'invalid-number'. It must be an integer between 1 and "* ]]
 }
 
-@test "BW01 is printed when \`run\`ing a (non-existant) command with exit code 127 without exit code check" {
+@test "BW01 is printed when \`run\`ing a (non-existent) command with exit code 127 without exit code check" {
   reentrant_run -0 bats "$FIXTURE_ROOT/BW01.bats"
   [ "${lines[0]}" == "1..1" ]
   [ "${lines[1]}" == "ok 1 Trigger BW01" ]
@@ -32,7 +32,7 @@ setup() {
   [ "${lines[5]}" == "       in test file $RELATIVE_FIXTURE_ROOT/BW01.bats, line 3)" ]
 }
 
-@test "BW01 is not printed when \`run\`ing a (non-existant) command with exit code 127 with exit code check" {
+@test "BW01 is not printed when \`run\`ing a (non-existent) command with exit code 127 with exit code check" {
   reentrant_run -0 bats "$FIXTURE_ROOT/BW01_check_exit_code_is_127.bats"
   [ "${lines[0]}" == "1..1" ]
   [ "${lines[1]}" == "ok 1 Don't trigger BW01 with checked exit code 127" ]

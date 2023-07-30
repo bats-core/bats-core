@@ -72,7 +72,7 @@ not ok 1 a failing test
 # (in test file test/fixtures/bats/failing.bats, line 4)
 #   \`eval "( exit ${STATUS:-1} )"' failed
 begin 2 test_a_successful_test
-ok 2 a succesful test
+ok 2 a successful test
 unknown line
 EOF
   done

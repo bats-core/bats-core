@@ -80,7 +80,7 @@ internal use.
 If a test with the tag `bats:focus` is encountered in a test suite,
 all other tests will be filtered out and only those tagged with this tag will be executed.
 
-In focus mode, the exit code of successful runs will be overriden to 1 to prevent CI from silently running on a subset of tests due to an accidentally commited `bats:focus` tag.    
+In focus mode, the exit code of successful runs will be overridden to 1 to prevent CI from silently running on a subset of tests due to an accidentally committed `bats:focus` tag.    
 Should you require the true exit code, e.g. for a `git bisect` operation, you can disable this behavior by setting
 `BATS_NO_FAIL_FOCUS_RUN=1` when running `bats`, but make sure not to commit this to CI!
 
