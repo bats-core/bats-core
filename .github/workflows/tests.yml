@@ -3,6 +3,9 @@ name: Tests
 # Controls when the action will run.
 on: [push, pull_request, workflow_dispatch]
 
+permissions:
+  contents: read
+
 jobs:
   changelog:
     runs-on: ubuntu-20.04
@@ -276,9 +279,6 @@ jobs:
 
   coverage:
     runs-on: ubuntu-20.04
-    permissions:
-      pull-requests: write
-      issues: write
     steps:
       - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
       - run: |
