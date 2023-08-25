@@ -486,7 +486,7 @@ if [[ -n "$setup_suite_file" ]]; then
 fi
 
 # shellcheck source=lib/bats-core/validator.bash
-source "$BATS_ROOT/lib/bats-core/validator.bash"
+source "$BATS_ROOT/$BATS_LIBDIR/bats-core/validator.bash"
 
 trap 'BATS_INTERRUPTED=true' INT # let the lower levels handle the interruption
 

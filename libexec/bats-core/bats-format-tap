@@ -3,7 +3,7 @@ set -e
 trap '' INT
 
 # shellcheck source=lib/bats-core/formatter.bash
-source "$BATS_ROOT/lib/bats-core/formatter.bash"
+source "$BATS_ROOT/$BATS_LIBDIR/bats-core/formatter.bash"
 
 bats_tap_stream_plan() {
   printf "1..%d\n" "$1"

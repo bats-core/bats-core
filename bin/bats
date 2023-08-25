@@ -55,6 +55,8 @@ if ! BATS_PATH=$(bats_readlinkf "${BASH_SOURCE[0]}" 2>/dev/null); then
 fi
 
 export BATS_SAVED_PATH=$PATH
+BATS_BASE_LIBDIR=lib # this will be patched with the true value in install.sh
+
 export BATS_ROOT=${BATS_PATH%/*/*}
 export -f bats_readlinkf
-exec env BATS_ROOT="$BATS_ROOT" "$BATS_ROOT/libexec/bats-core/bats" "$@"
+exec env BATS_ROOT="$BATS_ROOT" BATS_LIBDIR="${BATS_BASE_LIBDIR:-lib}" "$BATS_ROOT/libexec/bats-core/bats" "$@"

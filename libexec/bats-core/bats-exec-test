@@ -79,9 +79,9 @@ bats_create_test_tmpdirs() {
 
 # load the test helper functions like `load` or `run` that are needed to run a (preprocessed) .bats file without bash errors
 # shellcheck source=lib/bats-core/test_functions.bash disable=SC2153
-source "$BATS_ROOT/lib/bats-core/test_functions.bash"
+source "$BATS_ROOT/$BATS_LIBDIR/bats-core/test_functions.bash"
 # shellcheck source=lib/bats-core/tracing.bash disable=SC2153
-source "$BATS_ROOT/lib/bats-core/tracing.bash"
+source "$BATS_ROOT/$BATS_LIBDIR/bats-core/tracing.bash"
 
 bats_teardown_trap() {
   bats_check_status_from_trap
@@ -109,7 +109,7 @@ bats_teardown_trap() {
 }
 
 # shellcheck source=lib/bats-core/common.bash
-source "$BATS_ROOT/lib/bats-core/common.bash"
+source "$BATS_ROOT/$BATS_LIBDIR/bats-core/common.bash"
 
 bats_exit_trap() {
   local status
@@ -352,7 +352,7 @@ bats_perform_test() {
 trap bats_interrupt_trap INT
 
 # shellcheck source=lib/bats-core/preprocessing.bash
-source "$BATS_ROOT/lib/bats-core/preprocessing.bash"
+source "$BATS_ROOT/$BATS_LIBDIR/bats-core/preprocessing.bash"
 
 exec 3<&1
 

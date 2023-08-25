@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # shellcheck source=lib/bats-core/tracing.bash
-source "$BATS_ROOT/lib/bats-core/tracing.bash"
+source "$BATS_ROOT/$BATS_LIBDIR/bats-core/tracing.bash"
 
 # generate a warning report for the parent call's call site
 bats_generate_warning() { # <warning number> [--no-stacktrace] [<printf args for warning string>...]

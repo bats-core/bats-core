@@ -4,7 +4,7 @@ BATS_TEST_DIRNAME="${BATS_TEST_FILENAME%/*}"
 BATS_TEST_NAMES=()
 
 # shellcheck source=lib/bats-core/warnings.bash
-source "$BATS_ROOT/lib/bats-core/warnings.bash"
+source "$BATS_ROOT/$BATS_LIBDIR/bats-core/warnings.bash"
 
 # find_in_bats_lib_path echoes the first recognized load path to
 # a library in BATS_LIB_PATH or relative to BATS_TEST_DIRNAME.
@@ -276,7 +276,7 @@ bats_pipe() { # [-N] [--] command0 [ \| command1 [ \| command2 [...]]]
 
   # run commands and return appropriate pipe status
   local -a __bats_pipe_eval_pipe_status=()
-  eval "${escaped_args[@]}" '; __bats_pipe_eval_pipe_status=(${PIPESTATUS[@]})'
+  eval "${escaped_args[*]}" '; __bats_pipe_eval_pipe_status=(${PIPESTATUS[@]})'
 
   local result_status=
   if [ -z "$pipestatus_position" ]; then
