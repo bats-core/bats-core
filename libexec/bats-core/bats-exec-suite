@@ -20,7 +20,7 @@ abort() {
 }
 
 # shellcheck source=lib/bats-core/common.bash disable=SC2153
-source "$BATS_ROOT/lib/bats-core/common.bash"
+source "$BATS_ROOT/$BATS_LIBDIR/bats-core/common.bash"
 
 while [[ "$#" -ne 0 ]]; do
   case "$1" in
@@ -106,7 +106,7 @@ if [[ "$num_jobs" != 1 ]]; then
     abort "Cannot execute \"${num_jobs}\" jobs without GNU parallel"
   fi
   # shellcheck source=lib/bats-core/semaphore.bash
-  source "${BATS_ROOT}/lib/bats-core/semaphore.bash"
+  source "${BATS_ROOT}/$BATS_LIBDIR/bats-core/semaphore.bash"
   bats_semaphore_setup
 fi
 
@@ -348,7 +348,7 @@ fi
 IFS=$'\n' read -d '' -r -a BATS_UNIQUE_TEST_FILENAMES < <(printf "%s\n" "$@" | nl | sort -k 2 | uniq -f 1 | sort -n | cut -f 2-) || true
 
 # shellcheck source=lib/bats-core/tracing.bash
-source "$BATS_ROOT/lib/bats-core/tracing.bash"
+source "$BATS_ROOT/$BATS_LIBDIR/bats-core/tracing.bash"
 bats_setup_tracing
 
 trap bats_suite_exit_trap EXIT
@@ -425,7 +425,7 @@ if [[ -n "$setup_suite_file" ]]; then
   # shellcheck disable=SC2034 # will be used in the sourced file below
   BATS_TEST_FILENAME="$setup_suite_file"
   # shellcheck source=lib/bats-core/test_functions.bash
-  source "$BATS_ROOT/lib/bats-core/test_functions.bash"
+  source "$BATS_ROOT/$BATS_LIBDIR/bats-core/test_functions.bash"
 
   # shellcheck disable=SC1090
   source "$setup_suite_file"

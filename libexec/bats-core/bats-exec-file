@@ -62,15 +62,15 @@ export BATS_TEST_FILENAME="$filename"
 
 # shellcheck source=lib/bats-core/preprocessing.bash
 # shellcheck disable=SC2153
-source "$BATS_ROOT/lib/bats-core/preprocessing.bash"
+source "$BATS_ROOT/$BATS_LIBDIR/bats-core/preprocessing.bash"
 
 bats_run_setup_file() {
   # shellcheck source=lib/bats-core/tracing.bash
   # shellcheck disable=SC2153
-  source "$BATS_ROOT/lib/bats-core/tracing.bash"
+  source "$BATS_ROOT/$BATS_LIBDIR/bats-core/tracing.bash"
   # shellcheck source=lib/bats-core/test_functions.bash
   # shellcheck disable=SC2153
-  source "$BATS_ROOT/lib/bats-core/test_functions.bash"
+  source "$BATS_ROOT/$BATS_LIBDIR/bats-core/test_functions.bash"
 
   exec 3<&1
 
@@ -125,7 +125,7 @@ bats_file_teardown_trap() {
 }
 
 # shellcheck source=lib/bats-core/common.bash
-source "$BATS_ROOT/lib/bats-core/common.bash"
+source "$BATS_ROOT/$BATS_LIBDIR/bats-core/common.bash"
 
 # shellcheck disable=SC2317
 bats_file_exit_trap() {
@@ -243,7 +243,7 @@ bats_run_tests_in_parallel() {
   local status=0
   mkdir -p "$output_folder"
   # shellcheck source=lib/bats-core/semaphore.bash
-  source "$BATS_ROOT/lib/bats-core/semaphore.bash"
+  source "$BATS_ROOT/$BATS_LIBDIR/bats-core/semaphore.bash"
   bats_semaphore_setup
   # the test_number_in_file is not yet incremented -> one before the next test to run
   local test_number_in_suite_of_last_finished_test="$BATS_FILE_FIRST_TEST_NUMBER_IN_SUITE" # stores which test was printed last

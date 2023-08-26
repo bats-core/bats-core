@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # shellcheck source=lib/bats-core/common.bash
-source "$BATS_ROOT/lib/bats-core/common.bash"
+source "$BATS_ROOT/$BATS_LIBDIR/bats-core/common.bash"
 
 bats_capture_stack_trace() {
   local test_file
@@ -336,7 +336,7 @@ bats_setup_tracing() {
   BATS_ERROR_SUFFIX=
   BATS_DEBUG_EXCLUDE_PATHS=()
   # exclude some paths by default
-  bats_add_debug_exclude_path "$BATS_ROOT/lib/"
+  bats_add_debug_exclude_path "$BATS_ROOT/$BATS_LIBDIR/"
   bats_add_debug_exclude_path "$BATS_ROOT/libexec/"
 
   exec 4<&1 # used for tracing

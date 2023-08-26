@@ -17,6 +17,6 @@ if [[ $1 == --list ]]; then
   exit 0
 fi
 
-LC_ALL=C.UTF-8 shellcheck "${targets[@]}"
+LC_ALL=C.UTF-8 shellcheck -x "${targets[@]}"
 
 exit $?
