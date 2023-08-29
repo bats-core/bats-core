@@ -38,7 +38,7 @@ BATS_VALID_TAG_PATTERN="[-_:[:alnum:]]+"
 BATS_VALID_TAGS_PATTERN="^ *($BATS_VALID_TAG_PATTERN)?( *, *$BATS_VALID_TAG_PATTERN)* *$"
 
 # shellcheck source=lib/bats-core/common.bash
-source "$BATS_ROOT/lib/bats-core/common.bash"
+source "$BATS_ROOT/$BATS_LIBDIR/bats-core/common.bash"
 
 extract_tags() { # <tag_type/return_var> <tags-string>
   local -r tag_type=$1 tags_string=$2

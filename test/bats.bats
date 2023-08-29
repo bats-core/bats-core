@@ -565,7 +565,7 @@ END_OF_ERR_MSG
 
 @test "test count validator catches mismatch and returns non zero" {
   # shellcheck source=lib/bats-core/validator.bash
-  source "$BATS_ROOT/lib/bats-core/validator.bash"
+  source "$BATS_ROOT/$BATS_LIBDIR/bats-core/validator.bash"
   export -f bats_test_count_validator
   reentrant_run bash -c "echo $'1..1\n' | bats_test_count_validator"
   [[ $status -ne 0 ]]
