@@ -1583,3 +1583,47 @@ enforce_own_process_group() {
 @test "Test timing does not break when overriding date on path" {
   bats "$FIXTURE_ROOT/override_date_on_path.bats"
 }
+
+@test "Coverage is enabled with --kcoverage_dir" {
+  bats_require_minimum_version 1.5.0
+  # Deliberately using a directory I can't write to.
+  reentrant_run -0 bats --kcoverage_dir "/TMPDIR/FOO" \
+    "$FIXTURE_ROOT/kcoverage.bats"
+}
+
+@test "Coverage is controlled by KCOVERAGE_DIR" {
+  bats_require_minimum_version 1.5.0
+  # Set up a fake kcov.
+  local output_file="${BATS_TEST_TMPDIR}/kcov-was-run"
+  cat > "${BATS_TEST_TMPDIR}/kcov" <<FAKE_KCOV
+!#/bin/bash
+
+echo "\$@" > "${output_file}"
+FAKE_KCOV
+  chmod 755 "${BATS_TEST_TMPDIR}/kcov"
+  PATH="${BATS_TEST_TMPDIR}:${PATH}"
+
+  # First run: coverage is disabled.
+  reentrant_run -0 true
+  [[ ! -e "${output_file}" ]]
+
+  # Second run: coverage is enabled.
+  KCOVERAGE_DIR="/TMPDIR/FOO"
+  export KCOVERAGE_DIR
+  reentrant_run -0 true
+  [[ -e "${output_file}" ]]
+  local output_contents
+  output_contents="$(< "${output_file}")"
+  local expected="--bash-dont-parse-binary-dir /TMPDIR/FOO"
+  expected+=" execute_with_unset_bats_vars true"
+  if [[ "${output_contents}" != "${expected}" ]]; then
+    echo "Bad output: expecting \"${expected}\", got \"${output_contents}\"" >&2
+    false
+  fi
+  unset KCOVERAGE_DIR
+  rm "${output_file}"
+
+  # Third run: coverage is disabled.
+  reentrant_run -0 true
+  [[ ! -e "${output_file}" ]]
+}

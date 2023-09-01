@@ -23,7 +23,6 @@ abort() {
 
 usage() {
   local cmd="${0##*/}"
-  local line
 
   cat <<HELP_TEXT_HEADER
 Usage: ${cmd} [OPTIONS] <tests>
@@ -63,6 +62,10 @@ HELP_TEXT_HEADER
                             as files in directory (if existing, must be empty)
   -h, --help                Display this help message
   -j, --jobs <jobs>         Number of parallel jobs (requires GNU parallel or shenwei356/rush)
+  --kcoverage_dir <directory>
+                            Gather test coverage with kcov(1).  See
+                            https://bats-core.readthedocs.io/en/stable/usage.html#test-coverage
+                            for details and limitations.
   --parallel-binary-name    Name of parallel binary
   --no-tempdir-cleanup      Preserve test output temporary directory
   --no-parallelize-across-files
@@ -294,6 +297,12 @@ while [[ "$#" -ne 0 ]]; do
   --line-reference-format)
     shift
     BATS_LINE_REFERENCE_FORMAT=$1
+    ;;
+  --kcoverage_dir)
+    shift
+    # shellcheck disable=SC2034
+    KCOVERAGE_DIR=$1
+    export KCOVERAGE_DIR
     ;;
   -*)
     abort "Bad command line option '$1'"
