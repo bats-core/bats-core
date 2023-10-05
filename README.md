@@ -93,29 +93,27 @@ See `docs/CHANGELOG.md`.
 ## Background
 
 <!-- markdownlint-disable MD026 -->
-### What's the plan and why?
-<!-- markdownlint-enable MD026 -->
-
-**Tuesday, September 19, 2017:** This was forked from [Bats][bats-orig] at
-commit [0360811][].  It was created via `git clone --bare` and `git push
---mirror`.
-
-[bats-orig]: https://github.com/sstephenson/bats
-[0360811]: https://github.com/sstephenson/bats/commit/03608115df2071fff4eaaff1605768c275e5f81f
-
-This [bats-core repo](https://github.com/bats-core/bats-core) is the community-maintained Bats project.
-
-<!-- markdownlint-disable MD026 -->
 ### Why was this fork created?
 <!-- markdownlint-enable MD026 -->
 
 There was an initial [call for maintainers][call-maintain] for the original Bats repository, but write access to it could not be obtained. With development activity stalled, this fork allowed ongoing maintenance and forward progress for Bats.
 
+**Tuesday, September 19, 2017:** This was forked from [Bats][bats-orig] at
+commit [0360811][].  It was created via `git clone --bare` and `git push
+--mirror`.
+
+As of **Thursday, April 29, 2021:** the original [Bats][bats-orig] has been
+archived by the owner and is now read-only.
+
+This [bats-core](https://github.com/bats-core/bats-core) repo is now the community-maintained Bats project.
+
 [call-maintain]: https://github.com/sstephenson/bats/issues/150
+[bats-orig]: https://github.com/sstephenson/bats
+[0360811]: https://github.com/sstephenson/bats/commit/03608115df2071fff4eaaff1605768c275e5f81f
 
 ## Copyright
 
-© 2017-2022 bats-core organization
+© 2017-2023 bats-core organization
 
 © 2011-2016 Sam Stephenson
 
