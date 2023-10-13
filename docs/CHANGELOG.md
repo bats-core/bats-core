@@ -21,6 +21,10 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 
 * `install.sh` now works for deviating `lib/` dirs (like `lib32`,`lib64`) (#487)
 
+### Changed
+
+* update Docker image with the latest `bats-file` version 0.4.0 (#780)
+
 #### Documentation
 
 * clarify docker usage (#741)
@@ -552,3 +556,4 @@ Changes:
 [0.3.0]: https://github.com/bats-core/bats-core/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/bats-core/bats-core/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/bats-core/bats-core/commits/v0.1.0
+
