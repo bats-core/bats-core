@@ -18,6 +18,10 @@ updates:
       - github-actions
       - dependencies
       - no changelog
+    groups:
+      actions-dependency:
+        patterns:
+          - "*"
 
   - package-ecosystem: docker
     directory: /
