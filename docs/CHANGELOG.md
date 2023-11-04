@@ -16,6 +16,7 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 * hardened CI scripts by using hashes instead of versions for actions and restricting permissions (#754, #770)
 * add security.md (#762)
 * add codespell CI checks (#720)
+* add dependabot github action group (#811)
 
 ### Fixed
 
