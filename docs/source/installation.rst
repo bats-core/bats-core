@@ -7,7 +7,7 @@ Linux: Distribition Package Manager
 
 Following Linux distributions provide Bats via their package manager:
 
-* Arch Linux: `community/bash-bats <https://archlinux.org/packages/community/any/bash-bats/>`__
+* Arch Linux: `extra/bash-bats <https://archlinux.org/packages/extra/any/bash-bats/>`__
 * Alpine Linux: `bats <https://pkgs.alpinelinux.org/package/edge/main/x86/bats>`__
 * Debian Linux: `shells/bats <https://packages.debian.org/search?keywords=bats>`__
 * Fedora Linux: `rpms/bats <https://src.fedoraproject.org/rpms/bats>`__
