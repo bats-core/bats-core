@@ -184,7 +184,7 @@ bats_emit_trace() {
       # avoid printing a function twice (at call site and at definition site)
       [[ $BASH_COMMAND != "$BATS_LAST_BASH_COMMAND" || ${BASH_LINENO[2]} != "$BATS_LAST_BASH_LINENO" || ${BASH_SOURCE[3]} != "$BATS_LAST_BASH_SOURCE" ]]; then
       local file="${BASH_SOURCE[2]}" # index 2: skip over bats_emit_trace and bats_debug_trap
-      if [[ $file == "${BATS_TEST_SOURCE}" ]]; then
+      if [[ $file == "${BATS_TEST_SOURCE:-}" ]]; then
         file="$BATS_TEST_FILENAME"
       fi
       local padding='$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$'
