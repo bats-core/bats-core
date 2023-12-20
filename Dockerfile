@@ -31,7 +31,7 @@ RUN /tmp/docker/install_libs.sh detik ${LIBS_VER_DETIK}
 
 # Install parallel and accept the citation notice (we aren't using this in a
 # context where it make sense to cite GNU Parallel).
-RUN apk add --no-cache parallel ncurses && \
+RUN apk add --no-cache parallel ncurses curl && \
     mkdir -p ~/.parallel && touch ~/.parallel/will-cite \
     && mkdir /code
 
