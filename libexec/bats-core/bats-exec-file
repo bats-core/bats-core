@@ -103,7 +103,7 @@ bats_run_setup_file() {
 
 bats_run_teardown_file() {
   local bats_teardown_file_status=0
-  # avoid running the therdown trap due to errors in teardown_file
+  # avoid running the teardown trap due to errors in teardown_file
   trap 'bats_file_exit_trap' EXIT
 
   # rely on bats_error_trap to catch failures

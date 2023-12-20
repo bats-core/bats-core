@@ -64,6 +64,8 @@ HELP_TEXT_HEADER
   -h, --help                Display this help message
   -j, --jobs <jobs>         Number of parallel jobs (requires GNU parallel or shenwei356/rush)
   --parallel-binary-name    Name of parallel binary
+  -l, --list                list test names without running any tests
+  -L, --list-with-filename  Same as -l but print filenames, too
   --no-tempdir-cleanup      Preserve test output temporary directory
   --no-parallelize-across-files
                             Serialize test file execution instead of running
@@ -135,7 +137,7 @@ fi
 arguments=()
 
 # list of single char options that don't expect a value
-single_char_flags="hvcprtTx"
+single_char_flags="hvclLprtTx"
 
 # Unpack single-character options bundled together, e.g. -cr, -pr.
 for arg in "$@"; do
@@ -168,6 +170,7 @@ formatter=${BATS_FORMATTER:-'tap'}
 report_formatter=''
 recursive=
 setup_suite_file=''
+skip_formatter=
 export BATS_TEMPDIR_CLEANUP=1
 if [[ -z "${CI:-}" && -t 0 && -t 1 ]] && command -v tput >/dev/null; then
   formatter='pretty'
@@ -224,6 +227,14 @@ while [[ "$#" -ne 0 ]]; do
   --parallel-binary-name)
     shift
     flags+=('--parallel-binary-name' "$1")
+    ;;
+  -l | --list)
+    flags+=('-l')
+    skip_formatter=1
+    ;;
+  -L | --list-with-filename)
+    flags+=('-L')
+    skip_formatter=1
     ;;
   -r | --recursive)
     recursive=1
@@ -505,7 +516,10 @@ bats_tee() { # <output-file> <command...>
   return $status
 }
 
-if [[ -n "$report_formatter" ]]; then
+# skip output formatting in case of we onyl print names (-l/-L)
+if [[ -n "$skip_formatter" ]]; then
+  exec bats-exec-suite "${flags[@]}" "${filenames[@]}"
+elif [[ -n "$report_formatter" ]]; then
   exec bats-exec-suite "${flags[@]}" "${filenames[@]}" |
     bats_tee "${BATS_REPORT_OUTPUT_DIR}/${BATS_REPORT_FILENAME}" "$interpolated_report_formatter" "${report_formatter_flags[@]}" |
     bats_test_count_validator |

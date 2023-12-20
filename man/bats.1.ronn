@@ -80,8 +80,8 @@ OPTIONS
     Count the number of test cases without running any tests
   * `--code-quote-style <style>`:
     A two character string of code quote delimiters or `custom`
-    which requires setting `$BATS_BEGIN_CODE_QUOTE` and 
-    `$BATS_END_CODE_QUOTE`. 
+    which requires setting `$BATS_BEGIN_CODE_QUOTE` and
+    `$BATS_END_CODE_QUOTE`.
     Can also be set via `$BATS_CODE_QUOTE_STYLE`.
   * `--line-reference-format`
     Controls how file/line references e.g. in stack traces are printed:
@@ -101,7 +101,7 @@ OPTIONS
       failed - runs tests that failed or were not present in the last run
       missed - runs tests that were not present in the last run
   * `--filter-tags <comma-separated-tag-list>`:
-    Only run tests that match all the tags in the list (`&&`). You can negate a 
+    Only run tests that match all the tags in the list (`&&`). You can negate a
     tag via prepending `!`.
     Specifying this flag multiple times allows for logical or (`||`):
     `--filter-tags A,B --filter-tags A,!C` matches tags `(A && B) || (A && !C)`
@@ -111,6 +111,10 @@ OPTIONS
     Display this help message
   * `-j`, `--jobs <jobs>`:
     Number of parallel jobs (requires GNU parallel)
+  * `-l`, `--list`:
+    list test names without running any tests
+  * `-L`, `--list-with-filename`:
+    Same as "-l" but print filenames, too
   * `--no-tempdir-cleanup`:
     Preserve test output temporary directory
   * `--no-parallelize-across-files`:
