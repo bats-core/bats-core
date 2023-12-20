@@ -32,6 +32,7 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 
 * clarify docker usage (#741)
 * update Arch Linux package URL in installation.rst (#821)
+* rename bash-bats to bats for Arch Linux in installation.rst (#836)
 
 ## [1.10.0] - 2023-07-15
 
