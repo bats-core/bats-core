@@ -20,10 +20,19 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 ### Fixed
 
 * `install.sh` now works for deviating `lib/` dirs (like `lib32`,`lib64`) (#487)
+* catch unset `BATS_TEST_SOURCE` in `lib/bats-core/tracing.bash` so
+  `set -u`/`set -o nounset` works as expected (#827)
+
+### Changed
+
+* update Docker image with the latest `bats-file` version 0.4.0 (#780)
+* update Docker image with the latest `bats-detik` version 1.2.1 (#810)
 
 #### Documentation
 
 * clarify docker usage (#741)
+* update Arch Linux package URL in installation.rst (#821)
+* rename bash-bats to bats for Arch Linux in installation.rst (#836)
 
 ## [1.10.0] - 2023-07-15
 
@@ -552,3 +561,4 @@ Changes:
 [0.3.0]: https://github.com/bats-core/bats-core/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/bats-core/bats-core/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/bats-core/bats-core/commits/v0.1.0
+
