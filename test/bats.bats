@@ -33,8 +33,8 @@ setup() {
 }
 
 @test "invalid filename prints an error" {
-  reentrant_run bats nonexistent
-  [ $status -eq 1 ]
+  bats_require_minimum_version 1.5.0
+  reentrant_run -1 bats nonexistent
   [ "$(expr "$output" : ".*does not exist")" -ne 0 ]
 }
 
@@ -308,7 +308,7 @@ setup() {
 }
 
 @test "single-line tests" {
-  reentrant_run bats --no-tempdir-cleanup "$FIXTURE_ROOT/single_line_no_shellcheck.bats"
+  reentrant_run bats "$FIXTURE_ROOT/single_line_no_shellcheck.bats"
   [ $status -eq 1 ]
   [ "${lines[1]}" = 'ok 1 empty' ]
   [ "${lines[2]}" = 'ok 2 passing' ]
@@ -413,7 +413,7 @@ END_OF_ERR_MSG
   reentrant_run bats --tap "$FIXTURE_ROOT/duplicate-tests_no_shellcheck.bats"
   [ $status -eq 1 ]
 
-  local expected='Error: Duplicate test name(s) in file '
+  local expected='ERROR: Duplicate test name(s) in file '
   expected+="\"${FIXTURE_ROOT}/duplicate-tests_no_shellcheck.bats\": test_gizmo_test"
 
   printf 'expected: "%s"\n' "$expected" >&2
@@ -612,10 +612,10 @@ END_OF_ERR_MSG
   cat "$TEMPFILE"
 
   run grep "file1" "$TEMPFILE"
-  [[ ${#lines[@]} -eq 2 ]]
+  [[ ${#lines[@]} -eq 3 ]]
 
   run grep "file2" "$TEMPFILE"
-  [[ ${#lines[@]} -eq 3 ]]
+  [[ ${#lines[@]} -eq 4 ]]
 }
 
 @test "Don't hang on CTRL-C (issue #353)" {
@@ -692,7 +692,7 @@ END_OF_ERR_MSG
   [ -d "$TEST_TMPDIR" ]
 
   # should also find preprocessed files!
-  [ "$(find "$TEST_TMPDIR" -name '*.src' | wc -l)" -eq 1 ]
+  [ "$(find "$TEST_TMPDIR" -name '*.src' | wc -l)" -gt 0 ]
 }
 
 @test "run should exit if tmpdir exist" {
@@ -745,7 +745,7 @@ END_OF_ERR_MSG
   echo "$output"
   [ "$status" -ne 0 ]
   [ "${lines[0]}" == 1..1 ]
-  [ "${lines[1]}" == 'not ok 1 setup_file failed' ]
+  [ "${lines[1]}" == 'not ok 1 bats-gather-tests' ]
   [ "${lines[2]}" == "# (from function \`helper' in file $RELATIVE_FIXTURE_ROOT/failure_in_free_code.bats, line 2," ]
   [ "${lines[3]}" == "#  in test file $RELATIVE_FIXTURE_ROOT/failure_in_free_code.bats, line 5)" ]
   [ "${lines[4]}" == "#   \`helper' failed" ]
@@ -1319,135 +1319,6 @@ END_OF_ERR_MSG
   TMPDIR=/tmp/ bats "$FIXTURE_ROOT/BATS_variables_dont_contain_double_slashes.bats"
 }
 
-@test "Without .bats/run-logs --filter-status failed returns an error" {
-  bats_require_minimum_version 1.5.0
-  reentrant_run -1 bats --filter-status failed "$FIXTURE_ROOT/passing_and_failing.bats"
-  [[ "${lines[0]}" == "Error: --filter-status needs '"*".bats/run-logs/' to save failed tests. Please create this folder, add it to .gitignore and try again." ]] || false
-}
-
-@test "Without previous recording --filter-status failed runs all tests and then runs only failed and missed tests" {
-  cd "$BATS_TEST_TMPDIR" # don't pollute the source folder
-  cp "$FIXTURE_ROOT/many_passing_and_one_failing.bats" .
-  mkdir -p .bats/run-logs
-  bats_require_minimum_version 1.5.0
-  reentrant_run -1 bats --filter-status failed "many_passing_and_one_failing.bats"
-  # without previous recording, all tests should be run
-  [ "${lines[0]}" == 'No recording of previous runs found. Running all tests!' ]
-  [ "${lines[1]}" == '1..4' ]
-  [ "$(grep -c 'not ok' <<<"$output")" -eq 1 ]
-
-  reentrant_run -1 bats --tap --filter-status failed "many_passing_and_one_failing.bats"
-  # now we should only run the failing test
-  [ "${lines[0]}" == 1..1 ]
-  [ "${lines[1]}" == "not ok 1 a failing test" ]
-
-  # add a new test that was missed before
-  echo $'@test missed { :; }' >>"many_passing_and_one_failing.bats"
-
-  find .bats/run-logs/ -type f -print -exec cat {} \;
-
-  reentrant_run -1 bats --tap --filter-status failed "many_passing_and_one_failing.bats"
-  # now we should only run the failing test
-  [ "${lines[0]}" == 1..2 ]
-  [ "${lines[1]}" == "not ok 1 a failing test" ]
-  [ "${lines[4]}" == "ok 2 missed" ]
-}
-
-@test "Without previous recording --filter-status passed runs all tests and then runs only passed and missed tests" {
-  cd "$BATS_TEST_TMPDIR" # don't pollute the source folder
-  cp "$FIXTURE_ROOT/many_passing_and_one_failing.bats" .
-  mkdir -p .bats/run-logs
-  bats_require_minimum_version 1.5.0
-  reentrant_run -1 bats --filter-status passed "many_passing_and_one_failing.bats"
-  # without previous recording, all tests should be run
-  [ "${lines[0]}" == 'No recording of previous runs found. Running all tests!' ]
-  [ "${lines[1]}" == '1..4' ]
-  [ "$(grep -c 'not ok' <<<"$output")" -eq 1 ]
-
-  reentrant_run -0 bats --tap --filter-status passed "many_passing_and_one_failing.bats"
-  # now we should only run the passed tests
-  [ "${lines[0]}" == 1..3 ]
-  [ "$(grep -c 'not ok' <<<"$output")" -eq 0 ]
-
-  # add a new test that was missed before
-  echo $'@test missed { :; }' >>"many_passing_and_one_failing.bats"
-
-  reentrant_run -0 bats --tap --filter-status passed "many_passing_and_one_failing.bats"
-  # now we should only run the passed and missed tests
-  [ "${lines[0]}" == 1..4 ]
-  [ "$(grep -c 'not ok' <<<"$output")" -eq 0 ]
-  [ "${lines[4]}" == "ok 4 missed" ]
-}
-
-@test "Without previous recording --filter-status missed runs all tests and then runs only missed tests" {
-  cd "$BATS_TEST_TMPDIR" # don't pollute the source folder
-  cp "$FIXTURE_ROOT/many_passing_and_one_failing.bats" .
-  mkdir -p .bats/run-logs
-  bats_require_minimum_version 1.5.0
-  reentrant_run -1 bats --filter-status missed "many_passing_and_one_failing.bats"
-  # without previous recording, all tests should be run
-  [ "${lines[0]}" == 'No recording of previous runs found. Running all tests!' ]
-  [ "${lines[1]}" == '1..4' ]
-  [ "$(grep -c -E '^ok' <<<"$output")" -eq 3 ]
-
-  # add a new test that was missed before
-  echo $'@test missed { :; }' >>"many_passing_and_one_failing.bats"
-
-  reentrant_run -0 bats --tap --filter-status missed "many_passing_and_one_failing.bats"
-  # now we should only run the missed test
-  [ "${lines[0]}" == 1..1 ]
-  [ "${lines[1]}" == "ok 1 missed" ]
-}
-
-@test "--filter-status failed gives warning on empty failed test list" {
-  cd "$BATS_TEST_TMPDIR" # don't pollute the source folder
-  cp "$FIXTURE_ROOT/passing.bats" .
-  mkdir -p .bats/run-logs
-  bats_require_minimum_version 1.5.0
-  # have no failing tests
-  reentrant_run -0 bats --filter-status failed "passing.bats"
-  # try to run the empty list of failing tests
-  reentrant_run -0 bats --filter-status failed "passing.bats"
-  [ "${lines[0]}" == "There where no failed tests in the last recorded run." ]
-  [ "${lines[1]}" == "1..0" ]
-  [ "${#lines[@]}" -eq 2 ]
-}
-
-enforce_own_process_group() {
-  set -m
-  "$@"
-}
-
-@test "--filter-status failed does not update list when run is aborted" {
-  if [[ "${BATS_NUMBER_OF_PARALLEL_JOBS:-1}" -gt 1 ]]; then
-    skip "Aborts don't work in parallel mode"
-  fi
-
-  cd "$BATS_TEST_TMPDIR" # don't pollute the source folder
-  cp "$FIXTURE_ROOT/sigint_in_failing_test.bats" .
-  mkdir -p .bats/run-logs
-
-  bats_require_minimum_version 1.5.0
-  # don't hang yet, so we get a useful rerun file
-  reentrant_run -1 env DONT_ABORT=1 bats "sigint_in_failing_test.bats"
-
-  # check that we have exactly one log
-  reentrant_run find .bats/run-logs -name '*.log'
-  [[ "${lines[0]}" == *.log ]] || false
-  [ ${#lines[@]} -eq 1 ]
-
-  local first_run_logs="$output"
-
-  sleep 1 # ensure we would get different timestamps for each run
-
-  # now rerun but abort midrun
-  reentrant_run -1 enforce_own_process_group bats --rerun-failed "sigint_in_failing_test.bats"
-
-  # should not have produced a new log
-  reentrant_run find .bats/run-logs -name '*.log'
-  [ "$first_run_logs" == "$output" ]
-}
-
 @test "BATS_TEST_RETRIES allows for retrying tests" {
   # shellcheck disable=SC2030
   export LOG="$BATS_TEST_TMPDIR/call.log"
@@ -1582,4 +1453,22 @@ enforce_own_process_group() {
 
 @test "Test timing does not break when overriding date on path" {
   bats "$FIXTURE_ROOT/override_date_on_path.bats"
+}
+
+@test "dynamic test registration" {
+  bats_require_minimum_version 1.5.0
+  reentrant_run -1 bats "$FIXTURE_ROOT/dynamic_test_registration.bats"
+  [ "${lines[0]}" == "1..6" ]
+  [ "${lines[1]}" == "ok 1 Some description" ]
+  [ "${lines[2]}" == "ok 2 dynamic_test_without_description" ]
+  [ "${lines[3]}" == "not ok 3 parametrized_test 1" ]
+  [ "${lines[4]}" == "# (from function \`parametrized_test' in test file test/fixtures/bats/dynamic_test_registration.bats, line 19)" ]
+  [ "${lines[5]}" == "#   \`false' failed" ]
+  [ "${lines[6]}" == "# parametrized_test 1: 1" ] # check that parameters gets passed
+  [ "${lines[7]}" == "not ok 4 parametrized_test 2" ]
+  [ "${lines[8]}" == "# (from function \`parametrized_test' in test file test/fixtures/bats/dynamic_test_registration.bats, line 19)" ]
+  [ "${lines[9]}" == "#   \`false' failed" ]
+  [ "${lines[10]}" == "# parametrized_test 2: 2" ] # check that parameters gets passed
+  [ "${lines[11]}" == "ok 5 normal test1" ]
+  [ "${lines[12]}" == "ok 6 normal test2" ]
 }

@@ -75,6 +75,9 @@ test_tags=()
 file_tags=()
 line_number=0
 exit_code=0
+test_descriptions=()
+all_tests_tags=()
+EMPTY_BODY_REGEX='[[:space:]]*\}'
 {
   while IFS= read -r line; do
     ((++line_number))
@@ -84,15 +87,24 @@ exit_code=0
       name="${name%[\'\"]}"
       body="${BASH_REMATCH[2]:-}"
       bats_encode_test_name "$name" 'encoded_name'
-      printf '%s() { bats_test_begin "%s"; %s\n' "${encoded_name:?}" "$name" "$body" || :
+
+      if [[ "$body" =~ $EMPTY_BODY_REGEX ]]; then
+        # ":;" is needed for empty {} after test
+        lead=':; '
+      else
+        # avoid injecting non user code into tests
+        lead=''
+      fi
+      printf '%s() { %s%s\n' "${encoded_name:?}" "$lead" "$body" || :
 
       bats_append_arrays_as_args \
         test_tags file_tags \
         -- bats_sort tags
-      if [[ -z "$BATS_TEST_FILTER" || "$name" =~ $BATS_TEST_FILTER ]]; then
-        IFS=,
-        tests+=("--tags '${tags[*]-}' $encoded_name")
-      fi
+        
+      tests+=("$encoded_name")
+      IFS=,
+      all_tests_tags+=("${tags[*]-}")
+      test_descriptions+=("$name")
       # shellcheck disable=SC2034 # used in `bats_sort tags`/`extract_tags`
       test_tags=() # reset test tags for next test
     else
@@ -112,8 +124,10 @@ exit_code=0
   done
 } <<<"$(<"$test_file")"$'\n'
 
-for test_name in "${tests[@]}"; do
-  printf 'bats_test_function %s\n' "$test_name"
+for ((i=0; i < ${#tests[@]}; ++i)); do
+  printf 'bats_test_function --description %q' "${test_descriptions[i]}"
+  printf ' --tags "%s"' "${all_tests_tags[i]}"
+  printf ' -- %s\n' "${tests[i]}"
 done
 
 exit $exit_code

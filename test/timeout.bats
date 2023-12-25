@@ -24,6 +24,7 @@ bats_require_minimum_version 1.5.0
   ((SECONDS < 10)) || false
 }
 
+# TODO: is this required? it seems to run longer than anticipated
 @test "sleep in run" {
     run sleep 10
 }

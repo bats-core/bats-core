@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
 
-BATS_TEST_DIRNAME="${BATS_TEST_FILENAME%/*}"
-BATS_TEST_NAMES=()
+# this must be called for each test file!
+_bats_test_functions_setup() { # <BATS_TEST_NUMBER>
+  BATS_TEST_DIRNAME="${BATS_TEST_FILENAME%/*}"
+  BATS_TEST_NAMES=()
+  BATS_TEST_NUMBER=${1?}
+}
 
 # shellcheck source=lib/bats-core/warnings.bash
 source "$BATS_ROOT/$BATS_LIBDIR/bats-core/warnings.bash"
@@ -462,25 +466,41 @@ skip() {
   exit 0
 }
 
-bats_test_begin() {
-  BATS_TEST_DESCRIPTION="$1"
-  if [[ -n "$BATS_EXTENDED_SYNTAX" ]]; then
-    printf 'begin %d %s\n' "$BATS_SUITE_TEST_NUMBER" "${BATS_TEST_NAME_PREFIX:-}$BATS_TEST_DESCRIPTION" >&3
-  fi
-  setup
-}
-
 bats_test_function() {
   local tags=()
-  if [[ "$1" == --tags ]]; then
-    IFS=',' read -ra tags <<<"$2"
-    shift 2
-  fi
-  local test_name="$1"
-  BATS_TEST_NAMES+=("$test_name")
-  if [[ "$test_name" == "$BATS_TEST_NAME" ]]; then
+  local got_test_description=
+  while (( $# > 0 )); do
+    case "$1" in
+      --description)
+        local test_description=
+        # use eval to resolve variable references in test names
+        eval "printf -v test_description '%s' \"$2\""
+        got_test_description=1
+        shift 2
+      ;;
+      --tags)
+        IFS=',' read -ra tags <<<"$2"
+        shift 2
+      ;;
+      --)
+        shift
+        break
+      ;;
+      *)
+        printf "ERROR: unknown option %s for bats_test_function" "$1" >&2
+        exit 1
+      ;;
+    esac
+  done
+
+  BATS_TEST_NAMES+=("$*")
+  # if this is the currently selected test, set tags and name
+  # this should only be entered from bats-exec-test
+  if [[ ${BATS_TEST_NAME-} == $*  ]]; then
     # shellcheck disable=SC2034
     BATS_TEST_TAGS=("${tags[@]+${tags[@]}}")
+    export BATS_TEST_DESCRIPTION="${test_description-$*}"
+    BATS_TEST_COMMAND=("$@")    
   fi
 }
 

@@ -72,6 +72,8 @@ bats_run_setup_file() {
   # shellcheck disable=SC2153
   source "$BATS_ROOT/$BATS_LIBDIR/bats-core/test_functions.bash"
 
+  _bats_test_functions_setup -1 # invalid TEST_NUMBER, as this is not a test
+
   exec 3<&1
 
   # these are defined only to avoid errors when referencing undefined variables down the line
@@ -96,6 +98,7 @@ bats_run_setup_file() {
 
   BATS_SOURCE_FILE_COMPLETED=1
 
+  bats_set_stacktrace_limit
   setup_file >>"$BATS_OUT" 2>&1
 
   BATS_SETUP_FILE_COMPLETED=1
@@ -105,6 +108,8 @@ bats_run_teardown_file() {
   local bats_teardown_file_status=0
   # avoid running the therdown trap due to errors in teardown_file
   trap 'bats_file_exit_trap' EXIT
+  
+  bats_set_stacktrace_limit
 
   # rely on bats_error_trap to catch failures
   teardown_file >>"$BATS_OUT" 2>&1 || bats_teardown_file_status=$?
@@ -292,7 +297,7 @@ bats_read_tests_list_file() {
 
 bats_run_tests() {
   bats_exec_file_status=0
-
+  # TODO: this does not seem to be used anymore?
   if [[ "${BATS_RUN_TESTS_SKIPPED-}" ]]; then
     # shellcheck disable=SC2317
     bats_test_begin() {
@@ -319,6 +324,7 @@ bats_run_tests() {
     local test_number_in_suite=$BATS_FILE_FIRST_TEST_NUMBER_IN_SUITE \
       test_number_in_file=0
     for test_name in "${tests_to_run[@]}"; do
+      #echo "bats-exec-file: execute test ${test_name}" >&2
       if [[ "${BATS_INTERRUPTED-NOTSET}" != NOTSET ]]; then
         bats_exec_file_status=130 # bash's code for SIGINT exits
         break
