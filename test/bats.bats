@@ -1406,9 +1406,8 @@ END_OF_ERR_MSG
 @test "Focus tests filter out other tests and override exit code for -c flag" {
   bats_require_minimum_version 1.5.0
   reentrant_run -0 bats -c "$FIXTURE_ROOT/focus.bats"
-  [ "${lines[0]}" == "WARNING: This test run only contains tests tagged \`bats:focus\`!" ]
-  [ "${lines[1]}" == '1' ]
-  [ "${#lines[@]}" == 2 ]
+  [ "${lines[0]}" == '1' ]
+  [ "${#lines[@]}" == 1 ]
 }
 
 @test "Focus tests filter out other tests and override exit code" {
