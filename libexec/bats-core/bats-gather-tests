@@ -159,7 +159,8 @@ function should_skip_because_of_status() {
   return 1
 }
 
-if [[ -n "$filter_status" ]]; then
+# shellcheck disable=SC2154 # filter_status is set in the environment
+if [[ -n "${filter_status-}" ]]; then
   case "$filter_status" in
   failed)
     bats_filter_test_by_status() { # <line>
