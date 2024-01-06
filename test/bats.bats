@@ -258,17 +258,22 @@ setup() {
 }
 
 @test "extended syntax" {
+  bats_require_minimum_version 1.5.0
+
   emulate_bats_env
   # shellcheck disable=SC2030,SC2031
-  REENTRANT_RUN_PRESERVE+=(BATS_LINE_REFERENCE_FORMAT)
-  reentrant_run bats-exec-suite -x "$FIXTURE_ROOT/failing_and_passing.bats"
-  echo "$output"
-  [ $status -eq 1 ]
+  REENTRANT_RUN_PRESERVE+=(BATS_LINE_REFERENCE_FORMAT BATS_BEGIN_CODE_QUOTE BATS_END_CODE_QUOTE)
+  reentrant_run -1 bats-exec-suite -x "$FIXTURE_ROOT/failing_and_passing.bats"
+
+  [ "${lines[0]}" = "1..2" ]
   [ "${lines[1]}" = "suite $FIXTURE_ROOT/failing_and_passing.bats" ]
   [ "${lines[2]}" = 'begin 1 a failing test' ]
   [ "${lines[3]}" = 'not ok 1 a failing test' ]
+  [ "${lines[4]}" = "# (in test file $RELATIVE_FIXTURE_ROOT/failing_and_passing.bats, line 2)" ]
+  [ "${lines[5]}" = "#   \`false' failed" ]
   [ "${lines[6]}" = 'begin 2 a passing test' ]
   [ "${lines[7]}" = 'ok 2 a passing test' ]
+  [ "${#lines[@]}" -eq 8 ]
 }
 
 @test "timing syntax" {
@@ -282,18 +287,24 @@ setup() {
 }
 
 @test "extended timing syntax" {
+  bats_require_minimum_version 1.5.0
+
   emulate_bats_env
   # shellcheck disable=SC2030,SC2031
-  REENTRANT_RUN_PRESERVE+=(BATS_LINE_REFERENCE_FORMAT)
-  reentrant_run bats-exec-suite -x -T "$FIXTURE_ROOT/failing_and_passing.bats"
-  echo "$output"
-  [ $status -eq 1 ]
+  REENTRANT_RUN_PRESERVE+=(BATS_LINE_REFERENCE_FORMAT BATS_BEGIN_CODE_QUOTE BATS_END_CODE_QUOTE)
+  reentrant_run -1 bats-exec-suite -x -T "$FIXTURE_ROOT/failing_and_passing.bats"
+
+  [ "${lines[0]}" = '1..2' ]
+  [ "${lines[1]}" = "suite $FIXTURE_ROOT/failing_and_passing.bats" ]
   regex="not ok 1 a failing test in [0-9]+ms"
   [ "${lines[2]}" = 'begin 1 a failing test' ]
   [[ "${lines[3]}" =~ $regex ]]
+  [ "${lines[4]}" = "# (in test file $RELATIVE_FIXTURE_ROOT/failing_and_passing.bats, line 2)" ]
+  [ "${lines[5]}" = "#   \`false' failed" ]
   [ "${lines[6]}" = 'begin 2 a passing test' ]
   regex="ok 2 a passing test in [0-9]+ms"
   [[ "${lines[7]}" =~ $regex ]]
+  [ "${#lines[@]}" -eq 8 ]
 }
 
 @test "time is greater than 0ms for long test" {
