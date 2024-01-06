@@ -1406,6 +1406,15 @@ END_OF_ERR_MSG
 @test "Focus tests filter out other tests and override exit code" {
   bats_require_minimum_version 1.5.0
   # expect exit 1: focus mode always fails tests
+  reentrant_run -0 bats -c "$FIXTURE_ROOT/focus.bats"
+  [ "${lines[0]}" == "WARNING: This test run only contains tests tagged \`bats:focus\`!" ]
+  [ "${lines[1]}" == '1' ]
+  [ "${#lines[@]}" == 2 ]
+}
+
+@test "Focus tests filter out other tests and override exit code" {
+  bats_require_minimum_version 1.5.0
+  # expect exit 1: focus mode always fails tests
   reentrant_run -1 bats "$FIXTURE_ROOT/focus.bats"
   [ "${lines[0]}" == "WARNING: This test run only contains tests tagged \`bats:focus\`!" ]
   [ "${lines[1]}" == '1..1' ]
@@ -1462,11 +1471,11 @@ END_OF_ERR_MSG
   [ "${lines[1]}" == "ok 1 Some description" ]
   [ "${lines[2]}" == "ok 2 dynamic_test_without_description" ]
   [ "${lines[3]}" == "not ok 3 parametrized_test 1" ]
-  [ "${lines[4]}" == "# (from function \`parametrized_test' in test file test/fixtures/bats/dynamic_test_registration.bats, line 19)" ]
+  [ "${lines[4]}" == "# (from function \`parametrized_test' in test file $RELATIVE_FIXTURE_ROOT/dynamic_test_registration.bats, line 19)" ]
   [ "${lines[5]}" == "#   \`false' failed" ]
   [ "${lines[6]}" == "# parametrized_test 1: 1" ] # check that parameters gets passed
   [ "${lines[7]}" == "not ok 4 parametrized_test 2" ]
-  [ "${lines[8]}" == "# (from function \`parametrized_test' in test file test/fixtures/bats/dynamic_test_registration.bats, line 19)" ]
+  [ "${lines[8]}" == "# (from function \`parametrized_test' in test file $RELATIVE_FIXTURE_ROOT/dynamic_test_registration.bats, line 19)" ]
   [ "${lines[9]}" == "#   \`false' failed" ]
   [ "${lines[10]}" == "# parametrized_test 2: 2" ] # check that parameters gets passed
   [ "${lines[11]}" == "ok 5 normal test1" ]

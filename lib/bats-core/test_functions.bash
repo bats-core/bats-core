@@ -4,6 +4,7 @@
 _bats_test_functions_setup() { # <BATS_TEST_NUMBER>
   BATS_TEST_DIRNAME="${BATS_TEST_FILENAME%/*}"
   BATS_TEST_NAMES=()
+  # shellcheck disable=SC2034
   BATS_TEST_NUMBER=${1?}
 }
 
@@ -468,14 +469,12 @@ skip() {
 
 bats_test_function() {
   local tags=()
-  local got_test_description=
   while (( $# > 0 )); do
     case "$1" in
       --description)
         local test_description=
         # use eval to resolve variable references in test names
         eval "printf -v test_description '%s' \"$2\""
-        got_test_description=1
         shift 2
       ;;
       --tags)
@@ -496,10 +495,11 @@ bats_test_function() {
   BATS_TEST_NAMES+=("$*")
   # if this is the currently selected test, set tags and name
   # this should only be entered from bats-exec-test
-  if [[ ${BATS_TEST_NAME-} == $*  ]]; then
+  if [[ ${BATS_TEST_NAME-} == "$*"  ]]; then
     # shellcheck disable=SC2034
     BATS_TEST_TAGS=("${tags[@]+${tags[@]}}")
     export BATS_TEST_DESCRIPTION="${test_description-$*}"
+    # shellcheck disable=SC2034
     BATS_TEST_COMMAND=("$@")    
   fi
 }

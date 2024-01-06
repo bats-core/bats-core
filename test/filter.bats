@@ -20,7 +20,7 @@ setup() {
   [ "${lines[0]}" == '1..4' ]
   [ "$(grep -c 'not ok' <<<"$output")" -eq 1 ]
 
-
+  # shellcheck disable=SC2154
   [ "${stderr_lines[0]}" == 'No recording of previous runs found. Running all tests!' ]
 
   reentrant_run -1 bats --tap --filter-status failed "many_passing_and_one_failing.bats"

@@ -4,9 +4,8 @@
 source "$BATS_ROOT/$BATS_LIBDIR/bats-core/common.bash"
 
 # set limit such that traces are only captured for calls at the same depth as this function in the calltree
-bats_set_stacktrace_limit() { # [<offset>]
-  local -i offset=${1-0}
-  BATS_STACK_TRACE_LIMIT=$(( ${#FUNCNAME[@]} + offset -1 )) # adjust by -1 to account for call to this functions
+bats_set_stacktrace_limit() {
+  BATS_STACK_TRACE_LIMIT=$(( ${#FUNCNAME[@]} - 1 )) # adjust by -1 to account for call to this functions
 }
 
 bats_capture_stack_trace() {

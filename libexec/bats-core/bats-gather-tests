@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
 set -eET
 
-args="$@"
+args=("$@")
 filter_tags_list=()
+included_tests=()
+excluded_tests=()
 
 # shellcheck source=lib/bats-core/common.bash disable=SC2153 
 source "$BATS_ROOT/lib/bats-core/common.bash"
@@ -11,6 +13,7 @@ source "$BATS_ROOT/lib/bats-core/preprocessing.bash"
 
 abort() {
   printf 'ERROR: '
+  # shellcheck disable=SC2059
   printf "$@"
   exit 1
 } >&2
@@ -104,7 +107,7 @@ function should_skip_because_of_focus() {
       # the current test enables focus mode ...
       focus_mode=1
       # ... -> remove previously found, unfocused tests
-      all_tests=()
+      included_tests=()
       : > "$TESTS_LIST_FILE"
     fi
   elif [[ $focus_mode == 1 ]]; then
@@ -117,7 +120,6 @@ function should_skip_because_of_focus() {
 
 function should_skip_because_of_filter_tags() {
   if (( ${#filter_tags_list[@]} > 0 )); then
-    local match=
     for filter_tags in "${filter_tags_list[@]}"; do
       # empty search tags only match empty test tags!
       if [[ -z "$filter_tags" ]]; then
@@ -148,6 +150,7 @@ function should_skip_because_of_filter_tags() {
 }
 
 function should_skip_because_of_filter() {
+  # shellcheck disable=SC2154 # filter should be inherited as env var
   ! [[ "$description" =~ $filter ]]
 }
 
@@ -213,9 +216,6 @@ if [[ -n "$filter_status" ]]; then
       esac
     done < <(sort "$BATS_PREVIOUS_RUNLOG_FILE")
 
-    included_tests=()
-    excluded_tests=()
-
     # enable filter only, when there is something to filter
     function should_skip_because_of_status() {
       #echo "Match:" 
@@ -253,7 +253,7 @@ bats_gather_tests_exit_trap() {
     bats_print_stack_trace "${stack_trace[@]}"
     bats_print_failed_command "${stack_trace[@]}" 
   fi >&2
-  exit $bats_gather_tests_exit_status
+  exit "$bats_gather_tests_exit_status"
 }
 trap bats_gather_tests_exit_trap EXIT
 
@@ -288,7 +288,6 @@ if [[ -n "$filter_status" ]]; then
     printf "status-filtered %s %s\n" "$filter_status" "$test_line"
   done >>"$BATS_RUNLOG_FILE"
 
-  test_count="${#included_tests[@]}"
   if [[ ${#test_names[@]} -eq 0 && ${#included_tests[@]} -eq 0 ]]; then
     printf "There were no tests of status '%s' in the last recorded run.\n" "$filter_status" >&2
   fi

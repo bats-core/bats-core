@@ -80,7 +80,7 @@ bats_create_test_tmpdirs() {
 # load the test helper functions like `load` or `run` that are needed to run a (preprocessed) .bats file without bash errors
 # shellcheck source=lib/bats-core/test_functions.bash disable=SC2153
 source "$BATS_ROOT/$BATS_LIBDIR/bats-core/test_functions.bash"
-_bats_test_functions_setup $BATS_TEST_NUMBER
+_bats_test_functions_setup "$BATS_TEST_NUMBER"
 
 # shellcheck source=lib/bats-core/tracing.bash disable=SC2153
 source "$BATS_ROOT/$BATS_LIBDIR/bats-core/tracing.bash"
