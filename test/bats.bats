@@ -1403,9 +1403,8 @@ END_OF_ERR_MSG
   [ "${lines[2]}" == "# (in test file $RELATIVE_FIXTURE_ROOT/failing.bats<-4)" ]
 }
 
-@test "Focus tests filter out other tests and override exit code" {
+@test "Focus tests filter out other tests and override exit code for -c flag" {
   bats_require_minimum_version 1.5.0
-  # expect exit 1: focus mode always fails tests
   reentrant_run -0 bats -c "$FIXTURE_ROOT/focus.bats"
   [ "${lines[0]}" == "WARNING: This test run only contains tests tagged \`bats:focus\`!" ]
   [ "${lines[1]}" == '1' ]
