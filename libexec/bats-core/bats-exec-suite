@@ -119,7 +119,7 @@ if [[ ! -d "$BATS_RUN_LOGS_DIRECTORY" ]]; then
 else
   # use UTC (-u) to avoid problems with TZ changes
   BATS_RUNLOG_DATE=$(date -u '+%Y-%m-%d %H:%M:%S UTC')
-  export BATS_RUNLOG_FILE="$BATS_RUN_LOGS_DIRECTORY/${BATS_RUNLOG_DATE}.log"
+  export BATS_RUNLOG_FILE="$BATS_RUN_LOGS_DIRECTORY/${BATS_RUNLOG_DATE}.log" BATS_RUNLOG_DATE
   if [[ ! -w "$BATS_RUN_LOGS_DIRECTORY" ]]; then
     printf "WARNING: Cannot write in %s. This run will not write a log!\n" "$BATS_RUN_LOGS_DIRECTORY" >&2
     BATS_RUNLOG_FILE='/dev/null' # disable runlog file
