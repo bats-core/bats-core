@@ -291,7 +291,7 @@ jobs:
           TERM: linux # fix tput for tty issue work around
 
       - name: Archive code coverage results
-        uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
+        uses: actions/upload-artifact@694cdabd8bdb0f10b2cea11669e1bf5453eed0a6 # v4.2.0
         with:
           name: code-coverage-report
           path: coverage/*
