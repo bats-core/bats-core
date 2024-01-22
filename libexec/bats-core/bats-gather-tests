@@ -149,10 +149,17 @@ function should_skip_because_of_filter_tags() {
   return 1 # no filter tags -> nothing to skip
 }
 
+if [[ -n "${filter-}" ]]; then
 function should_skip_because_of_filter() {
   # shellcheck disable=SC2154 # filter should be inherited as env var
   ! [[ "$description" =~ $filter ]]
 }
+else
+function should_skip_because_of_filter() {
+  # skip this when there is no $filter
+  return 1
+}
+fi
 
 function should_skip_because_of_status() {
   # disable this filter if not activated by $filter_status
