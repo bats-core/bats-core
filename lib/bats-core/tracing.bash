@@ -3,27 +3,25 @@
 # shellcheck source=lib/bats-core/common.bash
 source "$BATS_ROOT/$BATS_LIBDIR/bats-core/common.bash"
 
+# set limit such that traces are only captured for calls at the same depth as this function in the calltree
+bats_set_stacktrace_limit() {
+  BATS_STACK_TRACE_LIMIT=$(( ${#FUNCNAME[@]} - 1 )) # adjust by -1 to account for call to this functions
+}
+
 bats_capture_stack_trace() {
   local test_file
   local funcname
   local i
 
   BATS_DEBUG_LAST_STACK_TRACE=()
-
-  for ((i = 2; i != ${#FUNCNAME[@]}; ++i)); do
+  local limit=$(( ${#FUNCNAME[@]} - ${BATS_STACK_TRACE_LIMIT-0} ))
+  # TODO: why is the line number off by one in  @test "--trace recurses into functions but not into run"
+  for ((i = 2; i < limit ; ++i)); do
     # Use BATS_TEST_SOURCE if necessary to work around Bash < 4.4 bug whereby
     # calling an exported function erases the test file's BASH_SOURCE entry.
     test_file="${BASH_SOURCE[$i]:-$BATS_TEST_SOURCE}"
     funcname="${FUNCNAME[$i]}"
     BATS_DEBUG_LAST_STACK_TRACE+=("${BASH_LINENO[$((i - 1))]} $funcname $test_file")
-    case "$funcname" in
-    "${BATS_TEST_NAME-}" | setup | teardown | setup_file | teardown_file | setup_suite | teardown_suite)
-      break
-      ;;
-    esac
-    if [[ "${BASH_SOURCE[$i + 1]:-}" == *"bats-exec-file" ]] && [[ "$funcname" == 'source' ]]; then
-      break
-    fi
   done
 }
 
@@ -175,30 +173,55 @@ bats_normalize_windows_dir_path() { # <output-var> <path>
   printf -v "$output_var" "%s" "$NORMALIZED_INPUT"
 }
 
+bats_emit_trace_context() {
+  local padding='$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$'
+  local reference
+  bats_format_file_line_reference reference "${file##*/}" "$line"
+  printf '%s [%s]\n' "${padding::${#BASH_LINENO[@]}-limit-3}" "$reference" >&4
+}
+
+bats_emit_trace_command() {
+  local padding='$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$'
+  printf '%s %s\n' "${padding::${#BASH_LINENO[@]}-limit-3}" "$BASH_COMMAND" >&4
+
+  # keep track of printed commands
+  BATS_LAST_BASH_COMMAND="$BASH_COMMAND"
+  BATS_LAST_BASH_LINENO="$line"
+}
+
+BATS_EMIT_TRACE_LAST_STACK_DIFF=0
+
 bats_emit_trace() {
-  if [[ $BATS_TRACE_LEVEL -gt 0 ]]; then
-    local line=${BASH_LINENO[1]}
+  if [[ ${BATS_TRACE_LEVEL:-0} -gt 0 ]]; then
+    local line=${BASH_LINENO[1]} limit=${BATS_STACK_TRACE_LIMIT-0}
     # shellcheck disable=SC2016
-    if [[ $BASH_COMMAND != '"$BATS_TEST_NAME" >> "$BATS_OUT" 2>&1 4>&1' && $BASH_COMMAND != "bats_test_begin "* ]] && # don't emit these internal calls
-      [[ $BASH_COMMAND != "$BATS_LAST_BASH_COMMAND" || $line != "$BATS_LAST_BASH_LINENO" ]] &&
-      # avoid printing a function twice (at call site and at definition site)
-      [[ $BASH_COMMAND != "$BATS_LAST_BASH_COMMAND" || ${BASH_LINENO[2]} != "$BATS_LAST_BASH_LINENO" || ${BASH_SOURCE[3]} != "$BATS_LAST_BASH_SOURCE" ]]; then
+    if (( ${#FUNCNAME[@]} > limit + 2 ))  # only emit below BATS_STRACK_TRACE_LIMIT (adjust by 2 for trap+this function call)
+      # avoid printing the same line twice on errexit
+      [[ $BASH_COMMAND != "$BATS_LAST_BASH_COMMAND" || $line != "$BATS_LAST_BASH_LINENO" ]]; then
       local file="${BASH_SOURCE[2]}" # index 2: skip over bats_emit_trace and bats_debug_trap
       if [[ $file == "${BATS_TEST_SOURCE:-}" ]]; then
         file="$BATS_TEST_FILENAME"
       fi
-      local padding='$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$'
-      if ((BATS_LAST_STACK_DEPTH != ${#BASH_LINENO[@]})); then
-        local reference
-        bats_format_file_line_reference reference "${file##*/}" "$line"
-        printf '%s [%s]\n' "${padding::${#BASH_LINENO[@]}-4}" "$reference" >&4
+      # stack size difference since last call of this function
+      # <0: means new function call  
+      # >0: means return
+      # =0: in same function as before (assuming we did not skip return/call)
+      local stack_diff=$(( BATS_LAST_STACK_DEPTH - ${#BASH_LINENO[@]} ))
+      # show context immediately when returning or on second command in new function
+      # as the first "command" is the function itself
+      if (( stack_diff > 0 )) || (( BATS_EMIT_TRACE_LAST_STACK_DIFF < 0 )); then
+          bats_emit_trace_context
       fi
-      printf '%s %s\n' "${padding::${#BASH_LINENO[@]}-4}" "$BASH_COMMAND" >&4
-      BATS_LAST_BASH_COMMAND="$BASH_COMMAND"
-      BATS_LAST_BASH_LINENO="$line"
-      BATS_LAST_BASH_SOURCE="${BASH_SOURCE[2]}"
-      BATS_LAST_STACK_DEPTH="${#BASH_LINENO[@]}"
+      # only print command when moving up or staying in same function
+      # again, avoids printing the first command (the function itself) in new function
+      if (( stack_diff >= 0 )); then
+        bats_emit_trace_command
+      fi
+
+      BATS_EMIT_TRACE_LAST_STACK_DIFF=$stack_diff
     fi
+    # always update to detect stack depth changes regardless of printing
+    BATS_LAST_STACK_DEPTH="${#BASH_LINENO[@]}"
   fi
 }
 
@@ -344,7 +367,6 @@ bats_setup_tracing() {
     # avoid undefined variable errors
     BATS_LAST_BASH_COMMAND=
     BATS_LAST_BASH_LINENO=
-    BATS_LAST_BASH_SOURCE=
     BATS_LAST_STACK_DEPTH=
     # try to exclude helper libraries if found, this is only relevant for tracing
     while read -r path; do
