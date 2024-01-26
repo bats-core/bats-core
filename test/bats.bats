@@ -1151,7 +1151,7 @@ END_OF_ERR_MSG
   bats_require_minimum_version 1.5.0
 
   reentrant_run -0 bats --gather-test-outputs-in "$OUTPUT_DIR" "$FIXTURE_ROOT/test_with_slash.bats"
-  [ -e "$OUTPUT_DIR/1-test with %2F in name.log" ]
+  [ -e "$OUTPUT_DIR/1-test with %2F in %2F name.log" ]
 }
 
 @test "Tell about missing flock and shlock" {
