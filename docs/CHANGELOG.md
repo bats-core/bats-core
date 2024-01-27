@@ -23,6 +23,7 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 * `install.sh` now works for deviating `lib/` dirs (like `lib32`,`lib64`) (#487)
 * catch unset `BATS_TEST_SOURCE` in `lib/bats-core/tracing.bash` so
   `set -u`/`set -o nounset` works as expected (#827)
+* fix `--gather-test-outputs-in` fails on tests with multiple `/` (#789)
 
 ### Changed
 
