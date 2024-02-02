@@ -491,11 +491,14 @@ bats_test_function() {
       ;;
     esac
   done
-
   BATS_TEST_NAMES+=("$*")
+  local quoted_parameters
+  printf -v quoted_parameters " %q" "$@"
+  quoted_parameters=${quoted_parameters:1} # cut off leading space
+
   # if this is the currently selected test, set tags and name
   # this should only be entered from bats-exec-test
-  if [[ ${BATS_TEST_NAME-} == "$*"  ]]; then
+  if [[ ${BATS_TEST_NAME-} == "$quoted_parameters"  ]]; then
     # shellcheck disable=SC2034
     BATS_TEST_TAGS=("${tags[@]+${tags[@]}}")
     export BATS_TEST_DESCRIPTION="${test_description-$*}"

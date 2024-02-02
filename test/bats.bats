@@ -1476,7 +1476,7 @@ END_OF_ERR_MSG
 @test "dynamic test registration" {
   bats_require_minimum_version 1.5.0
   reentrant_run -1 bats "$FIXTURE_ROOT/dynamic_test_registration.bats"
-  [ "${lines[0]}" == "1..6" ]
+  [ "${lines[0]}" == "1..7" ]
   [ "${lines[1]}" == "ok 1 Some description" ]
   [ "${lines[2]}" == "ok 2 dynamic_test_without_description" ]
   [ "${lines[3]}" == "not ok 3 parametrized_test 1" ]
@@ -1487,6 +1487,11 @@ END_OF_ERR_MSG
   [ "${lines[8]}" == "# (from function \`parametrized_test' in test file $RELATIVE_FIXTURE_ROOT/dynamic_test_registration.bats, line 19)" ]
   [ "${lines[9]}" == "#   \`false' failed" ]
   [ "${lines[10]}" == "# parametrized_test 2: 2" ] # check that parameters gets passed
-  [ "${lines[11]}" == "ok 5 normal test1" ]
-  [ "${lines[12]}" == "ok 6 normal test2" ]
+  [ "${lines[11]}" == "not ok 5 parametrized_test th ree" ]
+  [ "${lines[12]}" == "# (from function \`parametrized_test' in test file $RELATIVE_FIXTURE_ROOT/dynamic_test_registration.bats, line 19)" ]
+  [ "${lines[13]}" == "#   \`false' failed" ]
+  [ "${lines[14]}" == "# parametrized_test th\\ ree: th ree" ] # check that parameters gets passed
+  [ "${lines[15]}" == "ok 6 normal test1" ]
+  [ "${lines[16]}" == "ok 7 normal test2" ]
+  [ "${#lines[*]}" -eq 17 ]
 }

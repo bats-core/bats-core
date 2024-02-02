@@ -23,6 +23,6 @@ parametrized_test() {
     true
 }
 
-for val in 1 2; do
+for val in 1 2 "th ree"; do
     bats_test_function -- parametrized_test "$val"
 done
