@@ -9,6 +9,5 @@ build:
     python: "3.12"
 
 python:
-  version: 3.12
   install:
     - requirements: docs/source/requirements.txt
