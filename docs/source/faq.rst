@@ -167,4 +167,6 @@ There is also `BATS_TEST_SKIPPED` which will be non-empty (contains the skip mes
 How can I setup/cleanup before/after all tests?
 -----------------------------------------------
 
-Currently, this is not supported. Please contribute your usecase to issue `#39 <https://github.com/bats-core/bats-core/issues/39>`_.
+Setup/cleanup before/after all tests can be achieved using the special `setup-suite` and `teardown-suite` functions.
+These functions must be placed into a dedicated `setup_suite.bash` file next to your `.bats` files. 
+For more information check out the `setup` and `teardown` section under `Writing Tests`.
