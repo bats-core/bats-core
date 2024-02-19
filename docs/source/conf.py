@@ -32,7 +32,8 @@ release = '1'
 # ones.
 extensions = [
     'recommonmark',
-    'sphinxcontrib.programoutput'
+    'sphinxcontrib.programoutput',
+    'sphinx.ext.autosectionlabel'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
