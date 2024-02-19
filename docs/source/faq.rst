@@ -169,4 +169,4 @@ How can I setup/cleanup before/after all tests?
 
 Setup/cleanup before/after all tests can be achieved using the special `setup_suite` and `teardown_suite` functions.
 These functions must be placed into a dedicated `setup_suite.bash` file next to your `.bats` files. 
-For more information check out the :ref:`setup and teardown section <writing-tests:setup and teardown Pre- and post-test hooks>`.
+For more information check out the :ref:`setup and teardown section <setup and teardown: pre- and post-test hooks>`.
