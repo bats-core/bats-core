@@ -32,7 +32,7 @@ jobs:
   failsafe:
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Check failing tests fail suite,
         run: "! bin/bats test/fixtures/bats/failing.bats"
 
