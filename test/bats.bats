@@ -673,8 +673,8 @@ END_OF_ERR_MSG
 }
 
 @test "test works even if PATH is reset" {
-  reentrant_run bats "$FIXTURE_ROOT/update_path_env.bats"
-  [ "$status" -eq 1 ]
+  bats_require_minimum_version 1.5.0
+  reentrant_run -1 bats "$FIXTURE_ROOT/update_path_env.bats" "$FIXTURE_ROOT/update_path_env.bats"
   [ "${lines[4]}" = "# /usr/local/bin:/usr/bin:/bin" ]
 }
 
