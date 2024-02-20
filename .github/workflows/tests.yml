@@ -207,7 +207,7 @@ jobs:
           time ./bin/bats  --print-output-on-failure test/
 
   freebsd:
-    runs-on: macos-12
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         packages:
