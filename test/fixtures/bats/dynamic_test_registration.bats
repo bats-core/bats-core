@@ -19,10 +19,10 @@ parametrized_test() {
     false
 }
 
-@test "normal test2" {
-    true
-}
-
 for val in 1 2 "th ree"; do
     bats_test_function -- parametrized_test "$val"
 done
+
+@test "normal test2" {
+    true
+}
