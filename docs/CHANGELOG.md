@@ -24,6 +24,7 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 * catch unset `BATS_TEST_SOURCE` in `lib/bats-core/tracing.bash` so
   `set -u`/`set -o nounset` works as expected (#827)
 * fix `--gather-test-outputs-in` fails on tests with multiple `/` (#789)
+* install does not create unused `/usr/share/bats` anymore (#857)
 
 ### Changed
 
