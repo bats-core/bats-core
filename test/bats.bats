@@ -1495,3 +1495,17 @@ END_OF_ERR_MSG
   [ "${lines[16]}" == "ok 7 normal test2" ]
   [ "${#lines[*]}" -eq 17 ]
 }
+
+@test "IFS is preserved in all contexts" {
+  bats_require_minimum_version 1.5.0
+
+  REENTRANT_RUN_PRESERVE+=(IFS EXPECTED_IFS)
+  export EXPECTED_IFS="$IFS"
+  export EXPECTED_IFS_MISMATCH_FILE="$BATS_TEST_TMPDIR/IFS_mismatches"
+
+  reentrant_run -0 bats "$FIXTURE_ROOT/preserve_IFS"
+
+  if [[ -e "$EXPECTED_IFS_MISMATCH_FILE" ]]; then
+    cat "$EXPECTED_IFS_MISMATCH_FILE"
+  fi
+}
