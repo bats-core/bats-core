@@ -2,6 +2,19 @@
 
 set -euo pipefail
 
+# Note: We first need to use POSIX's `[ ... ]' instead of Bash's `[[ ... ]]'
+# because this is the check for Bash, where the shell may not be Bash.  Once we
+# confirm that we are in Bash, we can use [[ ... ]] and (( ... )).  Note that
+# these [[ ... ]] and (( ... )) do not cause syntax errors in POSIX shells,
+# though they can be parsed differently.
+if [ -z "${BASH_VERSION-}" ] ||
+    [[ -z "${BASH_VERSINFO-}" ]] ||
+    ((BASH_VERSINFO[0] < 3 || (BASH_VERSINFO[0] == 3 && BASH_VERSINFO[1] < 2)))
+then
+  printf 'bats: this program needs to be run by Bash >= 3.2\n' >&2
+  exit 1
+fi
+
 if command -v greadlink >/dev/null; then
   bats_readlinkf() {
     greadlink -f "$1"

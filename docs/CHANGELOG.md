@@ -17,6 +17,7 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 * add security.md (#762)
 * add codespell CI checks (#720)
 * dynamic test registration via `bats_test_function` (#349)
+* add check that Bats is executed with Bash >= 3.2 (#873)
 
 ### Fixed
 
