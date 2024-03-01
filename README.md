@@ -8,8 +8,9 @@
 
 [![Join the chat in bats-core/bats-core on gitter](https://badges.gitter.im/bats-core/bats-core.svg)][gitter]
 
-Bats is a [TAP](https://testanything.org/)-compliant testing framework for Bash.  It provides a simple
-way to verify that the UNIX programs you write behave as expected.
+Bats is a [TAP](https://testanything.org/)-compliant testing framework for Bash
+3.2 or above.  It provides a simple way to verify that the UNIX programs you
+write behave as expected.
 
 A Bats test file is a Bash script with special syntax for defining test cases.
 Under the hood, each test case is just a function with a description.
