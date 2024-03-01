@@ -1499,13 +1499,5 @@ END_OF_ERR_MSG
 @test "IFS is preserved in all contexts" {
   bats_require_minimum_version 1.5.0
 
-  REENTRANT_RUN_PRESERVE+=(IFS EXPECTED_IFS)
-  export EXPECTED_IFS="$IFS"
-  export EXPECTED_IFS_MISMATCH_FILE="$BATS_TEST_TMPDIR/IFS_mismatches"
-
-  reentrant_run -0 bats "$FIXTURE_ROOT/preserve_IFS"
-
-  if [[ -e "$EXPECTED_IFS_MISMATCH_FILE" ]]; then
-    cat "$EXPECTED_IFS_MISMATCH_FILE"
-  fi
+  reentrant_run -0 bats --print-output-on-failure "$FIXTURE_ROOT/preserve_IFS" --filter-tags ''
 }

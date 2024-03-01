@@ -18,22 +18,27 @@ abort() {
   exit 1
 } >&2
 
+read_tags() {
+  local IFS=,
+  read -ra tags <<<"$1" || true
+  if ((${#tags[@]} > 0)); then
+    for ((i = 0; i < ${#tags[@]}; ++i)); do
+      bats_trim "tags[$i]" "${tags[$i]}"
+    done
+    bats_sort sorted_tags "${tags[@]}"
+    filter_tags_list+=("${sorted_tags[*]}")
+  else
+    filter_tags_list+=("")
+  fi
+}
+
 while [[ "$#" -ne 0 ]]; do
   case "$1" in
     --dummy-flag)
       ;;
     --filter-tags)
       shift
-      IFS=, read -ra tags <<<"$1" || true
-      if ((${#tags[@]} > 0)); then
-        for ((i = 0; i < ${#tags[@]}; ++i)); do
-          bats_trim "tags[$i]" "${tags[$i]}"
-        done
-        bats_sort sorted_tags "${tags[@]}"
-        IFS=, filter_tags_list+=("${sorted_tags[*]}")
-      else
-        filter_tags_list+=("")
-      fi
+      read_tags "$1"
       ;;
     --)
       shift 1
@@ -249,7 +254,6 @@ fi
 
 # shellcheck source=lib/bats-core/tracing.bash
 source "$BATS_ROOT/lib/bats-core/tracing.bash"
-
 
 bats_gather_tests_exit_trap() {
   local bats_gather_tests_exit_status=$?

@@ -1,6 +1,8 @@
 check_ifs() {
-    if [[ ${EXPECTED_IFS?} != ${IFS} ]]; then
-        diff <(hexdump -c <<<"$EXPECTED_IFS") <(hexdump -c <<<"$IFS") >"${EXPECTED_IFS_MISMATCH_FILE?}"
+    if [[ "$IFS" != $' \t\n' ]]; then
+        echo "${FUNCNAME[*]}"
+        echo "${BASH_SOURCE[*]}"
+        hexdump -c <<<"$IFS"
         exit 1
-    fi
+    fi >&2
 }
