@@ -1495,3 +1495,9 @@ END_OF_ERR_MSG
   [ "${lines[16]}" == "ok 7 normal test2" ]
   [ "${#lines[*]}" -eq 17 ]
 }
+
+@test "IFS is preserved in all contexts" {
+  bats_require_minimum_version 1.5.0
+
+  reentrant_run -0 bats --print-output-on-failure "$FIXTURE_ROOT/preserve_IFS" --filter-tags ''
+}

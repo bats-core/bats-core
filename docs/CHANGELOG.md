@@ -26,6 +26,7 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
   `set -u`/`set -o nounset` works as expected (#827)
 * fix `--gather-test-outputs-in` fails on tests with multiple `/` (#789)
 * install does not create unused `/usr/share/bats` anymore (#857)
+* ensure IFS is unchanged in `{setup,teardown}{_suite,_file,}`, `@test` and free code (#879)
 
 ### Changed
 
