@@ -39,6 +39,7 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 * update Arch Linux package URL in installation.rst (#821)
 * rename bash-bats to bats for Arch Linux in installation.rst (#836)
 * fix FAQ entry about setup-/teardown_suite, as they are available now (#861)
+* added logo (#881)
 
 ## [1.10.0] - 2023-07-15
 

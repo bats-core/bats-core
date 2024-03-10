@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="54.261147mm"
+   height="43.081844mm"
+   viewBox="0 0 54.261147 43.081844"
+   version="1.1"
+   id="svg2478"
+   inkscape:version="1.1.2 (b8e25be833, 2022-02-05)"
+   sodipodi:docname="light_mode_bat.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview2480"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="true"
+     inkscape:document-units="mm"
+     showgrid="false"
+     fit-margin-top="0"
+     fit-margin-left="0"
+     fit-margin-right="0"
+     fit-margin-bottom="0"
+     inkscape:zoom="1.0469406"
+     inkscape:cx="95.5164"
+     inkscape:cy="32.953158"
+     inkscape:window-width="1284"
+     inkscape:window-height="1040"
+     inkscape:window-x="632"
+     inkscape:window-y="71"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="g41739" />
+  <defs
+     id="defs2475" />
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-71.195776,-139.44713)">
+    <g
+       id="g9615">
+      <g
+         id="g41739"
+         transform="matrix(0.85714226,0,0,0.85714226,-1218.3151,927.76689)"
+         style="display:inline;stroke-width:1.16667">
+        <g
+           id="g24595"
+           transform="matrix(1.8087061,0,0,1.8087061,-1236.9066,713.01919)"
+           style="stroke-width:0.64503">
+          <path
+             style="fill:#3e474b;fill-opacity:1;stroke:none;stroke-width:0.51199;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+             d="m 1533.1344,-889.4993 2.9413,-2.92919 0.8498,3.37817 13.7088,-13.65367 -1.5371,6.21648 1.1421,4.5359 -3.0032,2.99127 -1.666,6.73802 -8.7932,3.67943 -3.6425,3.62793 -3.6425,-3.62793 -8.7932,-3.67943 -1.666,-6.73802 -3.0033,-2.99127 1.1421,-4.5359 -1.537,-6.21648 13.7088,13.65367 0.8498,-3.37817 z"
+             id="path41727"
+             inkscape:export-filename="D:\Art2021\2023\BatsLogo\test.png"
+             inkscape:export-xdpi="150"
+             inkscape:export-ydpi="150" />
+          <g
+             id="g41737"
+             style="fill:#515b60;fill-opacity:1;stroke-width:0.64503">
+            <path
+               style="fill:#515b60;fill-opacity:1;stroke:none;stroke-width:0.170933;stroke-linecap:round;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+               d="m 1545.57,-882.22245 -8.7932,3.67942 4.7021,-4.68334 z"
+               id="path41729"
+               inkscape:export-filename="D:\Art2021\2023\BatsLogo\test.png"
+               inkscape:export-xdpi="150"
+               inkscape:export-ydpi="150" />
+            <path
+               style="fill:#515b60;fill-opacity:1;stroke:none;stroke-width:0.170933;stroke-linecap:round;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+               d="m 1533.1343,-885.27404 17.5,-17.42995 -3.3983,13.74351 -5.7571,5.73411 z"
+               id="path41731"
+               inkscape:export-filename="D:\Art2021\2023\BatsLogo\test.png"
+               inkscape:export-xdpi="150"
+               inkscape:export-ydpi="150" />
+            <path
+               style="fill:#515b60;fill-opacity:1;stroke:none;stroke-width:0.170933;stroke-linecap:round;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+               d="m 1520.6986,-882.22245 8.7932,3.67942 -4.7021,-4.68334 z"
+               id="path41733"
+               inkscape:export-filename="D:\Art2021\2023\BatsLogo\test.png"
+               inkscape:export-xdpi="150"
+               inkscape:export-ydpi="150" />
+            <path
+               style="fill:#515b60;fill-opacity:1;stroke:none;stroke-width:0.170933;stroke-linecap:round;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+               d="m 1533.1343,-885.27404 -17.5,-17.42995 3.3983,13.74351 5.7571,5.73411 z"
+               id="path41735"
+               inkscape:export-filename="D:\Art2021\2023\BatsLogo\test.png"
+               inkscape:export-xdpi="150"
+               inkscape:export-ydpi="150" />
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>

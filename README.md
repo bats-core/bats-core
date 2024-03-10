@@ -1,5 +1,3 @@
-# Bats-core: Bash Automated Testing System
-
 [![Latest release](https://img.shields.io/github/release/bats-core/bats-core.svg)](https://github.com/bats-core/bats-core/releases/latest)
 [![npm package](https://img.shields.io/npm/v/bats.svg)](https://www.npmjs.com/package/bats)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/bats-core/bats-core/blob/master/LICENSE.md)
@@ -7,6 +5,15 @@
 [![Read the docs status](https://readthedocs.org/projects/bats-core/badge/)](https://bats-core.readthedocs.io)
 
 [![Join the chat in bats-core/bats-core on gitter](https://badges.gitter.im/bats-core/bats-core.svg)][gitter]
+
+<div align="center">
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/source/assets/dark_mode_cube.svg">
+  <img alt="" src="docs/source/assets/light_mode_cube.svg">
+</picture>
+</div>
+
+# Bats-core: Bash Automated Testing System
 
 Bats is a [TAP](https://testanything.org/)-compliant testing framework for Bash
 3.2 or above.  It provides a simple way to verify that the UNIX programs you
@@ -114,7 +121,9 @@ This [bats-core](https://github.com/bats-core/bats-core) repo is now the communi
 
 ## Copyright
 
-© 2017-2023 bats-core organization
+The Bats Logo was created by [Vukory](https://www.artstation.com/vukory) ([Github](https://github.com/vukory)) and sponsored by [SethFalco](https://github.com/SethFalco). If you want to use our logo, have a look at our [guidelines](./docs/source/assets/README.md#Usage-Guide-for-Third-Parties).
+
+© 2017-2024 bats-core organization
 
 © 2011-2016 Sam Stephenson
 
