@@ -54,12 +54,12 @@ TESTSUITES_REGEX="<testsuites time=\"$FLOAT_REGEX\">"
 
   echo "$output"
   [[ "${lines[2]}" == "<testsuite name=\"$ESCAPED_TEST_FILE_NAME\" tests=\"3\" failures=\"1\" errors=\"0\" skipped=\"1\" time=\""*"\" timestamp=\""*"\" hostname=\""*"\">" ]]
-  [[ "${lines[3]}" == "    <testcase classname=\"$ESCAPED_TEST_FILE_NAME\" name=\"Successful test with escape characters: &quot;&#39;&lt;&gt;&amp;&#27;[0m (0x1b)\" time=\""*"\" />" ]]
-  [[ "${lines[4]}" == "    <testcase classname=\"$ESCAPED_TEST_FILE_NAME\" name=\"Failed test with escape characters: &quot;&#39;&lt;&gt;&amp;&#27;[0m (0x1b)\" "* ]]
+  [[ "${lines[3]}" == "    <testcase classname=\"$ESCAPED_TEST_FILE_NAME\" name=\"Successful test with escape characters: &quot;&#39;&lt;&gt;&amp; (0x1b)\" time=\""*"\" />" ]]
+  [[ "${lines[4]}" == "    <testcase classname=\"$ESCAPED_TEST_FILE_NAME\" name=\"Failed test with escape characters: &quot;&#39;&lt;&gt;&amp; (0x1b)\" "* ]]
   [[ "${lines[5]}" == '        <failure type="failure">(in test file '*"$ESCAPED_TEST_FILE_NAME, line 6)" ]]
-  [[ "${lines[6]}" == '  `echo &quot;&lt;&gt;&#39;&amp;&#27;[0m&quot; &amp;&amp; false&#39; failed'* ]]
-  [[ "${lines[9]}" == "    <testcase classname=\"$ESCAPED_TEST_FILE_NAME\" name=\"Skipped test with escape characters: &quot;&#39;&lt;&gt;&amp;&#27;[0m (0x1b)\" time=\""*"\">" ]]
-  [[ "${lines[10]}" == "        <skipped>&quot;&#39;&lt;&gt;&amp;&#27;[0m</skipped>" ]]
+  [[ "${lines[6]}" == '  `echo &quot;&lt;&gt;&#39;&amp;&quot; &amp;&amp; false&#39; failed'* ]]
+  [[ "${lines[9]}" == "    <testcase classname=\"$ESCAPED_TEST_FILE_NAME\" name=\"Skipped test with escape characters: &quot;&#39;&lt;&gt;&amp; (0x1b)\" time=\""*"\">" ]]
+  [[ "${lines[10]}" == "        <skipped>&quot;&#39;&lt;&gt;&amp;</skipped>" ]]
 }
 
 @test "junit formatter: test suites" {
