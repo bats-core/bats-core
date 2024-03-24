@@ -9,7 +9,7 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 [semver]: https://semver.org/
 
 
-## [Unreleased]
+## [1.11.0] - 2024-03-24
 
 ### Added
 
