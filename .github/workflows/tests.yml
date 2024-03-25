@@ -318,12 +318,12 @@ jobs:
         id: coverage-percent
         shell: bash
         env:
-          minimum_coverage: 86.39
+          minimum_coverage: 86.40
         run: |
           value=$(jq '.percent_covered' <coverage/bats/coverage.json)
-          fixd_point() { # <float val>
-            int=${value%.*}
-            decimals=${value#*.}
+          fixed_point() { # <float val>
+            int=${1%.*}
+            decimals=${1#*.}
             echo $int${decimals::2}
           }
           echo "Coverage: $value%" | tee "$GITHUB_STEP_SUMMARY"
