@@ -234,21 +234,79 @@ Here, `jq` receives no input (which is captured by `run`),
 executes no filters, and always succeeds, so the test does not work as 
 expected.
 
-Instead use a Bash subshell:
+To correctly handle commands with pipes see `bats_pipe`.
+
+## `bats_pipe`: Run commands with pipes
+
+The `bats_pipe` helper command is meant to handle piping between commands. Its
+main purpose is to aide the `run` helper command (which cannot handle pipes, due
+to bash parsing priority). `run command0 | command1` will parse `|` before
+`run`, which is commonly not intended by test authors.
+
+Running `run bats_pipe command0 \| command1` will have the piped commands run
+within the context of the `run` command, and thus have the output and status
+variables properly contained within the normal `output` and `status` variables.
+
+Note that this requires the usage of `\|`, not `|`. This is to avoid bash
+parsing out `|` first, instead sending `\|` to the `bats_pipe` command for it to
+parse and set up intended piping. Running `bats_pipe` with no instances of `\|`
+will always fail; this is intended to catch typos (accidentally using `|`) by
+the test author.
+
+The `bats_pipe` command will also properly propagate exit status from the piped
+commands. The default behavior mimics `set -o pipefail`, returning the status of
+the last (rightmost) command that exits with a non-zero status. This ensures
+that usage of pipes do not mask the exit statuses of earlier commands.
 
 ```bash
-run bash -c "command args ... | jq -e '.limit == 42'"
+@test "invoking foo piped to bar" {
+  run bats_pipe foo \| bar
+  # asserting foo or bar would return 17 (from foo if bar returns 0).
+  [ "$status" -eq 17 ]
+  [ "$output" = "bar output." ]
+}
 ```
 
-This subshell is a fresh Bash environment, and will only inherit variables 
-and functions that are exported into it.
+Alternatively, if the test always cares about the status of a specific command,
+the `-<N>` option can be given (e.g. `-0`) to always return the status of the
+command of interest.
 
 ```bash
-limit() { jq -e '.limit == 42'; }
-export -f limit
-run bash -c "command args ... | limit"
+@test "invoking foo piped to bar always return foo status" {
+  run bats_pipe -0 foo \| bar
+  # status of bar is ignored, status is always from foo.
+  [ "$status" -eq 2 ]
+  [ "$output" = "bar output." ]
+}
 ```
 
+Similarly, `--returned-status N` (or `--returned-status=N`) can be used for
+similar functionality. This option supports negative values, which always return
+the of the command starting from the end and in reverse order.
+
+```bash
+@test "invoking foo piped to bar always return foo status" {
+  run bats_pipe --returned-status -2 foo \| bar
+  # status of bar is ignored, status is always from foo.
+  [ "$status" -eq 2 ]
+  [ "$output" = "bar output." ]
+}
+```
+
+Piping of command output is especially helpful when the output needs to be
+modified in some way (e.g. the command outputs binary data into stdout, which
+cannot be stored as-is in an environment variable).
+
+```bash
+@test "invoking foo that returns binary data" {
+  run bats_pipe foo \| hexdump -v -e "1/1 \"0x%02X \""
+  [ "$status" -eq 17 ]
+  [[ "$output" =~ 0xDE\ 0xAD ]]
+}
+```
+
+Any number of pipes can be used in conjunction to chain output between some set
+of running commands.
 
 ## `load`: Share common code
 

@@ -11,6 +11,12 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 
 ## [Unreleased]
 
+### Added
+
+#### Documentation
+
+* document `bats_pipe` function (#901)
+
 ### Fixed
 
 #### Documentation
