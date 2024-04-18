@@ -373,7 +373,7 @@ fi
 # requires the test list to be read but not empty
 bats_create_file_tempdirs
 
-bats_preprocess_source "$filename"
+bats_preprocess_source # uses BATS_TEST_FILENAME
 
 trap bats_interrupt_trap INT
 bats_run_setup_file
