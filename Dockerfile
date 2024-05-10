@@ -40,4 +40,4 @@ COPY . /opt/bats/
 
 WORKDIR /code/
 
-ENTRYPOINT ["/tini", "--", "bash", "bats"]
+ENTRYPOINT ["/tini", "--", "/usr/local/bin/bash", "/usr/local/bin/bats"]

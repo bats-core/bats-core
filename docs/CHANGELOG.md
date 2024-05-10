@@ -11,6 +11,10 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 
 ## [Unreleased]
 
+### Fixed
+
+* docker image won't crash if a file or directory named 'bats' exists (#920)
+
 ## [1.11.0] - 2024-03-24
 
 ### Added
