@@ -3,10 +3,6 @@ name: Release to docker hub
 on:
   release: { types: [published] }
   workflow_dispatch:
-    inputs:
-        version:
-          description: 'Version to simulate for deploy'
-          required: true
 
 permissions:
   contents: read
@@ -21,9 +17,8 @@ jobs:
 
         - id: version
           run: |
-            EXPECTED_VERSION=${{ github.event.inputs.version }}
             TAG_VERSION=${GITHUB_REF#refs/tags/v} # refs/tags/v1.2.3 -> 1.2.3
-            echo ::set-output name=version::${EXPECTED_VERSION:-$TAG_VERSION}
+            echo ::set-output name=version::$TAG_VERSION
         - name: Set up QEMU
           uses: docker/setup-qemu-action@68827325e0b33c7199eb31dd4e31fbe9023e06e3 # v3.0.0
 
