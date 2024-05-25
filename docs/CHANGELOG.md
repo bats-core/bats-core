@@ -11,6 +11,18 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 
 ## [Unreleased]
 
+### Added
+
+#### Documentation
+
+* document `bats_pipe` function (#901)
+
+### Fixed
+
+#### Documentation
+
+* fix hard-coded link to readthedocs (#901)
+
 ## [1.11.0] - 2024-03-24
 
 ### Added
