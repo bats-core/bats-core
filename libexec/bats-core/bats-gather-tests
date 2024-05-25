@@ -285,7 +285,7 @@ for filename in "$@"; do
   _bats_test_functions_setup -1 # invalid TEST_NUMBER, as this is not a test
 
   BATS_TEST_NAME=source
-  BATS_TEST_FILTER="$BATS_TEST_FILTER" bats_preprocess_source # uses BATS_TEST_FILENAME
+  bats_preprocess_source # uses BATS_TEST_FILENAME
   # shellcheck disable=SC1090
   BATS_TEST_DIRNAME="${filename%/*}" source "$BATS_TEST_SOURCE"
 

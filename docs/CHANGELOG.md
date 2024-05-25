@@ -11,6 +11,10 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 
 ## [Unreleased]
 
+### Fixed
+
+* removed (now) unused internal variable BATS_TEST_FILTER (#907)
+
 ## [1.11.0] - 2024-03-24
 
 ### Added
