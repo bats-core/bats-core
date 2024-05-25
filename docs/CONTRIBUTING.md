@@ -101,7 +101,7 @@ To use it, run Bats with the `--formatter cat` option.
 
 ## Coding conventions
 
-Use (`shfmt`)[https://github.com/mvdan/sh#shfmt] and [ShellCheck](https://www.shellcheck.net/). The CI will enforce this.
+Use [`shfmt`](https://github.com/mvdan/sh#shfmt) and [ShellCheck](https://www.shellcheck.net/). The CI will enforce this.
 
 Use `snake_case` for all identifiers.
 
