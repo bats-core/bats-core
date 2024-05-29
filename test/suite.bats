@@ -54,20 +54,13 @@ setup() {
 @test "errors when loading common helper from multiple tests in a suite" {
   reentrant_run bats "$FIXTURE_ROOT/errors_in_multiple_load"
   [ $status -eq 1 ]
-  [ "${lines[0]}" = "1..3" ]
-  regex="test_helper\.bash: line 1: call-to-undefined-command: command not found"
-  [[ "${lines[1]}" =~ $regex ]]
-  regex="Error while sourcing library loader at '.*test_helper\.bash'"
-  [[ "${lines[2]}" =~ $regex ]]
-  [ "${lines[3]}" = "not ok 1 setup_file failed" ]
-  regex="test_helper\.bash: line 1: call-to-undefined-command: command not found"
-  [[ "${lines[8]}" =~ $regex ]]
-  regex="Error while sourcing library loader at '.*test_helper\.bash'"
-  [[ "${lines[9]}" =~ $regex ]]
-  [ "${lines[10]}" = "not ok 2 setup_file failed" ]
-  regex="bats_load_safe: Could not find '.*nonexistent'\[\.bash\]"
-  [[ "${lines[15]}" =~ $regex ]]
-  [ "${lines[16]}" = "not ok 3 setup_file failed" ]
+  [ "${lines[0]}" = "1..1" ]
+  [ "${lines[1]}" = "not ok 1 bats-gather-tests" ]
+  [ "${lines[2]}" = "# (in test file $RELATIVE_FIXTURE_ROOT/errors_in_multiple_load/a.bats, line 1)" ]
+  [ "${lines[3]}" = "#   \`load test_helper' failed" ]
+  [ "${lines[4]}" = "# $FIXTURE_ROOT/errors_in_multiple_load/test_helper.bash: line 1: call-to-undefined-command: command not found" ]
+  [ "${lines[5]}" = "# Error while sourcing library loader at '$FIXTURE_ROOT/errors_in_multiple_load/test_helper.bash'" ]
+  [ "${#lines[@]}" -eq 6 ]
 }
 
 @test "running an ad-hoc suite by specifying multiple test files" {
