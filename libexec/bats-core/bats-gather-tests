@@ -271,6 +271,14 @@ trap bats_gather_tests_exit_trap EXIT
 
 bats_set_stacktrace_limit
 
+# override test_functions.bash's version to use it for test registration
+load() {
+  # the standard error stream and exit code will be revealed when running the tests
+  if ! bats_load_safe "$@" 2>/dev/null; then
+    return 0
+  fi
+}
+
 bats_setup_tracing
 focus_mode=0
 for filename in "$@"; do

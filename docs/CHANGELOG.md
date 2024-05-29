@@ -19,6 +19,8 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 
 ### Fixed
 
+* unbreak test suites with multiple files loading common constants (#904), introduced in v1.11.0
+
 #### Documentation
 
 * fix hard-coded link to readthedocs (#901)
