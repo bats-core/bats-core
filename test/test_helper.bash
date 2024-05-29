@@ -15,6 +15,15 @@ fixtures() {
   FIXTURE_ROOT="$BATS_TEST_DIRNAME/fixtures/$1"
   # shellcheck disable=SC2034
   RELATIVE_FIXTURE_ROOT="${FIXTURE_ROOT#"$BATS_CWD"/}"
+  if [[ $BATS_ROOT == "$BATS_CWD" ]]; then
+    RELATIVE_BATS_ROOT=''
+  else
+    RELATIVE_BATS_ROOT=${BATS_ROOT#"$BATS_CWD"/}
+  fi
+  if [[ -n "$RELATIVE_BATS_ROOT" && "$RELATIVE_BATS_ROOT" != */ ]]; then
+    RELATIVE_BATS_ROOT+=/
+  fi
+  echo "RELATIVE_BATS_ROOT=$RELATIVE_BATS_ROOT" "BATS_ROOT=$BATS_ROOT" "BATS_CWD=$BATS_CWD"
 }
 
 filter_control_sequences() {

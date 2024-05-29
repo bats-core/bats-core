@@ -67,11 +67,11 @@ setup() {
     [ "${lines[5]}" = "# Error while sourcing library loader at '$FIXTURE_ROOT/errors_in_multiple_load/test_helper.bash'" ]
     [ "${#lines[@]}" -eq 6 ]
   else
-    [ "${lines[2]}" = "# (in file $FIXTURE_ROOT/errors_in_multiple_load/test_helper.bash, line 1," ]
-    [ "${lines[3]}" = "#  from function \`bats_internal_load' in file $BATS_ROOT/lib/bats-core/test_functions.bash, line 69," ]
-    [ "${lines[4]}" = "#  from function \`bats_load_safe' in file $BATS_ROOT/lib/bats-core/test_functions.bash, line 106," ]
-    [ "${lines[5]}" = "#  from function \`load' in file $BATS_ROOT/lib/bats-core/test_functions.bash, line 156," ]
-    [ "${lines[6]}" = "#  in test file $FIXTURE_ROOT/errors_in_multiple_load/a.bats, line 1)" ]
+    [ "${lines[2]}" = "# (in file $RELATIVE_FIXTURE_ROOT/errors_in_multiple_load/test_helper.bash, line 1," ]
+    [ "${lines[3]}" = "#  from function \`bats_internal_load' in file ${RELATIVE_BATS_ROOT}lib/bats-core/test_functions.bash, line 69," ]
+    [ "${lines[4]}" = "#  from function \`bats_load_safe' in file ${RELATIVE_BATS_ROOT}lib/bats-core/test_functions.bash, line 106," ]
+    [ "${lines[5]}" = "#  from function \`load' in file ${RELATIVE_BATS_ROOT}lib/bats-core/test_functions.bash, line 156," ]
+    [ "${lines[6]}" = "#  in test file $RELATIVE_FIXTURE_ROOT/errors_in_multiple_load/a.bats, line 1)" ]
     if (( BASH_VERSINFO[0] == 4)); then
       [ "${lines[7]}" = "#   \`load test_helper' failed" ]
       [ "${lines[8]}" = "# $FIXTURE_ROOT/errors_in_multiple_load/test_helper.bash: line 1: call-to-undefined-command: command not found" ]
