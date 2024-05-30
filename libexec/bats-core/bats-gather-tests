@@ -335,8 +335,18 @@ for filename in "$@"; do
   file_test_count=0
   file_included_test_count=0
   saved_focus_mode=$focus_mode
+
   # get new values for the variables above
-  result="$(set -eET; bats_gather_tests_for_file)"
+  if [[ $BASH_VERSION == 4.3.*  ]]; then
+    # Bash 4.3 has function scoping issues when this is run in $() -> work around via file
+    bats_gather_tests_var_transfer_file=$BATS_RUN_TMPDIR/gather-tests-var-transfer
+    (set -eET; bats_gather_tests_for_file >"$bats_gather_tests_var_transfer_file")
+    result=$(<"$bats_gather_tests_var_transfer_file")
+  else
+    # separate retrieval from eval to avoid hiding the exit code
+    result="$(set -eET; bats_gather_tests_for_file)"
+  fi
+
   eval "$result"
 
   if [[ -n "$file_duplicate_test_names" ]]; then
