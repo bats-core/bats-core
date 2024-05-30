@@ -23,7 +23,6 @@ fixtures() {
   if [[ -n "$RELATIVE_BATS_ROOT" && "$RELATIVE_BATS_ROOT" != */ ]]; then
     RELATIVE_BATS_ROOT+=/
   fi
-  echo "RELATIVE_BATS_ROOT=$RELATIVE_BATS_ROOT" "BATS_ROOT=$BATS_ROOT" "BATS_CWD=$BATS_CWD"
 }
 
 filter_control_sequences() {
