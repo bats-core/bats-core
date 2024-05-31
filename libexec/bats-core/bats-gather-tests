@@ -3,8 +3,6 @@ set -eET
 
 args=("$@")
 filter_tags_list=()
-included_tests=()
-excluded_tests=()
 
 # shellcheck source=lib/bats-core/common.bash disable=SC2153 
 source "$BATS_ROOT/lib/bats-core/common.bash"
@@ -250,61 +248,129 @@ if [[ -n "${filter_status-}" ]]; then
   else
     printf "No recording of previous runs found. Running all tests!\n" >&2
   fi
+else
+  : #printf "Not filtering by status!\n" >&2
 fi
 
 # shellcheck source=lib/bats-core/tracing.bash
 source "$BATS_ROOT/lib/bats-core/tracing.bash"
 
+BATS_OUT="$BATS_RUN_TMPDIR/gather-tests.out"
+touch "$BATS_OUT"
+
 bats_gather_tests_exit_trap() {
   local bats_gather_tests_exit_status=$?
   trap - ERR EXIT DEBUG
-  if [[ ${BATS_ERROR_STATUS:-0} != 0 ]]; then
-    bats_gather_tests_exit_status=$BATS_ERROR_STATUS
+  if (( bats_gather_tests_exit_status != 0)); then
     printf "1..1\nnot ok 1 bats-gather-tests\n"
-    bats_get_failure_stack_trace stack_trace
-    bats_print_stack_trace "${stack_trace[@]}"
-    bats_print_failed_command "${stack_trace[@]}" 
+    # play back traces from test file evaluation
+    bats_replace_filename < "$BATS_TRACE"
+    bats_replace_filename <"$BATS_OUT" | bats_prefix_lines_for_tap_output
   fi >&2
   exit "$bats_gather_tests_exit_status"
 }
+
 trap bats_gather_tests_exit_trap EXIT
 
-bats_set_stacktrace_limit
+# prepare tracing for errors during test file evaluation
+BATS_TRACE="$BATS_RUN_TMPDIR/bats-gather-tests.trace"
+touch "$BATS_TRACE"
 
-bats_setup_tracing
+bats_gather_tests_source_exit_trap() {
+  local bats_gather_tests_source_exit_status=$?
+  trap - ERR EXIT DEBUG
+  if (( bats_gather_tests_source_exit_status != 0)); then
+    bats_get_failure_stack_trace stack_trace
+    bats_print_stack_trace "${stack_trace[@]}"
+    # TODO: why doesn't this work via ERR trap?
+    BATS_ERROR_STATUS=$bats_gather_tests_source_exit_status
+    bats_print_failed_command "${stack_trace[@]}"
+  fi  >>"$BATS_TRACE"
+  exit "$bats_gather_tests_source_exit_status"
+}
+
+bats_gather_tests_for_file() {
+  local test_names=() test_dupes=() included_tests=() excluded_tests=()
+
+  trap bats_gather_tests_source_exit_trap EXIT
+  bats_setup_tracing
+  bats_set_stacktrace_limit
+
+  # do the actual evaluation for gathering the tests
+  # shellcheck disable=SC1090
+  BATS_TEST_DIRNAME="${filename%/*}" source "$BATS_TEST_SOURCE" 1>"$BATS_OUT" 2>&1
+
+  if [[ "${#test_dupes[@]}" -ne 0 ]]; then
+    printf 'file_duplicate_test_names="%q"\n' "${test_dupes[*]#$filename$'\t'}"
+  fi
+
+  if [[ -n "$filter_status" ]]; then
+    # save filtered tests to exclude them again in next round
+    for test_line in "${excluded_tests[@]}"; do
+      printf "status-filtered %s %s\n" "$filter_status" "$test_line"
+    done >>"$BATS_RUNLOG_FILE"
+  fi
+
+  
+  printf "file_test_count=%d\n" "${#test_names[@]}"
+  printf "file_included_test_count=%d\n" "${#included_tests[@]}"
+  printf "focus_mode=%d\n" "$focus_mode"
+}
+
 focus_mode=0
+total_test_count=0
+total_included_test_count=0
 for filename in "$@"; do
   if [[ ! -f "$filename" ]]; then
     abort 'Test file "%s" does not exist.\n' "${filename}"
   fi
-
-  test_names=()
-  test_dupes=()
 
   BATS_TEST_FILENAME="$filename"
   _bats_test_functions_setup -1 # invalid TEST_NUMBER, as this is not a test
 
   BATS_TEST_NAME=source
   BATS_TEST_FILTER="$BATS_TEST_FILTER" bats_preprocess_source # uses BATS_TEST_FILENAME
-  # shellcheck disable=SC1090
-  BATS_TEST_DIRNAME="${filename%/*}" source "$BATS_TEST_SOURCE"
 
-  if [[ "${#test_dupes[@]}" -ne 0 ]]; then
-    abort 'Duplicate test name(s) in file "%s": %s' "${filename}" "${test_dupes[*]#$filename$'\t'}"
+  file_duplicate_test_names=""
+  file_test_count=0
+  file_included_test_count=0
+  saved_focus_mode=$focus_mode
+
+  # get new values for the variables above
+  if [[ $BASH_VERSION == 4.3.*  ]]; then
+    # Bash 4.3 has function scoping issues when this is run in $() -> work around via file
+    bats_gather_tests_var_transfer_file=$BATS_RUN_TMPDIR/gather-tests-var-transfer
+    (set -eET; bats_gather_tests_for_file >"$bats_gather_tests_var_transfer_file")
+    result=$(<"$bats_gather_tests_var_transfer_file")
+  else
+    # separate retrieval from eval to avoid hiding the exit code
+    result="$(set -eET; bats_gather_tests_for_file)"
+  fi
+
+  eval "$result"
+
+  if [[ -n "$file_duplicate_test_names" ]]; then
+    trap - EXIT # prevent 1..1 from being printed
+    abort 'Duplicate test name(s) in file "%s": %s' "$filename" "$file_duplicate_test_names"
+  fi
+
+  total_test_count=$((total_test_count + file_test_count))
+
+  # did focus mode turn on in this file? (cannot turn off afterwards)
+  if (( saved_focus_mode != focus_mode)); then # -> only count new tests
+    total_included_test_count=$file_included_test_count
+  else # -> count previous tests as well
+    total_included_test_count=$((total_included_test_count + file_included_test_count))
   fi
 done
 
 if [[ -n "$filter_status" ]]; then
-  # save filtered tests to exclude them again in next round
-  for test_line in "${excluded_tests[@]}"; do
-    printf "status-filtered %s %s\n" "$filter_status" "$test_line"
-  done >>"$BATS_RUNLOG_FILE"
-
-  if [[ ${#test_names[@]} -eq 0 && ${#included_tests[@]} -eq 0 ]]; then
+  if (( total_test_count == 0 && total_included_test_count == 0 )); then
     printf "There were no tests of status '%s' in the last recorded run.\n" "$filter_status" >&2
   fi
 fi
 
+# communicate to the caller that we are running in focus mode
 if (( focus_mode )); then
   printf "focus_mode\n"
 fi

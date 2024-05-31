@@ -89,14 +89,15 @@ jobs:
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       - uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
+        with:
+          node-version: v18.20.2 
+      - run: npm pack ./
+      - run: npm install -g ./bats-*.tgz
       - name: Run test on OS ${{ matrix.os }}
         shell: 'script -q -e -c "bash {0}"' # work around tty issues
         env:
           TERM: linux # fix tput for tty issue work around
-        run: |
-          npm pack ./
-          sudo npm install -g ./bats-*.tgz
-          bats test --print-output-on-failure
+        run: bats test --print-output-on-failure
 
   windows:
     runs-on: windows-2019
@@ -116,6 +117,8 @@ jobs:
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       - uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
+        with:
+          node-version: v18.20.2 
       - run: npm pack ./
       - run: npm install -g (get-item .\bats-*.tgz).FullName
       - run: bats  -T --print-output-on-failure test
@@ -161,6 +164,8 @@ jobs:
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       - uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
+        with:
+          node-version: v18.20.2 
       - name: Install unbuffer via expect
         run: brew install expect
       - name: Run test on OS ${{ matrix.os }}

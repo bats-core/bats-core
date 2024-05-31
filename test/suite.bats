@@ -36,11 +36,54 @@ setup() {
   echo "$output" | grep "^ok . quasi-truth"
 }
 
+@test "aggregated output of multiple tests in a suite loading common constants" {
+  reentrant_run bats "$FIXTURE_ROOT/multiple_load_constants"
+  [ $status -eq 0 ]
+  [ "${lines[0]}" = "1..2" ]
+  [ "${lines[1]}" = "ok 1 constant" ]
+  [ "${lines[2]}" = "ok 2 constant (again)" ]
+}
+
 @test "a failing test in a suite results in an error exit code" {
   FLUNK=1 reentrant_run bats "$FIXTURE_ROOT/multiple"
   [ $status -eq 1 ]
   [ "${lines[0]}" = "1..3" ]
   echo "$output" | grep "^not ok . quasi-truth"
+}
+
+@test "errors when loading common helper from multiple tests in a suite" {
+  reentrant_run bats "$FIXTURE_ROOT/errors_in_multiple_load"
+  [ $status -eq 1 ]
+  [ "${lines[0]}" = "1..1" ]
+  [ "${lines[1]}" = "not ok 1 bats-gather-tests" ]
+
+  # bash > 4.0 returns error codes from source
+  # bash < 4.0 does not handle the status on source, it fails through the ERREXIT instead, which creates another trace
+  # bash == 4.0 seems to be sonwhere in between
+  if (( BASH_VERSINFO[0] > 4 )) || (( BASH_VERSINFO[0] == 4 && BASH_VERSINFO[1] > 0 )); then
+    [ "${lines[2]}" = "# (in test file $RELATIVE_FIXTURE_ROOT/errors_in_multiple_load/a.bats, line 1)" ]
+    [ "${lines[3]}" = "#   \`load test_helper' failed" ]
+    [ "${lines[4]}" = "# $FIXTURE_ROOT/errors_in_multiple_load/test_helper.bash: line 1: call-to-undefined-command: command not found" ]
+    [ "${lines[5]}" = "# Error while sourcing library loader at '$FIXTURE_ROOT/errors_in_multiple_load/test_helper.bash'" ]
+    [ "${#lines[@]}" -eq 6 ]
+  else
+    [ "${lines[2]}" = "# (in file $RELATIVE_FIXTURE_ROOT/errors_in_multiple_load/test_helper.bash, line 1," ]
+    [ "${lines[3]}" = "#  from function \`bats_internal_load' in file ${RELATIVE_BATS_ROOT}lib/bats-core/test_functions.bash, line 69," ]
+    [ "${lines[4]}" = "#  from function \`bats_load_safe' in file ${RELATIVE_BATS_ROOT}lib/bats-core/test_functions.bash, line 106," ]
+    [ "${lines[5]}" = "#  from function \`load' in file ${RELATIVE_BATS_ROOT}lib/bats-core/test_functions.bash, line 156," ]
+    [ "${lines[6]}" = "#  in test file $RELATIVE_FIXTURE_ROOT/errors_in_multiple_load/a.bats, line 1)" ]
+    if (( BASH_VERSINFO[0] == 4)); then
+      [ "${lines[7]}" = "#   \`load test_helper' failed" ]
+      [ "${lines[8]}" = "# $FIXTURE_ROOT/errors_in_multiple_load/test_helper.bash: line 1: call-to-undefined-command: command not found" ]
+      [ "${lines[9]}" = "# Error while sourcing library loader at '$FIXTURE_ROOT/errors_in_multiple_load/test_helper.bash'" ]
+      [ "${#lines[@]}" -eq 10 ]
+    else
+      [ "${lines[7]}" = "#   \`load test_helper' failed with status 127" ]
+      [ "${lines[8]}" = "# $FIXTURE_ROOT/errors_in_multiple_load/test_helper.bash: line 1: call-to-undefined-command: command not found" ]
+      [ "${#lines[@]}" -eq 9 ]
+    fi
+  fi
+
 }
 
 @test "running an ad-hoc suite by specifying multiple test files" {

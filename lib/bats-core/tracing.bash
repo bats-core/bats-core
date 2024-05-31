@@ -277,19 +277,17 @@ bats_debug_trap() {
   # We need to normalize them to a common format!
   local NORMALIZED_INPUT
   bats_normalize_windows_dir_path NORMALIZED_INPUT "${1%/*}"
-  local file_excluded='' path
+  local path
   for path in "${BATS_DEBUG_EXCLUDE_PATHS[@]}"; do
     if [[ "$NORMALIZED_INPUT" == "$path"* ]]; then
-      file_excluded=1
-      break
+      return # skip this call
     fi
   done
 
   # don't update the trace within library functions or we get backtraces from inside traps
   # also don't record new stack traces while handling interruptions, to avoid overriding the interrupted command
-  if [[ -z "$file_excluded" &&
-    "${BATS_INTERRUPTED-NOTSET}" == NOTSET &&
-    "${BATS_TIMED_OUT-NOTSET}" == NOTSET ]]; then
+  if [[ "${BATS_INTERRUPTED-NOTSET}" == NOTSET &&
+        "${BATS_TIMED_OUT-NOTSET}" == NOTSET ]]; then
     BATS_DEBUG_LASTLAST_STACK_TRACE=(
       ${BATS_DEBUG_LAST_STACK_TRACE[@]+"${BATS_DEBUG_LAST_STACK_TRACE[@]}"}
     )
