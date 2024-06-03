@@ -21,6 +21,10 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 
 * unbreak test suites with multiple files loading common constants (#904), introduced in v1.11.0
 
+### Changed
+
+* update Docker image with the latest `bats-detik` version 1.3.1 (#931)
+
 #### Documentation
 
 * fix hard-coded link to readthedocs (#901)
