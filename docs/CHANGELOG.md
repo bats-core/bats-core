@@ -23,7 +23,7 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 
 ### Changed
 
-* update Docker image with the latest `bats-detik` version 1.3.1 (#931)
+* update Docker image with the latest `bats-detik` version 1.3.1 (#932)
 
 #### Documentation
 
