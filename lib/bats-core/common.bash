@@ -197,22 +197,23 @@ bats_trim() {                                            # <output-variable> <st
 # a helper function to work around unbound variable errors with ${arr[@]} on Bash 3
 bats_append_arrays_as_args() { # <array...> -- <command ...>
   local -a trailing_args=()
-  while (($# > 0)) && [[ $1 != -- ]]; do
-    local array=$1
+  local array
+  while (( $# > 0 )) && [[ $1 != -- ]]; do
+    array=$1
     shift
 
-    if eval "(( \${#${array}[@]} > 0 ))"; then
-      eval "trailing_args+=(\"\${${array}[@]}\")"
+    if (( ${#array[@]} > 0 )); then
+      trailing_args+=( "${array[@]}" )
     fi
   done
-  shift # remove -- separator
+  shift  # remove -- separator
 
-  if (($# == 0)); then
+  if (( $# == 0 )); then
     printf "Error: append_arrays_as_args is missing a command or -- separator\n" >&2
     return 1
   fi
 
-  if ((${#trailing_args[@]} > 0)); then
+  if (( ${#trailing_args[@]} > 0 )); then
     "$@" "${trailing_args[@]}"
   else
     "$@"
