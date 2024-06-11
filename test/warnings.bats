@@ -5,15 +5,6 @@ bats_require_minimum_version 1.5.0
 setup() {
   load test_helper
   fixtures warnings
-  if [[ $BATS_ROOT == "$BATS_CWD" ]]; then
-    RELATIVE_BATS_ROOT=''
-  else
-    RELATIVE_BATS_ROOT=${BATS_ROOT#"$BATS_CWD"/}
-  fi
-  if [[ -n "$RELATIVE_BATS_ROOT" && "$RELATIVE_BATS_ROOT" != */ ]]; then
-    RELATIVE_BATS_ROOT+=/
-  fi
-  echo "RELATIVE_BATS_ROOT=$RELATIVE_BATS_ROOT" "BATS_ROOT=$BATS_ROOT" "BATS_CWD=$BATS_CWD"
 }
 
 @test "invalid warning is an error" {

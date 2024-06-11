@@ -11,9 +11,24 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 
 ## [Unreleased]
 
+### Added
+
+#### Documentation
+
+* document `bats_pipe` function (#901)
+
 ### Fixed
 
+* unbreak test suites with multiple files loading common constants (#904), introduced in v1.11.0
 * docker image won't crash if a file or directory named 'bats' exists (#920)
+
+### Changed
+
+* update Docker image with the latest `bats-detik` version 1.3.1 (#932)
+
+#### Documentation
+
+* fix hard-coded link to readthedocs (#901)
 
 ## [1.11.0] - 2024-03-24
 
