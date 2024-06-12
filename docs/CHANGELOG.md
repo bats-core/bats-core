@@ -52,6 +52,9 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 
 ### Changed
 
+* `bats -j` will now stream the test point output (likely out-of-order, which is
+  permitted by the TAP specification) rather than dumping it all at the end of
+  the test run. (#826)
 * update Docker image with the latest `bats-file` version 0.4.0 (#780)
 * update Docker image with the latest `bats-detik` version 1.3.0 (#876)
 
