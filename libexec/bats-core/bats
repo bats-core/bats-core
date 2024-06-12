@@ -112,6 +112,7 @@ BATS_LIBEXEC="$(
   pwd
 )"
 export BATS_LIBEXEC
+export BATS_ARGS="$@"
 export BATS_CWD="$PWD"
 export BATS_TEST_FILTER=
 export PATH="$BATS_LIBEXEC:$PATH"
