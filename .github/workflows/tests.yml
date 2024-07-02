@@ -220,7 +220,7 @@ jobs:
           - ""
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
-      - uses: vmactions/freebsd-vm@f8be330398166d1eb0601f01353839d4052367b2 # v1.0.7
+      - uses: vmactions/freebsd-vm@12c207ac1ba13827f25726fe93f9c2e6f685f0f3 # v1.0.8
         with:
           prepare: pkg install -y bash parallel ${{ matrix.packages }}
           run: |
