@@ -35,6 +35,8 @@ RUN apk add --no-cache parallel ncurses && \
     mkdir -p ~/.parallel && touch ~/.parallel/will-cite \
     && mkdir /code
 
+RUN ln -s "$(/usr/bin/env which bash)" "/bin/bash"
+
 RUN ln -s /opt/bats/bin/bats /usr/local/bin/bats
 COPY . /opt/bats/
 
