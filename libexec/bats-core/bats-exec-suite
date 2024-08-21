@@ -278,6 +278,15 @@ else
   BATS_SETUP_SUITE_COMPLETED=1
 fi
 
+## insert nested dirs before the setup_suite file
+#setup_suite_file_pre=${setup_suite_file%/*}
+#setup_suite_file_post=${setup_suite_file##*/}
+#setup_suite_file=$setup_suite_file_pre
+#for _dir in ${nested_dirs[@]}; do
+#  setup_suite_file+="/$_dir"
+#done
+#setup_suite_file+="/$setup_suite_file_post"
+
 if [[ "$num_jobs" -gt 1 ]] && [[ -z "$bats_no_parallelize_across_files" ]]; then
   # run files in parallel to get the maximum pool of parallel tasks
   # shellcheck disable=SC2086,SC2068
@@ -285,13 +294,24 @@ if [[ "$num_jobs" -gt 1 ]] && [[ -z "$bats_no_parallelize_across_files" ]]; then
   # because parallel can only quote it as one
   "${parallel_binary_name}" --keep-order --jobs "$num_jobs" -- "bats-exec-file" "$(printf "%q " "${flags[@]}")" "{}" "$TESTS_LIST_FILE" <<< "$(printf "%s\n" "${BATS_UNIQUE_TEST_FILENAMES[@]}")" 2>&1 || bats_exec_suite_status=1
 else
-  for filename in "${BATS_UNIQUE_TEST_FILENAMES[@]}"; do
+  # recursive setup_suite only suppoted for non-parallel executions (for now).
+  _exec_file() {
+    if [[ -z $BATS_UNIQUE_TEST_FILENAMES ]]; then return; fi
+
+    filename=${BATS_UNIQUE_TEST_FILENAMES[0]}
+    unset BATS_UNIQUE_TEST_FILENAMES[0]
+    BATS_UNIQUE_TEST_FILENAMES=(${BATS_UNIQUE_TEST_FILENAMES[@]})
+
     if [[ "${BATS_INTERRUPTED-NOTSET}" != NOTSET ]]; then
       bats_exec_suite_status=130 # bash's code for SIGINT exits
       break
     fi
     bats-exec-file "${flags[@]}" "$filename" "${TESTS_LIST_FILE}" || bats_exec_suite_status=1
-  done
+
+    _exec_file
+  }
+
+  _exec_file
 fi
 
 set -eET
