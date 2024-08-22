@@ -286,9 +286,9 @@ if [[ "$num_jobs" -gt 1 ]] && [[ -z "$bats_no_parallelize_across_files" ]]; then
   "${parallel_binary_name}" --keep-order --jobs "$num_jobs" -- "bats-exec-file" "$(printf "%q " "${flags[@]}")" "{}" "$TESTS_LIST_FILE" <<< "$(printf "%s\n" "${BATS_UNIQUE_TEST_FILENAMES[@]}")" 2>&1 || bats_exec_suite_status=1
 else
   # recursive setup_suite only suppoted for non-parallel executions, for now.
-  declare file_que=(${BATS_UNIQUE_TEST_FILENAMES[@]})
+  declare file_que=("${BATS_UNIQUE_TEST_FILENAMES[@]}")
   declare setup_suite_filename=$(basename $setup_suite_file)
-  IFS='/' read -ra cur_dir_stack <<<$(dirname ${BATS_UNIQUE_TEST_FILENAMES[0]#/})
+  IFS='/' read -ra cur_dir_stack <<<"$(dirname "${BATS_UNIQUE_TEST_FILENAMES[0]#/}")"
 
   exec_file_que() {
     if [[ "${BATS_INTERRUPTED-NOTSET}" != NOTSET ]]; then
@@ -315,10 +315,10 @@ else
       # find the shared bottom stack
       local shared_bottom_stack=()
       for ((idx=0; idx<${#cur_dir_stack[@]}; ++idx)); do
-        if [[ ${cur_dir_stack[$idx]} != ${test_dir_stack[$idx]} ]]; then
+        if [[ "${cur_dir_stack[$idx]}" != "${test_dir_stack[$idx]}" ]]; then
           break
         fi
-        shared_bottom_stack+=(${cur_dir_stack[$idx]})
+        shared_bottom_stack+=("${cur_dir_stack[$idx]}")
       done
       local next_dir=${test_dir_stack[$idx]}
 
@@ -326,10 +326,10 @@ else
       # decide to go up or down the stack.
       if [[ ${#shared_bottom_stack[@]} -lt ${#cur_dir_stack[@]} ]]; then
         # go down the directory stack
-        local cur_dir_flat=${cur_dir_stack[@]}
+        local cur_dir_flat="${cur_dir_stack[@]}"
         local setup_suite_file_inner="/${cur_dir_flat// /\/}/$setup_suite_filename"
         if [[ -f $setup_suite_file_inner ]]; then
-          source $setup_suite_file_inner
+          source "$setup_suite_file_inner"
           teardown_suite >>"$BATS_OUT" 2>&1
         fi
         echo "${file_que[@]}" >$BATS_RUN_TMPDIR/file_que
@@ -337,17 +337,17 @@ else
       else # [[ ${#shared_bottom_stack[@]} -eq ${#cur_dir_stack[@]} ]]
         # go up the directory stack
         # assume the commented-out condition was met
-        cur_dir_stack+=($next_dir)
+        cur_dir_stack+=("$next_dir")
         ( 
           local cur_dir_flat=${cur_dir_stack[@]}
           local setup_suite_file_inner="/${cur_dir_flat// /\/}/$setup_suite_filename"
           if [[ -f $setup_suite_file_inner ]]; then 
-            source $setup_suite_file_inner
+            source "$setup_suite_file_inner"
             setup_suite >>"$BATS_OUT" 2>&1
           fi 
           exec_file_que
         )
-        file_que=($(cat $BATS_RUN_TMPDIR/file_que))
+        file_que=("$(cat $BATS_RUN_TMPDIR/file_que)")
         unset cur_dir_stack[$(( ${#cur_dir_stack[@]} - 1 ))]
       fi
     fi
