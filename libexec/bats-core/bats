@@ -457,7 +457,6 @@ for filename in "${arguments[@]}"; do
   if [[ -z "$setup_suite_file" ]]; then
     if [[ -d "$filename" ]]; then
       dirname="$filename"
-      export BATS_BASE_DIRNAME=$dirname # NOTE: recursion assume this
     else
       dirname="${filename%/*}"
     fi

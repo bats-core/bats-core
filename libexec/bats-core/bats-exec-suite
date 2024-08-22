@@ -307,8 +307,11 @@ else
   }
 
   cur_dir_stack=()
+  IFS='/' read -ra cur_dir_stack <<<$(dirname ${BATS_UNIQUE_TEST_FILENAMES[0]#/})
+
   _exec_file() {
-    filenames=$1
+    filenames=($@)
+    echo ${filenames[@]}
     if [[ -z $filenames ]]; then return; fi
 
     filename=${filenames[0]}
@@ -317,8 +320,12 @@ else
     # TODO: create subshell if necessary and call setup_suite inside
     _exec_file_inner() {
       # FIXME: optimize
-      IFS='/' read -ra test_dir_stack <<<$(dirname ${filename#$BATS_BASE_DIRNAME/})
-      if [[ $cur_dir_stack == $test_dir_stack ]]; then
+      test_dir_stack=()
+      IFS='/' read -ra test_dir_stack <<<$(dirname ${filename#/})
+      echo "curr: ${cur_dir_stack[@]}"
+      echo "test: ${test_dir_stack[@]}"
+
+      if [[ "${cur_dir_stack[@]}" == "${test_dir_stack[@]}" ]]; then
         _exec_file_impl $filename
       else
         shortest_stack_len=${#test_dir_stack[@]}
@@ -340,25 +347,29 @@ else
           next_dir=${test_dir_stack[$idx]}
         fi
 
+        echo "slen: $shortest_stack_len"
+        echo "sbot: ${shared_bottom_stack[@]}"
+        echo "next: $next_dir"
+
         if [[ ${#shared_bottom_stack[@]} -gt ${#cur_dir_stack[@]} ]]; then
           return $filenames
         elif [[ ${#shared_bottom_stack[@]} -eq ${#cur_dir_stack[@]} ]]; then
-          # TODO: push next dir to cur_dir_stack
-          # TODO: execute setup_suite of the bottom-most non-shared dir.
-          # TODO: _filenames=_enter_subshell  ; filenames=$_filenames
-          # TODO: execute teardown_suite of the bottom-most non-shared dir.
-          # TODO: pop top dir from cur_dir_stack
           cur_dir_stack+=($next_dir)
-          setup_suite_file_inner="$(dirname $filename)/$setup_suite_filename"
+          _tmp=${cur_dir_stack[@]}
+          setup_suite_file_inner="/${_tmp// /\/}/$setup_suite_filename"
+          echo $setup_suite_file_inner
           if [[ -f $setup_suite_file_inner ]]; then
+            echo "setup_suite in $setup_suite_file_inner"
             source $setup_suite_file_inner
             setup_suite >>"$BATS_OUT" 2>&1
           fi
-          { _exec_file_impl $filename; }
+          echo "entering subshell..."
+          { _exec_file_inner; }
           if [[ -f $setup_suite_file_inner ]]; then
+            echo "teardown_suite in $setup_suite_file_inner"
             teardown_suite >>"$BATS_OUT" 2>&1
           fi
-          unset filenames[$(( ${#arr[@]} - 1 ))]
+          unset cur_dir_stack[$(( ${#cur_dir_stack[@]} - 1 ))]
         else
           echo "wtf"
           exit 1
@@ -372,7 +383,6 @@ else
     _exec_file ${filenames[@]}
   }
 
-  echo ${BATS_UNIQUE_TEST_FILENAMES[@]}
   _exec_file ${BATS_UNIQUE_TEST_FILENAMES[@]}
 fi
 
