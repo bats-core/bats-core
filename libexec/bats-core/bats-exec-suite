@@ -288,7 +288,7 @@ else
   # recursive setup_suite only suppoted for non-parallel executions, for now.
   declare file_que=("${BATS_UNIQUE_TEST_FILENAMES[@]}")
   declare setup_suite_filename=$(basename "$setup_suite_file")
-  IFS='/' read -ra cur_dir_stack <<<"$(dirname "${BATS_UNIQUE_TEST_FILENAMES[0]#/}")"
+  IFS='/' read -ra cur_dir_stack <<<"$(dirname "${setup_suite_file#/}")"
 
   exec_file_que() {
     if [[ "${BATS_INTERRUPTED-NOTSET}" != NOTSET ]]; then
