@@ -293,7 +293,7 @@ else
   exec_file_que() {
     if [[ "${BATS_INTERRUPTED-NOTSET}" != NOTSET ]]; then
       bats_exec_suite_status=130 # bash's code for SIGINT exits
-      exit
+      return
     fi
 
     # if queue was exhausted, return the way out
@@ -333,7 +333,7 @@ else
           teardown_suite >>"$BATS_OUT" 2>&1
         fi
         echo "${file_que[@]}" >$BATS_RUN_TMPDIR/file_que
-        exit
+        return
       else # [[ ${#shared_bottom_stack[@]} -eq ${#cur_dir_stack[@]} ]]
         # go up the directory stack
         # assume the commented-out condition was met
