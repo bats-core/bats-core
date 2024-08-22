@@ -347,7 +347,7 @@ else
           fi 
           exec_file_que
         )
-        file_que=("$(cat $BATS_RUN_TMPDIR/file_que)")
+        file_que=($(cat $BATS_RUN_TMPDIR/file_que))
         unset cur_dir_stack[$(( ${#cur_dir_stack[@]} - 1 ))]
       fi
     fi
