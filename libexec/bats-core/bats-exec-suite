@@ -352,6 +352,7 @@ else
         echo "next: $next_dir"
 
         if [[ ${#shared_bottom_stack[@]} -gt ${#cur_dir_stack[@]} ]]; then
+          # NOTE: teardown here
           return $filenames
         elif [[ ${#shared_bottom_stack[@]} -eq ${#cur_dir_stack[@]} ]]; then
           cur_dir_stack+=($next_dir)
@@ -364,7 +365,8 @@ else
             setup_suite >>"$BATS_OUT" 2>&1
           fi
           echo "entering subshell..."
-          { _exec_file_inner; }
+          ( _exec_file_inner; )
+          # NOTE: no teardown. pass cur_dir_stack to subshell
           if [[ -f $setup_suite_file_inner ]]; then
             echo "teardown_suite in $setup_suite_file_inner"
             teardown_suite >>"$BATS_OUT" 2>&1
