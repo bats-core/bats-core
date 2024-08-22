@@ -278,15 +278,6 @@ else
   BATS_SETUP_SUITE_COMPLETED=1
 fi
 
-## insert nested dirs before the setup_suite file
-#setup_suite_file_pre=${setup_suite_file%/*}
-#setup_suite_file_post=${setup_suite_file##*/}
-#setup_suite_file=$setup_suite_file_pre
-#for _dir in ${nested_dirs[@]}; do
-#  setup_suite_file+="/$_dir"
-#done
-#setup_suite_file+="/$setup_suite_file_post"
-
 if [[ "$num_jobs" -gt 1 ]] && [[ -z "$bats_no_parallelize_across_files" ]]; then
   # run files in parallel to get the maximum pool of parallel tasks
   # shellcheck disable=SC2086,SC2068
@@ -294,43 +285,37 @@ if [[ "$num_jobs" -gt 1 ]] && [[ -z "$bats_no_parallelize_across_files" ]]; then
   # because parallel can only quote it as one
   "${parallel_binary_name}" --keep-order --jobs "$num_jobs" -- "bats-exec-file" "$(printf "%q " "${flags[@]}")" "{}" "$TESTS_LIST_FILE" <<< "$(printf "%s\n" "${BATS_UNIQUE_TEST_FILENAMES[@]}")" 2>&1 || bats_exec_suite_status=1
 else
+  # recursive setup_suite only suppoted for non-parallel executions, for now.
+  file_que=(${BATS_UNIQUE_TEST_FILENAMES[@]})
   setup_suite_filename=$(basename $setup_suite_file)
+  IFS='/' read -ra cur_dir_stack <<<$(dirname ${BATS_UNIQUE_TEST_FILENAMES[0]#/})
 
-  # recursive setup_suite only suppoted for non-parallel executions (for now).
-  _exec_file_impl() {
-    filename=$1
+  exec_file_next() {
     if [[ "${BATS_INTERRUPTED-NOTSET}" != NOTSET ]]; then
       bats_exec_suite_status=130 # bash's code for SIGINT exits
       exit
     fi
-    bats-exec-file "${flags[@]}" "$filename" "${TESTS_LIST_FILE}" || bats_exec_suite_status=1
-  }
 
-  filenames=(${BATS_UNIQUE_TEST_FILENAMES[@]})
-  cur_dir_stack=()
-  IFS='/' read -ra cur_dir_stack <<<$(dirname ${BATS_UNIQUE_TEST_FILENAMES[0]#/})
-
-  _exec_file() {
-    #echo "queu: ${filenames[@]}"
-    if [[ -z $filenames ]]; then 
-      echo "" > $BATS_RUN_TMPDIR/filenames
+    # if queue was exhausted, return the way out
+    #echo "queu: ${file_que[@]}"
+    if [[ -z $file_que ]]; then 
+      echo "" > $BATS_RUN_TMPDIR/file_que
       return
     fi
-    filename=${filenames[0]}
 
-    test_dir_stack=()
+    filename=${file_que[0]}
     IFS='/' read -ra test_dir_stack <<<$(dirname ${filename#/})
     #echo "curr: ${cur_dir_stack[@]}"
     #echo "test: ${test_dir_stack[@]}"
 
-    # TODO: create subshell if necessary and call setup_suite inside
-    _exec_file_execute_or_subshell() {
+    # if necessary, create a subshell and call {setup,teardown}_suite inside
+    exec_file_or_subshell() {
       if [[ "${cur_dir_stack[@]}" == "${test_dir_stack[@]}" ]]; then
-        echo "executing $filename"
-        _exec_file_impl $filename
-        unset filenames[0]
-        filenames=("${filenames[@]}")
-        #echo "next: ${filenames[@]}"
+        #echo "executing $filename"
+        bats-exec-file "${flags[@]}" "$filename" "${TESTS_LIST_FILE}" || bats_exec_suite_status=1
+        unset file_que[0]
+        file_que=("${file_que[@]}")
+        #echo "next: ${file_que[@]}"
       else
         shortest_stack_len=${#test_dir_stack[@]}
         if [[ ${#cur_dir_stack[@]} -lt ${#test_dir_stack[@]} ]]; then
@@ -338,7 +323,6 @@ else
         fi
 
         shared_bottom_stack=()
-        next_dir=""
         for ((idx=0; idx<$shortest_stack_len; ++idx)); do
           if [[ ${cur_dir_stack[$idx]} == ${test_dir_stack[$idx]} ]]; then
             shared_bottom_stack+=(${cur_dir_stack[$idx]})
@@ -347,6 +331,7 @@ else
           fi
         done
 
+        next_dir=""
         if [[ -n ${test_dir_stack[$idx]} ]]; then
           next_dir=${test_dir_stack[$idx]}
         fi
@@ -356,6 +341,7 @@ else
         #echo "next: $next_dir"
 
         if [[ ${#shared_bottom_stack[@]} -lt ${#cur_dir_stack[@]} ]]; then
+          # we need to go down the directory stack
           _tmp=${cur_dir_stack[@]}
           setup_suite_file_inner="/${_tmp// /\/}/$setup_suite_filename"
           if [[ -f $setup_suite_file_inner ]]; then
@@ -363,10 +349,11 @@ else
             source $setup_suite_file_inner
             teardown_suite >>"$BATS_OUT" 2>&1
           fi
-          echo "${filenames[@]}" >$BATS_RUN_TMPDIR/filenames
+          echo "${file_que[@]}" >$BATS_RUN_TMPDIR/file_que
           echo "exiting..."
           exit
-        elif [[ ${#shared_bottom_stack[@]} -eq ${#cur_dir_stack[@]} ]]; then
+        else # [[ ${#shared_bottom_stack[@]} -eq ${#cur_dir_stack[@]} ]]
+          # we need to go up in this case
           cur_dir_stack+=($next_dir)
           echo "entering subshell..."
           ( 
@@ -377,25 +364,19 @@ else
               source $setup_suite_file_inner
               setup_suite >>"$BATS_OUT" 2>&1
             fi 
-            _exec_file 
+            exec_file_next
           )
-          filenames=($(cat $BATS_RUN_TMPDIR/filenames))
+          file_que=($(cat $BATS_RUN_TMPDIR/file_que))
           unset cur_dir_stack[$(( ${#cur_dir_stack[@]} - 1 ))]
-        else
-          echo "wtf???"
-          exit 1
         fi
       fi
     }
 
-    _exec_file_execute_or_subshell
-
-    # Do the rest of tests
-    # NOTE: assume this function call already updated filenames internally.
-    _exec_file
+    exec_file_or_subshell
+    exec_file_next
   }
 
-  _exec_file
+  exec_file_next
 fi
 
 set -eET
