@@ -287,7 +287,7 @@ if [[ "$num_jobs" -gt 1 ]] && [[ -z "$bats_no_parallelize_across_files" ]]; then
 else
   # recursive setup_suite only suppoted for non-parallel executions, for now.
   declare file_que=("${BATS_UNIQUE_TEST_FILENAMES[@]}")
-  declare setup_suite_filename=$(basename $setup_suite_file)
+  declare setup_suite_filename=$(basename "$setup_suite_file")
   IFS='/' read -ra cur_dir_stack <<<"$(dirname "${BATS_UNIQUE_TEST_FILENAMES[0]#/}")"
 
   exec_file_que() {
@@ -297,7 +297,7 @@ else
     fi
 
     # if queue was exhausted, return the way out
-    if [[ -z $file_que ]]; then 
+    if [[ -z "${file_que+x}" ]]; then 
       echo "" > $BATS_RUN_TMPDIR/file_que
       return
     fi
@@ -305,13 +305,14 @@ else
     local filename=${file_que[0]}
     IFS='/' read -ra test_dir_stack <<<$(dirname ${filename#/})
 
-    if [[ "${cur_dir_stack[@]}" == "${test_dir_stack[@]}" ]]; then
+    if [[ -z "$setup_suite_filename" ]] || [[ "${cur_dir_stack[@]}" == "${test_dir_stack[@]}" ]]; then
       # execute the file and pop it from the queue
       bats-exec-file "${flags[@]}" "$filename" "${TESTS_LIST_FILE}" || bats_exec_suite_status=1
       unset file_que[0]
       file_que=("${file_que[@]}")
     else
       # create a subshell and call {setup,teardown}_suite inside
+      # do this whole operation only when the root setup_suite exists
       # find the shared bottom stack
       local shared_bottom_stack=()
       for ((idx=0; idx<${#cur_dir_stack[@]}; ++idx)); do
