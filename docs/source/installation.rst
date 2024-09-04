@@ -2,7 +2,7 @@
 Installation
 ============
 
-Linux: Distribition Package Manager
+Linux: Distribution Package Manager
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Following Linux distributions provide Bats via their package manager:
