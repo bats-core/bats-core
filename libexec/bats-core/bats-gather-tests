@@ -5,9 +5,9 @@ args=("$@")
 filter_tags_list=()
 
 # shellcheck source=lib/bats-core/common.bash disable=SC2153 
-source "$BATS_ROOT/lib/bats-core/common.bash"
+source "$BATS_ROOT/$BATS_LIB/bats-core/common.bash"
 # shellcheck source=lib/bats-core/preprocessing.bash
-source "$BATS_ROOT/lib/bats-core/preprocessing.bash"
+source "$BATS_ROOT/$BATS_LIB/bats-core/preprocessing.bash"
 
 abort() {
   printf 'ERROR: '
@@ -52,7 +52,7 @@ done
 
 # shellcheck source=lib/bats-core/test_functions.bash disable=SC2153 
 # required to provide e.g. `load` for free code (some users rely on this)
-source "$BATS_ROOT/lib/bats-core/test_functions.bash"
+source "$BATS_ROOT/$BATS_LIB/bats-core/test_functions.bash"
 # _bats_test_functions_setup will be called per file further down
 
 # override test_functions.bash's version to use it for test registration
@@ -253,7 +253,7 @@ else
 fi
 
 # shellcheck source=lib/bats-core/tracing.bash
-source "$BATS_ROOT/lib/bats-core/tracing.bash"
+source "$BATS_ROOT/$BATS_LIB/bats-core/tracing.bash"
 
 BATS_OUT="$BATS_RUN_TMPDIR/gather-tests.out"
 touch "$BATS_OUT"
