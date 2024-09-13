@@ -126,7 +126,7 @@ jobs:
   macos:
     strategy:
       matrix:
-        os: ['macos-11', 'macos-12']
+        os: ['macos-12', 'macos-13']
         env_vars:
           - ''
           # allow for some parallelity without GNU parallel, since it is not installed by default
@@ -159,7 +159,7 @@ jobs:
   npm_on_macos:
     strategy:
       matrix:
-        os: ['macos-11', 'macos-12']
+        os: ['macos-12', 'macos-13']
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
