@@ -19,9 +19,10 @@ setup() {
   # give each test their own tmpdir to allow for parallelization without interference
   # shellcheck disable=SC2103,SC2164
   cd "$BATS_TEST_TMPDIR"
+  PATH_TO_INSTALL_SHELL="${BATS_TEST_DIRNAME%/*}/install.sh"
   mkdir -p {usr/bin,opt/bats-core}
   ls -lR .
-  "$BATS_ROOT/install.sh" "opt/bats-core"
+  "$PATH_TO_INSTALL_SHELL" "opt/bats-core"
 
   ln -s "usr/bin" "bin"
 
