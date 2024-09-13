@@ -23,7 +23,7 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 
 * unbreak test suites with multiple files loading common constants (#904), introduced in v1.11.0
 * docker image won't crash if a file or directory named 'bats' exists (#920)
-* use $BATS_LIBDIR instead of hardcoded lib in 'bats-gather-tests' (#985)
+* use $BATS_LIBDIR instead of hardcoded lib in 'bats-gather-tests' (#985, #990)
 
 ### Changed
 
