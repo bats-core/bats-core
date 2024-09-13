@@ -13,6 +13,8 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 
 ### Added
 
+* make Dockerfile compatible with `#!/bin/bash` files (#967)
+
 #### Documentation
 
 * document `bats_pipe` function (#901)
