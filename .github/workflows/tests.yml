@@ -199,12 +199,20 @@ jobs:
 
   lib64-install:
     runs-on: ubuntu-latest
+    permissions: 
+        checks: write
+        pull-requests: write
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       - name: Install in lib64
         run: sudo ./install.sh /usr/ lib64
       - name: Run from env
-        run: time bats test --print-output-on-failure --report-formatter junit --output test-results
+        shell: 'script -q -e -c "bash {0}"' # work around tty issues
+        env:
+          TERM: linux # fix tput for tty issue work around
+        run: |
+          mkdir test-results/
+          time bats test --print-output-on-failure --report-formatter junit --output test-results
       - name: Publish Test Results
         uses: EnricoMi/publish-unit-test-result-action@v2
         if: always()
