@@ -19,4 +19,4 @@ jobs:
       - name: Checkout
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       - name: Codespell
-        uses: codespell-project/actions-codespell@94259cd8be02ad2903ba34a22d9c13de21a74461 # v2.0
+        uses: codespell-project/actions-codespell@406322ec52dd7b488e48c1c4b82e2a8b3a1bf630 # v2.1
