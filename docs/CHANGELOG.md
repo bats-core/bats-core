@@ -33,6 +33,7 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 #### Documentation
 
 * fix hard-coded link to readthedocs (#901)
+* fix tutorial code for multiline test suite (#1011)
 
 ## [1.11.0] - 2024-03-24
 
