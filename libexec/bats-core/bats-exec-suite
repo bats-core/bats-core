@@ -285,13 +285,81 @@ if [[ "$num_jobs" -gt 1 ]] && [[ -z "$bats_no_parallelize_across_files" ]]; then
   # because parallel can only quote it as one
   "${parallel_binary_name}" --keep-order --jobs "$num_jobs" -- "bats-exec-file" "$(printf "%q " "${flags[@]}")" "{}" "$TESTS_LIST_FILE" <<< "$(printf "%s\n" "${BATS_UNIQUE_TEST_FILENAMES[@]}")" 2>&1 || bats_exec_suite_status=1
 else
-  for filename in "${BATS_UNIQUE_TEST_FILENAMES[@]}"; do
+  # recursive setup_suite only suppoted for non-parallel executions, for now.
+  declare file_que=("${BATS_UNIQUE_TEST_FILENAMES[@]}")
+  declare setup_suite_filename=$(basename "$setup_suite_file")
+  IFS='/' read -ra cur_dir_stack <<<"$(dirname "${setup_suite_file#/}")"
+
+  exec_file_que() {
     if [[ "${BATS_INTERRUPTED-NOTSET}" != NOTSET ]]; then
       bats_exec_suite_status=130 # bash's code for SIGINT exits
-      break
+      return
     fi
-    bats-exec-file "${flags[@]}" "$filename" "${TESTS_LIST_FILE}" || bats_exec_suite_status=1
-  done
+
+    # if queue was exhausted, return the way out
+    if [[ -z "${file_que+x}" ]]; then 
+      echo "" > $BATS_RUN_TMPDIR/file_que
+      return
+    fi
+
+    local filename=${file_que[0]}
+    IFS='/' read -ra test_dir_stack <<<$(dirname ${filename#/})
+
+    if [[ -z "$setup_suite_filename" ]] || [[ "${cur_dir_stack[@]}" == "${test_dir_stack[@]}" ]]; then
+      # execute the file and pop it from the queue
+      bats-exec-file "${flags[@]}" "$filename" "${TESTS_LIST_FILE}" || bats_exec_suite_status=1
+      unset file_que[0]
+      file_que=("${file_que[@]}")
+    else
+      # create a subshell and call {setup,teardown}_suite inside
+      # do this whole operation only when the root setup_suite exists
+      # find the shared bottom stack
+      local shared_bottom_stack=()
+      for ((idx=0; idx<${#cur_dir_stack[@]}; ++idx)); do
+        if [[ "${cur_dir_stack[$idx]}" != "${test_dir_stack[$idx]}" ]]; then
+          break
+        fi
+        shared_bottom_stack+=("${cur_dir_stack[$idx]}")
+      done
+      local next_dir=${test_dir_stack[$idx]}
+
+      # depending on the bottom and the current stacks,
+      # decide to go up or down the stack.
+      if [[ ${#shared_bottom_stack[@]} -lt ${#cur_dir_stack[@]} ]]; then
+        # go down the directory stack
+        local cur_dir_flat="${cur_dir_stack[@]}"
+        local setup_suite_file_inner="/${cur_dir_flat// /\/}/$setup_suite_filename"
+        if [[ -f $setup_suite_file_inner ]]; then
+          source "$setup_suite_file_inner"
+          teardown_suite >>"$BATS_OUT" 2>&1
+        fi
+        echo "${file_que[@]}" >$BATS_RUN_TMPDIR/file_que
+        return
+      else # [[ ${#shared_bottom_stack[@]} -eq ${#cur_dir_stack[@]} ]]
+        # go up the directory stack
+        # assume the commented-out condition was met
+        cur_dir_stack+=("$next_dir")
+        ( 
+          local cur_dir_flat=${cur_dir_stack[@]}
+          local setup_suite_file_inner="/${cur_dir_flat// /\/}/$setup_suite_filename"
+          if [[ -f $setup_suite_file_inner ]]; then 
+            source "$setup_suite_file_inner"
+            setup_suite >>"$BATS_OUT" 2>&1
+          fi 
+          exec_file_que
+        )
+        file_que=($(cat $BATS_RUN_TMPDIR/file_que))
+        unset cur_dir_stack[$(( ${#cur_dir_stack[@]} - 1 ))]
+      fi
+    fi
+
+    exec_file_que
+  }
+
+  exec_file_que
+
+  unset file_que
+  unset setup_suite_filename
 fi
 
 set -eET
