@@ -11,6 +11,8 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 
 ## [Unreleased]
 
+## [1.11.1] - 2024-11-29
+
 ### Added
 
 * make Dockerfile compatible with `#!/bin/bash` files (#967)

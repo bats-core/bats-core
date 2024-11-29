@@ -1,6 +1,6 @@
 {
   "name": "bats",
-  "version": "1.11.0",
+  "version": "1.11.1",
   "description": "Bash Automated Testing System",
   "homepage": "https://github.com/bats-core/bats-core#readme",
   "license": "MIT",
