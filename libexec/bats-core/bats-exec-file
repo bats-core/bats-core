@@ -185,42 +185,20 @@ function teardown_file() {
 
 bats_forward_output_of_parallel_test() {
   local test_number_in_suite=$1
-  local status=0
-  wait "$(cat "$output_folder/$test_number_in_suite/pid")" || status=1
   cat "$output_folder/$test_number_in_suite/stdout"
   cat "$output_folder/$test_number_in_suite/stderr" >&2
-  return $status
 }
 
-bats_is_next_parallel_test_finished() {
-  local PID
-  # get the pid of the next potentially finished test
-  PID=$(cat "$output_folder/$((test_number_in_suite_of_last_finished_test + 1))/pid")
+bats_is_parallel_test_finished() {
+  local test_number_in_suite="$1"
+  local test_pid
+  test_pid=$(cat "$output_folder/$test_number_in_suite/pid")
   # try to send a signal to this process
   # if it fails, the process exited,
   # if it succeeds, the process is still running
-  if kill -0 "$PID" 2>/dev/null; then
+  if kill -0 "$test_pid" 2>/dev/null; then
     return 1
   fi
-}
-
-# prints output from all tests in the order they were started
-# $1 == "blocking": wait for a test to finish before printing
-#    != "blocking": abort printing, when a test has not finished
-bats_forward_output_for_parallel_tests() {
-  local status=0
-  # was the next test already started?
-  while ((test_number_in_suite_of_last_finished_test + 1 <= test_number_in_suite)); do
-    # if we are okay with waiting or if the test has already been finished
-    if [[ "$1" == "blocking" ]] || bats_is_next_parallel_test_finished; then
-      ((++test_number_in_suite_of_last_finished_test))
-      bats_forward_output_of_parallel_test "$test_number_in_suite_of_last_finished_test" || status=$?
-    else
-      # non-blocking and the process has not finished -> abort the printing
-      break
-    fi
-  done
-  return $status
 }
 
 bats_run_test_with_retries() { # <args>
@@ -251,8 +229,8 @@ bats_run_tests_in_parallel() {
   source "$BATS_ROOT/$BATS_LIBDIR/bats-core/semaphore.bash"
   bats_semaphore_setup
   # the test_number_in_file is not yet incremented -> one before the next test to run
-  local test_number_in_suite_of_last_finished_test="$BATS_FILE_FIRST_TEST_NUMBER_IN_SUITE" # stores which test was printed last
-  local test_number_in_file=0 test_number_in_suite=$BATS_FILE_FIRST_TEST_NUMBER_IN_SUITE
+  local test_number_in_file=0 test_number_in_suite=$BATS_FILE_FIRST_TEST_NUMBER_IN_SUITE test_pid=0
+  declare -A remaining_test_pids
   for test_name in "${tests_to_run[@]}"; do
     # Only handle non-empty lines
     if [[ $test_name ]]; then
@@ -262,11 +240,26 @@ bats_run_tests_in_parallel() {
       bats_semaphore_run "$output_folder/$test_number_in_suite" \
         bats_run_test_with_retries "${flags[@]}" "$filename" "$test_name" "$test_number_in_suite" "$test_number_in_file" \
         >"$output_folder/$test_number_in_suite/pid"
+      test_pid="$(<"$output_folder/$test_number_in_suite/pid")"
     fi
-    # print results early to get interactive feedback
-    bats_forward_output_for_parallel_tests non-blocking || status=1 # ignore if we did not finish yet
+    if bats_is_parallel_test_finished "$test_number_in_suite"; then
+      # Print results early if the test has already finished, so fast test
+      # suites get somewhat more in-order output if possible.
+      bats_forward_output_of_parallel_test "$test_number_in_suite"
+    else
+      # Add the test to the list we wait for at the end.
+      remaining_test_pids["$test_pid"]="$test_number_in_suite"
+    fi
   done
-  bats_forward_output_for_parallel_tests blocking || status=1
+  # Wait for all remaining tests to complete.
+  while [ "${#remaining_test_pids[@]}" -gt 0 ]; do
+    local finished_pid finished_test
+    wait -f -p finished_pid -n "${!remaining_test_pids[@]}" || status=1
+    finished_test="${remaining_test_pids[$finished_pid]}"
+    bats_forward_output_of_parallel_test "$finished_test"
+    # Remove the test
+    unset "remaining_test_pids[$finished_pid]"
+  done
   return $status
 }
 
