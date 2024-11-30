@@ -334,10 +334,12 @@ To allow to use `load` in conditions `bats_load_safe` has been added.
 loaded instead of exiting Bats.
 Aside from that `bats_load_safe` acts exactly like `load`.
 
-As pointed out by @iatrou in https://www.tldp.org/LDP/abs/html/declareref.html,
+__Note:__ : As pointed out by @iatrou in the [Advanced Bash Scripting Guide
+(section 9.2)](https://www.tldp.org/LDP/abs/html/declareref.html),
 using the `declare` builtin restricts scope of a variable. Thus, since actual
-`source`-ing is performed in context of the `load` function, `declare`d symbols
-will _not_ be made available to callers of `load`.
+`source`-ing is performed in context of the `load` function, symbols
+defined using `declare` will _not_ be made available to callers of `load` (unless `declare -g`
+is used).
 
 ### `load` argument resolution
 
