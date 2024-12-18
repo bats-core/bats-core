@@ -3,15 +3,15 @@ bats::on_failure() {
     echo "called failure callback"
 }
 
-@test failure callback is called on failure {
+@test "failure callback is called on failure" {
     false
 }
 
-@test failure callback is not called on success {
+@test "failure callback is not called on success" {
     echo passed
 }
 
-@test failure callback can be overridden locally {
+@test "failure callback can be overridden locally" {
     bats::on_failure() {
         echo "override failure callback"
     }

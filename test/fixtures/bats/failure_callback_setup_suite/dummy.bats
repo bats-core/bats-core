@@ -1,3 +1,3 @@
-@test dummy {
+@test "dummy" {
     true
 }
