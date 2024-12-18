@@ -1501,3 +1501,49 @@ END_OF_ERR_MSG
 
   reentrant_run -0 bats --print-output-on-failure "$FIXTURE_ROOT/preserve_IFS" --filter-tags ''
 }
+
+@test "failure callback in test" {
+  bats_require_minimum_version 1.5.0
+
+  reentrant_run -1 bats --show-output-of-passing-tests --print-output-on-failure "$FIXTURE_ROOT/failure_callback.bats"
+
+  [ "${lines[0]}" = 1..3 ]
+  [ "${lines[1]}" = 'not ok 1 failure callback is called on failure' ]
+  [ "${lines[2]}" = "# (in test file $RELATIVE_FIXTURE_ROOT/failure_callback.bats, line 7)" ]
+  [ "${lines[3]}" = "#   \`false' failed" ]
+  [ "${lines[4]}" = "# called failure callback" ]
+  [ "${lines[5]}" = 'ok 2 failure callback is not called on success' ]
+  [ "${lines[6]}" = '# passed' ]
+  # this test should not contain: called failure callback
+  [ "${lines[7]}" = 'not ok 3 failure callback can be overridden locally' ]
+  [ "${lines[8]}" = "# (in test file $RELATIVE_FIXTURE_ROOT/failure_callback.bats, line 18)" ]
+  [ "${lines[9]}" = "#   \`false' failed" ]
+  [ "${lines[10]}" = "# override failure callback" ]
+  [ ${#lines[@]} -eq 11 ]
+}
+
+@test "failure callback in setup_file" {
+  bats_require_minimum_version 1.5.0
+
+  reentrant_run -1 bats --print-output-on-failure "$FIXTURE_ROOT/failure_callback_setup_file.bats"
+
+  [ "${lines[0]}" = 1..1 ]
+  [ "${lines[1]}" = 'not ok 1 setup_file failed' ]
+  [ "${lines[2]}" = "# (from function \`setup_file' in test file $RELATIVE_FIXTURE_ROOT/failure_callback_setup_file.bats, line 6)" ]
+  [ "${lines[3]}" = "#   \`false' failed" ] 
+  [ "${lines[4]}" = '# failure callback' ]
+  [ ${#lines[@]} -eq 5 ]
+}
+
+@test "failure callback in setup_suite" {
+  bats_require_minimum_version 1.5.0
+
+  reentrant_run -1 bats --print-output-on-failure "$FIXTURE_ROOT/failure_callback_setup_suite"
+
+  [ "${lines[0]}" = 1..1 ]
+  [ "${lines[1]}" = 'not ok 1 setup_suite' ]
+  [ "${lines[2]}" = "# (from function \`setup_suite' in test file $RELATIVE_FIXTURE_ROOT/failure_callback_setup_suite/setup_suite.bash, line 6)" ]
+  [ "${lines[3]}" = "#   \`false' failed" ]
+  [ "${lines[4]}" = '# failure callback' ]
+  [ ${#lines[@]} -eq 5 ]
+}
