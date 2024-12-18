@@ -50,8 +50,9 @@ while [[ "$#" -ne 0 ]]; do
   shift
 done
 
-filename="$1"
-TESTS_FILE="$2"
+export BATS_TEST_FILE_NUMBER="$1"
+filename="$2"
+TESTS_FILE="$3"
 
 if [[ ! -f "$filename" ]]; then
   printf 'Testfile "%s" not found\n' "$filename" >&2
@@ -87,6 +88,7 @@ bats_run_setup_file() {
   BATS_TEARDOWN_FILE_COMPLETED=
   # shellcheck disable=2034
   BATS_ERROR_STATUS= # used in tracing.bash
+  
   touch "$BATS_OUT"
   bats_setup_tracing
   trap 'bats_file_teardown_trap' EXIT
@@ -346,7 +348,7 @@ bats_create_file_tempdirs() {
     printf 'Failed to create %s\n' "$bats_files_tmpdir" >&2
     exit 1
   fi
-  BATS_FILE_TMPDIR="$bats_files_tmpdir/${BATS_FILE_FIRST_TEST_NUMBER_IN_SUITE?}"
+  BATS_FILE_TMPDIR="$bats_files_tmpdir/${BATS_TEST_FILE_NUMBER?}"
   if ! mkdir "$BATS_FILE_TMPDIR"; then
     printf 'Failed to create BATS_FILE_TMPDIR=%s\n' "$BATS_FILE_TMPDIR" >&2
     exit 1
@@ -373,7 +375,8 @@ fi
 # requires the test list to be read but not empty
 bats_create_file_tempdirs
 
-bats_preprocess_source # uses BATS_TEST_FILENAME
+export BATS_OUT="${BATS_RUN_TMPDIR}/file/${BATS_TEST_FILE_NUMBER?}-${BATS_TEST_FILENAME##*/}.out"
+bats_export_preprocess_source_BATS_TEST_SOURCE
 
 trap bats_interrupt_trap INT
 bats_run_setup_file
