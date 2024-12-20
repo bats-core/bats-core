@@ -18,6 +18,7 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 ### Fixed
 
 * increase compatibility with Solaris (#1043)
+* fix `noclobber` breaking `bats-gather-tests` (#1042)
 
 ## [1.11.1] - 2024-11-29
 
