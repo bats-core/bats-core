@@ -367,6 +367,7 @@ trap bats_interrupt_trap INT
 source "$BATS_ROOT/$BATS_LIBDIR/bats-core/preprocessing.bash"
 
 exec 3<&1
+BATS_OUT="$BATS_RUN_TMPDIR/test/$BATS_SUITE_TEST_NUMBER.out"
 
 bats_create_test_tmpdirs
 bats_evaluate_preprocessed_source
