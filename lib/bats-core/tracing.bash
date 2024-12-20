@@ -386,8 +386,14 @@ bats_setup_tracing() {
   trap 'bats_error_trap' ERR
 }
 
+# predefine to avoid problems when the user does not declare one
+bats::on_failure() {
+  :
+}
+
 bats_error_trap() {
   bats_check_status_from_trap
+  bats::on_failure "$BATS_ERROR_STATUS"
 
   # If necessary, undo the most recent stack trace captured by bats_debug_trap.
   # See bats_debug_trap for details.

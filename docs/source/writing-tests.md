@@ -522,6 +522,35 @@ teardown() {
 </details>
 <!-- markdownlint-enable MD033 -->
 
+## `bats::on_failure` hook
+
+While `teardown` unconditionally handles cleanup after the test ends, the `bats::on_failure` hook gets called 
+only when a test is aborted due to an error. `bats::on_failure` will be called before `teardown`.
+
+You can define `bats::on_failure` anywhere in your test files, even inside the test functions, to change its behavior midtest:
+
+```bash
+@test "my awesome test" {
+  simple_test_setup
+
+  bats::on_failure() {
+    handle_simple_error_case
+  }
+
+  complex_test_setup
+
+  bats::on_failure() {
+    print_debug_information_only_on_error
+  }
+
+  do_actual_tests
+
+  check_results
+}
+```
+
+The `bats::on_failure` hook is available in `setup_suite`/`setup_file`/`setup`, their respective teardown functions, and test functions.
+
 ## `bats_require_minimum_version <Bats version number>`
 
 Added in [v1.7.0](https://github.com/bats-core/bats-core/releases/tag/v1.7.0)
