@@ -129,7 +129,7 @@ fi
 # create file even if no tests are found so the `read` below won't fail
 touch "$TESTS_LIST_FILE"
 gather_tests_output=$(TESTS_LIST_FILE="$TESTS_LIST_FILE" filter="$filter" filter_status="$filter_status" bats-gather-tests "${gather_tests_flags[@]}" -- "$@")
-test_count=$(grep -c '' "$TESTS_LIST_FILE" || true) # don't fail here when there are no tests
+test_count=$(grep -c ^ "$TESTS_LIST_FILE" || true) # don't fail here when there are no tests
 if [[ $gather_tests_output == focus_mode ]]; then
   focus_mode=1
 else

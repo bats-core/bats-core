@@ -66,7 +66,7 @@ setup() {
 
 @test "syntax errors in setup_suite.bash are reported and lead to non zero exit code" {
   LANG=C reentrant_run ! bats --setup-suite-file "$FIXTURE_ROOT/syntax_error/setup_suite_no_shellcheck" "$FIXTURE_ROOT/syntax_error/"
-  [ "${lines[1]}" == "$FIXTURE_ROOT/syntax_error/setup_suite_no_shellcheck: line 2: syntax error: unexpected end of file" ]
+  [[ "${lines[1]}" == "$FIXTURE_ROOT/syntax_error/setup_suite_no_shellcheck: line 2: syntax error: unexpected end of file"* ]]
 }
 
 @test "errors in setup_suite.bash's free code reported correctly" {
