@@ -111,7 +111,7 @@ function should_skip_because_of_focus() {
       focus_mode=1
       # ... -> remove previously found, unfocused tests
       included_tests=()
-      : > "$TESTS_LIST_FILE"
+      : >| "$TESTS_LIST_FILE"
     fi
   elif [[ $focus_mode == 1 ]]; then
     # the current test is not focused but focus mode is enabled -> filter out
