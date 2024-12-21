@@ -250,3 +250,11 @@ setup() {
   [ "${lines[0]}" = "1..1" ]
   [ "${lines[1]}" = "ok 1 test.other_extension" ]
 }
+
+@test "calling setup_suite recursively" {
+  reentrant_run bats -r "${FIXTURE_ROOT}/recursive_setup"
+  echo "$output"
+  [ "$status" -eq 0 ]
+  [ "${#lines[@]}" -eq 7 ]
+  [ "${lines[0]}" = "1..6" ]
+}
