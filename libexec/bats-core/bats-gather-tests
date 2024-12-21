@@ -111,7 +111,7 @@ function should_skip_because_of_focus() {
       focus_mode=1
       # ... -> remove previously found, unfocused tests
       included_tests=()
-      : > "$TESTS_LIST_FILE"
+      : >| "$TESTS_LIST_FILE"
     fi
   elif [[ $focus_mode == 1 ]]; then
     # the current test is not focused but focus mode is enabled -> filter out
@@ -298,7 +298,7 @@ bats_gather_tests_for_file() {
 
   # do the actual evaluation for gathering the tests
   # shellcheck disable=SC1090
-  BATS_TEST_DIRNAME="${filename%/*}" source "$BATS_TEST_SOURCE" 1>"$BATS_OUT" 2>&1
+  BATS_TEST_DIRNAME="${filename%/*}" source "$BATS_TEST_SOURCE" 1>>"$BATS_OUT" 2>&1
 
   if [[ "${#test_dupes[@]}" -ne 0 ]]; then
     printf 'file_duplicate_test_names="%q"\n' "${test_dupes[*]#$filename$'\t'}"
@@ -320,7 +320,9 @@ bats_gather_tests_for_file() {
 focus_mode=0
 total_test_count=0
 total_included_test_count=0
+export BATS_TEST_FILE_NUMBER=0
 for filename in "$@"; do
+  (( ++BATS_TEST_FILE_NUMBER ))
   if [[ ! -f "$filename" ]]; then
     abort 'Test file "%s" does not exist.\n' "${filename}"
   fi
@@ -329,7 +331,7 @@ for filename in "$@"; do
   _bats_test_functions_setup -1 # invalid TEST_NUMBER, as this is not a test
 
   BATS_TEST_NAME=source
-  bats_preprocess_source # uses BATS_TEST_FILENAME
+  bats_preprocess_source # uses BATS_TEST_FILENAME, BATS_TEST_FILE_NUMBER
 
   file_duplicate_test_names=""
   file_test_count=0
