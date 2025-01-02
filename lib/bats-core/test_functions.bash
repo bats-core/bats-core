@@ -17,8 +17,6 @@ source "$BATS_ROOT/$BATS_LIBDIR/bats-core/warnings.bash"
 # Libraries relative to BATS_TEST_DIRNAME take precedence over
 # BATS_LIB_PATH.
 #
-# Library load paths are recognized using find_library_load_path.
-#
 # If no library is found find_in_bats_lib_path returns 1.
 find_in_bats_lib_path() { # <return-var> <library-name>
   local return_var="${1:?}"
@@ -80,18 +78,12 @@ bats_internal_load() {
 # bats_load_safe accepts an argument called 'slug' and attempts to find and
 # source a library based on the slug.
 #
-# A slug can be an absolute path, a library name or a relative path.
+# A slug can be an absolute path or a relative path.
 #
-# If the slug is an absolute path bats_load_safe attempts to find the library
-# load path using find_library_load_path.
-# What is considered a library load path is documented in the
-# documentation for find_library_load_path.
+# If the slug is not an absolute path it is resolved relative to
+# BATS_TEST_DIRNAME
 #
-# If the slug is not an absolute path it is considered a library name or
-# relative path. bats_load_safe attempts to find the library load path using
-# find_in_bats_lib_path.
-#
-# If bats_load_safe can find a library load path it is passed to bats_internal_load.
+# The resolved slug is passed to bats_internal_load.
 # If bats_internal_load fails bats_load_safe returns 1.
 #
 # If no library load path can be found bats_load_safe prints an error message
