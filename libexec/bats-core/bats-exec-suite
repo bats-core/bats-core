@@ -158,12 +158,26 @@ if [[ -n "$focus_mode" ]]; then
   printf "WARNING: This test run only contains tests tagged \`bats:focus\`!\n"
 fi
 
+bats_exit_suite() {
+if [[ "$focus_mode" == 1 && $bats_exec_suite_status -eq 0 ]]; then
+  if [[ ${BATS_NO_FAIL_FOCUS_RUN-} == 1 ]]; then
+    printf "WARNING: This test run only contains tests tagged \`bats:focus\`!\n"
+  else
+    printf "Marking test run as failed due to \`bats:focus\` tag. (Set \`BATS_NO_FAIL_FOCUS_RUN=1\` to disable.)\n" >&2
+    bats_exec_suite_status=1
+  fi
+fi
+
+exit "$bats_exec_suite_status" # the actual exit code will be set by the exit trap using bats_exec_suite_status
+}
+
 bats_exec_suite_status=0
 printf '1..%d\n' "${test_count}"
 
 # No point on continuing if there's no tests.
 if [[ "${test_count}" == 0 ]]; then
-  exit
+  bats_exec_suite_status=0
+  bats_exit_suite
 fi
 
 export BATS_SUITE_TMPDIR="${BATS_RUN_TMPDIR}/suite"
@@ -299,13 +313,4 @@ fi
 set -eET
 bats_run_teardown_suite
 
-if [[ "$focus_mode" == 1 && $bats_exec_suite_status -eq 0 ]]; then
-  if [[ ${BATS_NO_FAIL_FOCUS_RUN-} == 1 ]]; then
-    printf "WARNING: This test run only contains tests tagged \`bats:focus\`!\n"
-  else
-    printf "Marking test run as failed due to \`bats:focus\` tag. (Set \`BATS_NO_FAIL_FOCUS_RUN=1\` to disable.)\n" >&2
-    bats_exec_suite_status=1
-  fi
-fi
-
-exit "$bats_exec_suite_status" # the actual exit code will be set by the exit trap using bats_exec_suite_status
+bats_exit_suite
