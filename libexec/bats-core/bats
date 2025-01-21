@@ -489,28 +489,30 @@ source "$BATS_ROOT/$BATS_LIBDIR/bats-core/validator.bash"
 
 trap 'BATS_INTERRUPTED=true' INT # let the lower levels handle the interruption
 
-set -o pipefail execfail
-
 # pipe stdin into command and to stdout
-# pipe command stdout to file
-bats_tee() { # <output-file> <command...>
-  local output_file=$1 status=0
-  shift
+bats_tee() { # <command...>
+  local status=0
   exec 3<&1 # use FD3 to get around pipe
-  tee >(cat >&3) | "$@" >"$output_file" || status=$?
+  tee >(cat >&3) | "$@" || status=$?
   if (( status != 0 )); then
     printf "ERROR: command \`%s\` failed with status %d\n" "$*" "$status" >&2
   fi
   return $status
 }
 
+redirect_stdout_to_report_file() { # <command>
+  # run the formatter with its flags and redirect output to report file
+  "$@" >"${BATS_REPORT_OUTPUT_DIR}/${BATS_REPORT_FILENAME}"
+}
+
+set -o pipefail execfail
 if [[ -n "$report_formatter" ]]; then
   exec bats-exec-suite "${flags[@]}" "${filenames[@]}" |
-    bats_tee "${BATS_REPORT_OUTPUT_DIR}/${BATS_REPORT_FILENAME}" "$interpolated_report_formatter" "${report_formatter_flags[@]}" |
-    bats_test_count_validator |
-    "$interpolated_formatter" "${formatter_flags[@]}"
+    bats_tee redirect_stdout_to_report_file "$interpolated_report_formatter" "${report_formatter_flags[@]}" |
+      bats_tee bats_test_count_validator |
+        "$interpolated_formatter" "${formatter_flags[@]}"
 else
   exec bats-exec-suite "${flags[@]}" "${filenames[@]}" |
-    bats_test_count_validator |
-    "$interpolated_formatter" "${formatter_flags[@]}"
+    bats_tee bats_test_count_validator |
+      "$interpolated_formatter" "${formatter_flags[@]}"
 fi
