@@ -19,7 +19,7 @@ function get_open_fds() {
     BASHPID=$(bash -c 'echo $PPID')
   fi
   local tmpfile
-  tmpfile=$(mktemp "$BATS_SUITE_TMPDIR/fds-XXXXXX")
+  tmpfile=$(mktemp -u "$BATS_SUITE_TMPDIR/fds-XXXXXX") # macos requires -u instead of --dry-run
   # Avoid opening a new fd to read fds: Don't use <(), glob expansion.
   # Instead, redirect stdout to file which does not create an extra FD.
   if [[ -d /proc/$BASHPID/fd ]]; then # Linux

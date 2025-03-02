@@ -103,8 +103,12 @@ xml_escape() {
   output=${output//>/\&gt;}
   output=${output//'"'/\&quot;}
   output=${output//\'/\&#39;}
+  # remove ANSI Color codes
   local CONTROL_CHAR=$'\033'
-  output=${output//$CONTROL_CHAR/\&#27;}
+  local REGEX="$CONTROL_CHAR\[[0-9;]+m"
+  while [[ "$output" =~ $REGEX ]]; do
+      output=${output//${BASH_REMATCH[0]}/}
+  done
   printf "%s" "$output"
 }
 

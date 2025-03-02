@@ -458,7 +458,7 @@ For our example project, we will extract functionality into the additional file 
     #!/usr/bin/env bash
 
     _is_first_run() {
-        local FIRST_RUN_FILE=/tmp/bats-tutorial-project-ran
+        local FIRST_RUN_FILE=${1-/tmp/bats-tutorial-project-ran}
         if [[ ! -e "$FIRST_RUN_FILE" ]]; then
             touch "$FIRST_RUN_FILE"
             return 0
@@ -478,20 +478,20 @@ This allows for testing it separately in a new file `test/helper.bats`:
     }
 
     teardown() {
-        rm -f "$NON_EXISTANT_FIRST_RUN_FILE"
+        rm -f "$NON_EXISTENT_FIRST_RUN_FILE"
         rm -f "$EXISTING_FIRST_RUN_FILE"
     }
 
     @test "Check first run" {
-        NON_EXISTANT_FIRST_RUN_FILE=$(mktemp -u) # only create the name, not the file itself
+        NON_EXISTENT_FIRST_RUN_FILE=$(mktemp -u) # only create the name, not the file itself
 
-        assert _is_first_run
-        refute _is_first_run
-        refute _is_first_run
+        assert _is_first_run "$NON_EXISTENT_FIRST_RUN_FILE"
+        refute _is_first_run "$NON_EXISTENT_FIRST_RUN_FILE"
+        refute _is_first_run "$NON_EXISTENT_FIRST_RUN_FILE"
 
         EXISTING_FIRST_RUN_FILE=$(mktemp)
-        refute _is_first_run
-        refute _is_first_run
+        refute _is_first_run "$EXISTING_FIRST_RUN_FILE"
+        refute _is_first_run "$EXISTING_FIRST_RUN_FILE"
     }
 
 Since the setup function would have duplicated much of the other files', we split that out into the file `test/test_helper/common-setup.bash`:

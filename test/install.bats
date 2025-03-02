@@ -13,9 +13,10 @@ setup() {
 }
 
 @test "install.sh creates a valid installation, and uninstall.sh undos it" {
-  run "$PATH_TO_INSTALL_SHELL" "$INSTALL_DIR"
+  run "$PATH_TO_INSTALL_SHELL" "$INSTALL_DIR" "$BATS_LIBDIR"
   [ "$status" -eq 0 ]
   [ "$output" == "Installed Bats to $INSTALL_DIR/bin/bats" ]
+  ls -lr "$INSTALL_DIR"
   [ -x "$INSTALL_DIR/bin/bats" ]
   [ -x "$INSTALL_DIR/$BATS_LIBDIR/bats-core/formatter.bash" ]
   [ -x "$INSTALL_DIR/$BATS_LIBDIR/bats-core/preprocessing.bash" ]

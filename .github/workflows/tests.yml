@@ -27,6 +27,15 @@ jobs:
           chmod a+x shfmt
       - run: ./shfmt --diff .
 
+  # Ensure we detect when a change disables Bats from reporting failure.
+  # This would not be detectable by Bats' selftests.
+  failsafe:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check failing tests fail suite,
+        run: "! bin/bats test/fixtures/bats/failing.bats"
+
   shellcheck:
     runs-on: ubuntu-20.04
     steps:
@@ -79,20 +88,23 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
-      - uses: actions/setup-node@5e21ff4d9bc1a8cf6de233a3057d20ec6b3fb69d # v3.8.1
+      - uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
+        with:
+          node-version: v18.20.2 
+      - run: npm pack ./
+      - run: npm install -g ./bats-*.tgz
       - name: Run test on OS ${{ matrix.os }}
         shell: 'script -q -e -c "bash {0}"' # work around tty issues
         env:
           TERM: linux # fix tput for tty issue work around
-        run: |
-          npm pack ./
-          sudo npm install -g ./bats-*.tgz
-          bats test --print-output-on-failure
+        run: bats test --print-output-on-failure
 
   windows:
     runs-on: windows-2019
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - name: Check failing tests fail suite,
+        run: bash -c "! bin/bats test/fixtures/bats/failing.bats"
       - run: |
           bash --version
           bash -c "time bin/bats  --print-output-on-failure --formatter tap test"
@@ -104,7 +116,9 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
-      - uses: actions/setup-node@5e21ff4d9bc1a8cf6de233a3057d20ec6b3fb69d # v3.8.1
+      - uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
+        with:
+          node-version: v18.20.2 
       - run: npm pack ./
       - run: npm install -g (get-item .\bats-*.tgz).FullName
       - run: bats  -T --print-output-on-failure test
@@ -112,7 +126,7 @@ jobs:
   macos:
     strategy:
       matrix:
-        os: ['macos-11', 'macos-12']
+        os: ['macos-13', 'macos-14', 'macos-15']
         env_vars:
           - ''
           # allow for some parallelity without GNU parallel, since it is not installed by default
@@ -127,6 +141,13 @@ jobs:
         run: |
           curl -sSfL https://github.com/shenwei356/rush/releases/download/v0.5.0/rush_darwin_amd64.tar.gz | sudo tar xzf - -C /usr/local/bin
         if: contains(matrix.env_vars, 'rush')
+
+      - name: Check failing tests fail suite,
+        shell: 'unbuffer bash {0}' # work around tty issues
+        env:
+          TERM: linux # fix tput for tty issue work around
+        run: bash -c '! bin/bats test/fixtures/bats/failing.bats'
+
       - name: Run test on OS ${{ matrix.os }}
         shell: 'unbuffer bash {0}' # work around tty issues
         env:
@@ -138,11 +159,13 @@ jobs:
   npm_on_macos:
     strategy:
       matrix:
-        os: ['macos-11', 'macos-12']
+        os: ['macos-13', 'macos-14', 'macos-15']
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
-      - uses: actions/setup-node@5e21ff4d9bc1a8cf6de233a3057d20ec6b3fb69d # v3.8.1
+      - uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
+        with:
+          node-version: v18.20.2 
       - name: Install unbuffer via expect
         run: brew install expect
       - name: Run test on OS ${{ matrix.os }}
@@ -174,6 +197,29 @@ jobs:
           docker run -it "bash:${{ matrix.version }}" --version
           time docker run -it ${{ matrix.env_vars }} "bats/bats:bash-${{ matrix.version }}"  --print-output-on-failure --tap /opt/bats/test
 
+  lib64-install:
+    runs-on: ubuntu-latest
+    permissions: 
+        checks: write
+        pull-requests: write
+    steps:
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - name: Install in lib64
+        run: sudo ./install.sh /usr/ lib64
+      - name: Run from env
+        shell: 'script -q -e -c "bash {0}"' # work around tty issues
+        env:
+          TERM: linux # fix tput for tty issue work around
+        run: |
+          mkdir test-results/
+          time bats test --print-output-on-failure --report-formatter junit --output test-results
+      - name: Publish Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: always()
+        with:
+          files: |
+            test-results/**/*.xml
+
   alpine:
     runs-on: ubuntu-latest
     container: alpine:latest
@@ -189,7 +235,7 @@ jobs:
           time ./bin/bats  --print-output-on-failure test/
 
   freebsd:
-    runs-on: macos-12
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         packages:
@@ -197,7 +243,7 @@ jobs:
           - ""
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
-      - uses: vmactions/freebsd-vm@9991fc3550abdc19b61d50063c7eeb7713bc498f # v0.3.1
+      - uses: vmactions/freebsd-vm@a50912ab96b7568d0fa9c1156c6facd6f11488a9 # v1.1.0
         with:
           prepare: pkg install -y bash parallel ${{ matrix.packages }}
           run: |
@@ -238,9 +284,9 @@ jobs:
 
       - name: Set up Docker Buildx
         id: buildx
-        uses: docker/setup-buildx-action@4c0219f9ac95b02789c1075625400b2acbff50b1 # v2.9.1
+        uses: docker/setup-buildx-action@c47758b77c9736f4b2ef4073d4d51994fabfe349 # v3.7.1
 
-      - uses: docker/build-push-action@2eb1c1961a95fc15694676618e422e8ba1d63825 # v4.1.1
+      - uses: docker/build-push-action@5cd11c3a4ced054e52742c5fd54dca954e0edd85 # v6.7.0
         with:
           platforms: linux/amd64
           tags: bats:test
@@ -291,7 +337,7 @@ jobs:
           TERM: linux # fix tput for tty issue work around
 
       - name: Archive code coverage results
-        uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
+        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
         with:
           name: code-coverage-report
           path: coverage/*
@@ -300,12 +346,12 @@ jobs:
         id: coverage-percent
         shell: bash
         env:
-          minimum_coverage: 86.39
+          minimum_coverage: 86.40
         run: |
           value=$(jq '.percent_covered' <coverage/bats/coverage.json)
-          fixd_point() { # <float val>
-            int=${value%.*}
-            decimals=${value#*.}
+          fixed_point() { # <float val>
+            int=${1%.*}
+            decimals=${1#*.}
             echo $int${decimals::2}
           }
           echo "Coverage: $value%" | tee "$GITHUB_STEP_SUMMARY"

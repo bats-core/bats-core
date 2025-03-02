@@ -4,8 +4,8 @@ BW03: `setup_suite` is visible to test file '<path>', but was not executed. It b
 In contrast to the other setup functions, `setup_suite` must not be defined in `*.bats` files but in `setup_suite.bash`.
 When a file is executed and sees `setup_suite` defined but not run before the tests, this warning will be printed.
 
-How to fix
-----------
+How to fix BW03
+---------------
 
 The fix depends on your actual intention. There are basically two cases:
 

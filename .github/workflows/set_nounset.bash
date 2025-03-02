@@ -1,1 +1,1 @@
-set -u
+set -uo noclobber

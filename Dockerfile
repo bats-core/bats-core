@@ -6,7 +6,7 @@ ARG TARGETPLATFORM
 ARG LIBS_VER_SUPPORT=0.3.0
 ARG LIBS_VER_FILE=0.4.0
 ARG LIBS_VER_ASSERT=2.1.0
-ARG LIBS_VER_DETIK=1.2.1
+ARG LIBS_VER_DETIK=1.3.2
 ARG UID=1001
 ARG GID=115
 
@@ -35,9 +35,11 @@ RUN apk add --no-cache parallel ncurses && \
     mkdir -p ~/.parallel && touch ~/.parallel/will-cite \
     && mkdir /code
 
+RUN ln -s "$(/usr/bin/env which bash)" "/bin/bash"
+
 RUN ln -s /opt/bats/bin/bats /usr/local/bin/bats
 COPY . /opt/bats/
 
 WORKDIR /code/
 
-ENTRYPOINT ["/tini", "--", "bash", "bats"]
+ENTRYPOINT ["/tini", "--", "/usr/local/bin/bash", "/usr/local/bin/bats"]

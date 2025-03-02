@@ -5,15 +5,6 @@ bats_require_minimum_version 1.5.0
 setup() {
   load test_helper
   fixtures warnings
-  if [[ $BATS_ROOT == "$BATS_CWD" ]]; then
-    RELATIVE_BATS_ROOT=''
-  else
-    RELATIVE_BATS_ROOT=${BATS_ROOT#"$BATS_CWD"/}
-  fi
-  if [[ -n "$RELATIVE_BATS_ROOT" && "$RELATIVE_BATS_ROOT" != */ ]]; then
-    RELATIVE_BATS_ROOT+=/
-  fi
-  echo "RELATIVE_BATS_ROOT=$RELATIVE_BATS_ROOT" "BATS_ROOT=$BATS_ROOT" "BATS_CWD=$BATS_CWD"
 }
 
 @test "invalid warning is an error" {
@@ -28,7 +19,7 @@ setup() {
   [ "${lines[1]}" == "ok 1 Trigger BW01" ]
   [ "${lines[2]}" == "The following warnings were encountered during tests:" ]
   [ "${lines[3]}" == "BW01: \`run\`'s command \`=0 actually-intended-command with some args\` exited with code 127, indicating 'Command not found'. Use run's return code checks, e.g. \`run -127\`, to fix this message." ]
-  [[ "${lines[4]}" == "      (from function \`run' in file ${RELATIVE_BATS_ROOT}lib/bats-core/test_functions.bash, line"* ]]
+  [[ "${lines[4]}" == "      (from function \`run' in file ${RELATIVE_BATS_ROOT}${BATS_LIBDIR}/bats-core/test_functions.bash, line"* ]]
   [ "${lines[5]}" == "       in test file $RELATIVE_FIXTURE_ROOT/BW01.bats, line 3)" ]
 }
 
@@ -52,8 +43,8 @@ setup() {
   [ "${lines[1]}" == "ok 1 Trigger BW02" ]
   [ "${lines[2]}" == "The following warnings were encountered during tests:" ]
   [ "${lines[3]}" == "BW02: Using flags on \`run\` requires at least BATS_VERSION=1.5.0. Use \`bats_require_minimum_version 1.5.0\` to fix this message." ]
-  [[ "${lines[4]}" == "      (from function \`bats_warn_minimum_guaranteed_version' in file ${RELATIVE_BATS_ROOT}lib/bats-core/warnings.bash, line "* ]]
-  [[ "${lines[5]}" == "       from function \`run' in file ${RELATIVE_BATS_ROOT}lib/bats-core/test_functions.bash, line"* ]]
+  [[ "${lines[4]}" == "      (from function \`bats_warn_minimum_guaranteed_version' in file ${RELATIVE_BATS_ROOT}${BATS_LIBDIR}/bats-core/warnings.bash, line "* ]]
+  [[ "${lines[5]}" == "       from function \`run' in file ${RELATIVE_BATS_ROOT}${BATS_LIBDIR}/bats-core/test_functions.bash, line"* ]]
   [ "${lines[6]}" == "       in test file $RELATIVE_FIXTURE_ROOT/BW02.bats, line 2)" ]
 }
 

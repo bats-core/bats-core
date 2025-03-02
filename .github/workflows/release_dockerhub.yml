@@ -3,10 +3,6 @@ name: Release to docker hub
 on:
   release: { types: [published] }
   workflow_dispatch:
-    inputs:
-        version:
-          description: 'Version to simulate for deploy'
-          required: true
 
 permissions:
   contents: read
@@ -21,21 +17,20 @@ jobs:
 
         - id: version
           run: |
-            EXPECTED_VERSION=${{ github.event.inputs.version }}
             TAG_VERSION=${GITHUB_REF#refs/tags/v} # refs/tags/v1.2.3 -> 1.2.3
-            echo ::set-output name=version::${EXPECTED_VERSION:-$TAG_VERSION}
+            echo ::set-output name=version::$TAG_VERSION
         - name: Set up QEMU
-          uses: docker/setup-qemu-action@2b82ce82d56a2a04d2637cd93a637ae1b359c0a7 # v2.2.0
+          uses: docker/setup-qemu-action@68827325e0b33c7199eb31dd4e31fbe9023e06e3 # v3.0.0
 
 
         - name: Login to DockerHub
-          uses: docker/login-action@465a07811f14bebb1938fbed4728c6a1ff8901fc # v2.2.0
+          uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
           with:
             username: ${{ secrets.DOCKER_USERNAME }}
             password: ${{ secrets.DOCKER_PASSWORD }}
 
         - name: Log in to the GitHub Container registry
-          uses: docker/login-action@465a07811f14bebb1938fbed4728c6a1ff8901fc
+          uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567
           with:
             registry: ghcr.io
             username: ${{ github.actor }}
@@ -43,15 +38,15 @@ jobs:
 
         - name: Set up Docker Buildx
           id: buildx
-          uses: docker/setup-buildx-action@4c0219f9ac95b02789c1075625400b2acbff50b1 # v2.9.1
+          uses: docker/setup-buildx-action@c47758b77c9736f4b2ef4073d4d51994fabfe349 # v3.7.1
 
-        - uses: docker/build-push-action@2eb1c1961a95fc15694676618e422e8ba1d63825 # v4.1.1
+        - uses: docker/build-push-action@5cd11c3a4ced054e52742c5fd54dca954e0edd85 # v6.7.0
           with:
             platforms: linux/amd64,linux/arm64,linux/ppc64le,linux/s390x,linux/386,linux/arm/v7,linux/arm/v6
             tags: ${{ secrets.DOCKER_USERNAME }}/bats:${{ steps.version.outputs.version }},${{ secrets.DOCKER_USERNAME }}/bats:latest
             push: true
 
-        - uses: docker/build-push-action@2eb1c1961a95fc15694676618e422e8ba1d63825 # v4.1.1
+        - uses: docker/build-push-action@5cd11c3a4ced054e52742c5fd54dca954e0edd85 # v6.7.0
           with:
             platforms: linux/amd64,linux/arm64,linux/ppc64le,linux/s390x,linux/386,linux/arm/v7,linux/arm/v6
             tags: ${{ secrets.DOCKER_USERNAME }}/bats:${{ steps.version.outputs.version }}-no-faccessat2,${{ secrets.DOCKER_USERNAME }}/bats:latest-no-faccessat2

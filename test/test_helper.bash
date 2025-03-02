@@ -1,17 +1,27 @@
 emulate_bats_env() {
   export BATS_CWD="$PWD"
-  export BATS_TEST_FILTER=
   export BATS_ROOT_PID=$$
   export BATS_RUN_TMPDIR
   BATS_RUN_TMPDIR=$(mktemp -d "${BATS_RUN_TMPDIR}/emulated-tmpdir-${BATS_ROOT_PID}-XXXXXX")
-  REENTRANT_RUN_PRESERVE+=(BATS_CWD BATS_TEST_FILTER BATS_ROOT_PID BATS_RUN_TMPDIR)
+  REENTRANT_RUN_PRESERVE+=(BATS_CWD BATS_ROOT_PID BATS_RUN_TMPDIR)
   export BATS_LINE_REFERENCE_FORMAT=comma_line
+  export BATS_BEGIN_CODE_QUOTE='`'
+  export BATS_END_CODE_QUOTE="'"
+  export BATS_CODE_QUOTE_STYLE="\`'"
 }
 
 fixtures() {
   FIXTURE_ROOT="$BATS_TEST_DIRNAME/fixtures/$1"
   # shellcheck disable=SC2034
   RELATIVE_FIXTURE_ROOT="${FIXTURE_ROOT#"$BATS_CWD"/}"
+  if [[ $BATS_ROOT == "$BATS_CWD" ]]; then
+    RELATIVE_BATS_ROOT=''
+  else
+    RELATIVE_BATS_ROOT=${BATS_ROOT#"$BATS_CWD"/}
+  fi
+  if [[ -n "$RELATIVE_BATS_ROOT" && "$RELATIVE_BATS_ROOT" != */ ]]; then
+    RELATIVE_BATS_ROOT+=/
+  fi
 }
 
 filter_control_sequences() {

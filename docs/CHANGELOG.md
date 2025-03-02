@@ -11,28 +11,77 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 
 ## [Unreleased]
 
+### Added 
+
+* `bats::on_failure` hook that gets called when a test or `setup*` function fails (#1031)
+
+### Fixed
+
+* increase compatibility with Solaris (#1043)
+* fix `noclobber` breaking `bats-gather-tests` (#1042)
+
+### Documentation
+
+* Fix hyperlink to external Bash resource (#1033)
+
+## [1.11.1] - 2024-11-29
+
+### Added
+
+* make Dockerfile compatible with `#!/bin/bash` files (#967)
+
+#### Documentation
+
+* document `bats_pipe` function (#901)
+
+### Fixed
+
+* unbreak test suites with multiple files loading common constants (#904), introduced in v1.11.0
+* docker image won't crash if a file or directory named 'bats' exists (#920)
+* use $BATS_LIBDIR instead of hardcoded lib in 'bats-gather-tests' (#985, #990)
+
+### Changed
+
+* update Docker image with the latest `bats-detik` version 1.3.2 (#1017)
+* cleanup: remove unused `$BATS_FILTER` (#907)
+
+#### Documentation
+
+* fix hard-coded link to readthedocs (#901)
+* fix tutorial code for multiline test suite (#1011)
+
+## [1.11.0] - 2024-03-24
+
 ### Added
 
 * hardened CI scripts by using hashes instead of versions for actions and restricting permissions (#754, #770)
 * add security.md (#762)
 * add codespell CI checks (#720)
+* dynamic test registration via `bats_test_function` (#349)
+* add check that Bats is executed with Bash >= 3.2 (#873)
 
 ### Fixed
 
 * `install.sh` now works for deviating `lib/` dirs (like `lib32`,`lib64`) (#487)
 * catch unset `BATS_TEST_SOURCE` in `lib/bats-core/tracing.bash` so
   `set -u`/`set -o nounset` works as expected (#827)
+* fix `--gather-test-outputs-in` fails on tests with multiple `/` (#789)
+* install does not create unused `/usr/share/bats` anymore (#857)
+* ensure IFS is unchanged in `{setup,teardown}{_suite,_file,}`, `@test` and free code (#879)
+* junit formatter: remove ANSI Codes to avoid invalid XML character (#886)
 
 ### Changed
 
 * update Docker image with the latest `bats-file` version 0.4.0 (#780)
-* update Docker image with the latest `bats-detik` version 1.2.1 (#810)
+* update Docker image with the latest `bats-detik` version 1.3.0 (#876)
 
 #### Documentation
 
 * clarify docker usage (#741)
 * update Arch Linux package URL in installation.rst (#821)
 * rename bash-bats to bats for Arch Linux in installation.rst (#836)
+* fix FAQ entry about setup-/teardown_suite, as they are available now (#861)
+* added logo (#881)
 
 ## [1.10.0] - 2023-07-15
 

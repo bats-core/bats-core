@@ -5,8 +5,8 @@ Using a feature that is only available starting with a certain version can be a 
 In most cases, running this code in older versions will generate an error due to a missing command.
 However, in cases like `run`'s where old version simply take all parameters as command to execute, the failure can be silent.
 
-How to fix
-----------
+How to fix BW02
+---------------
 
 When you encounter this warning, you can simply guard your code with `bats_require_minimum_version <version>` as the message says.
 For example, consider the following code:
