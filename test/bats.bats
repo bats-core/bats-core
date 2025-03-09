@@ -1444,6 +1444,11 @@ END_OF_ERR_MSG
   [ "${#lines[@]}" == 4 ]
 }
 
+@test "Fail with focus, even if all tests are filtered out (#1044)" {
+  bats_require_minimum_version 1.5.0
+  reentrant_run -1 bats --filter-tags filter "$FIXTURE_ROOT/focused_filtered_out.bats"
+}
+
 @test "Bats waits for report formatter to finish" {
   REPORT_FORMATTER=$FIXTURE_ROOT/gobble_up_stdin_sleep_and_print_finish.bash
   bats_require_minimum_version 1.5.0
