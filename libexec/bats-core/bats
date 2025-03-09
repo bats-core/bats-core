@@ -492,9 +492,14 @@ trap 'BATS_INTERRUPTED=true' INT # let the lower levels handle the interruption
 # pipe stdin into command and to stdout
 bats_tee() { # <command...>
   local status=0
+  local check_status=1
+  if [[ $1 == --no-check-status ]]; then
+    check_status=0
+    shift 1
+  fi
   exec 3<&1 # use FD3 to get around pipe
   tee >(cat >&3) | "$@" || status=$?
-  if (( status != 0 )); then
+  if (( status != 0 && check_status==1 )); then
     printf "ERROR: command \`%s\` failed with status %d\n" "$*" "$status" >&2
   fi
   return $status
@@ -509,10 +514,10 @@ set -o pipefail execfail
 if [[ -n "$report_formatter" ]]; then
   exec bats-exec-suite "${flags[@]}" "${filenames[@]}" |
     bats_tee redirect_stdout_to_report_file "$interpolated_report_formatter" "${report_formatter_flags[@]}" |
-      bats_tee bats_test_count_validator |
+      bats_tee --no-check-status bats_test_count_validator |
         "$interpolated_formatter" "${formatter_flags[@]}"
 else
   exec bats-exec-suite "${flags[@]}" "${filenames[@]}" |
-    bats_tee bats_test_count_validator |
+    bats_tee --no-check-status bats_test_count_validator |
       "$interpolated_formatter" "${formatter_flags[@]}"
 fi
