@@ -1463,7 +1463,7 @@ END_OF_ERR_MSG
   bats_require_minimum_version 1.5.0
   reentrant_run ! bats "$FIXTURE_ROOT/passing.bats" --report-formatter "$REPORT_FORMATTER" --output "$BATS_TEST_TMPDIR"
 
-  [[ "${output}" = *"ERROR: command \`$REPORT_FORMATTER\` failed with status 11"* ]] || false
+  [[ "${output}" = *"ERROR: command \`redirect_stdout_to_report_file $REPORT_FORMATTER\` failed with status 11"* ]] || false
 }
 
 @test "Short opt unpacker rejects valued options" {
