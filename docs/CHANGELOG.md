@@ -26,6 +26,7 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 * Fix hyperlink to external Bash resource (#1033)
 * Remove mentions to no longer existing `find_library_load_path` in
   `lib/bats-core` docstrings (#1032)
+* Add missing "status" word in `--returned-status` documentation (#1077)
 
 ## [1.11.1] - 2024-11-29
 
