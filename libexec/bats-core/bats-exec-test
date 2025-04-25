@@ -121,7 +121,7 @@ bats_exit_trap() {
   local killer_pid=${1:-}
   trap - ERR EXIT
   if [[ -n "${BATS_TEST_TIMEOUT:-}" ]]; then
-    # Kill the watchdog in the case of of kernel finished before the timeout
+    # Kill the watchdog in the case of kernel finished before the timeout
     bats_abort_timeout_countdown "$killer_pid" || status=1
   fi
 
