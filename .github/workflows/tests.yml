@@ -328,7 +328,7 @@ jobs:
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       - run: |
-          wget https://github.com/SimonKagstrom/kcov/releases/download/v40/kcov-amd64.tar.gz
+          wget https://github.com/SimonKagstrom/kcov/releases/download/v43/kcov-amd64.tar.gz
           tar -xf kcov-amd64.tar.gz
       - run: |
           ./usr/local/bin/kcov --exclude-path=/tmp $PWD/coverage ./bin/bats --filter-tags '!no-kcov' test/
