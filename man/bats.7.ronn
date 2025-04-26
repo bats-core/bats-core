@@ -203,7 +203,7 @@ command of interest.
 
 Similarly, --returned-status N (or --returned-status=N) can be used for similar
 functionality. This option supports negative values, which always return the
-of the command starting from the end and in reverse order.
+status of the command starting from the end and in reverse order.
 
     @test "invoking foo piped to bar always return foo status" {
       run bats_pipe --returned-status -2 foo \| bar

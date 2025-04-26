@@ -19,10 +19,14 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 
 * increase compatibility with Solaris (#1043)
 * fix `noclobber` breaking `bats-gather-tests` (#1042)
+* fix exiting with `0` despite `bats:focus` when all tests have been filtered out (#1058)
 
 ### Documentation
 
 * Fix hyperlink to external Bash resource (#1033)
+* Remove mentions to no longer existing `find_library_load_path` in
+  `lib/bats-core` docstrings (#1032)
+* Add missing "status" word in `--returned-status` documentation (#1077)
 
 ## [1.11.1] - 2024-11-29
 
