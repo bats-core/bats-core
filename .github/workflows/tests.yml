@@ -8,7 +8,7 @@ permissions:
 
 jobs:
   changelog:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       - name: Check that PR is mentioned in Changelog
@@ -19,7 +19,7 @@ jobs:
     if: ${{github.event.pull_request}}
 
   shfmt:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       - run: |
@@ -37,7 +37,7 @@ jobs:
         run: "! bin/bats test/fixtures/bats/failing.bats"
 
   shellcheck:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       - name: Run shellcheck
@@ -49,7 +49,7 @@ jobs:
   linux:
     strategy:
       matrix:
-        os: ['ubuntu-20.04', 'ubuntu-22.04']
+        os: ['ubuntu-22.04', 'ubuntu-24.04']
         env_vars:
           - ''
           # allow for some parallelity without GNU parallel, since it is not installed by default
@@ -84,13 +84,13 @@ jobs:
   npm_on_linux:
     strategy:
       matrix:
-        os: ['ubuntu-20.04', 'ubuntu-22.04']
+        os: ['ubuntu-22.04', 'ubuntu-24.04']
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       - uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
         with:
-          node-version: v18.20.2 
+          node-version: v18.20.2
       - run: npm pack ./
       - run: npm install -g ./bats-*.tgz
       - name: Run test on OS ${{ matrix.os }}
@@ -118,7 +118,7 @@ jobs:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       - uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
         with:
-          node-version: v18.20.2 
+          node-version: v18.20.2
       - run: npm pack ./
       - run: npm install -g (get-item .\bats-*.tgz).FullName
       - run: bats  -T --print-output-on-failure test
@@ -165,7 +165,7 @@ jobs:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       - uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
         with:
-          node-version: v18.20.2 
+          node-version: v18.20.2
       - name: Install unbuffer via expect
         run: brew install expect
       - name: Run test on OS ${{ matrix.os }}
@@ -199,7 +199,7 @@ jobs:
 
   lib64-install:
     runs-on: ubuntu-latest
-    permissions: 
+    permissions:
         checks: write
         pull-requests: write
     steps:
@@ -324,11 +324,11 @@ jobs:
           TERM: linux # fix tput for tty issue work around
 
   coverage:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       - run: |
-          wget https://github.com/SimonKagstrom/kcov/releases/download/v40/kcov-amd64.tar.gz
+          wget https://github.com/SimonKagstrom/kcov/releases/download/v42/kcov-amd64.tar.gz
           tar -xf kcov-amd64.tar.gz
       - run: |
           ./usr/local/bin/kcov --exclude-path=/tmp $PWD/coverage ./bin/bats --filter-tags '!no-kcov' test/

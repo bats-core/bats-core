@@ -20,6 +20,7 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 * increase compatibility with Solaris (#1043)
 * fix `noclobber` breaking `bats-gather-tests` (#1042)
 * fix exiting with `0` despite `bats:focus` when all tests have been filtered out (#1058)
+* remove deprecated ubuntu 20.04 from CI config (#1083)
 
 ### Documentation
 

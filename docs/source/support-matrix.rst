@@ -15,11 +15,11 @@ Supported Operating systems
 
 The following Operating Systems are supported and tested automatically (CI) or manually during development:
 
- * Linux: Alpine (CI), Alma 8 (CI), Arch Linux (manual), Ubuntu 20.04/22.04 (CI)
+ * Linux: Alpine (CI), Alma 8 (CI), Arch Linux (manual), Ubuntu 22.04/24.04 (CI)
  * FreeBSD: 11 (CI)
  * macOS: 11 (CI), 12 (CI)
  * Windows: Server 2019 (CI), 10 (manual)
- 
+
    * Git for Windows Bash (MSYS2 based)
    * Windows Subsystem for Linux
    * MSYS2
