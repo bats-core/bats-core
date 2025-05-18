@@ -512,11 +512,16 @@ redirect_stdout_to_report_file() { # <command>
 
 set -o pipefail execfail
 if [[ -n "$report_formatter" ]]; then
+  # bats-exec-suite ╦> report-formatter > report_file.xml
+  #                 ╠> bats_test_count_validator
+  #                 ╚> formatter > stdout
   exec bats-exec-suite "${flags[@]}" "${filenames[@]}" |
     bats_tee redirect_stdout_to_report_file "$interpolated_report_formatter" "${report_formatter_flags[@]}" |
       bats_tee --no-check-status bats_test_count_validator |
         "$interpolated_formatter" "${formatter_flags[@]}"
 else
+  # bats-exec-suite ╦> bats_test_count_validator
+  #                 ╚> formatter > stdout
   exec bats-exec-suite "${flags[@]}" "${filenames[@]}" |
     bats_tee --no-check-status bats_test_count_validator |
       "$interpolated_formatter" "${formatter_flags[@]}"
