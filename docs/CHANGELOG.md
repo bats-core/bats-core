@@ -11,6 +11,10 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 
 ## [Unreleased]
 
+### Documentation
+
+* moved 3rd-party libraries list into wiki (#1078)
+
 ## [1.12.0] - 2025-05-18
 
 ### Added 
