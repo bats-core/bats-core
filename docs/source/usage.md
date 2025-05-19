@@ -6,7 +6,7 @@ can view the available command line options that Bats supports by calling Bats
 with the `-h` or `--help` options. These are the options that Bats currently
 supports:
 
-``` eval_rst
+```eval_rst
 .. program-output:: ../../bin/bats --help
 ```
 
@@ -85,7 +85,7 @@ $ cat /tmp/report.xml
 
 ## Parallel Execution
 
-``` eval_rst
+```eval_rst
 .. versionadded:: 1.0.0
 ```
 
@@ -110,5 +110,36 @@ If you have files where tests within the file would interfere with each other, y
 If you want more fine-grained control, you can `export BATS_NO_PARALLELIZE_WITHIN_FILE=true` in `setup_file()`
 or outside any function to disable parallelization only within the containing file.
 
+## Test Coverage
+
+Test coverage can be gathered when using [run][run-test-other-commands] to run
+the code being tested as an external binary; it is not possible to gather test
+coverage for shell functions because shell functions cannot be run by an
+external program, and attempting to do so will likely cause the tests to fail.
+
+Bats does not create or cleanup the test coverage directory, allowing
+accumulation of coverage data over multiple runs.
+
+Only [kcov][kcov] is currently supported:
+
+- To enable test coverage globally use `--kcoverage_dir <directory>`.
+- Test coverage can be selectively enabled by setting or clearing the
+  environment variable `KCOVERAGE_DIR` before calling `run`.
+
+Other programs for gathering test coverage can be supported by redefining the
+`gather_coverage` function, e.g.:
+
+```shell
+gather_coverage() {
+  my-coverage-program --flag1 --flag2 "$@"
+}
+```
+
+If you would like to contribute support for other test coverage systems please
+search for `gather_coverage`, `kcoverage_dir`, and `KCOVERAGE_DIR` to find the
+code that will need to be extended.
+
 [tap-format]: https://testanything.org
 [gnu-parallel]: https://www.gnu.org/software/parallel/
+[run-test-other-commands]: writing-tests.html#run-test-other-commands
+[kcov]: https://github.com/SimonKagstrom/kcov

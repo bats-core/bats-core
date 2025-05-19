@@ -150,12 +150,28 @@ load() {
   fi
 }
 
+# This is a hook enabling users to gather coverage when using `run()`.
+#
+# You can run anything in this function so it should be possible to support most
+# (all?) coverage systems.
+#
+# Limitations: only works for external binaries, shell functions are not
+# supported.
+gather_coverage() {
+  if [[ -n "${KCOVERAGE_DIR:-}" ]]; then
+    kcov --bash-dont-parse-binary-dir \
+      "${KCOVERAGE_DIR}" "$@"
+  else
+    "$@"
+  fi
+}
+
 bats_redirect_stderr_into_file() {
-  "$@" 2>>"$bats_run_separate_stderr_file" # use >> to see collisions' content
+  gather_coverage "$@" 2>>"$bats_run_separate_stderr_file" # use >> to see collisions' content
 }
 
 bats_merge_stdout_and_stderr() {
-  "$@" 2>&1
+  gather_coverage "$@" 2>&1
 }
 
 # write separate lines from <input-var> into <output-array>
@@ -421,7 +437,7 @@ run() { # [!|-N] [--keep-empty-lines] [--separate-stderr] [--] <command to run..
   if [[ ${BATS_VERBOSE_RUN:-} ]]; then
     bats_run_print_output
   fi
-  
+
   # don't leak our trap into surrounding code
   trap bats_interrupt_trap INT
 }
@@ -495,7 +511,7 @@ bats_test_function() {
     BATS_TEST_TAGS=("${tags[@]+${tags[@]}}")
     export BATS_TEST_DESCRIPTION="${test_description-$*}"
     # shellcheck disable=SC2034
-    BATS_TEST_COMMAND=("$@")    
+    BATS_TEST_COMMAND=("$@")
   fi
 }
 
