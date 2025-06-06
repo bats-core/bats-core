@@ -32,7 +32,7 @@ If you want to exclude only few tests from a run, you can either `skip` them:
         # yadayada
     }
 
-becomes 
+becomes
 
 .. code-block:: bash
 
@@ -47,7 +47,7 @@ or comment them out, e.g.:
 
     @test "Testname" {
 
-becomes 
+becomes
 
 .. code-block:: bash
 
@@ -92,7 +92,7 @@ Short of using a bash debugger you should make sure to use appropriate asserts f
     @test test {
         run echo test failed
         assert_output "test"
-        # instead of 
+        # instead of
         [ "$output" = "test" ]
     }
 
@@ -128,7 +128,7 @@ Next, you should load those helper libraries:
     setup() {
         load 'test_helper/bats-support/load' # this is required by bats-assert!
         load 'test_helper/bats-assert/load'
-    }    
+    }
 
 Now, you should be able to use the functions from these helpers inside your tests, e.g.:
 
@@ -141,6 +141,24 @@ Now, you should be able to use the functions from these helpers inside your test
 
 Note that you obviously need to load the library before using it.
 If you need the library inside `setup_file` or `teardown_file` you need to load it in `setup_file`.
+
+How can I abort on first failure?
+------------------------------------------------
+
+Setup on_failure hook to create a file indicating that previous test failed. Then check for it in test `setup`:
+
+.. code-block:: bash
+
+    setup() {
+        # Stop if there was a failure in the previous test
+        [ ! -f "${BATS_RUN_TMPDIR}/.skip" ] || skip "fail"
+        # Write skip file on failure
+        bats::on_failure() {
+            echo "$BATS_TEST_FILENAME" > "${BATS_RUN_TMPDIR}/.skip"
+        }
+    }
+
+Note that bats::on_failure hook requires bats-core version 1.12.0 or later.
 
 How to set a test timeout in bats?
 ----------------------------------
@@ -168,5 +186,5 @@ How can I setup/cleanup before/after all tests?
 -----------------------------------------------
 
 Setup/cleanup before/after all tests can be achieved using the special `setup_suite` and `teardown_suite` functions.
-These functions must be placed into a dedicated `setup_suite.bash` file next to your `.bats` files. 
+These functions must be placed into a dedicated `setup_suite.bash` file next to your `.bats` files.
 For more information check out the :ref:`setup and teardown section <setup and teardown: pre- and post-test hooks>`.
