@@ -11,6 +11,11 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 
 ## [Unreleased]
 
+### Fixed
+
+* unset `output`, `stderr`, `lines`, `stderr_lines` at the start of `run` to avoid crosstalk 
+  between successive invocations (#1105)
+
 ### Documentation
 
 * moved 3rd-party libraries list into wiki (#1078)

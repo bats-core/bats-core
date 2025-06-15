@@ -1552,3 +1552,27 @@ END_OF_ERR_MSG
   [ "${lines[4]}" = '# failure callback' ]
   [ ${#lines[@]} -eq 5 ]
 }
+
+@test "run outputs dont crosstalk (#1105)" {
+  bats_require_minimum_version 1.5.0
+  echo_stdout_stderr() {
+    echo stdout
+    echo stderr >&2
+  }
+
+  run --separate-stderr echo_stdout_stderr
+
+  [ "$output" == "stdout" ]
+  [ "${lines[*]}" == "stdout" ]
+
+  [ "$stderr" == "stderr" ]
+  [ "${stderr_lines[*]}" == "stderr" ]
+
+  run false
+
+  [ "$output" == "" ]
+  [ "${lines[*]}" == "" ]
+
+  [ "$stderr" == "" ]
+  [ "${stderr_lines[*]}" == "" ]
+}

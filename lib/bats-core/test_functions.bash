@@ -348,6 +348,8 @@ run() { # [!|-N] [--keep-empty-lines] [--separate-stderr] [--] <command to run..
     bats_warn_minimum_guaranteed_version "Using flags on \`run\`" 1.5.0
   fi
 
+  unset output stderr lines stderr_lines
+
   local pre_command=
 
   case "$output_case" in
