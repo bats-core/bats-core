@@ -1,0 +1,6 @@
+[31;1m[1G ✗ setup_suite[K
+[0m[31;22m   (from function `setup_suite' in test file test2/setup_suite.bash, line 2)
+[0m[31;22m     `false' failed
+[0m[31;1m
+1 test, 1 failure
+[0m
