@@ -3,6 +3,7 @@ set -e
 
 count_only_flag=''
 filter=''
+nfilter=''
 num_jobs=${BATS_NUMBER_OF_PARALLEL_JOBS:-1}
 parallel_binary_name=${BATS_PARALLEL_BINARY_NAME:-"parallel"}
 bats_no_parallelize_across_files=${BATS_NO_PARALLELIZE_ACROSS_FILES-}
@@ -60,6 +61,10 @@ while [[ "$#" -ne 0 ]]; do
   --filter-tags)
     shift
     gather_tests_flags+=("--filter-tags" "$1")
+    ;;
+  --negative-filter)
+    shift
+    nfilter="$1"
     ;;
   --dummy-flag) ;;
 
@@ -128,7 +133,7 @@ fi
 
 # create file even if no tests are found so the `read` below won't fail
 touch "$TESTS_LIST_FILE"
-gather_tests_output=$(TESTS_LIST_FILE="$TESTS_LIST_FILE" filter="$filter" filter_status="$filter_status" bats-gather-tests "${gather_tests_flags[@]}" -- "$@")
+gather_tests_output=$(TESTS_LIST_FILE="$TESTS_LIST_FILE" filter="$filter" nfilter="$nfilter" filter_status="$filter_status" bats-gather-tests "${gather_tests_flags[@]}" -- "$@")
 test_count=$(grep -c ^ "$TESTS_LIST_FILE" || true) # don't fail here when there are no tests
 if [[ $gather_tests_output == focus_mode ]]; then
   focus_mode=1
