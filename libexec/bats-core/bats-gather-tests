@@ -85,7 +85,7 @@ bats_test_function() {
   line+=$'\t'
   line+="$*"
   # always execute should_skip_because_of_status for its sideeffects
-  if should_skip_because_of_status || should_skip_because_of_focus || should_skip_because_of_filter_tags || should_skip_because_of_filter; then
+  if should_skip_because_of_status || should_skip_because_of_focus || should_skip_because_of_filter_tags || should_skip_because_of_filter || should_skip_because_of_negative_filter; then
     return 0
   fi
   
@@ -160,6 +160,18 @@ function should_skip_because_of_filter() {
 else
 function should_skip_because_of_filter() {
   # skip this when there is no $filter
+  return 1
+}
+fi
+
+if [[ -n "${nfilter-}" ]]; then
+function should_skip_because_of_negative_filter() {
+  # shellcheck disable=SC2154 # nfilter should be inherited as env var
+  [[ "$description" =~ $nfilter ]]
+}
+else
+function should_skip_because_of_negative_filter() {
+  # skip this when there is no $nfilter
   return 1
 }
 fi

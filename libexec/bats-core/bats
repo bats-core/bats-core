@@ -47,6 +47,7 @@ HELP_TEXT_HEADER
                               - custom: provide your own via defining bats_format_file_line_reference_custom
                                         with parameters <filename> <line>, store via `printf -v "$output"`
   -f, --filter <regex>      Only run tests that match the regular expression
+  --negative-filter <regex> Only run tests that do not match the regular expression
   --filter-status <status>  Only run tests with the given status in the last completed (no CTRL+C/SIGINT) run.
                             Valid <status> values are:
                               failed - runs tests that failed or were not present in the last run
@@ -189,6 +190,10 @@ while [[ "$#" -ne 0 ]]; do
   -f | --filter)
     shift
     flags+=('-f' "$1")
+    ;;
+  --negative-filter)
+    shift
+    flags+=('--negative-filter' "$1")
     ;;
   -F | --formatter)
     shift
