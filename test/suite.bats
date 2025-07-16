@@ -219,6 +219,25 @@ setup() {
   [ "${lines[2]}" = 'ok 2 bar_in_b' ]
 }
 
+@test "use --negative-filter to exclude specific test cases" {
+  reentrant_run bats --negative-filter 'ba[rz]' "${FIXTURE_ROOT}/filter"
+  [ "$status" -eq 0 ]
+  [ "${lines[0]}" = '1..5' ]
+  [ "${lines[1]}" = 'ok 1 foo in a' ]
+  [ "${lines[2]}" = 'ok 2 quux_in_b' ]
+  [ "${lines[3]}" = 'ok 3 quux_in c' ]
+  [ "${lines[4]}" = 'ok 4 xyzzy in c' ]
+  [ "${lines[5]}" = 'ok 5 plugh_in c' ]
+}
+
+@test "--negative-filter together with --filter" {
+  reentrant_run bats -f 'in a' --negative-filter 'baz' "${FIXTURE_ROOT}/filter"
+  [ "$status" -eq 0 ]
+  [ "${lines[0]}" = '1..2' ]
+  [ "${lines[1]}" = 'ok 1 foo in a' ]
+  [ "${lines[2]}" = 'ok 2 --bar in a' ]
+}
+
 @test "skip is handled correctly in setup, test, and teardown" {
   bats "${FIXTURE_ROOT}/skip"
 }
