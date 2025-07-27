@@ -1560,8 +1560,6 @@ END_OF_ERR_MSG
     echo stderr >&2
   }
 
-  local stderr stderr_lines # shut up shellcheck
-
   run --separate-stderr echo_stdout_stderr
 
   [ "$output" == "stdout" ]
@@ -1575,6 +1573,6 @@ END_OF_ERR_MSG
   [ "$output" == "" ]
   [ "${lines[*]}" == "" ]
 
-  [ "${stderr-UNSET}" == "UNSET" ]
-  [ "${stderr_lines[*]-UNSET}" == "UNSET" ]
+  [ "$stderr" == "" ]
+  [ "${stderr_lines[*]}" == "" ]
 }

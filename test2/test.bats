@@ -1,3 +1,0 @@
-@test "fail" {
-	echo success!
-}

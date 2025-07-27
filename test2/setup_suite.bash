@@ -1,3 +1,0 @@
-setup_suite() {
-	false
-}

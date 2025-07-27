@@ -348,6 +348,8 @@ run() { # [!|-N] [--keep-empty-lines] [--separate-stderr] [--] <command to run..
     bats_warn_minimum_guaranteed_version "Using flags on \`run\`" 1.5.0
   fi
 
+  unset output stderr lines stderr_lines
+
   local pre_command=
 
   case "$output_case" in
@@ -386,8 +388,6 @@ run() { # [!|-N] [--keep-empty-lines] [--separate-stderr] [--] <command to run..
     # shellcheck disable=SC2034
     read -d '' -r stderr <"$bats_run_separate_stderr_file" || true
     bats_separate_lines stderr_lines stderr
-  else
-    unset stderr stderr_lines
   fi
 
   # shellcheck disable=SC2034
