@@ -11,9 +11,13 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 
 ## [Unreleased]
 
+### Added
+
+* `--errexit` flag to enable errexit (set -e) behavior for commands run in `run` (#1118)
+
 ### Fixed
 
-* junit formatter: 
+* junit formatter:
   * avoid interference between env and internals (#1175)
   * remove control characters (\x00-\x08\x0B\x0C\x0E-\x1F) (#1176)
   * don't report (skipped) last test as failed when `teardown_suite` generates FD3 output (#1181s)
@@ -29,7 +33,7 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 
 ## [1.13.0] - 2025-11-07
 
-### Added 
+### Added
 
 * use the [`syntax`](https://docs.docker.com/reference/dockerfile/#syntax) parser directive to declare the Dockerfile syntax version (#1127)
 * Negative test filtering via `--negative-filter` - tests matching the filter are *excluded* (#1114)
@@ -37,7 +41,7 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 
 ### Fixed
 
-* unset `output`, `stderr`, `lines`, `stderr_lines` at the start of `run` to avoid crosstalk 
+* unset `output`, `stderr`, `lines`, `stderr_lines` at the start of `run` to avoid crosstalk
   between successive invocations (#1105)
 * junit:
   * XML escape fully removes ANSI sequences, e.g. color codes, cursor movements (#1103)
@@ -56,7 +60,7 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 
 ## [1.12.0] - 2025-05-18
 
-### Added 
+### Added
 
 * `bats::on_failure` hook that gets called when a test or `setup*` function fails (#1031)
 

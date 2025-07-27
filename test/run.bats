@@ -137,3 +137,39 @@ print-stderr-stdout() {
   run true
   [ "${IFS-(unset)}" = '(unset)' ]
 }
+
+failing_function() {
+  echo "first line"
+  echo ""
+  echo "before failure"
+  false
+  echo "after failure"
+}
+
+@test "run without BATS_RUN_ERREXIT=1 allows function to continue after failure" {
+  run failing_function
+  [ $status -eq 0 ]
+  [[ "$output" =~ "before failure" ]]
+  [[ "$output" =~ "after failure" ]]
+}
+
+@test "run with BATS_RUN_ERREXIT=1 exits functions after failure" {
+  # shellcheck disable=SC2034
+  local BATS_RUN_ERREXIT=1
+  run failing_function
+  [ $status -ne 0 ]
+  [ "${#lines[@]}" -eq 2 ]
+  [ "${lines[0]}" = "first line" ]
+  [ "${lines[1]}" = "before failure" ]
+}
+
+@test "run with BATS_RUN_ERREXIT=1 and --keep-empty-lines preserves empty lines" {
+  # shellcheck disable=SC2034
+  local BATS_RUN_ERREXIT=1
+  run --keep-empty-lines failing_function
+  [ $status -ne 0 ]
+  [ "${#lines[@]}" -eq 3 ]
+  [ "${lines[0]}" = "first line" ]
+  [ "${lines[1]}" = "" ]
+  [ "${lines[2]}" = "before failure" ]
+}
