@@ -1,0 +1,3 @@
+setup_suite() {
+	false
+}

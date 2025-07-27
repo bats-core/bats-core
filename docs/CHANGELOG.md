@@ -15,6 +15,7 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 
 * unset `output`, `stderr`, `lines`, `stderr_lines` at the start of `run` to avoid crosstalk 
   between successive invocations (#1105)
+* junit: XML escape fully removes ANSI sequences, e.g. color codes, cursor movements (#1103)
 
 ### Documentation
 
