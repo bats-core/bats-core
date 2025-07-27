@@ -304,19 +304,16 @@ jobs:
         with:
           repository: bats-core/bats-assert
           path: bats-assert
-          ref: v2.1.0
 
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
           repository: bats-core/bats-support
           path: bats-support
-          ref: v0.3.0
 
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
           repository: bats-core/bats-file
           path: bats-file
-          ref: v0.4.0
 
       - run: |
           <<EOF cat >test.sh
