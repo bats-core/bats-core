@@ -172,6 +172,8 @@ finish_file() {
     file_header
     printf "%s\n" "${_buffer}"
     file_footer
+    class=''
+    name=''
   fi
 }
 
@@ -215,6 +217,11 @@ bats_tap_stream_skipped() { # <test index> <test name> <skip reason>
 }
 
 bats_tap_stream_not_ok() { # <test index> <test name>
+  if [[ -z "${name:-}" ]]; then
+    # Can be called (after bats_tap_stream_plan) before anything else if the test fails in setup_suite
+    bats_tap_stream_suite "setup_suite"
+    bats_tap_stream_begin "$1" "$2"
+  fi
   test_exec_time=${BATS_FORMATTER_TEST_DURATION:-0}
   ((file_count += 1))
   ((file_failures += 1))
