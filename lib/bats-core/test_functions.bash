@@ -349,6 +349,8 @@ run() { # [!|-N] [--keep-empty-lines] [--separate-stderr] [--] <command to run..
   fi
 
   local pre_command=
+  # make sure tmpdir exists in case run() is called outside a @test
+  local tmpdir=${BATS_TEST_TMPDIR:-${BATS_FILE_TMPDIR:-${BATS_RUN_TMPDIR}}}
 
   case "$output_case" in
   merged) # redirects stderr into stdout and fills only $output/$lines
@@ -356,7 +358,7 @@ run() { # [!|-N] [--keep-empty-lines] [--separate-stderr] [--] <command to run..
     ;;
   separate) # splits stderr into own file and fills $stderr/$stderr_lines too
     local bats_run_separate_stderr_file
-    bats_run_separate_stderr_file="$(mktemp "${BATS_TEST_TMPDIR}/separate-stderr-XXXXXX")"
+    bats_run_separate_stderr_file="$(mktemp "${tmpdir}/separate-stderr-XXXXXX")"
     pre_command=bats_redirect_stderr_into_file
     ;;
   esac
@@ -372,7 +374,7 @@ run() { # [!|-N] [--keep-empty-lines] [--separate-stderr] [--] <command to run..
       # Use temp file to avoid ERR trap interference with errexit
       # Don't use mktemp because that doesn't work with `set -o noclobber`
       local status_file
-      status_file="${BATS_TEST_TMPDIR}/run_status.$(printf '%06d' $((RANDOM % 1000000)))"
+      status_file="${tmpdir}/run_status.$(printf '%06d' $((RANDOM % 1000000)))"
       output="$(
         ( set -eET; "$pre_command" "$@" )
         echo "$?" >"$status_file"
@@ -393,7 +395,7 @@ run() { # [!|-N] [--keep-empty-lines] [--separate-stderr] [--] <command to run..
     # shellcheck disable=SC2034
     if [[ -n "${BATS_RUN_ERREXIT:-}" ]]; then
       local status_file
-      status_file="${BATS_TEST_TMPDIR}/run_status.$(printf '%06d' $((RANDOM % 1000000)))"
+      status_file="${tmpdir}/run_status.$(printf '%06d' $((RANDOM % 1000000)))"
       output="$(
         ( set -eET; "$pre_command" "$@" )
         echo "$?" >"$status_file"
