@@ -1,5 +1,7 @@
 #!/usr/bin/env bats
 
+bats_require_minimum_version 1.5.0
+
 setup() {
   load test_helper
   fixtures bats
@@ -1535,7 +1537,7 @@ END_OF_ERR_MSG
   [ "${lines[0]}" = 1..1 ]
   [ "${lines[1]}" = 'not ok 1 setup_file failed' ]
   [ "${lines[2]}" = "# (from function \`setup_file' in test file $RELATIVE_FIXTURE_ROOT/failure_callback_setup_file.bats, line 6)" ]
-  [ "${lines[3]}" = "#   \`false' failed" ] 
+  [ "${lines[3]}" = "#   \`false' failed" ]
   [ "${lines[4]}" = '# failure callback' ]
   [ ${#lines[@]} -eq 5 ]
 }
@@ -1577,4 +1579,29 @@ END_OF_ERR_MSG
 
   [ "${stderr-UNSET}" == "UNSET" ]
   [ "${stderr_lines[*]-UNSET}" == "UNSET" ]
+}
+
+@test "--errexit flag is accepted and sets BATS_RUN_ERREXIT" {
+  reentrant_run bats --tap --errexit "$FIXTURE_ROOT/errexit_env.bats"
+  [ "${lines[0]}" == "1..1" ]
+  [ "${lines[1]}" == "ok 1 check BATS_RUN_ERREXIT is set" ]
+  [ "${#lines[@]}" == 2 ]
+}
+
+@test "--errexit flag behavior differs from default run behavior" {
+  # Test without --errexit flag (default behavior)
+  reentrant_run bats --tap "$FIXTURE_ROOT/errexit_test.bats"
+  [ "${lines[0]}" == "1..2" ]
+  [ "${lines[1]}" == "ok 1 failing function without --errexit continues" ]
+  [ "${lines[2]}" == "ok 2 passing function works" ]
+  [ "${#lines[@]}" == 3 ]
+
+  # Test with --errexit flag - should fail the first test since it expects non-errexit behavior
+  reentrant_run ! bats --tap --errexit "$FIXTURE_ROOT/errexit_test.bats"
+  [ "${lines[0]}" == "1..2" ]
+  [[ "${lines[1]}" =~ "not ok 1 failing function without --errexit continues" ]]
+  [[ "${lines[2]}" =~ "in test file" ]]
+  [[ "${lines[3]}" =~ "Step 2: should not appear with errexit" ]]
+  [ "${lines[4]}" == "ok 2 passing function works" ]
+  [ "${#lines[@]}" == 5 ]
 }

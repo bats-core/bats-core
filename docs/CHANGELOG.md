@@ -11,9 +11,13 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 
 ## [Unreleased]
 
+### Added
+
+* `--errexit` flag to enable errexit (set -e) behavior for commands run in `run` (#1118)
+
 ### Fixed
 
-* unset `output`, `stderr`, `lines`, `stderr_lines` at the start of `run` to avoid crosstalk 
+* unset `output`, `stderr`, `lines`, `stderr_lines` at the start of `run` to avoid crosstalk
   between successive invocations (#1105)
 * junit: XML escape fully removes ANSI sequences, e.g. color codes, cursor movements (#1103)
 
@@ -23,7 +27,7 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 
 ## [1.12.0] - 2025-05-18
 
-### Added 
+### Added
 
 * `bats::on_failure` hook that gets called when a test or `setup*` function fails (#1031)
 

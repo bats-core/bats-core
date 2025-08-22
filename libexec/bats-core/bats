@@ -65,6 +65,7 @@ HELP_TEXT_HEADER
   -j, --jobs <jobs>         Number of parallel jobs (requires GNU parallel or shenwei356/rush)
   --parallel-binary-name    Name of parallel binary
   --no-tempdir-cleanup      Preserve test output temporary directory
+  --errexit                 Enable errexit (set -e) for commands run in `run`
   --no-parallelize-across-files
                             Serialize test file execution instead of running
                             them in parallel (requires --jobs >1)
@@ -246,6 +247,9 @@ while [[ "$#" -ne 0 ]]; do
   --no-tempdir-cleanup)
     BATS_TEMPDIR_CLEANUP=''
     ;;
+  --errexit)
+    BATS_RUN_ERREXIT=1
+    ;;
   --tempdir) # for internal test consumption only!
     BATS_RUN_TMPDIR="$2"
     shift
@@ -323,6 +327,7 @@ elif ! BATS_RUN_TMPDIR=$(mktemp -d "${BATS_TMPDIR}/bats-run-XXXXXX"); then
 fi
 
 export BATS_WARNING_FILE="${BATS_RUN_TMPDIR}/warnings.log"
+export BATS_RUN_ERREXIT=${BATS_RUN_ERREXIT:-}
 
 bats_exit_trap() {
   if [[ -s "$BATS_WARNING_FILE" ]]; then
