@@ -18,8 +18,7 @@ If you want to see this output, you need to print it yourself, or use functions 
 Can I use `--filter` to exclude files/tests?
 --------------------------------------------
 
-No, not directly. `--filter` uses a regex to match against test names. So you could try to invert the regex.
-The filename won't be part of the strings that are tested, so you cannot filter against files.
+You can use `--negative-filter` to do this.
 
 How can I exclude a single test from a test run?
 ------------------------------------------------
