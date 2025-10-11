@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1
 ARG bashver=latest
 
 FROM bash:${bashver}

@@ -11,6 +11,10 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 
 ## [Unreleased]
 
+### Added 
+
+* use the [`syntax`](https://docs.docker.com/reference/dockerfile/#syntax) parser directive to declare the Dockerfile syntax version (#1127)
+
 ### Fixed
 
 * unset `output`, `stderr`, `lines`, `stderr_lines` at the start of `run` to avoid crosstalk 
