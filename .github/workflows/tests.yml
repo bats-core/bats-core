@@ -100,7 +100,10 @@ jobs:
         run: bats test --print-output-on-failure
 
   windows:
-    runs-on: windows-2019
+    strategy:
+      matrix:
+        os: ['windows-2022', 'windows-2025']
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       - name: Check failing tests fail suite,
@@ -112,7 +115,7 @@ jobs:
   npm_on_windows:
     strategy:
       matrix:
-        os: ['windows-2019']
+        os: ['windows-2022', 'windows-2025']
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
