@@ -155,6 +155,7 @@ flush_log() {
   fi
   _buffer_log=""
   _system_out_log=""
+  test_result_state="" # Clean out result from last test. Retried tests will have multiple begin calls.
 }
 
 log_system_out() {

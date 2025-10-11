@@ -20,7 +20,9 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 
 * unset `output`, `stderr`, `lines`, `stderr_lines` at the start of `run` to avoid crosstalk 
   between successive invocations (#1105)
-* junit: XML escape fully removes ANSI sequences, e.g. color codes, cursor movements (#1103)
+* junit:
+  * XML escape fully removes ANSI sequences, e.g. color codes, cursor movements (#1103)
+  * fix retried tests being listed multiple times (#1150)
 * remove deprecated windows runner (#1119)
 * renamed `docker-compose.yml` to `compose.yaml` (#1128)
 
