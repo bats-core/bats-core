@@ -161,12 +161,12 @@ TESTSUITES_REGEX="<testsuites time=\"$FLOAT_REGEX\">"
   [[ "${lines[2]}" == '<testsuite name="issue_1149.bats" '*'>' ]]
   # The first failing (and retried) test has one entry, as expected
   [[ "${lines[3]}" == '    <testcase classname="issue_1149.bats" name="test fail" '*'>' ]]
-  [[ "${lines[4]}" == '        <failure type="failure">(in test file test/fixtures/junit-formatter/issue_1149.bats, line 7)' ]]
+  [[ "${lines[4]}" == "        <failure type=\"failure\">(in test file $RELATIVE_FIXTURE_ROOT/issue_1149.bats, line 7)" ]]
   [[ "${lines[5]}" == '  `false&#39; failed</failure>' ]]
   [[ "${lines[6]}" == '    </testcase>' ]]
   # Second failing test (also retried) should also only have one entry, and that includes the failure message
   [[ "${lines[7]}" == '    <testcase classname="issue_1149.bats" name="test foobar" '*'>' ]]
-  [[ "${lines[8]}" == '        <failure type="failure">(in test file test/fixtures/junit-formatter/issue_1149.bats, line 11)' ]]
+  [[ "${lines[8]}" == "        <failure type=\"failure\">(in test file $RELATIVE_FIXTURE_ROOT/issue_1149.bats, line 11)" ]]
   [[ "${lines[9]}" == '  `false&#39; failed</failure>' ]]
   [[ "${lines[10]}" == '    </testcase>' ]]
   [[ "${lines[11]}" == '</testsuite>' ]]
