@@ -1,4 +1,4 @@
-# Copy this file to docker-compose.override.yml
+# Copy this file to compose.override.yaml
 services:
     bats:
         entrypoint:

@@ -21,6 +21,7 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
   between successive invocations (#1105)
 * junit: XML escape fully removes ANSI sequences, e.g. color codes, cursor movements (#1103)
 * remove deprecated windows runner (#1119)
+* renamed `docker-compose.yml` to `compose.yaml` (#1128)
 
 ### Documentation
 
