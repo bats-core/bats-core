@@ -1434,7 +1434,7 @@ END_OF_ERR_MSG
 
 @test "Focus tests with BATS_NO_FAIL_FOCUS_RUN=1 does not override exit code" {
   bats_require_minimum_version 1.5.0
-  # shellcheck disable=SC2031
+  # shellcheck disable=SC2031,SC2030
   REENTRANT_RUN_PRESERVE+=(BATS_NO_FAIL_FOCUS_RUN)
   BATS_NO_FAIL_FOCUS_RUN=1 reentrant_run -0 bats "$FIXTURE_ROOT/focus.bats"
   [ "${lines[0]}" == "WARNING: This test run only contains tests tagged \`bats:focus\`!" ]
@@ -1577,4 +1577,54 @@ END_OF_ERR_MSG
 
   [ "${stderr-UNSET}" == "UNSET" ]
   [ "${stderr_lines[*]-UNSET}" == "UNSET" ]
+}
+
+@test "--abort prevents further tests from running" {
+  bats_require_minimum_version 1.5.0
+
+  # shellcheck disable=SC2031,SC2030
+  export MARKER_FILE="${BATS_TEST_TMPDIR}/marker-file"
+  # shellcheck disable=SC2031,SC2030
+  REENTRANT_RUN_PRESERVE+=(MARKER_FILE)
+
+  reentrant_run -1 bats --abort "$FIXTURE_ROOT/abort/"
+
+  # this should deterministically stop after first test fails
+
+  [ "${lines[0]}" = '1..5' ]
+  [ "${lines[1]}" = 'not ok 1 failing' ]
+  [ "${lines[4]}" = '# bats warning: Executed 1 instead of expected 5 tests' ]
+  [ ${#lines[*]} -eq 5 ]
+}
+
+@test "--abort prevents further tests from running in parallel mode" {
+  if ! type -p parallel &>/dev/null; then
+    skip "Requires GNU parallel"
+  fi
+  if ! (type -p flock &>/dev/null || type -p shlock &>/dev/null); then
+    skip "Requires flock/shlock"
+  fi
+  if [[ ${BATS_PARALLEL_BINARY_NAME-} == rush ]]; then
+    skip "--halt only works for GNU parallel"
+  fi
+
+  bats_require_minimum_version 1.5.0
+
+  # shellcheck disable=SC2031
+  export MARKER_FILE="${BATS_TEST_TMPDIR}/marker-file"
+  # shellcheck disable=SC2031
+  REENTRANT_RUN_PRESERVE+=(MARKER_FILE)
+
+  reentrant_run -1 bats -j 2 --abort "$FIXTURE_ROOT/abort/"
+
+  # Due to race conditions, we cannot say how many other tests will run exactly.
+  # However, we expect that the third test file will not be run due to the low
+  # parallelization factor and that the third test in each individual file will never run
+
+  [ "${lines[0]}" = '1..5' ]
+  [ "${lines[1]}" = 'not ok 1 failing' ] # the provoking test should always be printed!
+  
+  # we should not reach the test that creates this file
+  # shellcheck disable=SC2314
+  ! cat "$MARKER_FILE"
 }

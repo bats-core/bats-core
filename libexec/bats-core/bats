@@ -35,6 +35,7 @@ HELP_TEXT_HEADER
   <tests> is the path to a Bats test file, or the path to a directory
   containing Bats test files (ending with ".bats")
 
+  --abort                   Stop execution of suite on first failed test
   -c, --count               Count test cases without running any tests
   --code-quote-style <style>
                             A two character string of code quote delimiters
@@ -238,6 +239,9 @@ while [[ "$#" -ne 0 ]]; do
   -T | --timing)
     flags+=('-T')
     formatter_flags+=('-T')
+    ;;
+  --abort)
+    flags+=('--abort')
     ;;
   # this flag is now a no-op, as it is the parallel default
   --parallel-preserve-environment) ;;

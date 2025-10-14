@@ -15,6 +15,7 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 
 * use the [`syntax`](https://docs.docker.com/reference/dockerfile/#syntax) parser directive to declare the Dockerfile syntax version (#1127)
 * Negative test filtering via `--negative-filter` - tests matching the filter are *excluded* (#1114)
+* fail-fast flag `--abort` to stop test suite execution on first failure (#1155)
 
 ### Fixed
 
