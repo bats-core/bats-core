@@ -57,7 +57,7 @@ source "$BATS_ROOT/$BATS_LIBDIR/bats-core/test_functions.bash"
 
 # override test_functions.bash's version to use it for test registration
 bats_test_function() {
-  local -a tags=()
+  local -a tags=() current_tags=()
   local description=
 
   while (( $# > 0 )); do
@@ -67,7 +67,10 @@ bats_test_function() {
         shift 2
       ;;
       --tags)
-        IFS=, read -ra tags <<<"$2" || true
+        if [[ "$2" != "" ]]; then # avoid unbound variable with set -u Bash 3
+          IFS=, read -ra current_tags <<<"$2" || true
+          tags+=("${current_tags[@]}")
+        fi
         shift 2
       ;;
       --)
@@ -80,6 +83,10 @@ bats_test_function() {
       ;;
     esac
   done
+
+  if (( ${#tags[@]} > 1 )); then # avoid unbound variable with set -u Bash 3
+    bats_sort tags "${tags[@]}"
+  fi
 
   line="$BATS_TEST_FILENAME"
   line+=$'\t'
