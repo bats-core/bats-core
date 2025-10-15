@@ -27,6 +27,7 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 * remove deprecated windows runner (#1119)
 * renamed `docker-compose.yml` to `compose.yaml` (#1128)
 * `bats_test_function`: don't require `--tags` to be sorted (#1158)
+* `BATS_TEST_TIMEOUT` not stopping command under `run` (#1160)
 
 ### Documentation
 
