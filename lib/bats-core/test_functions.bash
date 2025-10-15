@@ -462,7 +462,7 @@ skip() {
 }
 
 bats_test_function() {
-  local tags=()
+  local tags=() current_tags=()
   while (( $# > 0 )); do
     case "$1" in
       --description)
@@ -472,7 +472,10 @@ bats_test_function() {
         shift 2
       ;;
       --tags)
-        IFS=',' read -ra tags <<<"$2"
+        if [[ "$2" != "" ]]; then # avoid unbound variable with set -u Bash 3
+          IFS=',' read -ra current_tags <<<"$2"
+          tags+=("${current_tags[@]}")
+        fi
         shift 2
       ;;
       --)
@@ -485,6 +488,11 @@ bats_test_function() {
       ;;
     esac
   done
+
+  if (( ${#tags[@]} > 1 )); then # avoid unbound variable with set -u Bash 3
+    bats_sort tags "${tags[@]}"
+  fi
+
   BATS_TEST_NAMES+=("$*")
   local quoted_parameters
   printf -v quoted_parameters " %q" "$@"
