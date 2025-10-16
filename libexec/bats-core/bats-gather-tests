@@ -24,6 +24,7 @@ read_tags() {
       bats_trim "tags[$i]" "${tags[$i]}"
     done
     bats_sort sorted_tags "${tags[@]}"
+    # shellcheck disable=SC2154
     filter_tags_list+=("${sorted_tags[*]}")
   else
     filter_tags_list+=("")

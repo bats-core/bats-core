@@ -229,11 +229,25 @@ bats_forward_output_for_parallel_tests() {
   return $status
 }
 
+bats_run_test() {
+  if [[ -n "${BATS_TEST_TIMEOUT:-}" ]]; then
+    # using SIGABRT for interprocess communication.
+    # Ruled out:
+    # USR1/2 - not available on Windows
+    # SIGALRM - interferes with sleep:
+    #           "sleep(3) may be implemented using SIGALRM; mixing calls to alarm()
+    #           and sleep(3) is a bad idea." ~ https://linux.die.net/man/2/alarm
+    timeout -sABRT "${BATS_TEST_TIMEOUT}" "$BATS_LIBEXEC/bats-exec-test" "$@"
+  else
+    "$BATS_LIBEXEC/bats-exec-test" "$@"
+  fi
+}
+
 bats_run_test_with_retries() { # <args>
   local status=0
   local should_try_again=1 try_number
   for ((try_number = 1; should_try_again; ++try_number)); do
-    if "$BATS_LIBEXEC/bats-exec-test" "$@" "$try_number"; then
+    if bats_run_test "$@" "$try_number"; then
       should_try_again=0
     else
       status=$?
