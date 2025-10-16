@@ -247,6 +247,8 @@ jobs:
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       - uses: vmactions/freebsd-vm@848dac7e118679d08e2c2f9d42cd96608d834323 # v1.1.8
+        # this step usually takes ~4 minutes but sometimes hangs in the boot phase -> shorten feedback
+        timeout-minutes: 6
         with:
           prepare: pkg install -y bash parallel ${{ matrix.packages }}
           run: |
