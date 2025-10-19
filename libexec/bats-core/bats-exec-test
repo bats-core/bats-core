@@ -220,8 +220,10 @@ bats_timeout_trap() {
   exit 1
 }
 
-bats_get_child_processes_of() { # <parent-pid>
-  local -ri parent_pid=${1?}
+# find pids of process and all its descendants
+bats_find_processes_of() { # <parent-pid>
+  local -ri parent_pid=$1
+  child_pids=("$1")
   {
     read -ra header
     local pid_col ppid_col
@@ -233,24 +235,41 @@ bats_get_child_processes_of() { # <parent-pid>
         ppid_col=$i
       fi
     done
+    # PID PPID  child_pids
+    # 1   0     (2)
+    # 2   1     (2)
+    # 3   1     (2)
+    # 4   3     (2)
+    # 5   2     (2 5)
+    # 6   5     (2 5 6)
+    # assumes pids are in ascending order and there are no orphans in the chain
+
+    if (( BASH_VERSINFO[0] < 4 )); then
+      # BASHPID is not available before bash 4
+      BASHPID=$(sh -c 'echo $PPID')
+    fi
     while read -ra row; do
-      if ((${row[$ppid_col]} == parent_pid)); then
-        printf "%d\n" "${row[$pid_col]}"
+      local -i ppid=${row[ppid_col]} pid=${row[$pid_col]}
+      if (( ppid == parent_pid)) || bats_linear_reverse_search $ppid child_pids; then
+        # exclude `ps` command substitution below
+        if (( pid != BASHPID)); then
+          child_pids+=("$pid")
+        fi
       fi
     done
-  } < <(ps -ef "$parent_pid")
+  } < <(ps -eo pid,ppid,args)
 }
 
-bats_kill_childprocesses_of() { # <parent-pid>
-  local -ir parent_pid="${1?}"
-  if command -v pkill; then
-    pkill -P "$parent_pid"
-  else
-    # kill in reverse order (latest first)
-    while read -r pid; do
-      kill "$pid"
-    done < <(bats_get_child_processes_of "$parent_pid" | sort -r)
-  fi >/dev/null
+# send signal to process and all its descendants
+bats_kill_processes_of() { # <parent-pid> [<signal>]
+  local -ir parent_pid="${1?}" 
+  local -r signal=${2?}
+  bats_find_processes_of "$parent_pid"
+  kill "-$signal" "${child_pids[@]}"
+}
+
+echo_ppid() {
+  echo $PPID
 }
 
 # sets a timeout for this process
@@ -278,10 +297,8 @@ bats_start_timeout_countdown() { # <timeout>
     # shellcheck disable=SC2064
     trap "kill $!; exit 0" ABRT
     wait
-    if kill -ABRT "$target_pid"; then
-      # get rid of signal blocking child processes (like sleep)
-      bats_kill_childprocesses_of "$target_pid"
-    fi &>/dev/null
+    trap '' ABRT # don'- react to below signal below (this proess is in the same group)
+    bats_kill_processes_of $target_pid ABRT
   ) &
 }
 
