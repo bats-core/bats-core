@@ -260,3 +260,45 @@ bats_format_file_line_reference_uri() {
 bats_execute() { # <command...>
   PATH="${BATS_SAVED_PATH?}" "$@"
 }
+
+bats_get_child_processes_of() { # <parent-pid>
+  local -ri parent_pid=${1?}
+  {
+    read -ra header
+    local pid_col ppid_col
+    for ((i = 0; i < ${#header[@]}; ++i)); do
+      if [[ ${header[$i]} == "PID" ]]; then
+        pid_col=$i
+      fi
+      if [[ ${header[$i]} == "PPID" ]]; then
+        ppid_col=$i
+      fi
+    done
+    while read -ra row; do
+      if ((${row[$ppid_col]} == parent_pid)); then
+        printf "%d\n" "${row[$pid_col]}"
+      fi
+    done
+  } < <(ps -ef "$parent_pid")
+}
+
+bats_kill_childprocesses_of() { # <parent-pid>
+  local -ir parent_pid="${1?}"
+  if command -v pkill; then
+    pkill -P "$parent_pid"
+  else
+    # kill in reverse order (latest first)
+    while read -r pid; do
+      kill "$pid"
+    done < <(bats_get_child_processes_of "$parent_pid" | sort -r)
+  fi >/dev/null
+}
+
+bats_interrupt_process_group_of_childprocesses_of() { # <parent-pid>
+  local -ir parent_pid="${1?}"
+  # kill in reverse order (latest first)
+  while read -r pid; do
+    kill -SIGINT -"$pid"
+  done < <(bats_get_child_processes_of "$parent_pid" | sort -r)
+}
+

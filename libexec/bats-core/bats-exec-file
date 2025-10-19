@@ -138,7 +138,7 @@ bats_file_teardown_trap() {
 # shellcheck source=lib/bats-core/common.bash
 source "$BATS_ROOT/$BATS_LIBDIR/bats-core/common.bash"
 
-# shellcheck disable=SC2317
+# shellcheck disable=SC2317,SC2329
 bats_file_exit_trap() {
   local -r last_return_code=$?
   if [[ ${1:-} != in-teardown_trap ]]; then
@@ -326,6 +326,27 @@ bats_run_tests() {
     exit 1
   fi
 
+  # deal with SIGINT from CLI and timeout
+  # This is the process structure:
+  # pid pgid command
+  #   1    1 bats/exec-suite
+  #   2    1   exec-file first-file.bats
+  #   3    3    exec-test first-test
+  #   4    3      command-under-run
+  #   5    5    exec-test second-test
+  #   6    5      command-under-run
+  # - CTLR+C on the terminal will send sigint to pgid=1 
+  #   -> need to forward to (potentially parallel) exec-test groups 3 and 5
+  # - test timeouts need to send signal to all processes in the exec-test group.
+  #   However, we don't want to timeout other tests! -> only send to own group
+  (
+    # forward 
+     trap "bats_interrupt_process_group_of_childprocesses_of $$" SIGINT # forward sigint to exec-test
+     exec 1>&- 2>&- 3>&- 4>&-
+     sleep 86000 & # we assume tha
+     wait
+  )&
+  set -m # use job control to put everything under test run into own pgid
   if [[ "$num_jobs" != 1 && "${BATS_NO_PARALLELIZE_WITHIN_FILE-False}" == False ]]; then
     export BATS_SEMAPHORE_NUMBER_OF_SLOTS="$num_jobs"
     bats_run_tests_in_parallel "$BATS_RUN_TMPDIR/parallel_output" || bats_exec_file_status=1
@@ -350,6 +371,7 @@ bats_run_tests() {
       fi
     done
   fi
+  set +m
 }
 
 bats_create_file_tempdirs() {

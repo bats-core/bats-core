@@ -220,39 +220,6 @@ bats_timeout_trap() {
   exit 1
 }
 
-bats_get_child_processes_of() { # <parent-pid>
-  local -ri parent_pid=${1?}
-  {
-    read -ra header
-    local pid_col ppid_col
-    for ((i = 0; i < ${#header[@]}; ++i)); do
-      if [[ ${header[$i]} == "PID" ]]; then
-        pid_col=$i
-      fi
-      if [[ ${header[$i]} == "PPID" ]]; then
-        ppid_col=$i
-      fi
-    done
-    while read -ra row; do
-      if ((${row[$ppid_col]} == parent_pid)); then
-        printf "%d\n" "${row[$pid_col]}"
-      fi
-    done
-  } < <(ps -ef "$parent_pid")
-}
-
-bats_kill_childprocesses_of() { # <parent-pid>
-  local -ir parent_pid="${1?}"
-  if command -v pkill; then
-    pkill -P "$parent_pid"
-  else
-    # kill in reverse order (latest first)
-    while read -r pid; do
-      kill "$pid"
-    done < <(bats_get_child_processes_of "$parent_pid" | sort -r)
-  fi >/dev/null
-}
-
 # sets a timeout for this process
 #
 # using SIGABRT for interprocess communication.
@@ -278,10 +245,8 @@ bats_start_timeout_countdown() { # <timeout>
     # shellcheck disable=SC2064
     trap "kill $!; exit 0" ABRT
     wait
-    if kill -ABRT "$target_pid"; then
-      # get rid of signal blocking child processes (like sleep)
-      bats_kill_childprocesses_of "$target_pid"
-    fi &>/dev/null
+    trap '' ABRT # don'- react to below signal below (this proess is in the same group)
+    kill -ABRT -"$target_pid" &>/dev/null
   ) &
 }
 
