@@ -88,7 +88,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
-      - uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
         with:
           node-version: v18.20.2
       - run: npm pack ./
@@ -100,7 +100,10 @@ jobs:
         run: bats test --print-output-on-failure
 
   windows:
-    runs-on: windows-2019
+    strategy:
+      matrix:
+        os: ['windows-2022', 'windows-2025']
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       - name: Check failing tests fail suite,
@@ -112,11 +115,11 @@ jobs:
   npm_on_windows:
     strategy:
       matrix:
-        os: ['windows-2019']
+        os: ['windows-2022', 'windows-2025']
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
-      - uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
         with:
           node-version: v18.20.2
       - run: npm pack ./
@@ -163,7 +166,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
-      - uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
         with:
           node-version: v18.20.2
       - name: Install unbuffer via expect
@@ -244,6 +247,8 @@ jobs:
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       - uses: vmactions/freebsd-vm@848dac7e118679d08e2c2f9d42cd96608d834323 # v1.1.8
+        # this step usually takes ~4 minutes but sometimes hangs in the boot phase -> shorten feedback
+        timeout-minutes: 6
         with:
           prepare: pkg install -y bash parallel ${{ matrix.packages }}
           run: |

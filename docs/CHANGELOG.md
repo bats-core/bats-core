@@ -11,11 +11,22 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 
 ## [Unreleased]
 
+### Added 
+
+* use the [`syntax`](https://docs.docker.com/reference/dockerfile/#syntax) parser directive to declare the Dockerfile syntax version (#1127)
+* Negative test filtering via `--negative-filter` - tests matching the filter are *excluded* (#1114)
+* fail-fast flag `--abort` to stop test suite execution on first failure (#1155)
+
 ### Fixed
 
 * unset `output`, `stderr`, `lines`, `stderr_lines` at the start of `run` to avoid crosstalk 
   between successive invocations (#1105)
-* junit: XML escape fully removes ANSI sequences, e.g. color codes, cursor movements (#1103)
+* junit:
+  * XML escape fully removes ANSI sequences, e.g. color codes, cursor movements (#1103)
+  * fix retried tests being listed multiple times (#1150)
+* remove deprecated windows runner (#1119)
+* renamed `docker-compose.yml` to `compose.yaml` (#1128)
+* `bats_test_function`: don't require `--tags` to be sorted (#1158)
 
 ### Documentation
 

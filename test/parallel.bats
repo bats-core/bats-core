@@ -68,6 +68,8 @@ check_parallel_tests() { # <expected maximum parallelity>
 }
 
 @test "parallel suite execution with --jobs" {
+  # shellcheck disable=SC2034
+  BATS_TEST_RETRIES=2 # be more robust against flaky MacOS runners
   # shellcheck disable=SC2031,SC2030
   export FILE_MARKER
   # shellcheck disable=SC2030

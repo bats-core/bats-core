@@ -1,4 +1,4 @@
-/docker-compose.override.yml
+/compose.override.yaml
 /docs/build
 
 # npm

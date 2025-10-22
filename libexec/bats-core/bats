@@ -35,6 +35,7 @@ HELP_TEXT_HEADER
   <tests> is the path to a Bats test file, or the path to a directory
   containing Bats test files (ending with ".bats")
 
+  --abort                   Stop execution of suite on first failed test
   -c, --count               Count test cases without running any tests
   --code-quote-style <style>
                             A two character string of code quote delimiters
@@ -47,6 +48,7 @@ HELP_TEXT_HEADER
                               - custom: provide your own via defining bats_format_file_line_reference_custom
                                         with parameters <filename> <line>, store via `printf -v "$output"`
   -f, --filter <regex>      Only run tests that match the regular expression
+  --negative-filter <regex> Only run tests that do not match the regular expression
   --filter-status <status>  Only run tests with the given status in the last completed (no CTRL+C/SIGINT) run.
                             Valid <status> values are:
                               failed - runs tests that failed or were not present in the last run
@@ -190,6 +192,10 @@ while [[ "$#" -ne 0 ]]; do
     shift
     flags+=('-f' "$1")
     ;;
+  --negative-filter)
+    shift
+    flags+=('--negative-filter' "$1")
+    ;;
   -F | --formatter)
     shift
     # allow cat formatter to see extended output but don't advertise to users
@@ -233,6 +239,9 @@ while [[ "$#" -ne 0 ]]; do
   -T | --timing)
     flags+=('-T')
     formatter_flags+=('-T')
+    ;;
+  --abort)
+    flags+=('--abort')
     ;;
   # this flag is now a no-op, as it is the parallel default
   --parallel-preserve-environment) ;;

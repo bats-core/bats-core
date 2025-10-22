@@ -70,7 +70,6 @@ extract_tags() { # <tag_type/return_var> <tags-string>
 
 test_file="$1"
 test_tags=()
-# shellcheck disable=SC2034 # used in `bats_sort tags`/`extract_tags``
 file_tags=()
 line_number=0
 exit_code=0
@@ -93,15 +92,11 @@ IFS=,
         # avoid injecting non user code into tests
         lead=''
       fi
-      bats_append_arrays_as_args \
-        test_tags file_tags \
-        -- bats_sort tags
 
       # shellcheck disable=SC2154 # encoded_name is declare via bats_encode_test_name
-      printf 'bats_test_function --description %q  --tags "%s" -- %s;' "$name" "${tags[*]-}" "$encoded_name"
+      printf 'bats_test_function --description %q  --tags "%s" --tags "%s" -- %s;' "$name" "${test_tags[*]-}" "${file_tags[*]-}" "$encoded_name"
       printf '%s() { %s%s\n' "${encoded_name:?}" "$lead" "$body" || :
 
-      # shellcheck disable=SC2034 # used in `bats_sort tags`/`extract_tags`
       test_tags=() # reset test tags for next test
     else
       if [[ "$line" =~ $BATS_COMMENT_COMMAND_PATTERN ]]; then

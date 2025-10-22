@@ -3,8 +3,10 @@ set -e
 
 count_only_flag=''
 filter=''
+nfilter=''
 num_jobs=${BATS_NUMBER_OF_PARALLEL_JOBS:-1}
 parallel_binary_name=${BATS_PARALLEL_BINARY_NAME:-"parallel"}
+BATS_ABORT_ON_FAILURE=
 bats_no_parallelize_across_files=${BATS_NO_PARALLELIZE_ACROSS_FILES-}
 bats_no_parallelize_within_files=
 filter_status=''
@@ -46,6 +48,10 @@ while [[ "$#" -ne 0 ]]; do
   -x)
     flags+=('-x')
     ;;
+  --abort)
+    flags+=('--abort')
+    BATS_ABORT_ON_FAILURE=1
+    ;;
   --no-parallelize-across-files)
     bats_no_parallelize_across_files=1
     ;;
@@ -60,6 +66,10 @@ while [[ "$#" -ne 0 ]]; do
   --filter-tags)
     shift
     gather_tests_flags+=("--filter-tags" "$1")
+    ;;
+  --negative-filter)
+    shift
+    nfilter="$1"
     ;;
   --dummy-flag) ;;
 
@@ -128,7 +138,7 @@ fi
 
 # create file even if no tests are found so the `read` below won't fail
 touch "$TESTS_LIST_FILE"
-gather_tests_output=$(TESTS_LIST_FILE="$TESTS_LIST_FILE" filter="$filter" filter_status="$filter_status" bats-gather-tests "${gather_tests_flags[@]}" -- "$@")
+gather_tests_output=$(TESTS_LIST_FILE="$TESTS_LIST_FILE" filter="$filter" nfilter="$nfilter" filter_status="$filter_status" bats-gather-tests "${gather_tests_flags[@]}" -- "$@")
 test_count=$(grep -c ^ "$TESTS_LIST_FILE" || true) # don't fail here when there are no tests
 if [[ $gather_tests_output == focus_mode ]]; then
   focus_mode=1
@@ -155,13 +165,13 @@ fi
 trap 'BATS_INTERRUPTED=true' INT
 
 if [[ -n "$focus_mode" ]]; then
-  printf "WARNING: This test run only contains tests tagged \`bats:focus\`!\n"
+  printf "WARNING: This test run only contains tests tagged \`bats:focus\`!\n" >&2
 fi
 
 bats_exit_suite() {
 if [[ "$focus_mode" == 1 && $bats_exec_suite_status -eq 0 ]]; then
   if [[ ${BATS_NO_FAIL_FOCUS_RUN-} == 1 ]]; then
-    printf "WARNING: This test run only contains tests tagged \`bats:focus\`!\n"
+    printf "WARNING: This test run only contains tests tagged \`bats:focus\`!\n" >&2
   else
     printf "Marking test run as failed due to \`bats:focus\` tag. (Set \`BATS_NO_FAIL_FOCUS_RUN=1\` to disable.)\n" >&2
     bats_exec_suite_status=1
@@ -293,11 +303,15 @@ else
 fi
 
 if [[ "$num_jobs" -gt 1 ]] && [[ -z "$bats_no_parallelize_across_files" ]]; then
+  parallel_flags=(--keep-order --jobs "$num_jobs")
+  if (( BATS_ABORT_ON_FAILURE )); then
+    parallel_flags+=('--halt' 'now,fail=1')
+  fi
   # run files in parallel to get the maximum pool of parallel tasks
   # shellcheck disable=SC2086,SC2068
   # we need to handle the quoting of ${flags[@]} ourselves,
   # because parallel can only quote it as one
-  "${parallel_binary_name}" --keep-order --jobs "$num_jobs" -- "bats-exec-file" "$(printf "%q " "${flags[@]}")" "{#}" "{}" "$TESTS_LIST_FILE" <<< "$(printf "%s\n" "${BATS_UNIQUE_TEST_FILENAMES[@]}")" 2>&1 || bats_exec_suite_status=1
+  "${parallel_binary_name}" "${parallel_flags[@]}" -- "bats-exec-file" "$(printf "%q " "${flags[@]}")" "{#}" "{}" "$TESTS_LIST_FILE" <<< "$(printf "%s\n" "${BATS_UNIQUE_TEST_FILENAMES[@]}")" 2>&1 || bats_exec_suite_status=1
 else
   file_index=0
   for filename in "${BATS_UNIQUE_TEST_FILENAMES[@]}"; do
@@ -307,6 +321,9 @@ else
       break
     fi
     bats-exec-file "${flags[@]}" "$file_index" "$filename" "${TESTS_LIST_FILE}" || bats_exec_suite_status=1
+    if (( BATS_ABORT_ON_FAILURE && bats_exec_suite_status > 0 )); then
+      break
+    fi
   done
 fi
 
