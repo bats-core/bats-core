@@ -649,15 +649,12 @@ END_OF_ERR_MSG
 
   sleep 1 # wait for the signal to be acted upon
 
+  pstree -aspgl $$ || true # show additional info if available
   # when the process is gone, we cannot deliver a signal anymore, getting non-zero from kill
-  run kill -0 -- -$SUBPROCESS_PID
-  [[ $status -ne 0 ]] ||
-    (
-      kill -9 -- -$SUBPROCESS_PID
-      false
-    )
-  #   ^ kill the process for good when SIGINT failed,
-  #     to avoid waiting endlessly for stuck children to finish
+  if kill -9 -- $SUBPROCESS_PID; then
+    echo "error: subprocess $SUBPROCESS_PID still exists!"
+    false
+  fi
 }
 
 @test "test comment style" {
