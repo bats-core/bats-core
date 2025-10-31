@@ -210,7 +210,7 @@ trap bats_suite_exit_trap EXIT
 
 exec 3<&1
 
-# shellcheck disable=SC2317
+# shellcheck disable=SC2317,SC2329
 bats_suite_exit_trap() {
   local print_bats_out="${BATS_SHOW_OUTPUT_OF_SUCCEEDING_TESTS}"
   if [[ -z "${BATS_SETUP_SUITE_COMPLETED}" || -z "${BATS_TEARDOWN_SUITE_COMPLETED}" ]]; then
@@ -261,7 +261,7 @@ bats_run_teardown_suite() {
   fi
 }
 
-# shellcheck disable=SC2317
+# shellcheck disable=SC2317,SC2329
 bats_teardown_suite_trap() {
   bats_run_teardown_suite
   bats_suite_exit_trap

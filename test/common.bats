@@ -93,6 +93,7 @@
   run -0 bats_linear_reverse_search 3 three_elements_scrambled
 }
 
+# shellcheck disable=SC2031
 @test bats_sort {
   local -a empty one_element two_sorted two_elements_reversed three_elements_scrambled
 

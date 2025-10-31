@@ -213,7 +213,7 @@ bats_exit_trap() {
 # Marks the test as failed due to timeout.
 # The actual termination of subprocesses is done via pkill in the background
 # process in bats_start_timeout_countdown
-# shellcheck disable=SC2317
+# shellcheck disable=SC2317,SC2329
 bats_timeout_trap() {
   BATS_TIMED_OUT=1
   BATS_DEBUG_LAST_STACK_TRACE_IS_VALID=
@@ -250,14 +250,14 @@ bats_find_processes_of() { # <parent-pid>
     fi
     while read -ra row; do
       local -i ppid=${row[ppid_col]} pid=${row[$pid_col]}
-      if (( ppid == parent_pid)) || bats_linear_reverse_search $ppid child_pids; then
+      if (( ppid == parent_pid)) || bats_linear_reverse_search "$ppid" child_pids; then
         # exclude `ps` command substitution below
         if (( pid != BASHPID)); then
           child_pids+=("$pid")
         fi
       fi
     done
-  } < <(ps -eo pid,ppid,args)
+  } < <(ps -ef) # WSL does not support -o
 }
 
 # send signal to process and all its descendants
@@ -266,10 +266,6 @@ bats_kill_processes_of() { # <parent-pid> [<signal>]
   local -r signal=${2?}
   bats_find_processes_of "$parent_pid"
   kill "-$signal" "${child_pids[@]}"
-}
-
-echo_ppid() {
-  echo $PPID
 }
 
 # sets a timeout for this process

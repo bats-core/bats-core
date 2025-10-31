@@ -22,12 +22,14 @@ function should_be_found_with_function_parens_and_whitespace() { #@test
   true
 }
 
+# shellcheck disable=SC2329
 should_not_be_found() {
   # shellcheck disable=SC2317
   false
   #@test
 }
 
+# shellcheck disable=SC2329
 should_not_be_found() {
   # shellcheck disable=SC2317
   false

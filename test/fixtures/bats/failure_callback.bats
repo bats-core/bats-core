@@ -1,3 +1,4 @@
+# shellcheck disable=SC2329
 bats::on_failure() {
     # shellcheck disable=SC2317
     echo "called failure callback"
