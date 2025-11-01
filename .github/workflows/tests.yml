@@ -32,7 +32,7 @@ jobs:
   failsafe:
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       - name: Check failing tests fail suite,
         run: "! bin/bats test/fixtures/bats/failing.bats"
 
@@ -129,7 +129,7 @@ jobs:
   macos:
     strategy:
       matrix:
-        os: ['macos-13', 'macos-14', 'macos-15']
+        os: ['macos-14', 'macos-15']
         env_vars:
           - ''
           # allow for some parallelity without GNU parallel, since it is not installed by default
@@ -217,7 +217,7 @@ jobs:
           mkdir test-results/
           time bats test --print-output-on-failure --report-formatter junit --output test-results
       - name: Publish Test Results
-        uses: EnricoMi/publish-unit-test-result-action@v2
+        uses: EnricoMi/publish-unit-test-result-action@34d7c956a59aed1bfebf31df77b8de55db9bbaaf # v2.21.0
         if: always()
         with:
           files: |
@@ -246,12 +246,10 @@ jobs:
           - ""
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
-      - uses: vmactions/freebsd-vm@848dac7e118679d08e2c2f9d42cd96608d834323 # v1.1.8
-        # this step usually takes ~4 minutes but sometimes hangs in the boot phase -> shorten feedback
-        timeout-minutes: 6
+      - uses: acj/freebsd-firecracker-action@a5a3fc1709c5b5368141a5699f10259aca3cd965 # v0.6.0
         with:
-          prepare: pkg install -y bash parallel ${{ matrix.packages }}
-          run: |
+          run-in-vm: |
+            pkg install -y bash parallel ${{ matrix.packages }}
             time ./bin/bats --print-output-on-failure test/
 
   find_broken_symlinks:
