@@ -129,7 +129,7 @@ jobs:
   macos:
     strategy:
       matrix:
-        os: ['macos-13', 'macos-14', 'macos-15']
+        os: ['macos-14', 'macos-15']
         env_vars:
           - ''
           # allow for some parallelity without GNU parallel, since it is not installed by default
