@@ -257,7 +257,8 @@ bats_find_processes_of() { # <parent-pid>
         fi
       fi
     done
-  } < <(ps -ef) # WSL does not support -o
+  # MSYS does not support -o and rows are not sorted by pid
+  } < <(ps -Ao pid,ppid,args 2>/dev/null || { ps -ef | sort -k 2 -h; })
 }
 
 # send signal to process and all its descendants
@@ -269,18 +270,11 @@ bats_kill_processes_of() { # <parent-pid> [<signal>]
 }
 
 # sets a timeout for this process
-#
-# using SIGABRT for interprocess communication.
-# Ruled out:
-# USR1/2 - not available on Windows
-# SIGALRM - interferes with sleep:
-#           "sleep(3) may be implemented using SIGALRM; mixing calls to alarm()
-#           and sleep(3) is a bad idea." ~ https://linux.die.net/man/2/alarm
 bats_start_timeout_countdown() { # <timeout>
   local -ri timeout=$1
   local -ri target_pid=$$
   # shellcheck disable=SC2064
-  trap "bats_timeout_trap $target_pid" ABRT
+  trap "bats_timeout_trap $target_pid" TERM
   if ! (command -v ps || command -v pkill) >/dev/null; then
     printf "Error: Cannot execute timeout because neither pkill nor ps are available on this system!\n" >&2
     exit 1
@@ -291,16 +285,16 @@ bats_start_timeout_countdown() { # <timeout>
     # sleep won't receive signals, so we use wait below
     # and kill sleep explicitly when signalled to do so
     # shellcheck disable=SC2064
-    trap "kill $!; exit 0" ABRT
+    trap "kill $!; exit 0" TERM
     wait
-    trap '' ABRT # don'- react to below signal below (this proess is in the same group)
-    bats_kill_processes_of $target_pid ABRT
+    trap '' TERM
+    bats_kill_processes_of $target_pid TERM
   ) &
 }
 
-bats_abort_timeout_countdown() {
+bats_abort_timeout_countdown() { # <pid of timeout background process>
   # kill the countdown process, don't care if its still there
-  kill -ABRT "$1" &>/dev/null || true
+  kill "$1" &>/dev/null || true
 }
 
 
