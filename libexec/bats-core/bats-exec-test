@@ -89,11 +89,6 @@ bats_teardown_trap() {
   bats_check_status_from_trap
   local bats_teardown_trap_status=0
 
-  # `bats_teardown_trap` is always called with one parameter (BATS_TEARDOWN_STARTED)
-  # The second parameter is optional and corresponds for to the killer pid
-  # that will be forwarded to the exit trap to kill it if necessary
-  local killer_pid=${2:-}
-
   bats_set_stacktrace_limit
 
   # mark the start of this function to distinguish where skip is called
@@ -109,7 +104,7 @@ bats_teardown_trap() {
     BATS_ERROR_STATUS="$bats_teardown_trap_status"
   fi
 
-  bats_exit_trap "$killer_pid"
+  bats_exit_trap
 }
 
 # shellcheck source=lib/bats-core/common.bash
@@ -118,11 +113,10 @@ source "$BATS_ROOT/$BATS_LIBDIR/bats-core/common.bash"
 bats_exit_trap() {
   local status
   local exit_metadata=''
-  local killer_pid=${1:-}
   trap - ERR EXIT
   if [[ -n "${BATS_TEST_TIMEOUT:-}" ]]; then
     # Kill the watchdog in the case of of kernel finished before the timeout
-    bats_abort_timeout_countdown "$killer_pid" || status=1
+    bats_abort_timeout_countdown || status=1
   fi
 
   if [[ -n "$BATS_TEST_SKIPPED" ]]; then
@@ -281,9 +275,11 @@ bats_start_timeout_countdown() { # <timeout>
   fi
   # Start another process to kill the children of this process
   (
-    sleep "$timeout" &
-    # sleep won't receive signals, so we use wait below
-    # and kill sleep explicitly when signalled to do so
+    # with sleep in foreground this shell wouldn't receive signals,
+    # so we use wait below and kill sleep explicitly when signalled to do so
+    # On Windows the TERM signal does not seem to shut down sleep -> 
+    # close all fds to avoid blocking IO when sleep does not turn off
+    (eval exec {0..255}">&-"; sleep "$timeout") &
     # shellcheck disable=SC2064
     trap "kill $!; exit 0" TERM
     wait
@@ -292,9 +288,9 @@ bats_start_timeout_countdown() { # <timeout>
   ) &
 }
 
-bats_abort_timeout_countdown() { # <pid of timeout background process>
+bats_abort_timeout_countdown() {
   # kill the countdown process, don't care if its still there
-  kill "$1" &>/dev/null || true
+  kill "$BATS_killer_pid" &>/dev/null || true
 }
 
 
@@ -337,10 +333,9 @@ bats_perform_test() {
     }
   fi
 
-  local BATS_killer_pid=''
   if [[ -n "${BATS_TEST_TIMEOUT:-}" ]]; then
     bats_start_timeout_countdown "$BATS_TEST_TIMEOUT"
-    BATS_killer_pid=$!
+    declare -r BATS_killer_pid=$!
   fi
   BATS_TEST_COMPLETED=
   BATS_TEST_SKIPPED=${BATS_TEST_SKIPPED-}
@@ -349,7 +344,7 @@ bats_perform_test() {
   bats_setup_tracing
   # use parameter to mark this call as trap call
   # shellcheck disable=SC2064
-  trap "bats_teardown_trap as-exit-trap $BATS_killer_pid" EXIT
+  trap "bats_teardown_trap as-exit-trap" EXIT
 
   if [[ -n "$BATS_EXTENDED_SYNTAX" ]]; then
     printf 'begin %d %s\n' "$BATS_SUITE_TEST_NUMBER" "${BATS_TEST_NAME_PREFIX:-}$BATS_TEST_DESCRIPTION" >&3
@@ -364,8 +359,8 @@ bats_perform_test() {
 
   BATS_TEST_COMPLETED=1
   # shellcheck disable=SC2064
-  trap "bats_exit_trap $BATS_killer_pid" EXIT
-  bats_teardown_trap "" "$BATS_killer_pid" # pass empty parameter to signify call outside trap
+  trap "bats_exit_trap" EXIT
+  bats_teardown_trap "" # pass empty parameter to signify call outside trap
 }
 
 trap bats_interrupt_trap INT
