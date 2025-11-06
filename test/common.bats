@@ -69,6 +69,31 @@
 
 }
 
+@test bats_linear_reverse_search {
+  bats_require_minimum_version 1.5.0
+  # shellcheck disable=SC2030
+  local -a empty one_element=(1) two_sorted=(1 2) two_elements_reversed=(2 1) three_elements_scrambled=(2 1 3)
+
+  run -1 bats_linear_reverse_search 0 empty
+
+  run -1 bats_linear_reverse_search 0 one_element
+  run -0 bats_linear_reverse_search 1 one_element
+
+  run -1 bats_linear_reverse_search 0 two_sorted
+  run -0 bats_linear_reverse_search 1 two_sorted
+  run -0 bats_linear_reverse_search 2 two_sorted
+
+  run -1 bats_linear_reverse_search 0 two_elements_reversed
+  run -0 bats_linear_reverse_search 1 two_elements_reversed
+  run -0 bats_linear_reverse_search 2 two_elements_reversed
+
+  run -1 bats_linear_reverse_search 0 three_elements_scrambled
+  run -0 bats_linear_reverse_search 1 three_elements_scrambled
+  run -0 bats_linear_reverse_search 2 three_elements_scrambled
+  run -0 bats_linear_reverse_search 3 three_elements_scrambled
+}
+
+# shellcheck disable=SC2031
 @test bats_sort {
   local -a empty one_element two_sorted two_elements_reversed three_elements_scrambled
 

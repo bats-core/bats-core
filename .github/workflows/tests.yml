@@ -110,7 +110,7 @@ jobs:
         run: bash -c "! bin/bats test/fixtures/bats/failing.bats"
       - run: |
           bash --version
-          bash -c "time bin/bats  --print-output-on-failure --formatter tap test"
+          bash -c "time bin/bats -T --print-output-on-failure --formatter tap test"
 
   npm_on_windows:
     strategy:
@@ -162,7 +162,7 @@ jobs:
   npm_on_macos:
     strategy:
       matrix:
-        os: ['macos-13', 'macos-14', 'macos-15']
+        os: ['macos-14', 'macos-15']
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1

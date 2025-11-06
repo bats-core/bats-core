@@ -1514,14 +1514,14 @@ END_OF_ERR_MSG
 
   [ "${lines[0]}" = 1..3 ]
   [ "${lines[1]}" = 'not ok 1 failure callback is called on failure' ]
-  [ "${lines[2]}" = "# (in test file $RELATIVE_FIXTURE_ROOT/failure_callback.bats, line 7)" ]
+  [ "${lines[2]}" = "# (in test file $RELATIVE_FIXTURE_ROOT/failure_callback.bats, line 8)" ]
   [ "${lines[3]}" = "#   \`false' failed" ]
   [ "${lines[4]}" = "# called failure callback" ]
   [ "${lines[5]}" = 'ok 2 failure callback is not called on success' ]
   [ "${lines[6]}" = '# passed' ]
   # this test should not contain: called failure callback
   [ "${lines[7]}" = 'not ok 3 failure callback can be overridden locally' ]
-  [ "${lines[8]}" = "# (in test file $RELATIVE_FIXTURE_ROOT/failure_callback.bats, line 18)" ]
+  [ "${lines[8]}" = "# (in test file $RELATIVE_FIXTURE_ROOT/failure_callback.bats, line 19)" ]
   [ "${lines[9]}" = "#   \`false' failed" ]
   [ "${lines[10]}" = "# override failure callback" ]
   [ ${#lines[@]} -eq 11 ]

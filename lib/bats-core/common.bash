@@ -65,6 +65,22 @@ bats_require_minimum_version() { # <required version>
   fi
 }
 
+# returns 0 when search-value is found in array
+bats_linear_reverse_search() { # <search-value> <array-name>
+  local -r search_value=$1 array_name=$2
+  eval "local -ri array_length=\${#${array_name}[@]}"
+  # shellcheck disable=SC2154
+  for ((i=array_length - 1; i >=0; --i)); do
+    eval "local value=\"\${${array_name}[i]}\""
+    # shellcheck disable=SC2154
+    if [[ $value == "$search_value" ]]; then
+      return 0
+    fi
+  done
+  return 1
+}
+
+# returns 0 when search-value is found in array
 bats_binary_search() { # <search-value> <array-name>
   if [[ $# -ne 2 ]]; then
     printf "ERROR: bats_binary_search requires exactly 2 arguments: <search value> <array name>\n" >&2
