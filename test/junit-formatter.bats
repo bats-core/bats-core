@@ -171,3 +171,13 @@ TESTSUITES_REGEX="<testsuites time=\"$FLOAT_REGEX\">"
   [[ "${lines[10]}" == '    </testcase>' ]]
   [[ "${lines[11]}" == '</testsuite>' ]]
 }
+
+@test "don't choke on setup_suite errors (issue #1106)" {
+  bats_require_minimum_version 1.5.0
+  local stderr='' # silence shellcheck
+  reentrant_run -1 --separate-stderr bats --formatter junit "$FIXTURE_ROOT/../suite_setup_teardown/error_in_setup_suite/test.bats"
+  [ "${stderr}" == "" ]
+  [[ "${lines[2]}" == '<testsuite name="setup_suite" '*'>' ]]
+  [[ "${lines[3]}" == '    <testcase classname="setup_suite" '*'>' ]]
+  [[ "${lines[5]}" == *'call-to-undefined-command'* ]]
+}
