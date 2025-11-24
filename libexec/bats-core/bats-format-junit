@@ -4,18 +4,6 @@ set -euo pipefail
 # shellcheck source=lib/bats-core/formatter.bash
 source "$BATS_ROOT/$BATS_LIBDIR/bats-core/formatter.bash"
 
-BASE_PATH=.
-
-while [[ "$#" -ne 0 ]]; do
-  case "$1" in
-  --base-path)
-    shift
-    normalize_base_path BASE_PATH "$1"
-    ;;
-  esac
-  shift
-done
-
 init_suite() {
   suite_test_exec_time=0
   # since we have to print the suite header before its contents but we don't know the contents before the header,
@@ -24,7 +12,6 @@ init_suite() {
   test_result_state="" # declare for the first flush, when no test has been encountered
 }
 
-_buffer_log=
 init_file() {
   file_count=0
   file_failures=0
@@ -97,8 +84,8 @@ print_test_case() {
   fi
 }
 
-xml_escape() {
-  output=${1//&/\&amp;}
+xml_escape() { # <string to escape>
+  local output=${1//&/\&amp;}
   output=${output//</\&lt;}
   output=${output//>/\&gt;}
   output=${output//'"'/\&quot;}
@@ -168,7 +155,7 @@ $1"
 }
 
 finish_file() {
-  if [[ "${class-JUNIT_FORMATTER_NO_FILE_ENCOUNTERED}" != JUNIT_FORMATTER_NO_FILE_ENCOUNTERED ]]; then
+  if [[ "${class}" != JUNIT_FORMATTER_NO_FILE_ENCOUNTERED ]]; then
     file_header
     printf "%s\n" "${_buffer}"
     file_footer
@@ -188,10 +175,6 @@ finish_suite() {
 bats_tap_stream_plan() { #  <number of tests>
   :
 }
-
-init_suite
-trap finish_suite EXIT
-trap '' INT
 
 bats_tap_stream_begin() { # <test index> <test name>
   flush_log
@@ -259,4 +242,44 @@ bats_tap_stream_unknown() { # <full line>
   :
 }
 
-bats_parse_internal_extended_tap
+main() {
+  local _buffer_log="" \
+        name="" \
+        class="JUNIT_FORMATTER_NO_FILE_ENCOUNTERED" \
+        _buffer="" \
+        _buffer_log="" \
+        _suite_buffer="" \
+        _system_out_log="" \
+        test_result_state="" \
+        test_skip_message=""
+
+  local -i file_count=0 \
+            file_failures=0 \
+            file_skipped=0 \
+            file_exec_time=0 \
+            test_exec_time=0 \
+            suite_test_exec_time=0 
+
+  local BASE_PATH=.
+
+  while [[ "$#" -ne 0 ]]; do
+    case "$1" in
+    --base-path)
+      shift
+      normalize_base_path BASE_PATH "$1"
+      ;;
+    esac
+    shift
+  done
+
+  init_suite
+  trap finish_suite EXIT
+  trap '' INT
+
+  bats_parse_internal_extended_tap
+
+  trap - EXIT
+  finish_suite # ensure we run this with the local variables still in scope
+}
+
+main "$@"

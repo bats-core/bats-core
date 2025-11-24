@@ -11,6 +11,10 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 
 ## [Unreleased]
 
+### Fixed
+
+* avoid interference from env to junit formatter internals (#1175)
+
 ## [1.13.0] - 2025-11-07
 
 ### Added 
