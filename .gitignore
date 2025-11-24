@@ -8,3 +8,6 @@
 test/.bats/run-logs/
 # scratch file that should never be committed
 /test.bats
+/test2/
+report.xml
+report.log
