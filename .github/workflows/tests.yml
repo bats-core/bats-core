@@ -1,7 +1,16 @@
 name: Tests
 
 # Controls when the action will run.
-on: [push, pull_request, workflow_dispatch]
+on:
+  pull_request:
+    branches:
+      - main
+      - master
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
 
 permissions:
   contents: read
