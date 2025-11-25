@@ -158,6 +158,14 @@ TESTSUITES_REGEX="<testsuites time=\"$FLOAT_REGEX\">"
   [[ "${output}" == *'teardown_suite fd3'* ]]
 }
 
+@test "skipped tests report output in <system-out> when using --show-output-of-passing-tests (issue #1190)" {
+  bats_require_minimum_version 1.5.0
+  reentrant_run bats --formatter junit --show-output-of-passing-tests "$FIXTURE_ROOT/issue_1190.bats"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *'<system-out>output</system-out>'* ]]
+  [[ "$output" != '<system-err>' ]]
+}
+
 @test "don't choke on setup_file errors" {
   bats_require_minimum_version 1.5.0
   local stderr='' # silence shellcheck
