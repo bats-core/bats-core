@@ -16,6 +16,7 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 * junit formatter: 
   * avoid interference between env and internals (#1175)
   * remove control characters (\x00-\x08\x0B\x0C\x0E-\x1F) (#1176)
+* fix(junit-formatter): skipped tests reported as failures (#1177)
 
 ## [1.13.0] - 2025-11-07
 
