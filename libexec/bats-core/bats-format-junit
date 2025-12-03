@@ -20,7 +20,7 @@ init_file() {
   test_exec_time=0
   name=""
   _buffer=""
-  _buffer_log=""
+  _system_err_log=""
   _system_out_log=""
   test_result_state="" # mark that no test has run in this file so far
 }
@@ -53,12 +53,12 @@ suite_header() {
 
 file_header() {
   timestamp=$(date -u +"%Y-%m-%dT%H:%M:%S")
-  printf "<testsuite name=\"%s\" tests=\"%s\" failures=\"%s\" errors=\"0\" skipped=\"%s\" time=\"%s\" timestamp=\"%s\" hostname=\"%s\">\n" \
+  printf "  <testsuite name=\"%s\" tests=\"%s\" failures=\"%s\" errors=\"0\" skipped=\"%s\" time=\"%s\" timestamp=\"%s\" hostname=\"%s\">\n" \
     "$(xml_escape "${class}")" "${file_count}" "${file_failures}" "${file_skipped}" "$(milliseconds_to_seconds "${file_exec_time}")" "${timestamp}" "$(host)"
 }
 
 file_footer() {
-  printf "</testsuite>\n"
+  printf "  </testsuite>\n"
 }
 
 suite_footer() {
@@ -66,19 +66,32 @@ suite_footer() {
 }
 
 print_test_case() {
-  if [[ "$test_result_state" == ok && -z "$_system_out_log" && -z "$_buffer_log" ]]; then
+  if [[ "$test_result_state" == ok && -z "$_system_out_log" && -z "$_system_err_log" ]]; then
     # pass and no output can be shortened
     printf "    <testcase classname=\"%s\" name=\"%s\" time=\"%s\" />\n" "$(xml_escape "${class}")" "$(xml_escape "${name}")" "$(milliseconds_to_seconds "${test_exec_time}")"
   else
     printf "    <testcase classname=\"%s\" name=\"%s\" time=\"%s\">\n" "$(xml_escape "${class}")" "$(xml_escape "${name}")" "$(milliseconds_to_seconds "${test_exec_time}")"
     if [[ -n "$_system_out_log" ]]; then
-      printf "        <system-out>%s</system-out>\n" "$(xml_escape "${_system_out_log}")"
+      printf "      <system-out>%s</system-out>\n" "$(xml_escape "${_system_out_log}")"
     fi
-    if [[ -n "$_buffer_log" || "$test_result_state" == not_ok ]]; then
-      printf "        <failure type=\"failure\">%s</failure>\n" "$(xml_escape "${_buffer_log}")"
+    if [[ "$test_result_state" == not_ok ]]; then # Failed tests need a <failure> element.
+      # If we have system err output, we use that as the failure text.
+      if [[ -n "$_system_err_log" ]]; then
+        printf "      <failure type=\"failure\">%s</failure>\n" "$(xml_escape "${_system_err_log}")"
+      else
+        printf "      <failure type=\"failure\"/>\n"
+      fi
+    else
+      if [[ -n "$_system_err_log" ]]; then
+        printf "      <system-err>%s</system-err>\n" "$(xml_escape "${_system_err_log}")"
+      fi
     fi
     if [[ "$test_result_state" == skipped ]]; then
-      printf "        <skipped>%s</skipped>\n" "$(xml_escape "$test_skip_message")"
+      if [[ -n "$test_skip_message" ]]; then
+        printf "      <skipped>%s</skipped>\n" "$(xml_escape "$test_skip_message")"
+      else
+        printf "      <skipped/>\n"
+      fi
     fi
     printf "    </testcase>\n"
   fi
@@ -127,12 +140,12 @@ flush() {
   _buffer=""
 }
 
-log() {
-  if [[ -n "$_buffer_log" ]]; then
-    _buffer_log="${_buffer_log}
+log_system_err() {
+  if [[ -n "$_system_err_log" ]]; then
+    _system_err_log="${_system_err_log}
 $1"
   else
-    _buffer_log="$1"
+    _system_err_log="$1"
   fi
 }
 
@@ -140,7 +153,7 @@ flush_log() {
   if [[ -n "$test_result_state" ]]; then
     buffer print_test_case
   fi
-  _buffer_log=""
+  _system_err_log=""
   _system_out_log=""
   test_result_state="" # Clean out result from last test. Retried tests will have multiple begin calls.
 }
@@ -157,7 +170,7 @@ $1"
 finish_file() {
   if [[ "${class}" != JUNIT_FORMATTER_NO_FILE_ENCOUNTERED ]]; then
     file_header
-    printf "%s\n" "${_buffer}"
+    printf "%s" "${_buffer}"
     file_footer
     class=''
     name=''
@@ -226,7 +239,7 @@ bats_tap_stream_comment() { # <comment text without leading '# '> <scope>
     ;;
   *)
     # everything else is considered error output
-    log "$1"
+    log_system_err "$1"
     ;;
   esac
 }
@@ -239,15 +252,16 @@ bats_tap_stream_suite() { # <file name>
 }
 
 bats_tap_stream_unknown() { # <full line>
-  :
+  local line="$1" scope="$2"
+  log_system_out "$line"
 }
 
 main() {
-  local _buffer_log="" \
+  local \
         name="" \
         class="JUNIT_FORMATTER_NO_FILE_ENCOUNTERED" \
         _buffer="" \
-        _buffer_log="" \
+        _system_err_log="" \
         _suite_buffer="" \
         _system_out_log="" \
         test_result_state="" \
@@ -282,6 +296,4 @@ main() {
   finish_suite # ensure we run this with the local variables still in scope
 }
 
-# [\x00-\x08\x0B\x0C\x0E-\x1F] can't use $'\x00' as this terminates the string early
-BATS_JUNIT_FORMATTER_DELETE_CHARS_DEFAULT='\000'$'\x01\x02\x03\x04\x05\x06\x07\x08\x0B\x0C\x0E\x0F\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1A\x1B\x1C\x1D\x1E\x1F'
-main "$@" | tr -d "${BATS_JUNIT_FORMATTER_DELETE_CHARS-$BATS_JUNIT_FORMATTER_DELETE_CHARS_DEFAULT}"
+main "$@"
