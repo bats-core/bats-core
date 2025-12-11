@@ -6,12 +6,12 @@ function setup_file() {
 }
 
 function teardown_file() {
-  echo "Teardown_file stdout"
-  echo "# Hash Teardown_file stdout"
-  echo "Teardown_file stderr" >&2
-  echo "# Hash Teardown_file stderr" >&2
-  echo "Teardown_file fd3" >&3
-  echo "# Hash Teardown_file fd3" >&3
+  echo "normal teardown_file stdout"
+  echo "# Hash teardown_file stdout"
+  echo "normal teardown_file stderr" >&2
+  echo "# Hash teardown_file stderr" >&2
+  echo "normal teardown_file fd3" >&3
+  echo "# Hash teardown_file fd3" >&3
 }
 
 @test "skipped-and-junit-agrees" {
