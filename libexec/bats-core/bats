@@ -274,6 +274,11 @@ while [[ "$#" -ne 0 ]]; do
   --gather-test-outputs-in)
     shift
     output_dir="$1"
+    # Convert relative path to absolute to handle tests that change directory
+    # This ensures the path remains valid even if tests use 'cd'
+    if [[ $output_dir != /* ]]; then
+        output_dir="$PWD/$output_dir"
+    fi
     if [ -d "$output_dir" ]; then
       if ! find "$output_dir" -mindepth 1 -exec false {} + 2>/dev/null; then
         abort --no-print-usage "Directory '$output_dir' must be empty for --gather-test-outputs-in"
