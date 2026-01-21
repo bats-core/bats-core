@@ -92,6 +92,24 @@ setup() {
   [ "${lines[3]}" = "#   \`eval \"( exit \${STATUS:-1} )\"' failed" ]
 }
 
+@test "one failing test with condition then true" {
+  reentrant_run bats "$FIXTURE_ROOT/failing_with_bash_cond_then_true.bats"
+  [ $status -eq 1 ]
+  [ "${lines[0]}" = '1..1' ]
+  [ "${lines[1]}" = 'not ok 1 a failing test' ]
+  [ "${lines[2]}" = "# (in test file $RELATIVE_FIXTURE_ROOT/failing_with_bash_cond_then_true.bats, line 3)" ]
+  [ "${lines[3]}" = "#   \`[[ 1 == 2 ]]' failed" ]
+}
+
+@test "one failing test with expression then true" {
+  reentrant_run bats "$FIXTURE_ROOT/failing_with_bash_expression_then_true.bats"
+  [ $status -eq 1 ]
+  [ "${lines[0]}" = '1..1' ]
+  [ "${lines[1]}" = 'not ok 1 a failing test' ]
+  [ "${lines[2]}" = "# (in test file $RELATIVE_FIXTURE_ROOT/failing_with_bash_expression_then_true.bats, line 2)" ]
+  [ "${lines[3]}" = "#   \`(( 1 == 2 ))' failed" ]
+}
+
 @test "one failing and one passing test" {
   reentrant_run bats "$FIXTURE_ROOT/failing_and_passing.bats"
   [ $status -eq 1 ]
@@ -1535,7 +1553,7 @@ END_OF_ERR_MSG
   [ "${lines[0]}" = 1..1 ]
   [ "${lines[1]}" = 'not ok 1 setup_file failed' ]
   [ "${lines[2]}" = "# (from function \`setup_file' in test file $RELATIVE_FIXTURE_ROOT/failure_callback_setup_file.bats, line 6)" ]
-  [ "${lines[3]}" = "#   \`false' failed" ] 
+  [ "${lines[3]}" = "#   \`false' failed" ]
   [ "${lines[4]}" = '# failure callback' ]
   [ ${#lines[@]} -eq 5 ]
 }
@@ -1623,7 +1641,7 @@ END_OF_ERR_MSG
 
   [ "${lines[0]}" = '1..5' ]
   [ "${lines[1]}" = 'not ok 1 failing' ] # the provoking test should always be printed!
-  
+
   # we should not reach the test that creates this file
   # shellcheck disable=SC2314
   ! cat "$MARKER_FILE"
