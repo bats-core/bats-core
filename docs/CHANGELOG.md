@@ -17,6 +17,10 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
   * avoid interference between env and internals (#1175)
   * remove control characters (\x00-\x08\x0B\x0C\x0E-\x1F) (#1176)
 
+### Changed
+
+* update the default version of the `bash` Docker image to 5.3 in `devcontainer` (#1184)
+
 ## [1.13.0] - 2025-11-07
 
 ### Added 
