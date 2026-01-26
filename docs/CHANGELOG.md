@@ -21,6 +21,10 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 
 * update the default version of the `bash` Docker image to 5.3 in `devcontainer` (#1184)
 
+### Documentation
+
+* added section about dynamic test registration (#1187)
+
 ## [1.13.0] - 2025-11-07
 
 ### Added 
