@@ -1154,6 +1154,27 @@ END_OF_ERR_MSG
   [ -e "$OUTPUT_DIR/1-test with %2F in %2F name.log" ]
 }
 
+@test "--gather-test-outputs-in works with tests that change directory" {
+  bats_require_minimum_version 1.5.0
+
+  # Test with relative path (the bug case from issue #1132)
+  # The test fixture changes directory, which would break relative paths
+  local relative_output_dir="relative-out"
+  rm -rf "$relative_output_dir"
+
+  reentrant_run -0 bats --gather-test-outputs-in "$relative_output_dir" "$FIXTURE_ROOT/cd_in_test.bats"
+
+  # Verify the output file was created despite the test changing directory
+  [ -f "$relative_output_dir/1-test_that_does_cd.log" ]
+
+  # Verify the content is correct
+  OUTPUT=$(<"$relative_output_dir/1-test_that_does_cd.log")
+  [ "$OUTPUT" == "yey from test directory" ]
+
+  # Cleanup
+  rm -rf "$relative_output_dir"
+}
+
 @test "Tell about missing flock and shlock" {
   if ! command -v parallel; then
     skip "this test requires GNU parallel to be installed"
