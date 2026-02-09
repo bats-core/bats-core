@@ -121,6 +121,57 @@ function invoking_foo_without_arguments_prints_usage { #@test
 When using this syntax, the function name will be the title in the result output
 and the value checked when using `--filter`.
 
+## Dynamic test registration via `bats_test_function`
+
+Due to the way BATS preprocesses its scripts, the following won't work:
+
+```bash
+for i in 1 2 3 ; do
+  @test "$i is equal to 1" {
+    [ "$1" == 1 ]
+  }
+done
+```
+
+The correct way is to define a function that accepts an argument:
+
+```bash
+test_body() {
+  [ "$1" == 1 ]
+}
+```
+
+and then use `bats_test_function` to register calls to it:
+
+```bash
+for i in 1 2 3 ; do
+  bats_test_function --description "$i is equal to 1" --tags test:$i -- test_body $i
+done
+```
+
+giving us the following output:
+
+```
+ ✓ 1 is equal to 1
+ ✗ 2 is equal to 1
+   (from function `test_body' in test file test.bats, line 2)
+     `[ "$1" == 1 ]' failed
+ ✗ 3 is equal to 1
+   (from function `test_body' in test file test.bats, line 2)
+     `[ "$1" == 1 ]' failed
+
+3 tests, 2 failures
+```
+
+Note that the body of the `for` loop uses `$i` but the `test_body` function uses `$1`.
+
+```
+bats_test_function [--tags <tags>...] [--description <description>] -- [test command...]
+
+  --tags <tags...>            comma separated list of tags to apply to the test
+  --description <description> text to display as name in result output
+```
+
 ## `run`: Test other commands
 
 Many Bats tests need to run a command and then make assertions about its exit

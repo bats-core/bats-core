@@ -659,3 +659,4 @@ From now on, our test should clean up after itself.
 .. note:: 
 
     `teardown_file` will run regardless of tests failing or succeeding.
+
