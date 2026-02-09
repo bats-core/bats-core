@@ -74,8 +74,13 @@ print_test_case() {
     if [[ -n "$_system_out_log" ]]; then
       printf "        <system-out>%s</system-out>\n" "$(xml_escape "${_system_out_log}")"
     fi
-    if [[ -n "$_buffer_log" || "$test_result_state" == not_ok ]]; then
+    if [[ "$test_result_state" == not_ok ]]; then # Failed tests need a <failure> element.
+      # If we have system err output, we use that as the failure text.
       printf "        <failure type=\"failure\">%s</failure>\n" "$(xml_escape "${_buffer_log}")"
+    else
+      if [[ -n "$_buffer_log" ]]; then
+        printf "        <system-err>%s</system-err>\n" "$(xml_escape "${_buffer_log}")"
+      fi
     fi
     if [[ "$test_result_state" == skipped ]]; then
       printf "        <skipped>%s</skipped>\n" "$(xml_escape "$test_skip_message")"
@@ -127,7 +132,7 @@ flush() {
   _buffer=""
 }
 
-log() {
+log_system_err() {
   if [[ -n "$_buffer_log" ]]; then
     _buffer_log="${_buffer_log}
 $1"
@@ -157,7 +162,7 @@ $1"
 finish_file() {
   if [[ "${class}" != JUNIT_FORMATTER_NO_FILE_ENCOUNTERED ]]; then
     file_header
-    printf "%s\n" "${_buffer}"
+    printf "%s" "${_buffer}"
     file_footer
     class=''
     name=''
@@ -226,7 +231,7 @@ bats_tap_stream_comment() { # <comment text without leading '# '> <scope>
     ;;
   *)
     # everything else is considered error output
-    log "$1"
+    log_system_err "$1"
     ;;
   esac
 }
@@ -239,7 +244,8 @@ bats_tap_stream_suite() { # <file name>
 }
 
 bats_tap_stream_unknown() { # <full line>
-  :
+  local line="$1" scope="$2"
+  log_system_out "$line"
 }
 
 main() {

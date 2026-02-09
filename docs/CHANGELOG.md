@@ -16,6 +16,7 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 * junit formatter: 
   * avoid interference between env and internals (#1175)
   * remove control characters (\x00-\x08\x0B\x0C\x0E-\x1F) (#1176)
+  * don't report (skipped) last test as failed when `teardown_suite` generates FD3 output (#1181s)
 * fix failures with `--gather-test-outputs-in` when tests change directory (#1183)
 
 ### Changed

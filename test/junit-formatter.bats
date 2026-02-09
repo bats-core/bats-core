@@ -149,6 +149,15 @@ TESTSUITES_REGEX="<testsuites time=\"$FLOAT_REGEX\">"
   [[ "${lines[7]}" == '</testsuite>' ]]
 }
 
+@test "junit does not mark tests with FD 3 output in teardown_suite as failed (issue #1180)" {
+  bats_require_minimum_version 1.5.0
+  local stderr='' # silence shellcheck
+  name=non-empty reentrant_run -0 --separate-stderr bats --formatter junit "$FIXTURE_ROOT/issue1180"
+  [ "${stderr}" == "" ] || { echo "stderr should be empty but was: ${stderr}" >&3; return 1; }
+  [[ "${output}" != *'<failure '* ]]
+  [[ "${output}" == *'teardown_suite fd3'* ]]
+}
+
 @test "don't choke on setup_file errors" {
   bats_require_minimum_version 1.5.0
   local stderr='' # silence shellcheck
