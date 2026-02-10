@@ -179,6 +179,13 @@ bats_separate_lines() { # <output-array> <input-var>
   fi
 }
 
+bats_errexit_subshell() { # <command with args...>
+  (
+    set -eET
+    "$@"
+  )
+}
+
 bats_pipe() { # [-N] [--] command0 [ \| command1 [ \| command2 [...]]]
   # This will run each command given, piping them appropriately.
   # Meant to be used in combination with `run` helper to allow piped commands
@@ -348,20 +355,24 @@ run() { # [!|-N] [--keep-empty-lines] [--separate-stderr] [--] <command to run..
     bats_warn_minimum_guaranteed_version "Using flags on \`run\`" 1.5.0
   fi
 
-  local pre_command=
+  local -a pre_command=()
   # make sure tmpdir exists in case run() is called outside a @test
   local tmpdir=${BATS_TEST_TMPDIR:-${BATS_FILE_TMPDIR:-${BATS_RUN_TMPDIR}}}
 
   case "$output_case" in
   merged) # redirects stderr into stdout and fills only $output/$lines
-    pre_command=bats_merge_stdout_and_stderr
+    pre_command=(bats_merge_stdout_and_stderr)
     ;;
   separate) # splits stderr into own file and fills $stderr/$stderr_lines too
     local bats_run_separate_stderr_file
     bats_run_separate_stderr_file="$(mktemp "${tmpdir}/separate-stderr-XXXXXX")"
-    pre_command=bats_redirect_stderr_into_file
+    pre_command=(bats_redirect_stderr_into_file)
     ;;
   esac
+
+  if [[ -n "${BATS_RUN_ERREXIT:-}" ]]; then
+    pre_command=(bats_errexit_subshell "${pre_command[@]}")
+  fi
 
   local origFlags="$-"
   set +eET
@@ -370,40 +381,19 @@ run() { # [!|-N] [--keep-empty-lines] [--separate-stderr] [--] <command to run..
     # 'output', 'status', 'lines' are global variables available to tests.
     # preserve trailing newlines by appending . and removing it later
     # shellcheck disable=SC2034
-    if [[ -n "${BATS_RUN_ERREXIT:-}" ]]; then
-      # Use temp file to avoid ERR trap interference with errexit
-      # Don't use mktemp because that doesn't work with `set -o noclobber`
-      local status_file
-      status_file="${tmpdir}/run_status.$(printf '%06d' $((RANDOM % 1000000)))"
-      output="$(
-        ( set -eET; "$pre_command" "$@" )
-        echo "$?" >"$status_file"
-        printf .
-      )"
-      status="$(cat "$status_file")"
-    else
-      output="$(
-        "$pre_command" "$@"
-        status=$?
-        printf .
-        exit $status
-      )" && status=0 || status=$?
-    fi
+    output="$(
+      "${pre_command[@]}" "$@"
+      status=$?
+      printf .
+      exit $status
+    )"
+    status=$?
     output="${output%.}"
   else
     # 'output', 'status', 'lines' are global variables available to tests.
     # shellcheck disable=SC2034
-    if [[ -n "${BATS_RUN_ERREXIT:-}" ]]; then
-      local status_file
-      status_file="${tmpdir}/run_status.$(printf '%06d' $((RANDOM % 1000000)))"
-      output="$(
-        ( set -eET; "$pre_command" "$@" )
-        echo "$?" >"$status_file"
-      )"
-      status="$(cat "$status_file")"
-    else
-      output="$("$pre_command" "$@")" && status=0 || status=$?
-    fi
+    output="$("${pre_command[@]}" "$@")"
+    status=$?
   fi
 
   bats_separate_lines lines output

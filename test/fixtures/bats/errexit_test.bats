@@ -14,14 +14,14 @@ passing_function() {
 
 @test "failing function without --errexit continues" {
   run failing_function
-  [[ "$output" =~ "Step 1" ]]
-  [[ "$output" =~ "Step 2: should not appear with errexit" ]]
+  [[ "$output" =~ "Step 1" ]] || false
+  [[ "$output" =~ "Step 2: should not appear with errexit" ]] || false
   [ "$status" -eq 0 ]
 }
 
 @test "passing function works" {
   run passing_function
-  [[ "$output" =~ "Step 1" ]]
-  [[ "$output" =~ "Step 2: should always appear" ]]
+  [[ "$output" =~ "Step 1" ]] || false
+  [[ "$output" =~ "Step 2: should always appear" ]] || false
   [ "$status" -eq 0 ]
 }
