@@ -308,10 +308,6 @@ bats_pipe() { # [-N] [--] command0 [ \| command1 [ \| command2 [...]]]
 }
 
 run() { # [!|-N] [--keep-empty-lines] [--separate-stderr] [--] <command to run...>
-  # This has to be restored on exit from this function to avoid leaking our trap INT into surrounding code.
-  # Non zero exits won't restore under the assumption that they will fail the test before it can be aborted,
-  # which allows us to avoid duplicating the restore code on every exit path
-  trap bats_interrupt_trap_in_run INT
   local expected_rc=
   local keep_empty_lines=
   local output_case=merged
@@ -350,6 +346,14 @@ run() { # [!|-N] [--keep-empty-lines] [--separate-stderr] [--] <command to run..
     esac
     shift
   done
+
+  local saved_traps
+  saved_traps=$(trap -p INT ERR DEBUG)
+  # This has to be restored on return from this function to avoid leaking our trap INT into surrounding code.
+  # Non zero exits won't restore under the assumption that they will fail the test before it can be aborted,
+  # which allows us to avoid duplicating the restore code on every exit path
+  trap bats_interrupt_trap_in_run INT
+  trap - ERR DEBUG
 
   if [[ -n $has_flags ]]; then
     bats_warn_minimum_guaranteed_version "Using flags on \`run\`" 1.5.0
@@ -424,12 +428,14 @@ run() { # [!|-N] [--keep-empty-lines] [--separate-stderr] [--] <command to run..
       if [[ "$status" -eq 0 ]]; then
         BATS_ERROR_SUFFIX=", expected nonzero exit code!"
         bats_run_print_output
+        eval "$saved_traps"
         return 1
       fi
     elif [ "$status" -ne "$expected_rc" ]; then
       # shellcheck disable=SC2034
       BATS_ERROR_SUFFIX=", expected exit code $expected_rc, got $status"
       bats_run_print_output
+      eval "$saved_traps"
       return 1
     fi
   elif [[ "$status" -eq 127 ]]; then # "command not found"
@@ -439,9 +445,9 @@ run() { # [!|-N] [--keep-empty-lines] [--separate-stderr] [--] <command to run..
   if [[ ${BATS_VERBOSE_RUN:-} ]]; then
     bats_run_print_output
   fi
-  
+
   # don't leak our trap into surrounding code
-  trap bats_interrupt_trap INT
+  eval "$saved_traps"
 }
 
 setup() {
