@@ -2,6 +2,10 @@ load test_helper
 fixtures run
 bats_require_minimum_version 1.5.0
 
+setup() {
+  emulate_bats_env
+}
+
 @test "run --keep-empty-lines preserves leading empty lines" {
   run --keep-empty-lines -- echo -n $'\na'
   printf "'%s'\n" "${lines[@]}"
@@ -85,7 +89,7 @@ print-stderr-stdout() {
 }
 
 @test "run exit code check output " {
-  reentrant_run ! bats --tap "${FIXTURE_ROOT}/failing.bats"
+  reentrant_run ! bats --no-tempdir-cleanup --tap "${FIXTURE_ROOT}/failing.bats"
   echo "$output"
   [ "${lines[0]}" == 1..5 ]
   [ "${lines[1]}" == "not ok 1 run -0 false" ]
@@ -172,4 +176,30 @@ failing_function() {
   [ "${lines[0]}" = "first line" ]
   [ "${lines[1]}" = "" ]
   [ "${lines[2]}" = "before failure" ]
+}
+
+function fail_with_set_e() {
+  set -e
+  echo before
+  false
+  echo after
+}
+
+suppress_errexit() { # <command with args...>
+  "$@" || return $?
+}
+
+@test "run allows for set -e in command" {
+  unset BATS_RUN_ERREXIT
+  run ! fail_with_set_e
+  [ "${lines[0]}" = before ]
+  [ "${#lines[@]}" -eq 1 ]
+}
+
+@test "recreate old run set -e behavior" {
+  unset BATS_RUN_ERREXIT
+  run -0 suppress_errexit fail_with_set_e
+  [ "${lines[0]}" = before ]
+  [ "${lines[1]}" = after ]
+  [ "${#lines[@]}" -eq 2 ]
 }

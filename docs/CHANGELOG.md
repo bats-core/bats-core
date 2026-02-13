@@ -22,6 +22,10 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
   * remove control characters (\x00-\x08\x0B\x0C\x0E-\x1F) (#1176)
   * don't report (skipped) last test as failed when `teardown_suite` generates FD3 output (#1181s)
 * fix failures with `--gather-test-outputs-in` when tests change directory (#1183)
+* `run` now honors `set -e` in your functions (#1118)
+  * **ATTENTION**: In previous versions this was suppressed unintentionally.
+    While it might constitute a breaking change for some, we decided the new behavior should be the default because it might uncover hidden errors.
+    If you need the old behavior, you can use this wrapper function `suppress_errexit() { "$@" || return $?; }` like `run suppress_errexit <your command...>`
 
 ### Changed
 
