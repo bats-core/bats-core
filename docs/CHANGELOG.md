@@ -11,13 +11,21 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 
 ## [Unreleased]
 
+### Added
+
+* `--errexit` flag to enable errexit (set -e) behavior for commands run in `run` (#1118)
+
 ### Fixed
 
-* junit formatter: 
+* junit formatter:
   * avoid interference between env and internals (#1175)
   * remove control characters (\x00-\x08\x0B\x0C\x0E-\x1F) (#1176)
   * don't report (skipped) last test as failed when `teardown_suite` generates FD3 output (#1181s)
 * fix failures with `--gather-test-outputs-in` when tests change directory (#1183)
+* `run` now honors `set -e` in your functions (#1118)
+  * **ATTENTION**: In previous versions this was suppressed unintentionally.
+    While it might constitute a breaking change for some, we decided the new behavior should be the default because it might uncover hidden errors.
+    If you need the old behavior, you can use this wrapper function `suppress_errexit() { "$@" || return $?; }` like `run suppress_errexit <your command...>`
 
 ### Changed
 
@@ -29,7 +37,7 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 
 ## [1.13.0] - 2025-11-07
 
-### Added 
+### Added
 
 * use the [`syntax`](https://docs.docker.com/reference/dockerfile/#syntax) parser directive to declare the Dockerfile syntax version (#1127)
 * Negative test filtering via `--negative-filter` - tests matching the filter are *excluded* (#1114)
@@ -37,7 +45,7 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 
 ### Fixed
 
-* unset `output`, `stderr`, `lines`, `stderr_lines` at the start of `run` to avoid crosstalk 
+* unset `output`, `stderr`, `lines`, `stderr_lines` at the start of `run` to avoid crosstalk
   between successive invocations (#1105)
 * junit:
   * XML escape fully removes ANSI sequences, e.g. color codes, cursor movements (#1103)
@@ -56,7 +64,7 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 
 ## [1.12.0] - 2025-05-18
 
-### Added 
+### Added
 
 * `bats::on_failure` hook that gets called when a test or `setup*` function fails (#1031)
 
