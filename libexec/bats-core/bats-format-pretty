@@ -6,6 +6,7 @@ source "$BATS_ROOT/$BATS_LIBDIR/bats-core/formatter.bash"
 
 BASE_PATH=.
 BATS_ENABLE_TIMING=
+BATS_PRETTY_FORMAT_INTERACTIVE=
 
 while [[ "$#" -ne 0 ]]; do
   case "$1" in
@@ -15,6 +16,9 @@ while [[ "$#" -ne 0 ]]; do
   --base-path)
     shift
     normalize_base_path BASE_PATH "$1"
+    ;;
+  --interactive)
+    BATS_PRETTY_FORMAT_INTERACTIVE=1
     ;;
   esac
   shift
@@ -50,6 +54,10 @@ test_result=
 trap update_screen_width WINCH
 
 begin() {
+  if [[ -z "$BATS_PRETTY_FORMAT_INTERACTIVE" ]]; then
+    # don't print on begin in non-interactive mode
+    return
+  fi
   test_result= # reset to avoid carrying over result state from previous test
   line_backoff_count=0
   go_to_column 0
@@ -66,8 +74,10 @@ begin() {
 }
 
 finish_test() {
-  move_up $line_backoff_count
-  go_to_column 0
+  if [[ -n "${BATS_PRETTY_FORMAT_INTERACTIVE-}" ]]; then
+    move_up $line_backoff_count
+    go_to_column 0
+  fi
   buffer "$@"
   if [[ -n "${TIMEOUT-}" ]]; then
     set_color 2
@@ -83,7 +93,9 @@ finish_test() {
     fi
   fi
   advance
-  move_down $((line_backoff_count - 1))
+  if [[ -n "${BATS_PRETTY_FORMAT_INTERACTIVE-}" ]]; then
+    move_down $((line_backoff_count - 1))
+  fi
 }
 
 pass() {
