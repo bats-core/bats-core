@@ -170,9 +170,6 @@ report_formatter=''
 recursive=
 setup_suite_file=''
 export BATS_TEMPDIR_CLEANUP=1
-if [[ -z "${CI:-}" && -t 0 && -t 1 ]] && command -v tput >/dev/null; then
-  formatter='pretty'
-fi
 
 while [[ "$#" -ne 0 ]]; do
   case "$1" in
@@ -383,6 +380,12 @@ fi
 # if we don't need to filter extended syntax, use the faster formatter
 if [[ "$formatter" == tap && -z "$report_formatter" ]]; then
   formatter="cat"
+fi
+
+if [[ "$formatter" == pretty ]]; then
+  if [[ -z "${CI:-}" && -t 0 && -t 1 ]] && command -v tput >/dev/null; then
+    formatter_flags+=(--interactive)
+  fi
 fi
 
 bats_check_formatter() { # <formatter-path>
