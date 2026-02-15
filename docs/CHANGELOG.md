@@ -21,6 +21,7 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
   * avoid interference between env and internals (#1175)
   * remove control characters (\x00-\x08\x0B\x0C\x0E-\x1F) (#1176)
   * don't report (skipped) last test as failed when `teardown_suite` generates FD3 output (#1181s)
+  * fix(junit-formatter): skipped tests outputs reported as <system-err> (#1177)
 * fix failures with `--gather-test-outputs-in` when tests change directory (#1183)
 * `run` now honors `set -e` in your functions (#1118)
   * **ATTENTION**: In previous versions this was suppressed unintentionally.
