@@ -15,6 +15,9 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 
 * `--errexit` flag to enable errexit (set -e) behavior for commands run in `run` (#1118)
 * pretty formatter: add non-interactive, color-only mode for CI environments (#1191)
+* detect name collisions between bats generated test functions and user defined functions (#1193)
+  * trying to redefine a test function after the test has been defined results in error `test_<your test name>: readonly function`
+  * there is a small gap directly behind the test function: `readonly` is applied only at the next test or the end of file, since putting it automatically behind the test's `}` would either not be robust or require a full bash parser
 
 ### Fixed
 
