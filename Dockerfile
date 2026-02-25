@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 ARG bashver=latest
 
-FROM bash:${bashver}
+FROM bash:5.2-alpine3.18
 ARG TINI_VERSION=v0.19.0
 ARG TARGETPLATFORM
 ARG LIBS_VER_SUPPORT=0.3.0
@@ -32,7 +32,7 @@ RUN /tmp/docker/install_libs.sh detik ${LIBS_VER_DETIK}
 
 # Install parallel and accept the citation notice (we aren't using this in a
 # context where it make sense to cite GNU Parallel).
-RUN apk add --no-cache parallel ncurses && \
+RUN apk add --no-cache parallel ncurses openssl=3.1.8-r0 musl=1.2.4-r3 musl-utils=1.2.4-r3 && \
     mkdir -p ~/.parallel && touch ~/.parallel/will-cite \
     && mkdir /code
 
