@@ -64,6 +64,24 @@ If you want to fail the test, you should explicitly check `$status` or omit `run
 `load` is intended as an internal helper function that always loads `.bash` files (by appending this suffix).
 If you want to load an `.sh` file, you can simple `source` it.
 
+Variables I `declare` in a `load`\ -ed file are not visible in my tests.
+------------------------------------------------------------------------
+
+`load` sources the helper file from inside the `load` shell function. Bash's
+`declare` builtin creates function-local variables by default, so any
+variable set with a bare `declare` in the loaded file goes out of scope as
+soon as `load` returns and is not visible to your tests.
+
+Use `declare -g` in the helper file to make the variable global:
+
+.. code-block:: bash
+
+    # in helpers.bash, loaded via `load 'helpers'`
+    declare -g MY_VAR="some value"
+
+See the note under `load: Share common code <writing-tests.html#load-share-common-code>`_
+in the writing-tests guide for the underlying Bash behaviour.
+
 I can't lint/shell-format my bats tests.
 ----------------------------------------
 
