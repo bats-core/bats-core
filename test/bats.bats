@@ -22,6 +22,12 @@ setup() {
   [ "${lines[1]%% *}" == 'Usage:' ]
 }
 
+@test "empty filename prints an error" {
+  reentrant_run bats ""
+  [ $status -eq 1 ]
+  [ "${lines[0]}" == "Error: filename argument cannot be empty" ]
+}
+
 @test "-v and --version print version number" {
   reentrant_run bats -v
   [ $status -eq 0 ]

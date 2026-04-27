@@ -471,6 +471,11 @@ fi
 
 filenames=()
 for filename in "${arguments[@]}"; do
+  
+  if [[ -z "$filename" ]]; then
+    printf "Error: filename argument cannot be empty\n" >&2
+    exit 1
+  fi
   expand_path "$filename" 'filename'
 
   if [[ -z "$setup_suite_file" ]]; then
