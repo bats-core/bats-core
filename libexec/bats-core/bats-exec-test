@@ -278,9 +278,15 @@ bats_start_timeout_countdown() { # <timeout>
   fi
   # Start another process to kill the children of this process
   (
+    # Close inherited FDs so this watchdog cannot block the parent
+    # on pipe EOF when a test exits before the timeout fires — the
+    # watchdog otherwise keeps the parent's pipes open until its
+    # sleep completes. Mirrors the close-fds pattern in the inner
+    # subshell below. Fixes #1206.
+    eval exec {0..255}">&-"
     # with sleep in foreground this shell wouldn't receive signals,
     # so we use wait below and kill sleep explicitly when signalled to do so
-    # On Windows the TERM signal does not seem to shut down sleep -> 
+    # On Windows the TERM signal does not seem to shut down sleep ->
     # close all fds to avoid blocking IO when sleep does not turn off
     (eval exec {0..255}">&-"; sleep "$timeout") &
     # shellcheck disable=SC2064
