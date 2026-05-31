@@ -28,6 +28,7 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
   * **ATTENTION**: In previous versions this was suppressed unintentionally.
     While it might constitute a breaking change for some, we decided the new behavior should be the default because it might uncover hidden errors.
     If you need the old behavior, you can use this wrapper function `suppress_errexit() { "$@" || return $?; }` like `run suppress_errexit <your command...>`
+* avoid overwriting `$_` by the DEBUG and ERR traps set by Bats (#1208)
 
 ### Changed
 
