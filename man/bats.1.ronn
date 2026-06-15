@@ -76,6 +76,8 @@ An empty tag list matches tests without tags.
 OPTIONS
 -------
 
+  * `--abort`:
+    Stop execution of suite on first failed test
   * `-c`, `--count`:
     Count the number of test cases without running any tests
   * `--code-quote-style <style>`:
@@ -90,6 +92,8 @@ OPTIONS
       - uri: file:///tests/a.bats:1
       - custom: provide your own via defining bats_format_file_line_reference_custom
                 with parameters <filename> <line>, store via `printf -v "$output"`
+  * `--errexit`:
+    Enable errexit (`set -e`) for commands run in `run`
   * `-f`, `--filter <regex>`:
     Filter test cases by names matching the regular expression
   * `-F`, `--formatter <type>`:
@@ -111,12 +115,16 @@ OPTIONS
     Display this help message
   * `-j`, `--jobs <jobs>`:
     Number of parallel jobs (requires GNU parallel)
+  * `--negative-filter <regex>`:
+    Only run tests that do not match the regular expression
   * `--no-tempdir-cleanup`:
     Preserve test output temporary directory
   * `--no-parallelize-across-files`:
     Serialize test file execution instead of running them in parallel (requires --jobs >1)
   * `--no-parallelize-within-files`:
     Serialize test execution within files instead of running them in parallel (requires --jobs >1)
+  * `--parallel-binary-name <name>`:
+    Name of parallel binary
   * `--report-formatter <type>`:
     Switch between reporters (same options as --formatter)
   * `-o`, `--output <dir>`:
