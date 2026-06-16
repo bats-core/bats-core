@@ -127,10 +127,10 @@ BATS_REPORT_OUTPUT_DIR=${BATS_REPORT_OUTPUT_DIR-.}
 export BATS_LINE_REFERENCE_FORMAT=${BATS_LINE_REFERENCE_FORMAT-comma_line}
 
 if [[ ! -d "${BATS_TMPDIR}" ]]; then
-  printf "Error: BATS_TMPDIR (%s) does not exist or is not a directory" "${BATS_TMPDIR}" >&2
+  printf "Error: BATS_TMPDIR (%s) does not exist or is not a directory\n" "${BATS_TMPDIR}" >&2
   exit 1
 elif [[ ! -w "${BATS_TMPDIR}" ]]; then
-  printf "Error: BATS_TMPDIR (%s) is not writable" "${BATS_TMPDIR}" >&2
+  printf "Error: BATS_TMPDIR (%s) is not writable\n" "${BATS_TMPDIR}" >&2
   exit 1
 fi
 
