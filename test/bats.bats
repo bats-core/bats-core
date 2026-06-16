@@ -1676,3 +1676,19 @@ END_OF_ERR_MSG
   [ "${lines[4]}" == "ok 2 passing function works" ]
   [ "${#lines[@]}" == 5 ]
 }
+
+@test "prevent name collisions with test functions (#923)" {
+  reentrant_run bats --tap "$FIXTURE_ROOT/issue-923-before.bats"
+  [ "${lines[0]}" == 1..1 ]
+  [ "${lines[1]}" == 'not ok 1 bats-gather-tests' ]
+  [ "${lines[2]}" == "# (in test file $RELATIVE_FIXTURE_ROOT/issue-923-before.bats, line 5)" ]
+  [ "${lines[3]}" == "#   \`@test \"collision defined before test\" {' failed" ]
+  [ "${lines[4]}" == "# ERROR: trying to redefine (test) function test_collision_defined_before_test!" ]
+  [ "${#lines[*]}" -eq 5 ]
+
+  reentrant_run bats --tap "$FIXTURE_ROOT/issue-923-after.bats"
+  [[ "$output" == *"issue-923-after.bats: line 12: test_collision_defined_after_test: readonly function"* ]] || false
+
+  reentrant_run bats --tap "$FIXTURE_ROOT/issue-923-setup.bats"
+  [[ "$output" == *"issue-923-setup.bats: line 2: test_collision_defined_in_setup: readonly function"* ]] || false
+}

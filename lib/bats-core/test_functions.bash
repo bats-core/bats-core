@@ -483,6 +483,13 @@ skip() {
   exit 0
 }
 
+bats_warn_about_redefinition() { # <function name>
+  if [[ -n "${BATS_LAST_DEFINED_TEST_FUNCTION-}" ]]; then
+    readonly -f "$BATS_LAST_DEFINED_TEST_FUNCTION"
+  fi
+  BATS_LAST_DEFINED_TEST_FUNCTION=$1
+}
+
 bats_test_function() {
   local tags=() current_tags=()
   while (( $# > 0 )); do

@@ -56,6 +56,18 @@ done
 source "$BATS_ROOT/$BATS_LIBDIR/bats-core/test_functions.bash"
 # _bats_test_functions_setup will be called per file further down
 
+bats_warn_about_redefinition() { # <function name>
+  local funcname=$1 type
+  if type=$(type -t "$funcname") && [[ "$type" == function ]]; then
+    printf "ERROR: trying to redefine (test) function %s!" "$funcname" >&2
+    exit 1
+  fi
+  if [[ -n "${BATS_LAST_DEFINED_TEST_FUNCTION:-}" ]]; then
+    readonly -f "$BATS_LAST_DEFINED_TEST_FUNCTION"
+  fi
+  declare -g BATS_LAST_DEFINED_TEST_FUNCTION=$funcname
+}
+
 # override test_functions.bash's version to use it for test registration
 bats_test_function() {
   local -a tags=() current_tags=()

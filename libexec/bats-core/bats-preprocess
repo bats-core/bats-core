@@ -94,7 +94,8 @@ IFS=,
       fi
 
       # shellcheck disable=SC2154 # encoded_name is declare via bats_encode_test_name
-      printf 'bats_test_function --description %q  --tags "%s" --tags "%s" -- %s;' "$name" "${test_tags[*]-}" "${file_tags[*]-}" "$encoded_name"
+      printf 'bats_test_function --description %q  --tags "%s" --tags "%s" -- %s; ' "$name" "${test_tags[*]-}" "${file_tags[*]-}" "$encoded_name"
+      printf 'bats_warn_about_redefinition "%s"; ' "${encoded_name:?}"
       printf '%s() { %s%s\n' "${encoded_name:?}" "$lead" "$body" || :
 
       test_tags=() # reset test tags for next test
@@ -113,6 +114,7 @@ IFS=,
       printf '%s\n' "$line"
     fi
   done
+  printf "bats_warn_about_redefinition '' # also catch last test\n"
 } <<<"$(<"$test_file")"$'\n'
 
 exit $exit_code
