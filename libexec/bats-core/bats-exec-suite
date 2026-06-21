@@ -16,6 +16,11 @@ setup_suite_file=''
 BATS_TRACE_LEVEL="${BATS_TRACE_LEVEL:-0}"
 BATS_SHOW_OUTPUT_OF_SUCCEEDING_TESTS=
 
+if [[ -z ${BATS_LIBEXEC:-} ]]; then
+  BATS_LIBEXEC="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  export BATS_LIBEXEC
+fi
+
 abort() {
   printf 'Error: %s\n' "$1" >&2
   exit 1
@@ -311,7 +316,7 @@ if [[ "$num_jobs" -gt 1 ]] && [[ -z "$bats_no_parallelize_across_files" ]]; then
   # shellcheck disable=SC2086,SC2068
   # we need to handle the quoting of ${flags[@]} ourselves,
   # because parallel can only quote it as one
-  "${parallel_binary_name}" "${parallel_flags[@]}" -- "bats-exec-file" "$(printf "%q " "${flags[@]}")" "{#}" "{}" "$TESTS_LIST_FILE" <<< "$(printf "%s\n" "${BATS_UNIQUE_TEST_FILENAMES[@]}")" 2>&1 || bats_exec_suite_status=1
+  "${parallel_binary_name}" "${parallel_flags[@]}" -- "$(printf "%q" "${BATS_LIBEXEC}/bats-exec-file")" "$(printf "%q " "${flags[@]}")" "{#}" "{}" "$TESTS_LIST_FILE" <<< "$(printf "%s\n" "${BATS_UNIQUE_TEST_FILENAMES[@]}")" 2>&1 || bats_exec_suite_status=1
 else
   file_index=0
   for filename in "${BATS_UNIQUE_TEST_FILENAMES[@]}"; do
@@ -320,7 +325,7 @@ else
       bats_exec_suite_status=130 # bash's code for SIGINT exits
       break
     fi
-    bats-exec-file "${flags[@]}" "$file_index" "$filename" "${TESTS_LIST_FILE}" || bats_exec_suite_status=1
+    "${BATS_LIBEXEC}/bats-exec-file" "${flags[@]}" "$file_index" "$filename" "${TESTS_LIST_FILE}" || bats_exec_suite_status=1
     if (( BATS_ABORT_ON_FAILURE && bats_exec_suite_status > 0 )); then
       break
     fi
