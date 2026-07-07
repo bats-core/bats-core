@@ -1280,6 +1280,7 @@ END_OF_ERR_MSG
   else
     normalize_variable_list() {
       # `declare -p`: declare -X VAR_NAME="VALUE"
+      # shellcheck disable=SC2030 # false positive `$_` (see https://github.com/koalaman/shellcheck/issues/3478)
       while IFS=' =' read -r _declare _ variable _; do
         if [[ "$_declare" == declare ]]; then # skip multiline variables' values
           printf "%s\n" "$variable"
@@ -1675,4 +1676,12 @@ END_OF_ERR_MSG
   [[ "${lines[3]}" =~ "Step 2: should not appear with errexit" ]]
   [ "${lines[4]}" == "ok 2 passing function works" ]
   [ "${#lines[@]}" == 5 ]
+}
+
+@test "Bats's DEBUG trap should not overwrite \$_ (#1208)" {
+  # set $_
+  : '<lastarg#1208>'
+  
+  # shellcheck disable=SC2031 # see https://github.com/koalaman/shellcheck/issues/3478
+  [ "$_" == '<lastarg#1208>' ] # check that $_ is preserved
 }
