@@ -255,7 +255,7 @@ jobs:
           - ""
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
-      - uses: acj/freebsd-firecracker-action@a5a3fc1709c5b5368141a5699f10259aca3cd965 # v0.6.0
+      - uses: acj/freebsd-firecracker-action@da029f050a7a2535fce96385727cf3d5768bd8bf # v0.10.1
         with:
           run-in-vm: |
             pkg install -y bash parallel ${{ matrix.packages }}
