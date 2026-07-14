@@ -40,10 +40,15 @@ setup() {
   [ "$(expr "$output" : ".*does not exist")" -ne 0 ]
 }
 
-@test "empty test file runs zero tests" {
-  reentrant_run bats "$FIXTURE_ROOT/empty.bats"
-  [ $status -eq 0 ]
-  [ "$output" = "1..0" ]
+@test "empty test file runs zero tests but returns non-zero exit code" {
+  bats_require_minimum_version 1.5.0
+  reentrant_run --separate-stderr -1 bats "$FIXTURE_ROOT/empty.bats"
+
+  [ "${lines[0]}" = "1..0" ]
+  [ "${#lines[@]}" -eq 1 ]
+
+  [ "${stderr_lines[0]}" = "ERROR: Found no tests. (Try \`--allow-empty-suite\`?)" ]
+  [ "${#stderr_lines[@]}" -eq 1 ]
 }
 
 @test "one passing test" {
@@ -1681,7 +1686,12 @@ END_OF_ERR_MSG
 @test "Bats's DEBUG trap should not overwrite \$_ (#1208)" {
   # set $_
   : '<lastarg#1208>'
-  
+
   # shellcheck disable=SC2031 # see https://github.com/koalaman/shellcheck/issues/3478
   [ "$_" == '<lastarg#1208>' ] # check that $_ is preserved
+}
+
+@test "--allow-empty-suite fails when there are tests" {
+  bats_require_minimum_version 1.5.0
+  reentrant_run -0 bats --allow-empty-suite "$FIXTURE_ROOT/passing.bats"
 }

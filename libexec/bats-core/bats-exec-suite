@@ -15,6 +15,7 @@ flags=('--dummy-flag') # add a dummy flag to prevent unset variable errors on em
 setup_suite_file=''
 BATS_TRACE_LEVEL="${BATS_TRACE_LEVEL:-0}"
 BATS_SHOW_OUTPUT_OF_SUCCEEDING_TESTS=
+BATS_EMPTY_SUITE_STATUS=1
 
 abort() {
   printf 'Error: %s\n' "$1" >&2
@@ -94,6 +95,9 @@ while [[ "$#" -ne 0 ]]; do
   --setup-suite-file)
     shift
     setup_suite_file="$1"
+    ;;
+  --allow-empty-suite)
+    BATS_EMPTY_SUITE_STATUS=0
     ;;
   *)
     break
@@ -186,7 +190,10 @@ printf '1..%d\n' "${test_count}"
 
 # No point on continuing if there's no tests.
 if [[ "${test_count}" == 0 ]]; then
-  bats_exec_suite_status=0
+  bats_exec_suite_status=$BATS_EMPTY_SUITE_STATUS
+  if (( bats_exec_suite_status != 0)); then
+    printf "ERROR: Found no tests. (Try \`--allow-empty-suite\`?)" >&2
+  fi
   bats_exit_suite
 fi
 
@@ -247,7 +254,7 @@ bats_run_teardown_suite() {
   # avoid being called twice, in case this is not called through bats_teardown_suite_trap
   # but from the end of file
   trap bats_suite_exit_trap EXIT
-  
+
   bats_set_stacktrace_limit
 
   BATS_TEARDOWN_SUITE_COMPLETED=
@@ -255,6 +262,7 @@ bats_run_teardown_suite() {
   if ((bats_teardown_suite_status == 0)); then
     BATS_TEARDOWN_SUITE_COMPLETED=1
   elif [[ -n "${BATS_SETUP_SUITE_COMPLETED:-}" ]]; then
+    # shellcheck disable=SC2034
     BATS_DEBUG_LAST_STACK_TRACE_IS_VALID=1
     BATS_ERROR_STATUS=$bats_teardown_suite_status
     return $BATS_ERROR_STATUS

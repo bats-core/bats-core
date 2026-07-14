@@ -94,7 +94,7 @@ setup() {
   # have no failing tests
   reentrant_run -0 bats --filter-status failed "passing.bats"
   # try to run the empty list of failing tests
-  reentrant_run -0 bats --filter-status failed "passing.bats"
+  reentrant_run -0 bats --filter-status failed --allow-empty-suite "passing.bats"
   [ "${lines[0]}" == "There were no tests of status 'failed' in the last recorded run." ]
   [ "${lines[1]}" == "1..0" ]
   [ "${#lines[@]}" -eq 2 ]
