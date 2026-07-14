@@ -1695,3 +1695,15 @@ END_OF_ERR_MSG
   bats_require_minimum_version 1.5.0
   reentrant_run -0 bats --allow-empty-suite "$FIXTURE_ROOT/passing.bats"
 }
+
+@test "empty testfile path is an error" {
+  bats_require_minimum_version 1.5.0
+
+  reentrant_run -1 bats ""
+  [ "${lines[0]}" = "Error: File path must not be empty! (Path number 1)" ]
+  [ ${#lines[@]} -eq 1 ]
+
+  reentrant_run -1 bats "$FIXTURE_ROOT/passing.bats" ""
+  [ "${lines[0]}" = "Error: File path must not be empty! (Path number 2)" ]
+  [ ${#lines[@]} -eq 1 ]
+}
