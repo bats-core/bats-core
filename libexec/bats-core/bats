@@ -23,7 +23,6 @@ abort() {
 
 usage() {
   local cmd="${0##*/}"
-  local line
 
   cat <<HELP_TEXT_HEADER
 Usage: ${cmd} [OPTIONS] <tests>
@@ -36,6 +35,7 @@ HELP_TEXT_HEADER
   containing Bats test files (ending with ".bats")
 
   --abort                   Stop execution of suite on first failed test
+  --allow-empty-suite       Exit with code 0 (instead of the default code 1) when no tests are found.
   -c, --count               Count test cases without running any tests
   --code-quote-style <style>
                             A two character string of code quote delimiters
@@ -185,6 +185,9 @@ while [[ "$#" -ne 0 ]]; do
     ;;
   -c | --count)
     flags+=('-c')
+    ;;
+  --allow-empty-suite)
+    flags+=(--allow-empty-suite)
     ;;
   -f | --filter)
     shift

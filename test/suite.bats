@@ -4,10 +4,12 @@ setup() {
   REENTRANT_RUN_PRESERVE+=(BATS_LIBEXEC)
 }
 
-@test "running a suite with no test files" {
-  reentrant_run bats "$FIXTURE_ROOT/empty"
-  [ $status -eq 0 ]
+@test "Empty suite is an error" {
+  bats_require_minimum_version 1.5.0
+  reentrant_run --separate-stderr -1 bats "$FIXTURE_ROOT/empty"
   [ "$output" = "1..0" ]
+  # shellcheck disable=SC2154
+  [ "$stderr" = "ERROR: Found no tests. (Try \`--allow-empty-suite\`?)" ]
 }
 
 @test "running a suite with one test file" {
