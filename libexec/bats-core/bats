@@ -92,6 +92,10 @@ HELP_TEXT_BODY
 }
 
 expand_path() {
+  if [[ -z "$1" ]]; then
+    abort --no-print-usage "Path is empty string."
+  fi
+
   local path="${1%/}"
   local dirname="${path%/*}"
   if [[ -z "$dirname" ]]; then
@@ -473,7 +477,11 @@ if [[ -n "$setup_suite_file" && ! -f "$setup_suite_file" ]]; then
 fi
 
 filenames=()
-for filename in "${arguments[@]}"; do
+for ((i=0; i < ${#arguments[@]}; ++i)); do
+  filename="${arguments[i]}"
+  if [[ -z "$filename" ]]; then
+    abort --no-print-usage "File path must not be empty! (Path number $((i + 1)))"
+  fi
   expand_path "$filename" 'filename'
 
   if [[ -z "$setup_suite_file" ]]; then
