@@ -5,6 +5,38 @@ setup() {
   fixtures formatter
 }
 
+@test "default formatter in CI is TAP" {
+  bats_require_minimum_version 1.5.0
+  reentrant_run -0 -- env CI=1 bats "$FIXTURE_ROOT/passing.bats"
+  [ "${lines[0]}" = "1..1" ]
+  [ "${lines[1]}" = "ok 1 a passing test" ]
+  [ ${#lines[@]} -eq 2 ]
+}
+
+@test "default formatter in interactive shell is interactive pretty" {
+  bats_require_minimum_version 1.5.0
+  unset CI
+  reentrant_run -0 -- script -q -c "bats \"$FIXTURE_ROOT/passing.bats\""
+  [ "${lines[0]}" = $'\x1b[34;1mpassing.bats\r' ]
+  # avoid hardcoding the jump to terminal width - x
+  [[ "${lines[1]}" == *$'\x1b[2G\x1b[1G ✓ a passing test\x1b[K\r' ]] || false
+  [ "${lines[2]}" = $'\x1b[0m\x1b[32;1m\r' ]
+  [ "${lines[3]}" = $'1 test, 0 failures\r' ]
+  [ "${lines[4]}" = $'\x1b[0m\r' ]
+  [ ${#lines[@]} -eq 5 ]
+}
+
+@test "pretty formatter in CI is non-interactive" {
+  bats_require_minimum_version 1.5.0
+  reentrant_run -0 -- env CI=1 bats --pretty "$FIXTURE_ROOT/passing.bats"
+  [ "${lines[0]}" = $'\x1b[34;1mpassing.bats' ]
+  [ "${lines[1]}" = $'\x1b[0m ✓ a passing test\x1b[K' ]
+  [ "${lines[2]}" = $'\x1b[0m\x1b[32;1m' ]
+  [ "${lines[3]}" = $'1 test, 0 failures' ]
+  [ "${lines[4]}" = $'\x1b[0m' ]
+  [ ${#lines[@]} -eq 5 ]
+}
+
 @test "tap passing and skipping tests" {
   reentrant_run filter_control_sequences bats --formatter tap "$FIXTURE_ROOT/passing_and_skipping.bats"
   [ $status -eq 0 ]

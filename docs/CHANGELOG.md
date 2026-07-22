@@ -9,6 +9,12 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 [semver]: https://semver.org/
 
 
+## [Unreleased]
+
+### Fixed
+
+* pretty formatter was not the default on interactive shells anymore (#1220)
+
 ## [1.14.0] - 2026-07-21
 
 ### Added
