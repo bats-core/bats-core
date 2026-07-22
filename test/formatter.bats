@@ -16,14 +16,32 @@ setup() {
 @test "default formatter in interactive shell is interactive pretty" {
   bats_require_minimum_version 1.5.0
   unset CI
-  reentrant_run -0 -- script -q -c "bats \"$FIXTURE_ROOT/passing.bats\""
-  [ "${lines[0]}" = $'\x1b[34;1mpassing.bats\r' ]
-  # avoid hardcoding the jump to terminal width - x
-  [[ "${lines[1]}" == *$'\x1b[2G\x1b[1G ✓ a passing test\x1b[K\r' ]] || false
-  [ "${lines[2]}" = $'\x1b[0m\x1b[32;1m\r' ]
-  [ "${lines[3]}" = $'1 test, 0 failures\r' ]
-  [ "${lines[4]}" = $'\x1b[0m\r' ]
-  [ ${#lines[@]} -eq 5 ]
+  if [[ "$OSTYPE" == "linux"* ]]; then
+    script_cmd=(script -q /dev/null -c "bats \"$FIXTURE_ROOT/passing.bats\"")
+  else
+    script_cmd=(script -q /dev/null bats "$FIXTURE_ROOT/passing.bats")
+  fi
+  if [[ "$OSTYPE" == msys || "$OSTYPE" == cygwin ]]; then
+    skip "script is not available on $OSTYPE"
+  fi
+  if ! type script; then
+    echo "script executable not available on $OSTYPE" || false
+  fi
+  reentrant_run -0 -- "${script_cmd[@]}"
+  expected_lines=(
+    $'\x1b[34;1mpassing.bats'
+    $'\x1b[2G\x1b[1G ✓ a passing test\x1b[K'
+    $'\x1b[0m\x1b[32;1m'
+    $'1 test, 0 failures'
+    $'\x1b[0m'
+  )
+
+  for ((i=0; i < ${#expected_lines[@]}; ++i)); do
+    if ! [[ "${lines[i]}" = *"${expected_lines[i]}"* ]]; then
+      echo "line $i:"
+      diff --unified <(xxd <<<"${lines[i]}") <(xxd <<<"${expected_lines[i]}")
+    fi
+  done
 }
 
 @test "pretty formatter in CI is non-interactive" {

@@ -1,7 +1,8 @@
 # syntax=docker/dockerfile:1
 ARG bashver=latest
 
-FROM bash:${bashver}
+FROM bash:${bashver}  AS base
+
 ARG TINI_VERSION=v0.19.0
 ARG TARGETPLATFORM
 ARG LIBS_VER_SUPPORT=0.3.0
@@ -44,3 +45,9 @@ COPY . /opt/bats/
 WORKDIR /code/
 
 ENTRYPOINT ["/tini", "--", "/usr/local/bin/bash", "/usr/local/bin/bats"]
+
+FROM base AS test
+
+RUN apk add --no-cache util-linux # get script
+
+FROM base AS prod
