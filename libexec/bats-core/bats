@@ -170,7 +170,12 @@ arguments=()
 unset flags recursive formatter_flags
 flags=('--dummy-flag')           # add a dummy flag to prevent unset variable errors on empty array expansion in old bash versions
 formatter_flags=('--dummy-flag') # add a dummy flag to prevent unset variable errors on empty array expansion in old bash versions
-formatter=${BATS_FORMATTER:-'tap'}
+if [[ -z "${CI:-}" && -t 0 && -t 1 ]] && command -v tput >/dev/null; then
+  default_formatter=pretty
+else
+  default_formatter='tap'
+fi
+formatter=${BATS_FORMATTER:-$default_formatter}
 report_formatter=''
 recursive=
 setup_suite_file=''

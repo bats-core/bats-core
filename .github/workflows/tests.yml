@@ -205,9 +205,9 @@ jobs:
         shell: 'script -q -e -c "bash {0}"' # work around tty issues
         run: |
           set -e
-          docker build --build-arg bashver="${{ matrix.version }}" --tag "bats/bats:bash-${{ matrix.version }}" .
+          docker build --build-arg bashver="${{ matrix.version }}" --target test --tag "bats/bats:bash-${{ matrix.version }}" .
           docker run -it "bash:${{ matrix.version }}" --version
-          time docker run -it ${{ matrix.env_vars }} "bats/bats:bash-${{ matrix.version }}"  --print-output-on-failure /opt/bats/test
+          time docker run -e "CI=$CI" -it ${{ matrix.env_vars }} "bats/bats:bash-${{ matrix.version }}"  --print-output-on-failure /opt/bats/test
 
   lib64-install:
     runs-on: ubuntu-latest
@@ -303,8 +303,9 @@ jobs:
           platforms: linux/amd64
           tags: bats:test
           load: true
+          target: test
 
-      - run: docker run -itv "$PWD":/code bats:test --print-output-on-failure test/
+      - run: docker run -e "CI=$CI" -itv "$PWD":/code bats:test --print-output-on-failure test/
         shell: 'script -q -e -c "bash {0}"' # work around tty issues
         env:
           TERM: linux # fix tput for tty issue work around
@@ -330,7 +331,7 @@ jobs:
             ln -sf python3 /usr/bin/python # bats-file uses python without version
             bats --tap --print-output-on-failure bats-*/test/
           EOF
-          docker run -itv "$PWD":/code --entrypoint bash bats:test test.sh
+          docker run -e "CI=$CI" -itv "$PWD":/code --entrypoint bash bats:test test.sh
         shell: 'script -q -e -c "bash {0}"' # work around tty issues
         env:
           TERM: linux # fix tput for tty issue work around
