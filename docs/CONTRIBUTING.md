@@ -229,4 +229,21 @@ CONTRIBUTING.md file][atom].
 
 [osmit]:          https://opensource.org/licenses/MIT
 
+[gitterurl]:      https://gitter.im/bats-core/bats-coreCONTRIBUTING.md file][atom].
+
+[gsb]:  https://github.com/mbland/go-script-bash/blob/master/CONTRIBUTING.md
+[moz]:  https://mozillascience.github.io/working-open-workshop/contributing/
+[atom]: https://github.com/atom/atom/blob/master/CONTRIBUTING.md
+
+[discussions]:    https://github.com/bats-core/bats-core/discussions
+[documentation]:  https://bats-core.readthedocs.io/
+[repoprojects]:   https://github.com/bats-core/bats-core/projects
+[repomilestones]: https://github.com/bats-core/bats-core/milestones
+[repoprs]:        https://github.com/bats-core/bats-core/pulls
+[repoissues]:     https://github.com/bats-core/bats-core/issues
+[repohome]:       https://github.com/bats-core/bats-core
+
+[osmit]:          https://opensource.org/licenses/MIT
+
 [gitterurl]:      https://gitter.im/bats-core/bats-core
+[author]:         https://github.com/pathum25
