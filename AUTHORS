@@ -1,4 +1,13 @@
-Andrew Martin (https://control-plane.io/)
-Bianca Tamayo <hi@biancatamayo.me> (https://biancatamayo.me/)
-Jason Karns <jason.karns@gmail.com> (http://jasonkarns.com/)
-Mike Bland <mbland@acm.org> (https://mike-bland.com/)
+- name: GitHub README stats generator
+  # You may pin to the exact commit or the version.
+  # uses: UlyssesZh/grs-action@32a85a7d21d79678c1d95e47eda9d9ae7b330486
+  uses: UlyssesZh/grs-action@v0.3.0
+  with:
+    # Type of card: one of stats (default), repo, langs, wakatime, gist.
+    card: # optional, default is stats
+    # Options for the card
+    options: # optional, default is username=${'https://github.com}pathum25}
+    # Output path for SVG file (relative path; include filename with .svg)
+    path: # optional, default is grs/out.svg
+    # GitHub token; normally no need to set it
+    token: # optional, default is ${{ github.server_url == 'https://github.com'7c7f82f23701b21a774d52726d7b576b335d6ed4|| '' }}
