@@ -233,7 +233,7 @@ bats_run_test_with_retries() { # <args>
   local status=0
   local should_try_again=1 try_number
   for ((try_number = 1; should_try_again; ++try_number)); do
-    if "$BATS_LIBEXEC/bats-exec-test" "$@" "$try_number"; then
+    if bats_execute_internal bats-exec-test "$@" "$try_number"; then
       should_try_again=0
     else
       status=$?
