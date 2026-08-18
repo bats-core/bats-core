@@ -15,6 +15,10 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 
 * pretty formatter was not the default on interactive shells anymore (#1220)
 
+### Changed
+
+* bumped `shfmt` used in CI from v3.5.1 to v3.13.1 and reformatted accordingly (#1242)
+
 ### Documentation
 
 * removed the FAQ's outdated claim that suite-wide setup functionality does not exist; it now points to `setup_suite` (#1213)

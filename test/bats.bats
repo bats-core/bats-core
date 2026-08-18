@@ -553,7 +553,7 @@ END_OF_ERR_MSG
   linesPerTest=6
 
   outputOffset=1
-  currentErrorLine=9
+  currentErrorLine=10
 
   for t in $(seq $expectedNumberOfTests); do
     echo "t=$t outputOffset=$outputOffset currentErrorLine=$currentErrorLine"
@@ -1483,8 +1483,8 @@ END_OF_ERR_MSG
   bats_require_minimum_version 1.5.0
   reentrant_run -0 bats "$FIXTURE_ROOT/passing.bats" --report-formatter "$REPORT_FORMATTER" --output "$BATS_TEST_TMPDIR"
 
-  echo "'$(< "$BATS_TEST_TMPDIR/report.log")'"
-  [ "$(< "$BATS_TEST_TMPDIR/report.log")" = Finished ]
+  echo "'$(<"$BATS_TEST_TMPDIR/report.log")'"
+  [ "$(<"$BATS_TEST_TMPDIR/report.log")" = Finished ]
 }
 
 @test "Failing report formatter fails test run" {

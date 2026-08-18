@@ -5,17 +5,17 @@ bats_run_under_flock() {
 }
 
 bats_run_under_shlock() {
-      local lockfile="$BATS_SEMAPHORE_DIR/shlock.lock"
-      while ! shlock -p $$ -f "$lockfile"; do
-        sleep 1
-      done
-      # we got the lock now, execute the command
-      "$@"
-      local status=$?
-      # free the lock
-      rm -f "$lockfile"
-      return $status
-    }
+  local lockfile="$BATS_SEMAPHORE_DIR/shlock.lock"
+  while ! shlock -p $$ -f "$lockfile"; do
+    sleep 1
+  done
+  # we got the lock now, execute the command
+  "$@"
+  local status=$?
+  # free the lock
+  rm -f "$lockfile"
+  return $status
+}
 
 # setup the semaphore environment for the loading file
 bats_semaphore_setup() {
@@ -92,8 +92,8 @@ bats_semaphore_acquire_slot() {
     # don't lock for reading, we are fine with spuriously getting no free slot
     if [[ $(bats_semaphore_get_free_slot_count) -gt 0 ]]; then
       bats_run_under_"$BATS_LOCKING_IMPLEMENTATION" \
-        bash -c bats_semaphore_acquire_while_locked \
-      && break
+        bash -c bats_semaphore_acquire_while_locked &&
+        break
     fi
     sleep 1
   done
