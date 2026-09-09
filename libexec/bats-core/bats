@@ -236,6 +236,7 @@ while [[ "$#" -ne 0 ]]; do
   -j | --jobs)
     shift
     flags+=('-j' "$1")
+    export BATS_NUMBER_OF_PARALLEL_JOBS="$1"
     ;;
   --parallel-binary-name)
     shift

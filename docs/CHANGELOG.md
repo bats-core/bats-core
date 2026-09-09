@@ -18,6 +18,7 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 ### Fixed
 
 * pretty formatter was not the default on interactive shells anymore (#1220)
+* `BATS_NUMBER_OF_PARALLEL_JOBS` was not set when `--jobs` was used (#1225)
 
 ### Documentation
 
