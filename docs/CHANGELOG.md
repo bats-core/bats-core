@@ -17,6 +17,8 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 
 ### Fixed
 
+* avoid false duplicate errors for dynamic tests with argument prefixes, and
+  detect duplicates with non-space `IFS` separators (#1235)
 * pretty formatter was not the default on interactive shells anymore (#1220)
 
 ### Documentation
