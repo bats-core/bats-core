@@ -98,8 +98,16 @@ bats_test_function() {
   fi
 
   # dereferencing ${test_names[*]} fails on older bash versions when empty -> check before
-  if [[ ${#test_names[@]} -gt 0 && " ${test_names[*]} " == *" $line "* ]]; then
-      test_dupes+=("$line")
+  # A space-joined array can rule out matches, but prefixes are not duplicates.
+  if [[ ${#test_names[@]} -gt 0 &&
+    (${IFS-' '} != ' '* || " ${test_names[*]} " == *" $line "*) ]]; then
+    local existing_test_name
+    for existing_test_name in "${test_names[@]}"; do
+      if [[ "$existing_test_name" == "$line" ]]; then
+        test_dupes+=("$line")
+        break
+      fi
+    done
   fi
   test_names+=("$line")
 
