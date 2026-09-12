@@ -25,7 +25,7 @@ usage() {
   local cmd="${0##*/}"
 
   cat <<HELP_TEXT_HEADER
-Usage: ${cmd} [OPTIONS] <tests>
+Usage: ${cmd} [OPTIONS] [--] <tests>
        ${cmd} [-h | -v]
 
 HELP_TEXT_HEADER
@@ -87,6 +87,7 @@ HELP_TEXT_HEADER
   -x, --trace               Print test commands as they are executed (like `set -x`)
   --verbose-run             Make `run` print `$output` by default
   -v, --version             Display the version number
+  --                        Treat all following arguments as test paths
 
   For more information, see https://github.com/bats-core/bats-core
 HELP_TEXT_BODY
@@ -108,7 +109,7 @@ expand_path() {
   if [[ "$dirname" == "$path" ]]; then
     dirname="$PWD"
   else
-    cd "$dirname"
+    cd -- "$dirname"
     dirname="$PWD"
     cd "$OLDPWD"
   fi
@@ -144,30 +145,6 @@ arguments=()
 # list of single char options that don't expect a value
 single_char_flags="hvcprtTx"
 
-# Unpack single-character options bundled together, e.g. -cr, -pr.
-for arg in "$@"; do
-  if [[ "$arg" =~ ^-[^-]. ]]; then
-    index=1
-    while option="${arg:$((index++)):1}"; do
-      if [[ -z "$option" ]]; then
-        break
-      fi
-      if [[ "$single_char_flags" != *$option* && -n "${arg:index}" ]]; then
-        printf "Error: -%s is not allowed within pack of flags.\n" "$option"
-        printf "       Please put it last (e.g. \`-rF junit\` instead of \`-Fr junit\`), or on its own (\`-r -F junit\`)!\n"
-        exit 1
-      fi
-      arguments+=("-$option")
-    done
-  else
-    arguments+=("$arg")
-  fi
-  shift
-done
-
-set -- "${arguments[@]}"
-arguments=()
-
 unset flags recursive formatter_flags
 flags=('--dummy-flag')           # add a dummy flag to prevent unset variable errors on empty array expansion in old bash versions
 formatter_flags=('--dummy-flag') # add a dummy flag to prevent unset variable errors on empty array expansion in old bash versions
@@ -183,7 +160,32 @@ setup_suite_file=''
 export BATS_TEMPDIR_CLEANUP=1
 
 while [[ "$#" -ne 0 ]]; do
+  # Unpack bundled options here so option values and paths after -- stay intact.
+  arg="$1"
+  if [[ "$arg" =~ ^-[^-]. ]]; then
+    unpacked_options=()
+    index=1
+    while option="${arg:$((index++)):1}"; do
+      if [[ -z "$option" ]]; then
+        break
+      fi
+      if [[ "$single_char_flags" != *$option* && -n "${arg:index}" ]]; then
+        printf "Error: -%s is not allowed within pack of flags.\n" "$option"
+        printf "       Please put it last (e.g. \`-rF junit\` instead of \`-Fr junit\`), or on its own (\`-r -F junit\`)!\n"
+        exit 1
+      fi
+      unpacked_options+=("-$option")
+    done
+    shift
+    set -- "${unpacked_options[@]}" "$@"
+  fi
+
   case "$1" in
+  --)
+    shift
+    arguments+=("$@")
+    break
+    ;;
   -h | --help)
     version
     usage
