@@ -22,6 +22,82 @@ setup() {
   [ "${lines[1]%% *}" == 'Usage:' ]
 }
 
+@test "-- stops option parsing before test paths" {
+  reentrant_run bats -- "$FIXTURE_ROOT/passing.bats"
+  [ "$status" -eq 0 ]
+  [ "${lines[0]}" = '1..1' ]
+  [ "${lines[1]}" = 'ok 1 a passing test' ]
+}
+
+@test "-- preserves option-like test filenames" {
+  local filename
+  for filename in -tr --count '-test with spaces.bats'; do
+    cp "$FIXTURE_ROOT/passing.bats" "$BATS_TEST_TMPDIR/$filename"
+  done
+  cd "$BATS_TEST_TMPDIR"
+  reentrant_run bats -- -tr --count '-test with spaces.bats'
+  [ "$status" -eq 0 ]
+  [ "${lines[0]}" = '1..3' ]
+  [ "${lines[3]}" = 'ok 3 a passing test' ]
+}
+
+@test "-- is a literal test filename after the option terminator" {
+  cp "$FIXTURE_ROOT/passing.bats" "$BATS_TEST_TMPDIR/--"
+  cd "$BATS_TEST_TMPDIR"
+  reentrant_run bats -- --
+  [ "$status" -eq 0 ]
+  [ "${lines[0]}" = '1..1' ]
+  [ "${lines[1]}" = 'ok 1 a passing test' ]
+}
+
+@test "-- preserves test paths before and after it" {
+  cp "$FIXTURE_ROOT/passing.bats" "$BATS_TEST_TMPDIR/-f"
+  cd "$BATS_TEST_TMPDIR"
+  reentrant_run bats "$FIXTURE_ROOT/passing.bats" -c -- -f "$FIXTURE_ROOT/passing.bats"
+  [ "$status" -eq 0 ]
+  [ "$output" = 3 ]
+}
+
+@test "-- supports option-like directories with bundled options" {
+  mkdir -p "$BATS_TEST_TMPDIR/-tr/subdirectory"
+  cp "$FIXTURE_ROOT/passing.bats" "$BATS_TEST_TMPDIR/-tr/subdirectory/test.bats"
+  cd "$BATS_TEST_TMPDIR"
+  reentrant_run bats -cr -- -tr
+  [ "$status" -eq 0 ]
+  [ "$output" = 1 ]
+}
+
+@test "-- supports test paths within option-like directories" {
+  mkdir "$BATS_TEST_TMPDIR/-directory"
+  cp "$FIXTURE_ROOT/passing.bats" "$BATS_TEST_TMPDIR/-directory/test.bats"
+  cd "$BATS_TEST_TMPDIR"
+  reentrant_run bats -- -directory/test.bats
+  [ "$status" -eq 0 ]
+  [ "${lines[0]}" = '1..1' ]
+  [ "${lines[1]}" = 'ok 1 a passing test' ]
+}
+
+@test "-- without a test path prints the missing test error" {
+  reentrant_run bats --
+  [ "$status" -eq 1 ]
+  [ "${lines[0]}" = 'Error: Must specify at least one <test>' ]
+}
+
+@test "-- as an option value does not stop option parsing" {
+  printf '@test "test -- marker" { true; }\n' >"$BATS_TEST_TMPDIR/marker.bats"
+  reentrant_run bats -f -- -ct "$BATS_TEST_TMPDIR/marker.bats"
+  [ "$status" -eq 0 ]
+  [ "$output" = 1 ]
+}
+
+@test "-- can follow an option value containing --" {
+  printf '@test "test -- marker" { true; }\n' >"$BATS_TEST_TMPDIR/-tr"
+  cd "$BATS_TEST_TMPDIR"
+  reentrant_run bats -cf -- -- -tr
+  [ "$status" -eq 0 ]
+  [ "$output" = 1 ]
+}
+
 @test "-v and --version print version number" {
   reentrant_run bats -v
   [ $status -eq 0 ]
