@@ -3,7 +3,7 @@ setup() {
 }
 
 @test "test" {
-  single-use-latch::signal hang_after_run
   run true
+  single-use-latch::signal hang_after_run
   sleep 10
 }
