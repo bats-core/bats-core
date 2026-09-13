@@ -271,6 +271,18 @@ bats_format_file_line_reference_uri() {
   printf -v "$output" "file://%s:%d" "$filename" "$line"
 }
 
+bats_internal_path() { # <output-variable> <internal-command>
+  local output=$1 command=$2
+  printf -v "$output" '%s/%s' "${BATS_LIBEXEC?}" "$command"
+}
+
+bats_execute_internal() { # <internal-command> <args...>
+  local command=$1 path
+  shift
+  bats_internal_path path "$command"
+  "$path" "$@"
+}
+
 # execute command with backed up path
 # to prevent path mocks from interfering with our internals
 bats_execute() { # <command...>

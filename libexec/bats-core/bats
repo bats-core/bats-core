@@ -120,6 +120,9 @@ BATS_LIBEXEC="$(
   pwd
 )"
 export BATS_LIBEXEC
+# shellcheck source=lib/bats-core/common.bash
+source "$BATS_ROOT/$BATS_LIBDIR/bats-core/common.bash"
+
 export BATS_CWD="$PWD"
 export PATH="$BATS_LIBEXEC:$PATH"
 export BATS_ROOT_PID=$$
@@ -421,7 +424,14 @@ if [[ $formatter == /* ]]; then # absolute paths are direct references to format
   bats_check_formatter "$formatter"
   interpolated_formatter="$formatter"
 else
-  interpolated_formatter="bats-format-${formatter}"
+  case "$formatter" in
+  pretty | junit | tap | tap13 | cat)
+    bats_internal_path interpolated_formatter "bats-format-${formatter}"
+    ;;
+  *)
+    interpolated_formatter="bats-format-${formatter}"
+    ;;
+  esac
 fi
 
 if [[ "${#arguments[@]}" -eq 0 ]]; then
@@ -452,7 +462,7 @@ if [[ $report_formatter == /* ]]; then # absolute paths are direct references to
   bats_check_formatter "$report_formatter"
   interpolated_report_formatter="${report_formatter}"
 else
-  interpolated_report_formatter="bats-format-${report_formatter}"
+  bats_internal_path interpolated_report_formatter "bats-format-${report_formatter}"
 fi
 
 if [[ "${BATS_CODE_QUOTE_STYLE-BATS_CODE_QUOTE_STYLE_UNSET}" == BATS_CODE_QUOTE_STYLE_UNSET ]]; then
@@ -543,13 +553,15 @@ bats_tee() { # <output-file> <command...>
   return $status
 }
 
+bats_exec_suite=
+bats_internal_path bats_exec_suite bats-exec-suite
 if [[ -n "$report_formatter" ]]; then
-  exec bats-exec-suite "${flags[@]}" "${filenames[@]}" |
+  exec "$bats_exec_suite" "${flags[@]}" "${filenames[@]}" |
     bats_tee "${BATS_REPORT_OUTPUT_DIR}/${BATS_REPORT_FILENAME}" "$interpolated_report_formatter" "${report_formatter_flags[@]}" |
     bats_test_count_validator |
     "$interpolated_formatter" "${formatter_flags[@]}"
 else
-  exec bats-exec-suite "${flags[@]}" "${filenames[@]}" |
+  exec "$bats_exec_suite" "${flags[@]}" "${filenames[@]}" |
     bats_test_count_validator |
     "$interpolated_formatter" "${formatter_flags[@]}"
 fi

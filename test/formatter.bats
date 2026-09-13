@@ -136,6 +136,19 @@ EOF
   [ "$output" = "Dummy Formatter!" ]
 }
 
+@test "BATS_FORMATTER finds custom formatters on PATH" {
+  bats_require_minimum_version 1.5.0
+  local formatter_dir="$BATS_TEST_TMPDIR/custom-formatters"
+  mkdir -p "$formatter_dir"
+  ln -s "$FIXTURE_ROOT/dummy-formatter" "$formatter_dir/bats-format-custom"
+
+  reentrant_run -0 -- env \
+    BATS_FORMATTER=custom \
+    PATH="$formatter_dir:$PATH" \
+    bats "$FIXTURE_ROOT/passing.bats"
+  [ "$output" = "Dummy Formatter!" ]
+}
+
 @test "specifying nonexistent external formatter is an error" {
   bats_require_minimum_version 1.5.0
   reentrant_run -1 bats "$FIXTURE_ROOT/passing.bats" --formatter "$FIXTURE_ROOT/non-existing-file"

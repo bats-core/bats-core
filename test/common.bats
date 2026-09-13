@@ -1,3 +1,20 @@
+@test "bats_execute_internal resolves tools independently of PATH" {
+  bats_require_minimum_version 1.5.0
+  local libexec="$BATS_TEST_TMPDIR/libexec with spaces"
+  local path_bin="$BATS_TEST_TMPDIR/path-bin"
+  mkdir -p "$libexec" "$path_bin"
+
+  # shellcheck disable=SC2016 # generated script variables expand when the fixture runs
+  printf '%s\n' '#!/bin/sh' 'printf "internal:%s\n" "$1"' >"$libexec/bats-fake"
+  # shellcheck disable=SC2016 # generated script variables expand when the fixture runs
+  printf '%s\n' '#!/bin/sh' 'printf "path:%s\n" "$1"' >"$path_bin/bats-fake"
+  chmod +x "$libexec/bats-fake" "$path_bin/bats-fake"
+
+  BATS_LIBEXEC="$libexec" PATH="$path_bin:/usr/bin:/bin" \
+    run -0 bats_execute_internal bats-fake "argument with spaces"
+  [ "$output" = "internal:argument with spaces" ]
+}
+
 @test bats_version_lt {
   bats_require_minimum_version 1.5.0
   run ! bats_version_lt 1.0.0 1.0
