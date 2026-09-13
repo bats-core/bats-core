@@ -259,6 +259,7 @@ jobs:
         with:
           run-in-vm: |
             pkg install -y bash parallel ${{ matrix.packages }}
+            export LC_ALL=C
             time ./bin/bats --print-output-on-failure test/
 
   find_broken_symlinks:
