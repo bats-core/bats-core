@@ -1483,8 +1483,8 @@ END_OF_ERR_MSG
   bats_require_minimum_version 1.5.0
   reentrant_run -0 bats "$FIXTURE_ROOT/passing.bats" --report-formatter "$REPORT_FORMATTER" --output "$BATS_TEST_TMPDIR"
 
-  echo "'$(< "$BATS_TEST_TMPDIR/report.log")'"
-  [ "$(< "$BATS_TEST_TMPDIR/report.log")" = Finished ]
+  echo "'$(<"$BATS_TEST_TMPDIR/report.log")'"
+  [ "$(<"$BATS_TEST_TMPDIR/report.log")" = Finished ]
 }
 
 @test "Failing report formatter fails test run" {
@@ -1534,7 +1534,7 @@ END_OF_ERR_MSG
   local order expected_log
   local log="$BATS_TEST_TMPDIR/registration.log"
   for order in long-first short-first; do
-    : >"$log"
+    : >|"$log"
     reentrant_run env REGISTRATION_CASE="$order" REGISTRATION_LOG="$log" \
       bats "$FIXTURE_ROOT/dynamic_test_registration_prefix.bats"
     [ "$status" -eq 0 ]
@@ -1556,7 +1556,7 @@ END_OF_ERR_MSG
   local registration_case expected_log
   local log="$BATS_TEST_TMPDIR/registration.log"
   for registration_case in multi-word glob empty; do
-    : >"$log"
+    : >|"$log"
     reentrant_run env REGISTRATION_CASE="$registration_case" REGISTRATION_LOG="$log" \
       bats "$FIXTURE_ROOT/dynamic_test_registration_prefix.bats"
     [ "$status" -eq 0 ]
@@ -1598,7 +1598,7 @@ END_OF_ERR_MSG
   local registration_case
   local log="$BATS_TEST_TMPDIR/registration.log"
   for registration_case in nounset unset-ifs; do
-    : >"$log"
+    : >|"$log"
     reentrant_run env REGISTRATION_CASE="$registration_case" REGISTRATION_LOG="$log" \
       bats "$FIXTURE_ROOT/dynamic_test_registration_prefix.bats"
     [ "$status" -eq 0 ]
