@@ -17,6 +17,7 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 
 ### Fixed
 
+* fix incorrect stack traces when `load` or `bats_load_library` fails (#1186, #1250)
 * pretty formatter was not the default on interactive shells anymore (#1220)
 * `--jobs` now aborts when GNU parallel is unavailable instead of failing later (#1237, #1238)
 * `bats_encode_test_name()` used the locale-dependent `[[:alnum:]]` character class, causing test names with non-ASCII characters to be silently skipped under some locales (#1236)
