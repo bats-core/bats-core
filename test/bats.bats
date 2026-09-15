@@ -1501,8 +1501,8 @@ END_OF_ERR_MSG
   bats_require_minimum_version 1.5.0
   reentrant_run -0 bats "$FIXTURE_ROOT/passing.bats" --report-formatter "$REPORT_FORMATTER" --output "$BATS_TEST_TMPDIR"
 
-  echo "'$(< "$BATS_TEST_TMPDIR/report.log")'"
-  [ "$(< "$BATS_TEST_TMPDIR/report.log")" = Finished ]
+  echo "'$(<"$BATS_TEST_TMPDIR/report.log")'"
+  [ "$(<"$BATS_TEST_TMPDIR/report.log")" = Finished ]
 }
 
 @test "Failing report formatter fails test run" {
@@ -1546,6 +1546,104 @@ END_OF_ERR_MSG
   [ "${lines[15]}" == "# parametrized_test th\\ ree: th ree" ] # check that parameters gets passed
   [ "${lines[16]}" == "ok 7 normal test2" ]
   [ "${#lines[*]}" -eq 17 ]
+}
+
+@test "dynamic argument prefixes are distinct in either registration order" {
+  local order expected_log
+  local log="$BATS_TEST_TMPDIR/registration.log"
+  for order in long-first short-first; do
+    : >|"$log"
+    reentrant_run env REGISTRATION_CASE="$order" REGISTRATION_LOG="$log" \
+      bats "$FIXTURE_ROOT/dynamic_test_registration_prefix.bats"
+    [ "$status" -eq 0 ]
+    [ "${lines[0]}" == '1..2' ]
+    if [[ $order == long-first ]]; then
+      [ "${lines[1]}" == 'ok 1 long one' ]
+      [ "${lines[2]}" == 'ok 2 short one' ]
+      expected_log=$'2 <--format> <plain>\n0'
+    else
+      [ "${lines[1]}" == 'ok 1 short one' ]
+      [ "${lines[2]}" == 'ok 2 long one' ]
+      expected_log=$'0\n2 <--format> <plain>'
+    fi
+    [ "$(<"$log")" == "$expected_log" ]
+  done
+}
+
+@test "dynamic argument prefixes preserve spaces glob characters and empty values" {
+  local registration_case expected_log
+  local log="$BATS_TEST_TMPDIR/registration.log"
+  for registration_case in multi-word glob empty; do
+    : >|"$log"
+    reentrant_run env REGISTRATION_CASE="$registration_case" REGISTRATION_LOG="$log" \
+      bats "$FIXTURE_ROOT/dynamic_test_registration_prefix.bats"
+    [ "$status" -eq 0 ]
+    [ "${lines[0]}" == '1..2' ]
+    [ "${lines[1]}" == 'ok 1 long one' ]
+    [ "${lines[2]}" == 'ok 2 short one' ]
+    case "$registration_case" in
+    multi-word) expected_log=$'2 <--format> <plain text>\n1 <--format>' ;;
+    glob) expected_log=$'2 <*> <extra>\n1 <*>' ;;
+    empty) expected_log=$'1 <>\n0' ;;
+    esac
+    [ "$(<"$log")" == "$expected_log" ]
+  done
+}
+
+@test "dynamic test registration still rejects identical identities" {
+  local log="$BATS_TEST_TMPDIR/registration.log"
+  reentrant_run env REGISTRATION_CASE=duplicate REGISTRATION_LOG="$log" \
+    bats "$FIXTURE_ROOT/dynamic_test_registration_prefix.bats"
+  [ "$status" -eq 1 ]
+  [[ ${lines[0]} == 'ERROR: Duplicate test name(s) in file '* ]]
+  [[ ${lines[0]} == *'record_args\ --format\ plain' ]]
+  [ ! -s "$log" ]
+}
+
+@test "dynamic duplicate detection is independent of the array join separator" {
+  local registration_case
+  local log="$BATS_TEST_TMPDIR/registration.log"
+  for registration_case in duplicate-comma duplicate-empty-ifs; do
+    reentrant_run env REGISTRATION_CASE="$registration_case" REGISTRATION_LOG="$log" \
+      bats "$FIXTURE_ROOT/dynamic_test_registration_prefix.bats"
+    [ "$status" -eq 1 ]
+    [[ ${lines[0]} == 'ERROR: Duplicate test name(s) in file '* ]]
+    [ ! -s "$log" ]
+  done
+}
+
+@test "dynamic argument prefixes work with nounset and unset IFS" {
+  local registration_case
+  local log="$BATS_TEST_TMPDIR/registration.log"
+  for registration_case in nounset unset-ifs; do
+    : >|"$log"
+    reentrant_run env REGISTRATION_CASE="$registration_case" REGISTRATION_LOG="$log" \
+      bats "$FIXTURE_ROOT/dynamic_test_registration_prefix.bats"
+    [ "$status" -eq 0 ]
+    [ "${lines[0]}" == '1..2' ]
+    [ "$(<"$log")" == $'2 <--format> <plain>\n0' ]
+  done
+}
+
+@test "dynamic test identities are scoped to each file" {
+  local log="$BATS_TEST_TMPDIR/registration.log"
+  local second_file="$BATS_TEST_TMPDIR/another [file].bats"
+  cp "$FIXTURE_ROOT/dynamic_test_registration_prefix.bats" "$second_file"
+  reentrant_run env REGISTRATION_CASE=single REGISTRATION_LOG="$log" \
+    bats "$FIXTURE_ROOT/dynamic_test_registration_prefix.bats" "$second_file"
+  [ "$status" -eq 0 ]
+  [ "${lines[0]}" == '1..2' ]
+  [ "$(<"$log")" == $'2 <--format> <plain>\n2 <--format> <plain>' ]
+}
+
+@test "dynamic prefix registration retains name filtering" {
+  local log="$BATS_TEST_TMPDIR/registration.log"
+  reentrant_run env REGISTRATION_CASE=long-first REGISTRATION_LOG="$log" \
+    bats --filter 'short one' "$FIXTURE_ROOT/dynamic_test_registration_prefix.bats"
+  [ "$status" -eq 0 ]
+  [ "${lines[0]}" == '1..1' ]
+  [ "${lines[1]}" == 'ok 1 short one' ]
+  [ "$(<"$log")" == '0' ]
 }
 
 @test "IFS is preserved in all contexts" {
