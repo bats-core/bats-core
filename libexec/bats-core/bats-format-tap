@@ -5,7 +5,10 @@ trap '' INT
 # shellcheck source=lib/bats-core/formatter.bash
 source "$BATS_ROOT/$BATS_LIBDIR/bats-core/formatter.bash"
 
+count=0
+
 bats_tap_stream_plan() {
+  count="$1"
   printf "1..%d\n" "$1"
 }
 
@@ -13,8 +16,8 @@ bats_tap_stream_begin() { #<test index> <test name>
   :
 }
 
-bats_tap_stream_ok() { # [<test index> <test name>
-  printf "ok %d %s" "$1" "$2"
+bats_tap_stream_ok() { # <test index> <test name>
+  printf "ok [%d/%d] %s" "$1" "$count" "$2"
   if [[ "${BATS_FORMATTER_TEST_DURATION-x}" != x ]]; then
     printf " # in %d ms" "$BATS_FORMATTER_TEST_DURATION"
   fi
@@ -22,7 +25,7 @@ bats_tap_stream_ok() { # [<test index> <test name>
 }
 
 bats_tap_stream_not_ok() { # <test index> <test name>
-  printf "not ok %d %s" "$1" "$2"
+  printf "not ok [%d/%d] %s" "$1" "$count" "$2"
   if [[ "${BATS_FORMATTER_TEST_DURATION-x}" != x ]]; then
     printf " # in %d ms" "$BATS_FORMATTER_TEST_DURATION"
   fi
@@ -34,9 +37,9 @@ bats_tap_stream_not_ok() { # <test index> <test name>
 
 bats_tap_stream_skipped() { # <test index> <test name> <reason>
   if [[ $# -eq 3 ]]; then
-    printf "ok %d %s # skip %s\n" "$1" "$2" "$3"
+    printf "ok [%d/%d] %s # skip %s\n" "$1" "$count" "$2" "$3"
   else
-    printf "ok %d %s # skip\n" "$1" "$2"
+    printf "ok [%d/%d] %s # skip\n" "$1" "$count" "$2"
   fi
 }
 
