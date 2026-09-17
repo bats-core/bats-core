@@ -70,6 +70,10 @@ fi
 export BATS_SAVED_PATH=$PATH
 BATS_BASE_LIBDIR=lib # this will be patched with the true value in install.sh
 
-export BATS_ROOT=${BATS_PATH%/*/*}
+# `readlink -f` returns a Windows-form path when this script is launched through
+# the npm PowerShell shim on Git for Windows. Normalize it before passing it to
+# the Bash subprocesses that use it repeatedly.
+BATS_ROOT=$(cd -P -- "${BATS_PATH%/*/*}" && pwd -P)
+export BATS_ROOT
 export -f bats_readlinkf
 exec env BATS_ROOT="$BATS_ROOT" BATS_LIBDIR="${BATS_BASE_LIBDIR:-lib}" "$BATS_ROOT/libexec/bats-core/bats" "$@"
