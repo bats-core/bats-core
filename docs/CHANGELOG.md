@@ -21,6 +21,10 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 * `--jobs` now aborts when GNU parallel is unavailable instead of failing later (#1237, #1238)
 * `bats_encode_test_name()` used the locale-dependent `[[:alnum:]]` character class, causing test names with non-ASCII characters to be silently skipped under some locales (#1236)
 
+### Changed
+
+* claim parallel semaphore slots atomically (#1259)
+
 ### Documentation
 
 * removed the FAQ's outdated claim that suite-wide setup functionality does not exist; it now points to `setup_suite` (#1213)
