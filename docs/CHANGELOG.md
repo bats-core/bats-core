@@ -26,6 +26,10 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 
 * use native Rush in tests on macOS runners, bump Rush version to 0.10.0 (#1260)
 
+### Changed
+
+* claim parallel semaphore slots atomically (#1259)
+
 ### Documentation
 
 * removed the FAQ's outdated claim that suite-wide setup functionality does not exist; it now points to `setup_suite` (#1213)
