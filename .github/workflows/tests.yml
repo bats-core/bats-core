@@ -75,7 +75,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Install rush
         run: |
-          curl -sSfL https://github.com/shenwei356/rush/releases/download/v0.5.0/rush_linux_amd64.tar.gz | sudo tar xzf - -C /usr/local/bin
+          curl -sSfL https://github.com/shenwei356/rush/releases/download/v0.10.0/rush_linux_amd64.tar.gz | sudo tar xzf - -C /usr/local/bin
         if: contains(matrix.env_vars, 'rush')
       - name: Run test on OS ${{ matrix.os }}
         shell: 'script -q -e -c "bash {0}"' # work around tty issues
@@ -157,7 +157,7 @@ jobs:
         run: brew install expect
       - name: Install rush
         run: |
-          curl -sSfL https://github.com/shenwei356/rush/releases/download/v0.5.0/rush_darwin_amd64.tar.gz | sudo tar xzf - -C /usr/local/bin
+          curl -sSfL https://github.com/shenwei356/rush/releases/download/v0.10.0/rush_darwin_arm64.tar.gz | sudo tar xzf - -C /usr/local/bin
         if: contains(matrix.env_vars, 'rush')
 
       - name: Check failing tests fail suite,
