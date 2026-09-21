@@ -26,6 +26,7 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 * `bats_encode_test_name()` used the locale-dependent `[[:alnum:]]` character class, causing test names with non-ASCII characters to be silently skipped under some locales (#1236)
 * normalize BATS_ROOT from PowerShell on Windows (#1257)
 * normalize BATS_LIB_PATH from PowerShell on Windows (#1258)
+* pretty formatter colored the summary green when tests timed out or did not run (#538)
 
 ### Changed
 
