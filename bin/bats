@@ -70,6 +70,17 @@ fi
 export BATS_SAVED_PATH=$PATH
 BATS_BASE_LIBDIR=lib # this will be patched with the true value in install.sh
 
+# A Windows process can supply BATS_LIB_PATH in Windows form. Normalize it
+# before Bats evaluates test code or splits BATS_LIB_PATH on colons.
+if [[ ${OSTYPE-} == cygwin || ${OSTYPE-} == msys ]] &&
+  command -v cygpath >/dev/null 2>&1
+then
+  if [[ -n ${BATS_LIB_PATH-} ]]; then
+    BATS_LIB_PATH=$(cygpath --unix --path "$BATS_LIB_PATH")
+    export BATS_LIB_PATH
+  fi
+fi
+
 # `readlink -f` returns a Windows-form path when this script is launched through
 # the npm PowerShell shim on Git for Windows. Normalize it before passing it to
 # the Bash subprocesses that use it repeatedly.
