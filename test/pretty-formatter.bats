@@ -96,7 +96,7 @@ HERE
   [[ "${lines[4]}" == *$'1 test, 0 failures, 1 timed out'* ]]
 }
 
-@test "pretty formatter summary is colorized yellow when tests did not run" {
+@test "pretty formatter summary is colorized red when tests did not run" {
   run bats-format-pretty <<HERE
 1..3
 suite /test/path
@@ -106,7 +106,7 @@ begin 2 test2
 ok 2 test2
 HERE
 
-  [ "${lines[3]}" == $'\033[0m\033[33;1m' ] # TODO: avoid checking for the leading reset too
+  [ "${lines[3]}" == $'\033[0m\033[31;1m' ] # TODO: avoid checking for the leading reset too
   [ "${lines[4]}" == '3 tests, 0 failures, 1 not run' ]
   [ "${lines[5]}" == $'\033[0m' ]
 }

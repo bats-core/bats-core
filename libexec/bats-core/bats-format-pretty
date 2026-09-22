@@ -146,10 +146,8 @@ log() {
 summary() {
   not_run=$((count - passed - failures - skipped - timed_out))
 
-  if ((failures > 0 || timed_out > 0)); then
+  if ((failures > 0 || timed_out > 0 || not_run > 0)); then
     set_color 1 bold
-  elif ((not_run > 0)); then
-    set_color 3 bold
   else
     set_color 2 bold
   fi
