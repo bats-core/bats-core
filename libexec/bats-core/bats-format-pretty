@@ -144,10 +144,12 @@ log() {
 }
 
 summary() {
-  if [ "$failures" -eq 0 ]; then
-    set_color 2 bold
-  else
+  not_run=$((count - passed - failures - skipped - timed_out))
+
+  if ((failures > 0 || timed_out > 0 || not_run > 0)); then
     set_color 1 bold
+  else
+    set_color 2 bold
   fi
 
   buffer '\n%d test' "$count"
@@ -168,7 +170,6 @@ summary() {
     buffer ', %d timed out' "$timed_out"
   fi
 
-  not_run=$((count - passed - failures - skipped - timed_out))
   if [[ "$not_run" -gt 0 ]]; then
     buffer ', %d not run' "$not_run"
   fi
