@@ -110,7 +110,20 @@ IFS=,
           ;;
         esac
       fi
-      printf '%s\n' "$line"
+      if [[ "$line" =~ ^([[:blank:]]*)bats_test_function([[:blank:]].*)$ ]] &&
+        (( ${#test_tags[@]} > 0 || ${#file_tags[@]} > 0 )); then
+        printf "%sbats_test_function" "${BASH_REMATCH[1]}"
+        if (( ${#test_tags[@]} > 0 )); then
+          printf ' --tags %q' "${test_tags[*]}"
+        fi
+        if (( ${#file_tags[@]} > 0 )); then
+          printf ' --tags %q' "${file_tags[*]}"
+        fi
+        printf '%s\n' "${BASH_REMATCH[2]}"
+        test_tags=() # reset test tags for the next test
+      else
+        printf '%s\n' "$line"
+      fi
     fi
   done
 } <<<"$(<"$test_file")"$'\n'

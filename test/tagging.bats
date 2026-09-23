@@ -80,6 +80,14 @@ setup() {
   run -0 bats "$FIXTURE_ROOT/BATS_TEST_TAGS.bats"
 }
 
+@test "test_tags apply to dynamically registered tests" {
+  reentrant_run -1 bats "$FIXTURE_ROOT/dynamic_test_registration.bats"
+  [ "${lines[0]}" = "WARNING: This test run only contains tests tagged \`bats:focus\`!" ]
+  [ "${lines[1]}" = '1..1' ]
+  [ "${lines[2]}" = 'ok 1 Simple 2' ]
+  [ "${lines[3]}" = "Marking test run as failed due to \`bats:focus\` tag. (Set \`BATS_NO_FAIL_FOCUS_RUN=1\` to disable.)" ]
+}
+
 @test "Print tags on error" {
   run -1 bats "$FIXTURE_ROOT/print_tags_on_error.bats"
 

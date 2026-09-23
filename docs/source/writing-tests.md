@@ -33,7 +33,7 @@ Tags can be defined in two ways. The first being `# bats test_tags=`:
 
 These tags (`tag:1`, `tag:2`, `tag:3`) will be attached to the test `first test`.
 The second test will have no tags attached. Values defined in the `# bats test_tags=`
-directive will be assigned to the next `@test` that is being encountered in the
+directive will be assigned to the next `@test` or `bats_test_function` registration in the
 file and forgotten after that. Only the value of the last `# bats test_tags=` directive
 before a given test will be used.
 
