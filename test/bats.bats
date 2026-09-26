@@ -134,8 +134,9 @@ setup() {
   [ "${lines[1]}" = "ok 1 a passing test" ]
 }
 
-@test "recursive Bats invocation works without exported helpers" {
+@test "recursive Bats invocation works without inherited launcher state" {
   unset -f bats_readlinkf
+  unset BATS_LIBEXEC
   reentrant_run bats "$FIXTURE_ROOT/passing.bats"
   [ "$status" -eq 0 ]
 }
