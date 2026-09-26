@@ -27,14 +27,12 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 * normalize BATS_ROOT from PowerShell on Windows (#1257)
 * normalize BATS_LIB_PATH from PowerShell on Windows (#1258)
 * pretty formatter colored the summary green when tests timed out or did not run (#538, #1263)
+* avoid blocking failing tests for full BATS_TEST_TIMEOUT (#1226)
+* claim parallel semaphore slots atomically (#1259)
 
 ### Changed
 
 * use native Rush in tests on macOS runners, bump Rush version to 0.10.0 (#1260)
-
-### Changed
-
-* claim parallel semaphore slots atomically (#1259)
 
 ### Documentation
 
