@@ -13,6 +13,12 @@ setup_file() {
   bats "$FIXTURE_ROOT/setup_file.bats"
 }
 
+@test "BATS_FILE_FIRST_TEST_NUMBER_IN_SUITE is readonly in setup_file" {
+  reentrant_run bats "$FIXTURE_ROOT/first_test_number_readonly.bats"
+  echo "$output"
+  [[ $status -eq 0 ]]
+}
+
 @test "teardown_file is run once per file" {
   # shellcheck disable=SC2031,SC2030
   export LOG="$BATS_TEST_TMPDIR/teardown_file_once.log"
