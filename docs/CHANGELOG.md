@@ -27,6 +27,7 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 * normalize BATS_ROOT from PowerShell on Windows (#1257)
 * normalize BATS_LIB_PATH from PowerShell on Windows (#1258)
 * pretty formatter colored the summary green when tests timed out or did not run (#538, #1263)
+* keep first suite test number globally readonly (#1268)
 
 ### Changed
 
