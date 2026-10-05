@@ -260,7 +260,7 @@ bats_find_processes_of() { # <parent-pid>
 
 # send signal to process and all its descendants
 bats_kill_processes_of() { # <parent-pid> [<signal>]
-  local -ir parent_pid="${1?}" 
+  local -ir parent_pid="${1?}"
   local -r signal=${2?}
   bats_find_processes_of "$parent_pid"
   kill "-$signal" "${child_pids[@]}"
@@ -278,16 +278,13 @@ bats_start_timeout_countdown() { # <timeout>
   fi
   # Start another process to kill the children of this process
   (
-    # with sleep in foreground this shell wouldn't receive signals,
-    # so we use wait below and kill sleep explicitly when signalled to do so
-    # On Windows the TERM signal does not seem to shut down sleep -> 
-    # close all fds to avoid blocking IO when sleep does not turn off
-    (eval exec {0..255}">&-"; sleep "$timeout") &
-    # shellcheck disable=SC2064
-    trap "kill $!; exit 0" TERM
+    # With sleep in foreground this shell would not receive signals, so wait
+    # for it in the background and kill it explicitly when signalled.
+    trap 'kill "$(jobs -pr)" 2>/dev/null; exit 0' TERM
+    sleep "$timeout" &
     wait
     trap '' TERM
-    bats_kill_processes_of $target_pid TERM
+    bats_kill_processes_of "$target_pid" TERM 2>/dev/null || true
   ) &
 }
 
@@ -336,10 +333,6 @@ bats_perform_test() {
     }
   fi
 
-  if [[ -n "${BATS_TEST_TIMEOUT:-}" ]]; then
-    bats_start_timeout_countdown "$BATS_TEST_TIMEOUT"
-    declare -r BATS_killer_pid=$!
-  fi
   BATS_TEST_COMPLETED=
   BATS_TEST_SKIPPED=${BATS_TEST_SKIPPED-}
   BATS_TEARDOWN_COMPLETED=
@@ -348,6 +341,11 @@ bats_perform_test() {
   # use parameter to mark this call as trap call
   # shellcheck disable=SC2064
   trap "bats_teardown_trap as-exit-trap" EXIT
+
+  if [[ -n "${BATS_TEST_TIMEOUT:-}" ]]; then
+    bats_start_timeout_countdown "$BATS_TEST_TIMEOUT"
+    declare -r BATS_killer_pid=$!
+  fi
 
   if [[ -n "$BATS_EXTENDED_SYNTAX" ]]; then
     printf 'begin %d %s\n' "$BATS_SUITE_TEST_NUMBER" "${BATS_TEST_NAME_PREFIX:-}$BATS_TEST_DESCRIPTION" >&3
