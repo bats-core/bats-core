@@ -48,9 +48,9 @@ bats_semaphore_acquire_slot() {
   local slot
   while true; do
     for ((slot = 0; slot < BATS_SEMAPHORE_NUMBER_OF_SLOTS; ++slot)); do
-      # POSIX directory operations are atomic and serializable, so only one
-      # process can successfully create a given slot directory.
-      if mkdir "$BATS_SEMAPHORE_DIR/slot-$slot" 2>/dev/null; then
+      # Bash noclobber creates the file with O_CREAT|O_EXCL, so only one
+      # process can successfully claim a given slot.
+      if (set -C; : > "$BATS_SEMAPHORE_DIR/slot-$slot") 2>/dev/null; then
         printf "%d\n" "$slot"
         return 0
       fi
@@ -61,6 +61,6 @@ bats_semaphore_acquire_slot() {
 
 bats_semaphore_release_slot() {
   # We don't need additional synchronization: only our process owns this slot
-  # directory, and releasing a slot cannot conflict with another process.
-  rmdir "$BATS_SEMAPHORE_DIR/slot-$1" # fails if we did not acquire this slot
+  # file, and releasing a slot cannot conflict with another process.
+  rm "$BATS_SEMAPHORE_DIR/slot-$1" # fails if we did not acquire this slot
 }
