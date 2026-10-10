@@ -27,6 +27,7 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 * normalize BATS_ROOT from PowerShell on Windows (#1257)
 * normalize BATS_LIB_PATH from PowerShell on Windows (#1258)
 * pretty formatter colored the summary green when tests timed out or did not run (#538, #1263)
+* make LICENSE.md machine-parsable (#1262)
 * protect Bats-owned execution variables (#1269)
 
 ### Changed
