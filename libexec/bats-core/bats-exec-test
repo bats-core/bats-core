@@ -284,7 +284,9 @@ bats_start_timeout_countdown() { # <timeout>
     sleep "$timeout" &
     wait
     trap '' TERM
-    bats_kill_processes_of "$target_pid" TERM 2>/dev/null || true
+    if ! bats_kill_processes_of "$target_pid" TERM; then
+      printf 'bats: timeout watchdog: failed to terminate test process tree (PID %s)\n' "$target_pid" >&2
+    fi
   ) &
 }
 
