@@ -344,7 +344,7 @@ bats_perform_test() {
 
   if [[ -n "${BATS_TEST_TIMEOUT:-}" ]]; then
     bats_start_timeout_countdown "$BATS_TEST_TIMEOUT"
-    declare -r BATS_killer_pid=$!
+    readonly BATS_killer_pid=$!
   fi
 
   if [[ -n "$BATS_EXTENDED_SYNTAX" ]]; then
