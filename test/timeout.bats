@@ -7,6 +7,13 @@ bats_require_minimum_version 1.5.0
   SECONDS=0
   TIMEOUT=10
   reentrant_run -0 env BATS_TEST_TIMEOUT=$TIMEOUT SLEEP=1 bats -T "$FIXTURE_ROOT/sleep2.bats"
+  # Docker's bash:rc currently uses obsolete Bash 5.3.0-rc2, which emits this internal diagnostic when the watchdog's background sleep exits under Bats' DEBUG trap.
+  local -a filtered_lines=()
+  local line
+  for line in "${lines[@]}"; do
+    [[ $line == *'DEBUG warning: run_pending_traps: recursive invocation while running trap for signal '* ]] || filtered_lines+=("$line")
+  done
+  lines=("${filtered_lines[@]}")
   [ "${lines[0]}" == '1..1' ]
   [[ "${lines[1]}" == 'ok 1 my sleep 1 in '*'ms' ]] || false
   [ "${#lines[@]}" -eq 2 ]
