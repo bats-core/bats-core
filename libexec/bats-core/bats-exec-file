@@ -301,7 +301,7 @@ bats_read_tests_list_file() {
     ((++line_number))
   done <"$TESTS_FILE"
   BATS_FILE_FIRST_TEST_NUMBER_IN_SUITE="$test_number_in_suite"
-  declare -ri BATS_FILE_FIRST_TEST_NUMBER_IN_SUITE # mark readonly (cannot merge assignment, because value would be lost)
+  readonly BATS_FILE_FIRST_TEST_NUMBER_IN_SUITE # mark global readonly
 }
 
 bats_run_tests() {
@@ -384,6 +384,9 @@ fi
 
 # requires the test list to be read but not empty
 bats_create_file_tempdirs
+
+# shellcheck disable=SC2034 # BATS_SUITE_TMPDIR is exposed to user code
+readonly BATS_TEST_FILENAME BATS_TEST_FILE_NUMBER BATS_FILE_TMPDIR BATS_SUITE_TMPDIR
 
 export BATS_OUT="${BATS_RUN_TMPDIR}/file/${BATS_TEST_FILE_NUMBER?}-${BATS_TEST_FILENAME##*/}.out"
 bats_export_preprocess_source_BATS_TEST_SOURCE
