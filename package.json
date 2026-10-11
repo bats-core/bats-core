@@ -8,6 +8,7 @@
   "repository": "github:bats-core/bats-core",
   "bugs": "https://github.com/bats-core/bats-core/issues",
   "files": [
+    "NOTICE.md",
     "bin",
     "libexec",
     "lib",
