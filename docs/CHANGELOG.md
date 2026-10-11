@@ -18,8 +18,6 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 
 ### Fixed
 
-* shfmt CI download follows redirects and fails when the downloaded
-  executable is empty (#1205)
 * avoid false duplicate errors for dynamic tests with argument prefixes, and
   detect duplicates with non-space `IFS` separators (#1249)
 * fix incorrect stack traces when `load` or `bats_load_library` fails (#1186, #1250)
@@ -33,6 +31,7 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 * preserve semaphore wrapper exit status (#1271)
 * protect Bats-owned execution variables (#1269)
 * fix missing newlines in `$BATS_TMPDIR`-error handling checks at startup (#1194)
+* use shfmt linter in CI (#1205, #1242, #1277, #1282)
 
 ### Changed
 
