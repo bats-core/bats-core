@@ -100,6 +100,7 @@ check_parallel_tests() { # <expected maximum parallelity>
 @test "setup_file is not over parallelized" {
   #shellcheck disable=SC2031
   export FILE_MARKER
+  # shellcheck disable=SC2030
   FILE_MARKER=$(mktemp "${BATS_RUN_TMPDIR}/file_marker.XXXXXX")
   #shellcheck disable=SC2031,SC2030
   export PARALLELITY=2
@@ -134,7 +135,7 @@ check_parallel_tests() { # <expected maximum parallelity>
 }
 
 @test "parallelity factor is met exactly" {
-  # shellcheck disable=SC2031
+  # shellcheck disable=SC2031,SC2030
   export MARKER_FILE="${BATS_TEST_TMPDIR}/marker" PARALLELITY=5 # run the 10 tests in 2 batches with 5 test each
   bats --jobs $PARALLELITY "$FIXTURE_ROOT/parallel_factor.bats"
   local current_parallel_count=0 maximum_parallel_count=0 total_count=0
@@ -162,6 +163,24 @@ check_parallel_tests() { # <expected maximum parallelity>
 @test "parallel mode correctly forwards failure return code" {
   reentrant_run bats --jobs 2 "$FIXTURE_ROOT/../bats/failing.bats"
   [[ "$status" -eq 1 ]]
+}
+
+@test "parallel mode uses the recorded status when wait fails" {
+  # Simulate Bash having discarded a completed child's saved status after PID
+  # reuse. See https://github.com/bats-core/bats-core/issues/1278.
+  # shellcheck disable=SC2031
+  export FILE_MARKER
+  FILE_MARKER=$(mktemp "${BATS_RUN_TMPDIR}/file_marker.XXXXXX")
+  # shellcheck disable=SC2031
+  export PARALLELITY=3
+  reentrant_run env BASH_ENV="$FIXTURE_ROOT/wait-failure.bash" \
+    bats --jobs "$PARALLELITY" "$FIXTURE_ROOT/parallel.bats"
+
+  [[ "$status" -eq 0 ]]
+  [[ "${lines[0]}" == "1..3" ]]
+  for t in {1..3}; do
+    [[ "${lines[$t]}" == "ok $t slow test $t" ]]
+  done
 }
 
 @test "--no-parallelize-across-files test file detects parallel execution" {
