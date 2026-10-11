@@ -15,7 +15,11 @@ flags=('--dummy-flag') # add a dummy flag to prevent unset variable errors on em
 setup_suite_file=''
 BATS_TRACE_LEVEL="${BATS_TRACE_LEVEL:-0}"
 BATS_SHOW_OUTPUT_OF_SUCCEEDING_TESTS=
-BATS_EMPTY_SUITE_STATUS=1
+if [[ -n "${BATS_ALLOW_EMPTY_SUITE:-}" ]]; then
+  BATS_EMPTY_SUITE_STATUS=0
+else
+  BATS_EMPTY_SUITE_STATUS=1
+fi
 
 abort() {
   printf 'Error: %s\n' "$1" >&2
@@ -107,7 +111,7 @@ while [[ "$#" -ne 0 ]]; do
 done
 
 if [[ "$num_jobs" != 1 ]]; then
-  if ! type -p "${parallel_binary_name}" >/dev/null && "${parallel_binary_name}" --version &>/dev/null && [[ -z "$bats_no_parallelize_across_files" ]]; then
+  if ! (type -p "${parallel_binary_name}" >/dev/null && "${parallel_binary_name}" --version &>/dev/null) && [[ -z "$bats_no_parallelize_across_files" ]]; then
     abort "Cannot execute \"${num_jobs}\" jobs without GNU parallel"
   fi
   # shellcheck source=lib/bats-core/semaphore.bash
@@ -193,7 +197,7 @@ printf '1..%d\n' "${test_count}"
 if [[ "${test_count}" == 0 ]]; then
   bats_exec_suite_status=$BATS_EMPTY_SUITE_STATUS
   if ((bats_exec_suite_status != 0)); then
-    printf "ERROR: Found no tests. (Try \`--allow-empty-suite\`?)" >&2
+    printf "ERROR: Found no tests. Use \`--allow-empty-suite\` or \`BATS_ALLOW_EMPTY_SUITE=1\` to suppress this error." >&2
   fi
   bats_exit_suite
 fi

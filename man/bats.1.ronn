@@ -80,6 +80,8 @@ OPTIONS
     Stop execution of suite on first failed test
   * `--allow-empty-suite`:
     Exit with code 0 (instead of the default code 1) when no tests are found.
+    Can also be set via `$BATS_ALLOW_EMPTY_SUITE` (to any non-empty value),
+    which keeps compatibility with Bats versions that don't know this flag.
   * `-c`, `--count`:
     Count the number of test cases without running any tests
   * `--code-quote-style <style>`:

@@ -42,7 +42,7 @@ An empty tag list matches tests without tags\.
 .IP "\(bu" 4
 \fB\-\-abort\fR: Stop execution of suite on first failed test
 .IP "\(bu" 4
-\fB\-\-allow\-empty\-suite\fR: Exit with code 0 (instead of the default code 1) when no tests are found\.
+\fB\-\-allow\-empty\-suite\fR: Exit with code 0 (instead of the default code 1) when no tests are found\. Can also be set via \fB$BATS_ALLOW_EMPTY_SUITE\fR (to any non\-empty value), which keeps compatibility with Bats versions that don't know this flag\.
 .IP "\(bu" 4
 \fB\-c\fR, \fB\-\-count\fR: Count the number of test cases without running any tests
 .IP "\(bu" 4

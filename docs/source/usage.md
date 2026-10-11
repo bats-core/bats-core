@@ -15,6 +15,10 @@ files ending with the `.bats` extension, or paths to directories containing test
 files. (`bats` will only execute `.bats` files at the top level of each
 directory; it will not recurse unless you specify the `-r` flag.)
 
+Use `--` to stop option parsing before test paths that start with `-`, for
+example `bats -- -example.bats`. All arguments after `--` are treated as paths,
+so options must come before it: `bats -r -- -test-directory`.
+
 Test cases from each file are run sequentially and in isolation. If all the test
 cases pass, `bats` exits with a `0` status code. If there are any failures,
 `bats` exits with a `1` status code.

@@ -95,3 +95,31 @@ HERE
   [[ "${lines[2]}" == *$'\x1b[0m\x1b[33;22m   timeout text'* ]]
   [[ "${lines[4]}" == *$'1 test, 0 failures, 1 timed out'* ]]
 }
+
+@test "pretty formatter summary is colorized red when tests did not run" {
+  run bats-format-pretty <<HERE
+1..3
+suite /test/path
+begin 1 test1
+ok 1 test1
+begin 2 test2
+ok 2 test2
+HERE
+
+  [ "${lines[3]}" == $'\033[0m\033[31;1m' ] # TODO: avoid checking for the leading reset too
+  [ "${lines[4]}" == '3 tests, 0 failures, 1 not run' ]
+  [ "${lines[5]}" == $'\033[0m' ]
+}
+
+@test "pretty formatter summary is colorized red on timeout" {
+  run bats-format-pretty <<HERE
+1..1
+suite /test/path
+begin 1 test1
+not ok 1 test1 # timeout after 1s
+HERE
+
+  [ "${lines[2]}" == $'\033[0m\033[31;1m' ] # TODO: avoid checking for the leading reset too
+  [ "${lines[3]}" == '1 test, 0 failures, 1 timed out' ]
+  [ "${lines[4]}" == $'\033[0m' ]
+}

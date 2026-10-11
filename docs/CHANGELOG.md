@@ -11,9 +11,31 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 
 ## [Unreleased]
 
+### Added
+
+* `--` option terminator to allow test paths starting with `-` (#867, #1251)
+* `$BATS_ALLOW_EMPTY_SUITE` environment variable as an alternative to `--allow-empty-suite`, which keeps test setups compatible with Bats versions before 1.14 that don't know the flag (#1240)
+
 ### Fixed
 
+* avoid false duplicate errors for dynamic tests with argument prefixes, and
+  detect duplicates with non-space `IFS` separators (#1249)
+* fix incorrect stack traces when `load` or `bats_load_library` fails (#1186, #1250)
 * pretty formatter was not the default on interactive shells anymore (#1220)
+* `--jobs` now aborts when GNU parallel is unavailable instead of failing later (#1237, #1238)
+* `bats_encode_test_name()` used the locale-dependent `[[:alnum:]]` character class, causing test names with non-ASCII characters to be silently skipped under some locales (#1236)
+* normalize BATS_ROOT from PowerShell on Windows (#1257)
+* normalize BATS_LIB_PATH from PowerShell on Windows (#1258)
+* pretty formatter colored the summary green when tests timed out or did not run (#538, #1263)
+* make LICENSE.md machine-parsable (#1262)
+
+### Changed
+
+* use native Rush in tests on macOS runners, bump Rush version to 0.10.0 (#1260)
+
+### Changed
+
+* claim parallel semaphore slots atomically (#1259)
 
 ### Documentation
 

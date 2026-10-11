@@ -6,7 +6,7 @@ bats_encode_test_name() {
   local result='test_'
   local hex_code
 
-  if [[ ! "$name" =~ [^[:alnum:]\ _-] ]]; then
+  if [[ ! "$name" =~ [^a-zA-Z0-9\ _-] ]]; then
     name="${name//_/-5f}"
     name="${name//-/-2d}"
     name="${name// /_}"
@@ -19,7 +19,7 @@ bats_encode_test_name() {
       char="${name:$i:1}"
       if [[ "$char" == ' ' ]]; then
         result+='_'
-      elif [[ "$char" =~ [[:alnum:]] ]]; then
+      elif [[ "$char" =~ [a-zA-Z0-9] ]]; then
         result+="$char"
       else
         printf -v 'hex_code' -- '-%02x' \'"$char"

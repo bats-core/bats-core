@@ -12,6 +12,12 @@ on:
       - master
   workflow_dispatch:
 
+# Group runs by workflow and PR/ref; release-triggered runs use a separate
+# `-release` suffix. Cancel an older run when a new one uses the same group.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}${{ github.event_name == 'release' && '-release' || '' }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
@@ -58,7 +64,7 @@ jobs:
   linux:
     strategy:
       matrix:
-        os: ['ubuntu-22.04', 'ubuntu-24.04']
+        os: ['ubuntu-22.04', 'ubuntu-24.04', 'ubuntu-26.04']
         env_vars:
           - ''
           # allow for some parallelity without GNU parallel, since it is not installed by default
@@ -69,7 +75,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Install rush
         run: |
-          curl -sSfL https://github.com/shenwei356/rush/releases/download/v0.5.0/rush_linux_amd64.tar.gz | sudo tar xzf - -C /usr/local/bin
+          curl -sSfL https://github.com/shenwei356/rush/releases/download/v0.10.0/rush_linux_amd64.tar.gz | sudo tar xzf - -C /usr/local/bin
         if: contains(matrix.env_vars, 'rush')
       - name: Run test on OS ${{ matrix.os }}
         shell: 'script -q -e -c "bash {0}"' # work around tty issues
@@ -93,7 +99,7 @@ jobs:
   npm_on_linux:
     strategy:
       matrix:
-        os: ['ubuntu-22.04', 'ubuntu-24.04']
+        os: ['ubuntu-22.04', 'ubuntu-24.04', 'ubuntu-26.04']
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -138,7 +144,7 @@ jobs:
   macos:
     strategy:
       matrix:
-        os: ['macos-14', 'macos-15']
+        os: ['macos-15', 'macos-26']
         env_vars:
           - ''
           # allow for some parallelity without GNU parallel, since it is not installed by default
@@ -151,7 +157,7 @@ jobs:
         run: brew install expect
       - name: Install rush
         run: |
-          curl -sSfL https://github.com/shenwei356/rush/releases/download/v0.5.0/rush_darwin_amd64.tar.gz | sudo tar xzf - -C /usr/local/bin
+          curl -sSfL https://github.com/shenwei356/rush/releases/download/v0.10.0/rush_darwin_arm64.tar.gz | sudo tar xzf - -C /usr/local/bin
         if: contains(matrix.env_vars, 'rush')
 
       - name: Check failing tests fail suite,
@@ -171,7 +177,7 @@ jobs:
   npm_on_macos:
     strategy:
       matrix:
-        os: ['macos-14', 'macos-15']
+        os: ['macos-15', 'macos-26']
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -255,10 +261,11 @@ jobs:
           - ""
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: acj/freebsd-firecracker-action@da029f050a7a2535fce96385727cf3d5768bd8bf # v0.10.1
+      - uses: acj/freebsd-firecracker-action@0fe13161c7d388eed0570eac668e1ba8fc1f1e4e # v0.10.4
         with:
           run-in-vm: |
             pkg install -y bash parallel ${{ matrix.packages }}
+            export LC_ALL=C
             time ./bin/bats --print-output-on-failure test/
 
   find_broken_symlinks:
