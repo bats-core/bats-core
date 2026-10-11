@@ -191,17 +191,24 @@ function teardown_file() {
 
 bats_forward_output_of_parallel_test() {
   local test_number_in_suite=$1
-  local status=0
-  wait "$(cat "$output_folder/$test_number_in_suite/pid")" || status=1
+  local PID status
+  read -r PID <"$output_folder/$test_number_in_suite/pid"
+  # The status is recorded by the wrapper because Bash can discard the saved
+  # status of an already-reaped child when its PID is reused.
+  wait "$PID" 2>/dev/null || :
+  if ! read -r status <"$output_folder/$test_number_in_suite/status"; then
+    printf 'bats: parallel test %d did not record an exit status\n' "$test_number_in_suite" >&2
+    return 1
+  fi
   cat "$output_folder/$test_number_in_suite/stdout"
   cat "$output_folder/$test_number_in_suite/stderr" >&2
-  return $status
+  [[ $status -eq 0 ]]
 }
 
 bats_is_next_parallel_test_finished() {
   local PID
   # get the pid of the next potentially finished test
-  PID=$(cat "$output_folder/$((test_number_in_suite_of_last_finished_test + 1))/pid")
+  read -r PID <"$output_folder/$((test_number_in_suite_of_last_finished_test + 1))/pid"
   # try to send a signal to this process
   # if it fails, the process exited,
   # if it succeeds, the process is still running
