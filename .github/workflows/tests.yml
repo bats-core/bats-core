@@ -34,13 +34,11 @@ jobs:
     if: ${{github.event.pull_request}}
 
   shfmt:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - run: |
-          curl https://github.com/mvdan/sh/releases/download/v3.5.1/shfmt_v3.5.1_linux_amd64 -o shfmt
-          chmod a+x shfmt
-      - run: ./shfmt --diff .
+      - run: sudo apt-get update -y && sudo apt-get install -y shfmt
+      - run: shfmt --diff .
 
   # Ensure we detect when a change disables Bats from reporting failure.
   # This would not be detectable by Bats' selftests.
