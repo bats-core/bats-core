@@ -7,3 +7,11 @@
 @test waiting {
     sleep 1
 }
+
+@test filler {
+    sleep 1
+}
+
+@test marking {
+    echo "$BATS_TEST_SOURCE" >> "${MARKER_FILE?}"
+}
