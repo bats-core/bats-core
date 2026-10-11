@@ -32,6 +32,7 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 ### Changed
 
 * use native Rush in tests on macOS runners, bump Rush version to 0.10.0 (#1260)
+* parallel: claim semaphore slots with noclobber(#1279)
 
 ### Changed
 
