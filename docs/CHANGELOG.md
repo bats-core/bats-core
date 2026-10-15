@@ -30,6 +30,7 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 * make LICENSE.md machine-parsable (#1262)
 * preserve semaphore wrapper exit status (#1271)
 * protect Bats-owned execution variables (#1269)
+* fix missing newlines in `$BATS_TMPDIR`-error handling checks at startup (#1194)
 
 ### Changed
 
