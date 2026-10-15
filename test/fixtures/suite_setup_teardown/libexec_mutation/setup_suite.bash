@@ -1,3 +1,5 @@
 setup_suite() {
-  export BATS_LIBEXEC="$BATS_RUN_TMPDIR/missing-libexec" || true
+  if [[ $(declare -p BATS_LIBEXEC) != "declare -"*r* ]]; then
+    export BATS_LIBEXEC="$BATS_RUN_TMPDIR/missing-libexec"
+  fi
 }
