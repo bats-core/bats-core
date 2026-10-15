@@ -30,6 +30,7 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 * make LICENSE.md machine-parsable (#1262)
 * preserve semaphore wrapper exit status (#1271)
 * protect Bats-owned execution variables (#1269)
+* stop install_libs after cleanup signals (#1272)
 
 ### Changed
 
