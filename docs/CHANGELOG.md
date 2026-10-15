@@ -29,6 +29,7 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 * pretty formatter colored the summary green when tests timed out or did not run (#538, #1263)
 * make LICENSE.md machine-parsable (#1262)
 * preserve semaphore wrapper exit status (#1271)
+* protect Bats-owned execution variables (#1269)
 
 ### Changed
 
