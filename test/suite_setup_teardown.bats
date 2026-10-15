@@ -64,6 +64,26 @@ setup() {
   EXPECTED_VALUE=exported_var reentrant_run -0 bats "$FIXTURE_ROOT/exported_vars/"
 }
 
+@test "PATH mutations in setup_suite do not break Bats internals" {
+  reentrant_run -0 bats "$FIXTURE_ROOT/path_mutation/"
+  [ "${lines[0]}" = "1..1" ]
+  [ "${lines[1]}" = "ok 1 passing" ]
+  [ "${#lines[@]}" -eq 2 ]
+}
+
+@test "PATH mutations in setup_suite do not invoke Bash from PATH" {
+  local helper_dir="$BATS_TEST_TMPDIR/helpers"
+  mkdir "$helper_dir"
+  ln -s "$BATS_ROOT/libexec/bats-core/bats-exec-file" "$helper_dir/bats-exec-file"
+  printf '%s\n' '#!/bin/sh' 'exit 127' >"$helper_dir/bash"
+  chmod +x "$helper_dir/bash"
+
+  PATH_MUTATION_VALUE="$helper_dir:$BATS_SAVED_PATH" reentrant_run -0 bats "$FIXTURE_ROOT/path_mutation/"
+  [ "${lines[0]}" = "1..1" ]
+  [ "${lines[1]}" = "ok 1 passing" ]
+  [ "${#lines[@]}" -eq 2 ]
+}
+
 @test "syntax errors in setup_suite.bash are reported and lead to non zero exit code" {
   LANG=C reentrant_run ! bats --setup-suite-file "$FIXTURE_ROOT/syntax_error/setup_suite_no_shellcheck" "$FIXTURE_ROOT/syntax_error/"
   [[ "${lines[1]}" == "$FIXTURE_ROOT/syntax_error/setup_suite_no_shellcheck: line 2: syntax error: unexpected end of file"* ]]
