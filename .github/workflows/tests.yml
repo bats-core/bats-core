@@ -277,10 +277,10 @@ jobs:
 
   rpm:
     runs-on: ubuntu-latest
-    container: almalinux:8
+    container: almalinux:10
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - run: dnf install -y rpm-build rpmdevtools
+      - run: dnf install -y rpm-build rpmdevtools util-linux
       - name: Build and install RPM and dependencies
         run: |
           rpmdev-setuptree

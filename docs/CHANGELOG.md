@@ -32,6 +32,7 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 ### Changed
 
 * use native Rush in tests on macOS runners, bump Rush version to 0.10.0 (#1260)
+* run CI tests for RPM with AlmaLinux 10 (was 8) (#1283)
 
 ### Changed
 
