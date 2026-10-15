@@ -102,8 +102,11 @@ Is there a mechanism to add file/test specific functionality to a common setup f
 ----------------------------------------------------------------------------------------
 
 Often the setup consists of parts that are common between different files of a test suite and parts that are specific to each file.
-There is no suite wide setup functionality yet, so you should extract these common setup steps into their own file (e.g. `common-test-setup.sh`) and function (e.g. `commonSetup() {}`),
-which can be `source`d or `load`ed and call it in `setup_file` or `setup`.
+To share the common parts, you should extract these common setup steps into their own file (e.g. `common-test-setup.sh`) and function (e.g. `commonSetup() {}`),
+which can be loaded via `source` or `load` and called in `setup_file` or `setup`.
+
+Note that this is about setup that runs again for each file or test.
+If you instead need setup that runs only once for the entire suite, use `setup_suite` (see `How can I setup/cleanup before/after all tests?`_).
 
 How can I use helper libraries like bats-assert?
 ------------------------------------------------

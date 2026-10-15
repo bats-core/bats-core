@@ -76,12 +76,18 @@ An empty tag list matches tests without tags.
 OPTIONS
 -------
 
+  * `--abort`:
+    Stop execution of suite on first failed test
+  * `--allow-empty-suite`:
+    Exit with code 0 (instead of the default code 1) when no tests are found.
+    Can also be set via `$BATS_ALLOW_EMPTY_SUITE` (to any non-empty value),
+    which keeps compatibility with Bats versions that don't know this flag.
   * `-c`, `--count`:
     Count the number of test cases without running any tests
   * `--code-quote-style <style>`:
     A two character string of code quote delimiters or `custom`
-    which requires setting `$BATS_BEGIN_CODE_QUOTE` and 
-    `$BATS_END_CODE_QUOTE`. 
+    which requires setting `$BATS_BEGIN_CODE_QUOTE` and
+    `$BATS_END_CODE_QUOTE`.
     Can also be set via `$BATS_CODE_QUOTE_STYLE`.
   * `--line-reference-format`
     Controls how file/line references e.g. in stack traces are printed:
@@ -90,6 +96,8 @@ OPTIONS
       - uri: file:///tests/a.bats:1
       - custom: provide your own via defining bats_format_file_line_reference_custom
                 with parameters <filename> <line>, store via `printf -v "$output"`
+  * `--errexit`:
+    Enable errexit (`set -e`) for commands run in `run`
   * `-f`, `--filter <regex>`:
     Filter test cases by names matching the regular expression
   * `-F`, `--formatter <type>`:
@@ -101,7 +109,7 @@ OPTIONS
       failed - runs tests that failed or were not present in the last run
       missed - runs tests that were not present in the last run
   * `--filter-tags <comma-separated-tag-list>`:
-    Only run tests that match all the tags in the list (`&&`). You can negate a 
+    Only run tests that match all the tags in the list (`&&`). You can negate a
     tag via prepending `!`.
     Specifying this flag multiple times allows for logical or (`||`):
     `--filter-tags A,B --filter-tags A,!C` matches tags `(A && B) || (A && !C)`
@@ -111,12 +119,16 @@ OPTIONS
     Display this help message
   * `-j`, `--jobs <jobs>`:
     Number of parallel jobs (requires GNU parallel)
+  * `--negative-filter <regex>`:
+    Only run tests that do not match the regular expression
   * `--no-tempdir-cleanup`:
     Preserve test output temporary directory
   * `--no-parallelize-across-files`:
     Serialize test file execution instead of running them in parallel (requires --jobs >1)
   * `--no-parallelize-within-files`:
     Serialize test execution within files instead of running them in parallel (requires --jobs >1)
+  * `--parallel-binary-name <name>`:
+    Name of parallel binary
   * `--report-formatter <type>`:
     Switch between reporters (same options as --formatter)
   * `-o`, `--output <dir>`:
@@ -187,6 +199,3 @@ COPYRIGHT
 (c) 2011-2016 Sam Stephenson
 
 Bats is released under the terms of an MIT-style license.
-
-
-

@@ -710,13 +710,13 @@ There are several global variables you can use to introspect on Bats tests:
 - `$BATS_TEST_DIRNAME` is the directory in which the Bats test file is located.
 - `$BATS_TEST_NAMES` is an array of function names for each test case.
 - `$BATS_TEST_NAME` is the name of the function containing the current test case.
-- `BATS_TEST_NAME_PREFIX` will be prepended to the description of each test on 
+- `$BATS_TEST_NAME_PREFIX` will be prepended to the description of each test on
    stdout and in reports.
 - `$BATS_TEST_DESCRIPTION` is the description of the current test case.
-- `BATS_TEST_RETRIES` is the maximum number of additional attempts that will be
+- `$BATS_TEST_RETRIES` is the maximum number of additional attempts that will be
   made on a failed test before it is finally considered failed.
   The default of 0 means the test must pass on the first attempt.
-- `BATS_TEST_TIMEOUT` is the number of seconds after which a test (including setup)
+- `$BATS_TEST_TIMEOUT` is the number of seconds after which a test (including setup)
   will be aborted and marked as failed. Updates to this value in `setup()` or `@test`
   cannot change the running timeout countdown, so the latest useful update location
   is `setup_file()`.

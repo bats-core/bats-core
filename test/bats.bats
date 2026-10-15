@@ -22,6 +22,82 @@ setup() {
   [ "${lines[1]%% *}" == 'Usage:' ]
 }
 
+@test "-- stops option parsing before test paths" {
+  reentrant_run bats -- "$FIXTURE_ROOT/passing.bats"
+  [ "$status" -eq 0 ]
+  [ "${lines[0]}" = '1..1' ]
+  [ "${lines[1]}" = 'ok 1 a passing test' ]
+}
+
+@test "-- preserves option-like test filenames" {
+  local filename
+  for filename in -tr --count '-test with spaces.bats'; do
+    cp "$FIXTURE_ROOT/passing.bats" "$BATS_TEST_TMPDIR/$filename"
+  done
+  cd "$BATS_TEST_TMPDIR"
+  reentrant_run bats -- -tr --count '-test with spaces.bats'
+  [ "$status" -eq 0 ]
+  [ "${lines[0]}" = '1..3' ]
+  [ "${lines[3]}" = 'ok 3 a passing test' ]
+}
+
+@test "-- is a literal test filename after the option terminator" {
+  cp "$FIXTURE_ROOT/passing.bats" "$BATS_TEST_TMPDIR/--"
+  cd "$BATS_TEST_TMPDIR"
+  reentrant_run bats -- --
+  [ "$status" -eq 0 ]
+  [ "${lines[0]}" = '1..1' ]
+  [ "${lines[1]}" = 'ok 1 a passing test' ]
+}
+
+@test "-- preserves test paths before and after it" {
+  cp "$FIXTURE_ROOT/passing.bats" "$BATS_TEST_TMPDIR/-f"
+  cd "$BATS_TEST_TMPDIR"
+  reentrant_run bats "$FIXTURE_ROOT/passing.bats" -c -- -f "$FIXTURE_ROOT/passing.bats"
+  [ "$status" -eq 0 ]
+  [ "$output" = 3 ]
+}
+
+@test "-- supports option-like directories with bundled options" {
+  mkdir -p "$BATS_TEST_TMPDIR/-tr/subdirectory"
+  cp "$FIXTURE_ROOT/passing.bats" "$BATS_TEST_TMPDIR/-tr/subdirectory/test.bats"
+  cd "$BATS_TEST_TMPDIR"
+  reentrant_run bats -cr -- -tr
+  [ "$status" -eq 0 ]
+  [ "$output" = 1 ]
+}
+
+@test "-- supports test paths within option-like directories" {
+  mkdir "$BATS_TEST_TMPDIR/-directory"
+  cp "$FIXTURE_ROOT/passing.bats" "$BATS_TEST_TMPDIR/-directory/test.bats"
+  cd "$BATS_TEST_TMPDIR"
+  reentrant_run bats -- -directory/test.bats
+  [ "$status" -eq 0 ]
+  [ "${lines[0]}" = '1..1' ]
+  [ "${lines[1]}" = 'ok 1 a passing test' ]
+}
+
+@test "-- without a test path prints the missing test error" {
+  reentrant_run bats --
+  [ "$status" -eq 1 ]
+  [ "${lines[0]}" = 'Error: Must specify at least one <test>' ]
+}
+
+@test "-- as an option value does not stop option parsing" {
+  printf '@test "test -- marker" { true; }\n' >"$BATS_TEST_TMPDIR/marker.bats"
+  reentrant_run bats -f -- -ct "$BATS_TEST_TMPDIR/marker.bats"
+  [ "$status" -eq 0 ]
+  [ "$output" = 1 ]
+}
+
+@test "-- can follow an option value containing --" {
+  printf '@test "test -- marker" { true; }\n' >"$BATS_TEST_TMPDIR/-tr"
+  cd "$BATS_TEST_TMPDIR"
+  reentrant_run bats -cf -- -- -tr
+  [ "$status" -eq 0 ]
+  [ "$output" = 1 ]
+}
+
 @test "-v and --version print version number" {
   reentrant_run bats -v
   [ $status -eq 0 ]
@@ -40,10 +116,15 @@ setup() {
   [ "$(expr "$output" : ".*does not exist")" -ne 0 ]
 }
 
-@test "empty test file runs zero tests" {
-  reentrant_run bats "$FIXTURE_ROOT/empty.bats"
-  [ $status -eq 0 ]
-  [ "$output" = "1..0" ]
+@test "empty test file runs zero tests but returns non-zero exit code" {
+  bats_require_minimum_version 1.5.0
+  reentrant_run --separate-stderr -1 bats "$FIXTURE_ROOT/empty.bats"
+
+  [ "${lines[0]}" = "1..0" ]
+  [ "${#lines[@]}" -eq 1 ]
+
+  [ "${stderr_lines[0]}" = "ERROR: Found no tests. Use \`--allow-empty-suite\` or \`BATS_ALLOW_EMPTY_SUITE=1\` to suppress this error." ]
+  [ "${#stderr_lines[@]}" -eq 1 ]
 }
 
 @test "one passing test" {
@@ -358,7 +439,6 @@ setup() {
     if [[ -z "${BATS_NO_PARALLELIZE_ACROSS_FILES:-}" ]]; then
       type -p parallel &>/dev/null || skip "Don't check file parallelized without GNU parallel"
     fi
-    (type -p flock &>/dev/null || type -p shlock &>/dev/null) || skip "Don't check parallelized without flock/shlock "
   fi
 
   # PATH required for windows
@@ -522,6 +602,24 @@ END_OF_ERR_MSG
   [[ "${lines[1]}" == "ok 1 test 1" ]]
   [[ "${lines[2]}" == "ok 2 test 2 with	TAB in name" ]]
   [[ "${lines[3]}" == "ok 3 test 3" ]]
+}
+
+@test "test names with non-ASCII characters run under a UTF-8 locale (see #1233)" {
+  if ! locale -a 2>/dev/null | grep -qi '^en_US\.utf-\?8$'; then
+    skip "en_US.UTF-8 locale is not available on this system"
+  fi
+
+  # shellcheck disable=SC2030,SC2031
+  REENTRANT_RUN_PRESERVE+=(LC_ALL)
+  LC_ALL=en_US.UTF-8 reentrant_run --separate-stderr bats "$FIXTURE_ROOT/non_ascii_test_names.bats"
+  [ "$status" -eq 0 ]
+  [ "${lines[0]}" = "1..6" ]
+  # all 6 tests must actually run (none may be silently skipped/"ghosted"
+  # due to locale-dependent [[:alnum:]] matching in bats_encode_test_name)
+  local ok_count
+  ok_count="$(grep -c '^ok ' <<<"$output")"
+  [ "$ok_count" -eq 6 ]
+  [ -z "$stderr" ]
 }
 
 @test "report correct line on unset variables" {
@@ -746,7 +844,6 @@ END_OF_ERR_MSG
 
 @test "Parallel mode works on MacOS with over subscription (issue #433)" {
   type -p "${BATS_PARALLEL_BINARY_NAME:-"parallel"}" &>/dev/null || skip "--jobs requires GNU parallel"
-  (type -p flock &>/dev/null || type -p shlock &>/dev/null) || skip "--jobs requires flock/shlock"
   reentrant_run bats -j 2 "$FIXTURE_ROOT/issue-433"
 
   [ "$status" -eq 0 ]
@@ -1177,23 +1274,6 @@ END_OF_ERR_MSG
   rm -rf "$relative_output_dir"
 }
 
-@test "Tell about missing flock and shlock" {
-  if ! command -v parallel; then
-    skip "this test requires GNU parallel to be installed"
-  fi
-  if command -v flock; then
-    skip "this test requires flock not to be installed"
-  fi
-  if command -v shlock; then
-    skip "this test requires flock not to be installed"
-  fi
-
-  bats_require_minimum_version 1.5.0
-  reentrant_run ! bats --jobs 2 "$FIXTURE_ROOT/parallel.bats"
-  [ "${lines[0]}" == "ERROR: flock/shlock is required for parallelization within files!" ]
-  [ "${#lines[@]}" -eq 1 ]
-}
-
 @test "Test with a name that is waaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaay too long" {
   skip "This test should only check if the long name chokes bats' internals during execution"
 }
@@ -1280,6 +1360,7 @@ END_OF_ERR_MSG
   else
     normalize_variable_list() {
       # `declare -p`: declare -X VAR_NAME="VALUE"
+      # shellcheck disable=SC2030 # false positive `$_` (see https://github.com/koalaman/shellcheck/issues/3478)
       while IFS=' =' read -r _declare _ variable _; do
         if [[ "$_declare" == declare ]]; then # skip multiline variables' values
           printf "%s\n" "$variable"
@@ -1477,8 +1558,8 @@ END_OF_ERR_MSG
   bats_require_minimum_version 1.5.0
   reentrant_run -0 bats "$FIXTURE_ROOT/passing.bats" --report-formatter "$REPORT_FORMATTER" --output "$BATS_TEST_TMPDIR"
 
-  echo "'$(< "$BATS_TEST_TMPDIR/report.log")'"
-  [ "$(< "$BATS_TEST_TMPDIR/report.log")" = Finished ]
+  echo "'$(<"$BATS_TEST_TMPDIR/report.log")'"
+  [ "$(<"$BATS_TEST_TMPDIR/report.log")" = Finished ]
 }
 
 @test "Failing report formatter fails test run" {
@@ -1522,6 +1603,104 @@ END_OF_ERR_MSG
   [ "${lines[15]}" == "# parametrized_test th\\ ree: th ree" ] # check that parameters gets passed
   [ "${lines[16]}" == "ok 7 normal test2" ]
   [ "${#lines[*]}" -eq 17 ]
+}
+
+@test "dynamic argument prefixes are distinct in either registration order" {
+  local order expected_log
+  local log="$BATS_TEST_TMPDIR/registration.log"
+  for order in long-first short-first; do
+    : >|"$log"
+    reentrant_run env REGISTRATION_CASE="$order" REGISTRATION_LOG="$log" \
+      bats "$FIXTURE_ROOT/dynamic_test_registration_prefix.bats"
+    [ "$status" -eq 0 ]
+    [ "${lines[0]}" == '1..2' ]
+    if [[ $order == long-first ]]; then
+      [ "${lines[1]}" == 'ok 1 long one' ]
+      [ "${lines[2]}" == 'ok 2 short one' ]
+      expected_log=$'2 <--format> <plain>\n0'
+    else
+      [ "${lines[1]}" == 'ok 1 short one' ]
+      [ "${lines[2]}" == 'ok 2 long one' ]
+      expected_log=$'0\n2 <--format> <plain>'
+    fi
+    [ "$(<"$log")" == "$expected_log" ]
+  done
+}
+
+@test "dynamic argument prefixes preserve spaces glob characters and empty values" {
+  local registration_case expected_log
+  local log="$BATS_TEST_TMPDIR/registration.log"
+  for registration_case in multi-word glob empty; do
+    : >|"$log"
+    reentrant_run env REGISTRATION_CASE="$registration_case" REGISTRATION_LOG="$log" \
+      bats "$FIXTURE_ROOT/dynamic_test_registration_prefix.bats"
+    [ "$status" -eq 0 ]
+    [ "${lines[0]}" == '1..2' ]
+    [ "${lines[1]}" == 'ok 1 long one' ]
+    [ "${lines[2]}" == 'ok 2 short one' ]
+    case "$registration_case" in
+    multi-word) expected_log=$'2 <--format> <plain text>\n1 <--format>' ;;
+    glob) expected_log=$'2 <*> <extra>\n1 <*>' ;;
+    empty) expected_log=$'1 <>\n0' ;;
+    esac
+    [ "$(<"$log")" == "$expected_log" ]
+  done
+}
+
+@test "dynamic test registration still rejects identical identities" {
+  local log="$BATS_TEST_TMPDIR/registration.log"
+  reentrant_run env REGISTRATION_CASE=duplicate REGISTRATION_LOG="$log" \
+    bats "$FIXTURE_ROOT/dynamic_test_registration_prefix.bats"
+  [ "$status" -eq 1 ]
+  [[ ${lines[0]} == 'ERROR: Duplicate test name(s) in file '* ]]
+  [[ ${lines[0]} == *'record_args\ --format\ plain' ]]
+  [ ! -s "$log" ]
+}
+
+@test "dynamic duplicate detection is independent of the array join separator" {
+  local registration_case
+  local log="$BATS_TEST_TMPDIR/registration.log"
+  for registration_case in duplicate-comma duplicate-empty-ifs; do
+    reentrant_run env REGISTRATION_CASE="$registration_case" REGISTRATION_LOG="$log" \
+      bats "$FIXTURE_ROOT/dynamic_test_registration_prefix.bats"
+    [ "$status" -eq 1 ]
+    [[ ${lines[0]} == 'ERROR: Duplicate test name(s) in file '* ]]
+    [ ! -s "$log" ]
+  done
+}
+
+@test "dynamic argument prefixes work with nounset and unset IFS" {
+  local registration_case
+  local log="$BATS_TEST_TMPDIR/registration.log"
+  for registration_case in nounset unset-ifs; do
+    : >|"$log"
+    reentrant_run env REGISTRATION_CASE="$registration_case" REGISTRATION_LOG="$log" \
+      bats "$FIXTURE_ROOT/dynamic_test_registration_prefix.bats"
+    [ "$status" -eq 0 ]
+    [ "${lines[0]}" == '1..2' ]
+    [ "$(<"$log")" == $'2 <--format> <plain>\n0' ]
+  done
+}
+
+@test "dynamic test identities are scoped to each file" {
+  local log="$BATS_TEST_TMPDIR/registration.log"
+  local second_file="$BATS_TEST_TMPDIR/another [file].bats"
+  cp "$FIXTURE_ROOT/dynamic_test_registration_prefix.bats" "$second_file"
+  reentrant_run env REGISTRATION_CASE=single REGISTRATION_LOG="$log" \
+    bats "$FIXTURE_ROOT/dynamic_test_registration_prefix.bats" "$second_file"
+  [ "$status" -eq 0 ]
+  [ "${lines[0]}" == '1..2' ]
+  [ "$(<"$log")" == $'2 <--format> <plain>\n2 <--format> <plain>' ]
+}
+
+@test "dynamic prefix registration retains name filtering" {
+  local log="$BATS_TEST_TMPDIR/registration.log"
+  reentrant_run env REGISTRATION_CASE=long-first REGISTRATION_LOG="$log" \
+    bats --filter 'short one' "$FIXTURE_ROOT/dynamic_test_registration_prefix.bats"
+  [ "$status" -eq 0 ]
+  [ "${lines[0]}" == '1..1' ]
+  [ "${lines[1]}" == 'ok 1 short one' ]
+  [ "$(<"$log")" == '0' ]
 }
 
 @test "IFS is preserved in all contexts" {
@@ -1624,9 +1803,6 @@ END_OF_ERR_MSG
   if ! type -p parallel &>/dev/null; then
     skip "Requires GNU parallel"
   fi
-  if ! (type -p flock &>/dev/null || type -p shlock &>/dev/null); then
-    skip "Requires flock/shlock"
-  fi
   if [[ ${BATS_PARALLEL_BINARY_NAME-} == rush ]]; then
     skip "--halt only works for GNU parallel"
   fi
@@ -1675,4 +1851,60 @@ END_OF_ERR_MSG
   [[ "${lines[3]}" =~ "Step 2: should not appear with errexit" ]]
   [ "${lines[4]}" == "ok 2 passing function works" ]
   [ "${#lines[@]}" == 5 ]
+}
+
+@test "Bats's DEBUG trap should not overwrite \$_ (#1208)" {
+  # set $_
+  : '<lastarg#1208>'
+
+  # shellcheck disable=SC2031 # see https://github.com/koalaman/shellcheck/issues/3478
+  [ "$_" == '<lastarg#1208>' ] # check that $_ is preserved
+}
+
+@test "--allow-empty-suite fails when there are tests" {
+  bats_require_minimum_version 1.5.0
+  reentrant_run -0 bats --allow-empty-suite "$FIXTURE_ROOT/passing.bats"
+}
+
+@test "--allow-empty-suite exits successfully on empty suite" {
+  bats_require_minimum_version 1.5.0
+  reentrant_run --separate-stderr -0 bats --allow-empty-suite "$FIXTURE_ROOT/empty.bats"
+
+  [ "${lines[0]}" = "1..0" ]
+  [ "${#lines[@]}" -eq 1 ]
+  [ "${#stderr_lines[@]}" -eq 0 ]
+}
+
+@test "BATS_ALLOW_EMPTY_SUITE exits successfully on empty suite" {
+  bats_require_minimum_version 1.5.0
+  reentrant_run --separate-stderr -0 env BATS_ALLOW_EMPTY_SUITE=1 bats "$FIXTURE_ROOT/empty.bats"
+
+  [ "${lines[0]}" = "1..0" ]
+  [ "${#lines[@]}" -eq 1 ]
+  [ "${#stderr_lines[@]}" -eq 0 ]
+}
+
+@test "empty BATS_ALLOW_EMPTY_SUITE does not allow an empty suite" {
+  bats_require_minimum_version 1.5.0
+  reentrant_run --separate-stderr -1 env BATS_ALLOW_EMPTY_SUITE= bats "$FIXTURE_ROOT/empty.bats"
+
+  [ "${lines[0]}" = "1..0" ]
+  [ "${stderr_lines[0]}" = "ERROR: Found no tests. Use \`--allow-empty-suite\` or \`BATS_ALLOW_EMPTY_SUITE=1\` to suppress this error." ]
+}
+
+@test "BATS_ALLOW_EMPTY_SUITE does not fail when there are tests" {
+  bats_require_minimum_version 1.5.0
+  reentrant_run -0 env BATS_ALLOW_EMPTY_SUITE=1 bats "$FIXTURE_ROOT/passing.bats"
+}
+
+@test "empty testfile path is an error" {
+  bats_require_minimum_version 1.5.0
+
+  reentrant_run -1 bats ""
+  [ "${lines[0]}" = "Error: File path must not be empty! (Path number 1)" ]
+  [ ${#lines[@]} -eq 1 ]
+
+  reentrant_run -1 bats "$FIXTURE_ROOT/passing.bats" ""
+  [ "${lines[0]}" = "Error: File path must not be empty! (Path number 2)" ]
+  [ ${#lines[@]} -eq 1 ]
 }

@@ -5,6 +5,56 @@ setup() {
   fixtures formatter
 }
 
+@test "default formatter in CI is TAP" {
+  bats_require_minimum_version 1.5.0
+  reentrant_run -0 -- env CI=1 bats "$FIXTURE_ROOT/passing.bats"
+  [ "${lines[0]}" = "1..1" ]
+  [ "${lines[1]}" = "ok 1 a passing test" ]
+  [ ${#lines[@]} -eq 2 ]
+}
+
+@test "default formatter in interactive shell is interactive pretty" {
+  bats_require_minimum_version 1.5.0
+  unset CI
+  if [[ "$OSTYPE" == "linux"* ]]; then
+    script_cmd=(script -q /dev/null -c "bats \"$FIXTURE_ROOT/passing.bats\"")
+  else
+    script_cmd=(script -q /dev/null bats "$FIXTURE_ROOT/passing.bats")
+  fi
+  if [[ "$OSTYPE" == msys || "$OSTYPE" == cygwin ]]; then
+    skip "script is not available on $OSTYPE"
+  fi
+  if ! type script; then
+    echo "script executable not available on $OSTYPE" || false
+  fi
+  reentrant_run -0 -- "${script_cmd[@]}"
+  expected_lines=(
+    $'\x1b[34;1mpassing.bats'
+    $'\x1b[2G\x1b[1G ✓ a passing test\x1b[K'
+    $'\x1b[0m\x1b[32;1m'
+    $'1 test, 0 failures'
+    $'\x1b[0m'
+  )
+
+  for ((i=0; i < ${#expected_lines[@]}; ++i)); do
+    if ! [[ "${lines[i]}" = *"${expected_lines[i]}"* ]]; then
+      echo "line $i:"
+      diff --unified <(xxd <<<"${lines[i]}") <(xxd <<<"${expected_lines[i]}")
+    fi
+  done
+}
+
+@test "pretty formatter in CI is non-interactive" {
+  bats_require_minimum_version 1.5.0
+  reentrant_run -0 -- env CI=1 bats --pretty "$FIXTURE_ROOT/passing.bats"
+  [ "${lines[0]}" = $'\x1b[34;1mpassing.bats' ]
+  [ "${lines[1]}" = $'\x1b[0m ✓ a passing test\x1b[K' ]
+  [ "${lines[2]}" = $'\x1b[0m\x1b[32;1m' ]
+  [ "${lines[3]}" = $'1 test, 0 failures' ]
+  [ "${lines[4]}" = $'\x1b[0m' ]
+  [ ${#lines[@]} -eq 5 ]
+}
+
 @test "tap passing and skipping tests" {
   reentrant_run filter_control_sequences bats --formatter tap "$FIXTURE_ROOT/passing_and_skipping.bats"
   [ $status -eq 0 ]

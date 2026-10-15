@@ -7,10 +7,36 @@ setup_file() {
   export SETUP_FILE_EXPORT_TEST=true
 }
 
+assert_variables_are_readonly() {
+  local scope=$1
+  shift
+  reentrant_run env REASSIGNMENT_SCOPE="$scope" VARIABLES_TO_REASSIGN="$*" \
+    bats "$FIXTURE_ROOT/variables_readonly.bats"
+  echo "$output"
+  [[ $status -eq 0 ]]
+}
+
 @test "setup_file is run once per file" {
   # shellcheck disable=SC2031,SC2030
   export LOG="$BATS_TEST_TMPDIR/setup_file_once.log"
   bats "$FIXTURE_ROOT/setup_file.bats"
+}
+
+@test "Bats-owned variables are readonly in setup_file" {
+  assert_variables_are_readonly setup_file \
+    BATS_FILE_FIRST_TEST_NUMBER_IN_SUITE \
+    BATS_TEST_FILENAME \
+    BATS_TEST_FILE_NUMBER \
+    BATS_FILE_TMPDIR \
+    BATS_SUITE_TMPDIR
+}
+
+@test "Bats-owned variables are readonly in test" {
+  assert_variables_are_readonly test \
+    BATS_TEST_FILENAME \
+    BATS_TEST_FILE_NUMBER \
+    BATS_FILE_TMPDIR \
+    BATS_SUITE_TMPDIR
 }
 
 @test "teardown_file is run once per file" {

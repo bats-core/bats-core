@@ -10,7 +10,6 @@ BATS_TEST_TIMEOUT=10 # only intended for the "short form ..."" test
 
 setup() {
   (type -p "${BATS_PARALLEL_BINARY_NAME:-"parallel"}" &>/dev/null && "${BATS_PARALLEL_BINARY_NAME:-"parallel"}" --version &>/dev/null) || skip "--jobs requires GNU parallel"
-  (type -p flock &>/dev/null || type -p shlock &>/dev/null) || skip "--jobs requires flock/shlock"
 }
 
 check_parallel_tests() { # <expected maximum parallelity>

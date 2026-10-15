@@ -144,6 +144,43 @@ setup() {
   reentrant_run ! bats "$FIXTURE_ROOT/bats_load.bats" # load does not use BATS_LIB_PATH!
 }
 
+@test "bats_load_library supports a Windows-form BATS_LIB_PATH inherited at startup" {
+  if [[ ${OSTYPE-} != cygwin && ${OSTYPE-} != msys ]]; then
+    skip "Run only on Windows"
+  fi
+
+  library_root="$BATS_TEST_TMPDIR/libraries"
+  mkdir -p "$library_root/$BATS_TEST_NAME"
+  cp "$FIXTURE_ROOT/test_helper.bash" "$library_root/$BATS_TEST_NAME/load.bash"
+
+  BATS_LIB_PATH="$(cygpath --windows "$library_root")" \
+    HELPER_NAME="$BATS_TEST_NAME" \
+    reentrant_run -0 "$BATS_ROOT/bin/bats" "$FIXTURE_ROOT/bats_load_library.bats"
+}
+
+@test "bats_load_library honors BATS_LIB_PATH overridden in the test file" {
+  BATS_LIB_PATH="$BATS_TEST_TMPDIR/missing" \
+    reentrant_run -0 "$BATS_ROOT/bin/bats" "$FIXTURE_ROOT/bats_load_library_with_overridden_path.bats"
+}
+
+@test "Bats preserves BATS_LIB_PATH when cygpath is unavailable" {
+  if [[ ${OSTYPE-} != cygwin && ${OSTYPE-} != msys ]]; then
+    skip "Run only on Windows"
+  fi
+
+  command() {
+    if [[ ${1-} == -v && ${2-} == cygpath ]]; then
+      return 1
+    fi
+    builtin command "$@"
+  }
+  eval 'cygpath() { return 127; }'
+  export -f command cygpath
+
+  BATS_LIB_PATH='C:\unconverted' \
+    reentrant_run -0 "$BATS_ROOT/bin/bats" "$FIXTURE_ROOT/cygpath_unavailable.bats"
+}
+
 @test "bats_load_library supports libraries with loaders on the BATS_LIB_PATH with multiple libraries" {
   path_dir="$BATS_TEST_TMPDIR/libraries/"
   for lib in liba libb libc; do
@@ -187,4 +224,30 @@ setup() {
   [ "${lines[1]}" = "not ok 1 failed" ]
   [ "${lines[3]}" = "#   \`false' failed" ]
   [ ${#lines[@]} -eq 4 ]
+}
+
+@test "load reports the missing helper after a successful load (#1186)" {
+  reentrant_run -1 bats --filter "^missing helper" "$FIXTURE_ROOT/failing_load_after_success.bats"
+  [ "${lines[2]}" = "# (in test file $RELATIVE_FIXTURE_ROOT/failing_load_after_success.bats, line 3)" ]
+  [ "${lines[3]}" = "#   \`load nonexistent' failed" ]
+}
+
+@test "load reports the failing helper after a successful load (#1186)" {
+  reentrant_run -1 bats --filter "^helper returning" "$FIXTURE_ROOT/failing_load_after_success.bats"
+  [ "${lines[2]}" = "# (from function \`source' in file $RELATIVE_FIXTURE_ROOT/return1.bash, line 1," ]
+  [[ "$output" == *"failing_load_after_success.bats, line 8)"* ]]
+  [[ "$output" == *"\`load return1' failed"* ]]
+}
+
+@test "bats_load_library reports the missing library after a successful load (#1186)" {
+  reentrant_run -1 bats --filter "^missing library" "$FIXTURE_ROOT/failing_load_after_success.bats"
+  [ "${lines[2]}" = "# (in test file $RELATIVE_FIXTURE_ROOT/failing_load_after_success.bats, line 13)" ]
+  [ "${lines[3]}" = "#   \`bats_load_library \"\$BATS_TEST_DIRNAME/nonexistent.bash\"' failed" ]
+}
+
+@test "bats_load_library reports the failing library after a successful load (#1186)" {
+  reentrant_run -1 bats --filter "^library returning" "$FIXTURE_ROOT/failing_load_after_success.bats"
+  [ "${lines[2]}" = "# (from function \`source' in file $RELATIVE_FIXTURE_ROOT/return1.bash, line 1," ]
+  [[ "$output" == *"failing_load_after_success.bats, line 18)"* ]]
+  [[ "$output" == *"\`bats_load_library \"\$BATS_TEST_DIRNAME/return1.bash\"' failed"* ]]
 }

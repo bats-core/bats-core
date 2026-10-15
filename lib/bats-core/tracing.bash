@@ -382,8 +382,8 @@ bats_setup_tracing() {
   done
 
   # turn on traps after setting excludes to avoid tracing the exclude setup
-  trap 'bats_debug_trap "$BASH_SOURCE"' DEBUG
-  trap 'bats_error_trap' ERR
+  trap 'bats_debug_trap "$BASH_SOURCE" "$_"' DEBUG
+  trap 'bats_error_trap "$_"' ERR
 }
 
 # predefine to avoid problems when the user does not declare one

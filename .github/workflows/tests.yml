@@ -12,6 +12,12 @@ on:
       - master
   workflow_dispatch:
 
+# Group runs by workflow and PR/ref; release-triggered runs use a separate
+# `-release` suffix. Cancel an older run when a new one uses the same group.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}${{ github.event_name == 'release' && '-release' || '' }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
@@ -19,7 +25,7 @@ jobs:
   changelog:
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Check that PR is mentioned in Changelog
         run: |
           if ! ./.github/workflows/check_pr_label.sh "${{github.event.pull_request.number}}" "no changelog"; then
@@ -30,7 +36,7 @@ jobs:
   shfmt:
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - run: |
           curl https://github.com/mvdan/sh/releases/download/v3.5.1/shfmt_v3.5.1_linux_amd64 -o shfmt
           chmod a+x shfmt
@@ -41,14 +47,14 @@ jobs:
   failsafe:
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Check failing tests fail suite,
         run: "! bin/bats test/fixtures/bats/failing.bats"
 
   shellcheck:
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Run shellcheck
         run: |
           sudo apt-get update -y
@@ -58,7 +64,7 @@ jobs:
   linux:
     strategy:
       matrix:
-        os: ['ubuntu-22.04', 'ubuntu-24.04']
+        os: ['ubuntu-22.04', 'ubuntu-24.04', 'ubuntu-26.04']
         env_vars:
           - ''
           # allow for some parallelity without GNU parallel, since it is not installed by default
@@ -66,10 +72,10 @@ jobs:
           - 'BATS_PARALLEL_BINARY_NAME=rush'
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Install rush
         run: |
-          curl -sSfL https://github.com/shenwei356/rush/releases/download/v0.5.0/rush_linux_amd64.tar.gz | sudo tar xzf - -C /usr/local/bin
+          curl -sSfL https://github.com/shenwei356/rush/releases/download/v0.10.0/rush_linux_amd64.tar.gz | sudo tar xzf - -C /usr/local/bin
         if: contains(matrix.env_vars, 'rush')
       - name: Run test on OS ${{ matrix.os }}
         shell: 'script -q -e -c "bash {0}"' # work around tty issues
@@ -82,7 +88,7 @@ jobs:
   unset_variables:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Check unset variables
         shell: 'script -q -e -c "bash {0}"' # work around tty issues
         env:
@@ -93,10 +99,10 @@ jobs:
   npm_on_linux:
     strategy:
       matrix:
-        os: ['ubuntu-22.04', 'ubuntu-24.04']
+        os: ['ubuntu-22.04', 'ubuntu-24.04', 'ubuntu-26.04']
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v6.0.0
         with:
           node-version: v18.20.2
@@ -114,7 +120,7 @@ jobs:
         os: ['windows-2022', 'windows-2025']
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Check failing tests fail suite,
         run: bash -c "! bin/bats test/fixtures/bats/failing.bats"
       - run: |
@@ -127,7 +133,7 @@ jobs:
         os: ['windows-2022', 'windows-2025']
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v6.0.0
         with:
           node-version: v18.20.2
@@ -138,7 +144,7 @@ jobs:
   macos:
     strategy:
       matrix:
-        os: ['macos-14', 'macos-15']
+        os: ['macos-15', 'macos-26']
         env_vars:
           - ''
           # allow for some parallelity without GNU parallel, since it is not installed by default
@@ -146,12 +152,12 @@ jobs:
           - 'BATS_PARALLEL_BINARY_NAME=rush'
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Install unbuffer via expect
         run: brew install expect
       - name: Install rush
         run: |
-          curl -sSfL https://github.com/shenwei356/rush/releases/download/v0.5.0/rush_darwin_amd64.tar.gz | sudo tar xzf - -C /usr/local/bin
+          curl -sSfL https://github.com/shenwei356/rush/releases/download/v0.10.0/rush_darwin_arm64.tar.gz | sudo tar xzf - -C /usr/local/bin
         if: contains(matrix.env_vars, 'rush')
 
       - name: Check failing tests fail suite,
@@ -171,10 +177,10 @@ jobs:
   npm_on_macos:
     strategy:
       matrix:
-        os: ['macos-14', 'macos-15']
+        os: ['macos-15', 'macos-26']
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v6.0.0
         with:
           node-version: v18.20.2
@@ -200,14 +206,14 @@ jobs:
             - '-e BATS_NUMBER_OF_PARALLEL_JOBS=2'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Run test on bash version ${{ matrix.version }}
         shell: 'script -q -e -c "bash {0}"' # work around tty issues
         run: |
           set -e
-          docker build --build-arg bashver="${{ matrix.version }}" --tag "bats/bats:bash-${{ matrix.version }}" .
+          docker build --build-arg bashver="${{ matrix.version }}" --target test --tag "bats/bats:bash-${{ matrix.version }}" .
           docker run -it "bash:${{ matrix.version }}" --version
-          time docker run -it ${{ matrix.env_vars }} "bats/bats:bash-${{ matrix.version }}"  --print-output-on-failure /opt/bats/test
+          time docker run -e "CI=$CI" -it ${{ matrix.env_vars }} "bats/bats:bash-${{ matrix.version }}"  --print-output-on-failure /opt/bats/test
 
   lib64-install:
     runs-on: ubuntu-latest
@@ -215,7 +221,7 @@ jobs:
         checks: write
         pull-requests: write
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Install in lib64
         run: sudo ./install.sh /usr/ lib64
       - name: Run from env
@@ -236,7 +242,7 @@ jobs:
     runs-on: ubuntu-latest
     container: alpine:latest
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Install dependencies
         run: apk add bash ncurses util-linux
       - name: Run test on bash version ${{ matrix.version }}
@@ -254,17 +260,18 @@ jobs:
           - flock
           - ""
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
-      - uses: acj/freebsd-firecracker-action@a5a3fc1709c5b5368141a5699f10259aca3cd965 # v0.6.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: acj/freebsd-firecracker-action@ba4f70408ef1d979acdd7bd36fc4b27e06fe5abe # v0.12.0
         with:
           run-in-vm: |
             pkg install -y bash parallel ${{ matrix.packages }}
+            export LC_ALL=C
             time ./bin/bats --print-output-on-failure test/
 
   find_broken_symlinks:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       # list symlinks that are broken and force non-zero exit if there are any
       - run: "! find . -xtype l | grep ."
 
@@ -272,7 +279,7 @@ jobs:
     runs-on: ubuntu-latest
     container: almalinux:8
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - run: dnf install -y rpm-build rpmdevtools
       - name: Build and install RPM and dependencies
         run: |
@@ -292,34 +299,35 @@ jobs:
   dockerfile:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Set up Docker Buildx
         id: buildx
-        uses: docker/setup-buildx-action@c47758b77c9736f4b2ef4073d4d51994fabfe349 # v3.7.1
+        uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
 
-      - uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4 # v6.15.0
+      - uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
         with:
           platforms: linux/amd64
           tags: bats:test
           load: true
+          target: test
 
-      - run: docker run -itv "$PWD":/code bats:test --print-output-on-failure test/
+      - run: docker run -e "CI=$CI" -itv "$PWD":/code bats:test --print-output-on-failure test/
         shell: 'script -q -e -c "bash {0}"' # work around tty issues
         env:
           TERM: linux # fix tput for tty issue work around
 
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: bats-core/bats-assert
           path: bats-assert
 
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: bats-core/bats-support
           path: bats-support
 
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: bats-core/bats-file
           path: bats-file
@@ -330,7 +338,7 @@ jobs:
             ln -sf python3 /usr/bin/python # bats-file uses python without version
             bats --tap --print-output-on-failure bats-*/test/
           EOF
-          docker run -itv "$PWD":/code --entrypoint bash bats:test test.sh
+          docker run -e "CI=$CI" -itv "$PWD":/code --entrypoint bash bats:test test.sh
         shell: 'script -q -e -c "bash {0}"' # work around tty issues
         env:
           TERM: linux # fix tput for tty issue work around
@@ -338,7 +346,7 @@ jobs:
   coverage:
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - run: |
           wget https://github.com/SimonKagstrom/kcov/releases/download/v42/kcov-amd64.tar.gz
           tar -xf kcov-amd64.tar.gz
@@ -349,7 +357,7 @@ jobs:
           TERM: linux # fix tput for tty issue work around
 
       - name: Archive code coverage results
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: code-coverage-report
           path: coverage/*

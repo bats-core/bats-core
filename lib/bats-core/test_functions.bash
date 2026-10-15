@@ -139,6 +139,8 @@ bats_load_library_safe() { # <slug>
 # immediately exit on error, use bats_load_library_safe to catch and handle errors
 bats_load_library() { # <slug>
   if ! bats_load_library_safe "$@"; then
+    # No ERR trap runs for this exit, and internal calls do not update the trace.
+    BATS_DEBUG_LAST_STACK_TRACE_IS_VALID=1
     exit 1
   fi
 }
@@ -146,6 +148,8 @@ bats_load_library() { # <slug>
 # load acts like bats_load_safe but exits the shell instead of returning 1.
 load() {
   if ! bats_load_safe "$@"; then
+    # No ERR trap runs for this exit, and internal calls do not update the trace.
+    BATS_DEBUG_LAST_STACK_TRACE_IS_VALID=1
     exit 1
   fi
 }
