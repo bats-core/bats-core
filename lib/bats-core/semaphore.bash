@@ -35,6 +35,10 @@ bats_semaphore_release_wrapper() {
   "$@" 2>"$output_dir/stderr" >"$output_dir/stdout"
   local status=$?
 
+  # Keep the command status outside Bash's job table. A delayed `wait` can no
+  # longer retrieve it if the PID has been reused.
+  printf '%d\n' "$status" >"$output_dir/status"
+
   # bash bug: the exit trap is not called for the background process
   bats_semaphore_release_slot "$semaphore_name"
   trap - EXIT # avoid calling release twice
