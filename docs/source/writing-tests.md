@@ -18,7 +18,8 @@ Starting with version 1.8.0, Bats comes with a tagging system that allows users
 to categorize their tests and filter according to those categories.
 
 Each test has a list of tags attached to it. Without specification, this list is empty.
-Tags can be defined in two ways. The first being `# bats test_tags=`:
+For `@test` declarations and the [comment syntax](#comment-syntax), tags can be
+defined using comment directives. The first is `# bats test_tags=`:
 
 ```bash
 # bats test_tags=tag:1, tag:2, tag:3
@@ -69,6 +70,9 @@ Tag lists must be separated by commas and are allowed to contain whitespace.
 They must not contain empty tags like `test_tags=,b` (first tag is empty),
 `test_tags=a,,c`, `test_tags=a,  ,c` (second tag is only whitespace/empty),
 `test_tags=a,b,` (third tag is empty).
+
+For tests registered with `bats_test_function`, use its `--tags` option instead. The `# bats test_tags=` and
+`# bats file_tags=` directives do not apply to these tests.
 
 Every tag starting with `bats:` (case insensitive!) is reserved for Bats'
 internal use.
@@ -164,6 +168,15 @@ giving us the following output:
 ```
 
 Note that the body of the `for` loop uses `$i` but the `test_body` function uses `$1`.
+
+Pass tags directly with `--tags`, including the special `bats:focus` tag:
+
+```bash
+bats_test_function --description "focused test" --tags bats:focus -- test_body 1
+```
+
+This selects the registered test for focus mode.
+Putting `# bats test_tags=bats:focus` before the registration does not tag it.
 
 ```
 bats_test_function [--tags <tags>...] [--description <description>] -- [test command...]
