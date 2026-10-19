@@ -261,10 +261,11 @@ jobs:
           - ""
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: acj/freebsd-firecracker-action@ba4f70408ef1d979acdd7bd36fc4b27e06fe5abe # v0.12.0
+      - uses: vmactions/freebsd-vm@c46abacb49f09938ca4e1702d15d836285d694cc # v1.5.9
         with:
-          run-in-vm: |
+          prepare: |
             pkg install -y bash parallel ${{ matrix.packages }}
+          run: |
             export LC_ALL=C
             time ./bin/bats --print-output-on-failure test/
 
