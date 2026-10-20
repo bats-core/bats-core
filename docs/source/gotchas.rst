@@ -58,6 +58,36 @@ If you want to test these functions, you should call them without `run`.
 `run` is a wrapper that always succeeds. The wrapped command's exit code is stored in `$status` and the stdout/stderr in `$output`.
 If you want to fail the test, you should explicitly check `$status` or omit `run`. See also `when not to use run <writing-tests.html#when-not-to-use-run>`_.
 
+My test stops without reporting a result when the code under test uses `exec`.
+--------------------------------------------------------------------------------
+
+An ``exec command`` replaces the shell that executes it. If a test calls a
+function containing ``exec`` directly, or sources a script that uses it, the
+test's shell is replaced. Bats cannot run the remaining assertions, its
+``teardown`` function, or its normal result reporting.
+
+Use ``run`` to execute that code in a subshell and then check its result:
+
+.. code-block:: bash
+
+    replace_shell() {
+        exec printf '%s\n' 'hello'
+    }
+
+    @test "a function that uses exec" {
+        run replace_shell
+        [ "$status" -eq 0 ]
+        [ "$output" = "hello" ]
+    }
+
+For a script, use ``run ./script.sh`` (or ``run bash ./script.sh`` if it is not
+executable). A script invoked as a separate process does not replace the test's
+shell; sourcing it with ``source ./script.sh`` does.
+
+An explicit subshell, such as ``( replace_shell )``, also isolates ``exec``,
+but does not provide ``run``'s ``$status`` and ``$output`` variables. An ``exec``
+used only for redirections, such as ``exec 4>file``, does not replace the shell.
+
 `load` won't load my `.sh` files.
 ---------------------------------
 
