@@ -72,8 +72,7 @@ BATS_BASE_LIBDIR=lib # this will be patched with the true value in install.sh
 # A Windows process can supply BATS_LIB_PATH in Windows form. Normalize it
 # before Bats evaluates test code or splits BATS_LIB_PATH on colons.
 if [[ ${OSTYPE-} == cygwin || ${OSTYPE-} == msys ]] &&
-  command -v cygpath >/dev/null 2>&1
-then
+  command -v cygpath >/dev/null 2>&1; then
   if [[ -n ${BATS_LIB_PATH-} ]]; then
     BATS_LIB_PATH=$(cygpath --unix --path "$BATS_LIB_PATH")
     export BATS_LIB_PATH
