@@ -132,4 +132,3 @@ Bats is released under an MIT-style license; see `LICENSE.md` for details.
 See the [parent project](https://github.com/bats-core) at GitHub or the
 [AUTHORS](AUTHORS) file for the current project maintainer team.
 
-[gitter]: https://gitter.im/bats-core/bats-core
