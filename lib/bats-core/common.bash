@@ -276,3 +276,35 @@ bats_format_file_line_reference_uri() {
 bats_execute() { # <command...>
   PATH="${BATS_SAVED_PATH?}" "$@"
 }
+
+# Return 0 when path refers to a tool inside a Windows system directory
+# (System32, SysWOW64, or Sysnative). Directory names are matched
+# case-insensitively in MSYS form (/c/Windows/System32/...), Windows form
+# (C:/Windows/System32/... and C:\Windows\System32\...), and when that suffix
+# appears later in a longer path.
+bats_resolved_path_is_windows_system_tool() { # <path>
+  local path=${1-}
+  [[ -n $path ]] || return 1
+  local normalized=${path//\\//}
+  # Subshell keeps nocasematch from leaking into the caller.
+  (
+    shopt -s nocasematch
+    local re='([/][A-Za-z][/]|[A-Za-z]:[/])windows[/](system32|syswow64|sysnative)[/]'
+    [[ $normalized =~ $re ]]
+  ) && return 0
+  return 1
+}
+
+# Return 1 and print one stderr line when sort or find resolves to a Windows
+# system tool. A missing command is left alone. PATH is not modified.
+bats_reject_windows_system_tool_shadow() {
+  local cmd resolved
+  for cmd in sort find; do
+    resolved=$(command -v "$cmd") || continue
+    if bats_resolved_path_is_windows_system_tool "$resolved"; then
+      printf "Error: \`%s\` resolves to Windows system tool '%s' because System32 is ahead of Git Bash's Unix tools on PATH. Put /usr/bin before C:/Windows/System32. See the gotcha \"Git Bash runs Windows sort or find\".\n" "$cmd" "$resolved" >&2
+      return 1
+    fi
+  done
+  return 0
+}

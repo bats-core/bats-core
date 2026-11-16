@@ -178,3 +178,27 @@ Due to implementation internals of Bats and bash, this pipe might be held in mul
 
 You can use `close_non_std_fds from `test/fixtures/bats/issue-205.bats` in the background job to close all FDs except stdin, stdout and stderr, thus solving the problem.
 More details about the issue can be found in [#205](https://github.com/bats-core/bats-core/issues/205#issuecomment-973572596).
+
+Git Bash runs Windows sort or find
+----------------------------------
+
+On Git Bash, `C:/Windows/System32` (MSYS form `/c/Windows/System32`) can sit
+ahead of `/usr/bin` on `PATH`. `sort` and `find` then resolve to Windows
+`sort.exe` and `FIND.EXE`, which do not implement the GNU flags Bats already
+uses (`find -L ... -print0 | sort -z`, `sort -k`, and `sort -n`). This showed
+up on a Windows Jenkins agent running Git Bash, where that PATH order is the
+default.
+
+Bats leaves `PATH` unchanged. When `sort` or `find` resolves into `System32`,
+`SysWOW64`, or `Sysnative`, it stops with:
+
+.. code-block:: text
+
+    Error: `sort` resolves to Windows system tool '/c/Windows/System32/sort.exe' because System32 is ahead of Git Bash's Unix tools on PATH. Put /usr/bin before C:/Windows/System32. See the gotcha "Git Bash runs Windows sort or find".
+
+Put `/usr/bin` ahead of `C:/Windows/System32` for the process that launches
+Bats. Afterwards, `command -v sort` and `command -v find` should print
+`/usr/bin/...`.
+
+Code under test that needs Windows `SORT.EXE` or `FIND.EXE` should call them
+by absolute path, or adjust `PATH` inside the test.
