@@ -1908,3 +1908,81 @@ END_OF_ERR_MSG
   [ "${lines[0]}" = "Error: File path must not be empty! (Path number 2)" ]
   [ ${#lines[@]} -eq 1 ]
 }
+
+@test "Windows system sort on PATH aborts before sort runs" {
+  local system32="$BATS_TEST_TMPDIR/c/Windows/System32"
+  local marker="$BATS_TEST_TMPDIR/windows-tool-marker"
+  mkdir -p "$system32"
+  local cmd
+  for cmd in sort find; do
+    printf '#!/usr/bin/env bash\nprintf "%%s\\n" "%s" >> "%s"\n' "$cmd" "$marker" >"$system32/$cmd"
+    chmod +x "$system32/$cmd"
+  done
+
+  PATH="$system32:$PATH" reentrant_run bats "$FIXTURE_ROOT/passing.bats"
+  [ "$status" -eq 1 ]
+  [[ "$output" == *"\`sort\` resolves to Windows system tool"* ]] || false
+  [[ "$output" == *"Put /usr/bin before C:/Windows/System32"* ]] || false
+  [[ "$output" == *"/c/Windows/System32/"* ]] || false
+  [ ! -e "$marker" ]
+}
+
+@test "Windows system find on PATH aborts when sort is Unix" {
+  local system32="$BATS_TEST_TMPDIR/c/windows/system32"
+  local marker="$BATS_TEST_TMPDIR/windows-tool-marker"
+  mkdir -p "$system32"
+  printf '#!/usr/bin/env bash\nprintf "%%s\\n" find >> "%s"\n' "$marker" >"$system32/find"
+  chmod +x "$system32/find"
+
+  PATH="$system32:$PATH" reentrant_run bats "$FIXTURE_ROOT/passing.bats"
+  [ "$status" -eq 1 ]
+  [[ "$output" == *"\`find\` resolves to Windows system tool"* ]] || false
+  [ ! -e "$marker" ]
+}
+
+@test "Unix sort and find are not treated as Windows system tools" {
+  run -1 bats_resolved_path_is_windows_system_tool /usr/bin/sort
+  run -1 bats_resolved_path_is_windows_system_tool /usr/bin/sort.exe
+  run -1 bats_resolved_path_is_windows_system_tool /usr/bin/find
+  run -1 bats_resolved_path_is_windows_system_tool /bin/sort
+  run -1 bats_resolved_path_is_windows_system_tool ""
+  run -1 bats_resolved_path_is_windows_system_tool "/c/Program Files/Git/usr/bin/sort"
+
+  run -0 bats_resolved_path_is_windows_system_tool /c/Windows/System32/sort.exe
+  run -0 bats_resolved_path_is_windows_system_tool /c/Windows/SysWOW64/sort.exe
+  run -0 bats_resolved_path_is_windows_system_tool /c/Windows/Sysnative/find.exe
+  run -0 bats_resolved_path_is_windows_system_tool "C:/Windows/System32/sort.EXE"
+  run -0 bats_resolved_path_is_windows_system_tool 'C:\Windows\System32\sort.exe'
+
+  reentrant_run bats "$FIXTURE_ROOT/passing.bats"
+  [ "$status" -eq 0 ]
+
+  local usr_bin="$BATS_TEST_TMPDIR/usr/bin"
+  mkdir -p "$usr_bin"
+  printf '#!/usr/bin/env bash\n' >"$usr_bin/sort"
+  printf '#!/usr/bin/env bash\n' >"$usr_bin/find"
+  chmod +x "$usr_bin/sort" "$usr_bin/find"
+  hash -r
+  PATH="$usr_bin" bats_reject_windows_system_tool_shadow || false
+
+  local empty_bin="$BATS_TEST_TMPDIR/empty-bin"
+  mkdir -p "$empty_bin"
+  hash -r
+  PATH="$empty_bin" bats_reject_windows_system_tool_shadow || false
+}
+
+@test "help and version still work when Windows system sort is on PATH" {
+  local system32="$BATS_TEST_TMPDIR/c/Windows/System32"
+  local marker="$BATS_TEST_TMPDIR/windows-tool-marker"
+  mkdir -p "$system32"
+  local cmd
+  for cmd in sort find; do
+    printf '#!/usr/bin/env bash\nprintf "%%s\\n" "%s" >> "%s"\n' "$cmd" "$marker" >"$system32/$cmd"
+    chmod +x "$system32/$cmd"
+  done
+
+  PATH="$system32:$PATH" reentrant_run bats --help
+  [ "$status" -eq 0 ]
+  PATH="$system32:$PATH" reentrant_run bats --version
+  [ "$status" -eq 0 ]
+}

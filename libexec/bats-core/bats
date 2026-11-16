@@ -484,6 +484,14 @@ if [[ -n "$setup_suite_file" && ! -f "$setup_suite_file" ]]; then
   abort "--setup-suite-file $setup_suite_file does not exist!"
 fi
 
+# shellcheck source=lib/bats-core/common.bash
+source "$BATS_ROOT/$BATS_LIBDIR/bats-core/common.bash"
+# Windows sort.exe/FIND.EXE do not support the flags used below and in
+# bats-exec-suite. Exit without abort so usage text is not appended.
+if ! bats_reject_windows_system_tool_shadow; then
+  exit 1
+fi
+
 filenames=()
 for ((i=0; i < ${#arguments[@]}; ++i)); do
   filename="${arguments[i]}"
