@@ -376,9 +376,28 @@ apply, see below). This can be useful for sharing functions to set up your
 environment or load fixtures. `load` delegates to Bash's `source` command after
 resolving paths.
 
-If `load` encounters errors - e.g. because the targeted source file
-errored - it will print a message with the failing library and Bats
-exits.
+`load` exits Bats if it cannot find the helper or if sourcing the helper returns
+a nonzero status. This checks the result of sourcing the file, not the status
+of every command in it.
+
+Do not rely on `set -e` inside a loaded helper. The loader checks the helper's
+status in a conditional context, where Bash ignores `errexit`, even if the
+helper sets it explicitly. A successful final command can hide an earlier
+failure. The same applies to `bats_load_library`.
+
+Check required commands explicitly and return a nonzero status from the helper
+on failure, for example:
+
+```bash
+# In a loaded helper; CONFIG_FILE names a required file.
+config="$(cat "$CONFIG_FILE")" || return 1
+```
+
+If a file is optional and read errors may be ignored, handle that explicitly too:
+
+```bash
+config="$(cat "$CONFIG_FILE" 2>/dev/null || true)"
+```
 
 To allow to use `load` in conditions `bats_load_safe` has been added.
 `bats_load_safe` prints a message and returns `1` if a source file cannot be
