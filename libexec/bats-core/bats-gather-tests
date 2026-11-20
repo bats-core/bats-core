@@ -331,7 +331,7 @@ bats_gather_tests_for_file() {
   BATS_TEST_DIRNAME="${filename%/*}" source "$BATS_TEST_SOURCE" 1>>"$BATS_OUT" 2>&1
 
   if [[ "${#test_dupes[@]}" -ne 0 ]]; then
-    printf 'file_duplicate_test_names="%q"\n' "${test_dupes[*]#$filename$'\t'}"
+    printf 'file_duplicate_test_names="%q"\n' "${test_dupes[*]#"$filename"$'\t'}"
   fi
 
   if [[ -n "$filter_status" ]]; then

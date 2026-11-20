@@ -11,11 +11,15 @@ bats_prefix_lines_for_tap_output() {
 
 function bats_replace_filename() {
   local line
+  # quote pattern and replacement to match them literally,
+  # file names may contain glob characters or `&` (special in Bash >= 5.2)
   while read -r line; do
-    printf "%s\n" "${line//$BATS_TEST_SOURCE/$BATS_TEST_FILENAME}"
+    line=${line//"$BATS_TEST_SOURCE"/"$BATS_TEST_FILENAME"}
+    printf "%s\n" "$line"
   done
   if [[ -n "$line" ]]; then
-    printf "%s\n" "${line//$BATS_TEST_SOURCE/$BATS_TEST_FILENAME}"
+    line=${line//"$BATS_TEST_SOURCE"/"$BATS_TEST_FILENAME"}
+    printf "%s\n" "$line"
   fi
 }
 
