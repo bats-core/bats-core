@@ -92,6 +92,17 @@ TESTSUITES_REGEX="<testsuites time=\"$FLOAT_REGEX\">"
   [[ "${lines[8]}" == *"</testsuites>"* ]]
 }
 
+@test "junit formatter: base path containing glob characters" {
+  # `[1]` is a glob that does not match itself
+  local suite_dir="$BATS_TEST_TMPDIR/suite [1]"
+  mkdir "$suite_dir"
+  cp "$FIXTURE_ROOT/suite/file1.bats" "$suite_dir/"
+  reentrant_run bats --formatter junit "$suite_dir"
+
+  [[ "${lines[2]}" == "<testsuite name=\"file1.bats\""* ]]
+  [[ "${lines[3]}" == *"<testcase classname=\"file1.bats\""* ]]
+}
+
 @test "junit formatter: files with the same name are distinguishable" {
   reentrant_run bats --formatter junit -r "$FIXTURE_ROOT/duplicate/"
   

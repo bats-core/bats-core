@@ -517,6 +517,28 @@ END_OF_ERR_MSG
   [ "${#lines[*]}" = "1" ]
 }
 
+@test "duplicate tests error names files containing glob characters correctly" {
+  # `[1]` is a glob that does not match itself
+  local test_file="$BATS_TEST_TMPDIR/duplicate [1].bats"
+  cp "$FIXTURE_ROOT/duplicate-tests_no_shellcheck.bats" "$test_file"
+  reentrant_run bats --tap "$test_file"
+  [ $status -eq 1 ]
+
+  [ "${lines[0]}" = "ERROR: Duplicate test name(s) in file \"$test_file\": test_gizmo_test" ]
+  [ "${#lines[*]}" = "1" ]
+}
+
+@test "error output shows the name of test files containing special characters" {
+  # `&` is special in the replacement part of ${var//pattern/replacement} in Bash >= 5.2
+  # `[1]` is a glob that does not match itself
+  local test_file="$BATS_TEST_TMPDIR/R&D/special [1].bats"
+  mkdir "${test_file%/*}"
+  cp "$FIXTURE_ROOT/undefined_command.bats" "$test_file"
+  LANG=C reentrant_run bats --tap "$test_file"
+  [ "$status" -eq 1 ]
+  [[ "$output" == *"# $test_file: line 2: call-to-undefined-command: command not found"* ]]
+}
+
 @test "sourcing a nonexistent file in setup produces error output" {
   reentrant_run bats "$FIXTURE_ROOT/source_nonexistent_file_in_setup.bats"
   [ $status -eq 1 ]
