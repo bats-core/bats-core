@@ -18,7 +18,7 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 
 ### Fixed
 
-* fix self-tests that check English shell diagnostics under other locales (#661)
+* fix self-tests that check English shell diagnostics under other locales (#661, #1316)
 * update pre-commit hook and replace unmaintained one (#1306)
 * avoid false duplicate errors for dynamic tests with argument prefixes, and
   detect duplicates with non-space `IFS` separators (#1249)
