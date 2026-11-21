@@ -54,7 +54,7 @@ setup() {
 }
 
 @test "errors when loading common helper from multiple tests in a suite" {
-  reentrant_run bats "$FIXTURE_ROOT/errors_in_multiple_load"
+  LC_ALL=C reentrant_run bats "$FIXTURE_ROOT/errors_in_multiple_load"
   [ $status -eq 1 ]
   [ "${lines[0]}" = "1..1" ]
   [ "${lines[1]}" = "not ok 1 bats-gather-tests" ]
