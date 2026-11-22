@@ -843,7 +843,9 @@ END_OF_ERR_MSG
 }
 
 @test "Parallel mode works on MacOS with over subscription (issue #433)" {
-  type -p "${BATS_PARALLEL_BINARY_NAME:-"parallel"}" &>/dev/null || skip "--jobs requires GNU parallel"
+  local parallel_binary_name="${BATS_PARALLEL_BINARY_NAME:-parallel}"
+  (type -p "$parallel_binary_name" &>/dev/null && "$parallel_binary_name" --version &>/dev/null) ||
+    skip "--jobs requires GNU parallel or rush"
   reentrant_run bats -j 2 "$FIXTURE_ROOT/issue-433"
 
   [ "$status" -eq 0 ]
@@ -1800,12 +1802,12 @@ END_OF_ERR_MSG
 }
 
 @test "--abort prevents further tests from running in parallel mode" {
-  if ! type -p parallel &>/dev/null; then
-    skip "Requires GNU parallel"
-  fi
-  if [[ ${BATS_PARALLEL_BINARY_NAME-} == rush ]]; then
+  local parallel_binary_name="${BATS_PARALLEL_BINARY_NAME:-parallel}"
+  if [[ "$parallel_binary_name" == rush ]]; then
     skip "--halt only works for GNU parallel"
   fi
+  (type -p "$parallel_binary_name" &>/dev/null && "$parallel_binary_name" --version &>/dev/null) ||
+    skip "Requires GNU parallel"
 
   bats_require_minimum_version 1.5.0
 
