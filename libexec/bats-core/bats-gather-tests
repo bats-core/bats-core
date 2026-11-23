@@ -97,9 +97,14 @@ bats_test_function() {
     return 0
   fi
 
-  # dereferencing ${test_names[*]} fails on older bash versions when empty -> check before
-  # A space-joined array can rule out matches, but prefixes are not duplicates.
-  if [[ ${#test_names[@]} -gt 0 &&
+  if (( BASH_VERSINFO[0] >= 4 )); then
+    if [[ ${seen_test_names["$line"]+present} ]]; then
+      test_dupes+=("$line")
+    else
+      seen_test_names["$line"]=1
+    fi
+  # Bash 3 has no associative arrays, so use the original exact scan there.
+  elif [[ ${#test_names[@]} -gt 0 &&
     (${IFS-' '} != ' '* || " ${test_names[*]} " == *" $line "*) ]]; then
     local existing_test_name
     for existing_test_name in "${test_names[@]}"; do
@@ -321,6 +326,9 @@ bats_gather_tests_source_exit_trap() {
 
 bats_gather_tests_for_file() {
   local test_names=() test_dupes=() included_tests=() excluded_tests=()
+  if (( BASH_VERSINFO[0] >= 4 )); then
+    local -A seen_test_names=()
+  fi
 
   trap bats_gather_tests_source_exit_trap EXIT
   bats_setup_tracing
