@@ -511,9 +511,19 @@ for ((i=0; i < ${#arguments[@]}; ++i)); do
         filenames+=("$file")
       done < <(find -L "$filename" -type f -name "*.${BATS_FILE_EXTENSION:-bats}" -print0 | sort -z)
     else
+      declare dotglob_was_set=0
+      if shopt -q dotglob; then
+        dotglob_was_set=1
+      fi
+      shopt -s dotglob
       for suite_filename in "$filename"/*."${BATS_FILE_EXTENSION:-bats}"; do
+        [[ -f "$suite_filename" ]] || continue
         filenames+=("$suite_filename")
       done
+      if [[ "$dotglob_was_set" -eq 0 ]]; then
+        shopt -u dotglob
+      fi
+      unset dotglob_was_set
     fi
     shopt -u nullglob
   else
