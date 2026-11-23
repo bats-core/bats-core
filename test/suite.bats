@@ -78,6 +78,9 @@ setup() {
 }
 
 @test "directory discovery preserves enabled dotglob for tests" {
+  if ((BASH_VERSINFO[0] < 4 || (BASH_VERSINFO[0] == 4 && BASH_VERSINFO[1] == 0))); then
+    skip "BASHOPTS requires Bash 4.1 or newer"
+  fi
   printf '@test "dotglob stays enabled" { shopt -q dotglob; }\n' >"$BATS_TEST_TMPDIR/options.bats"
 
   reentrant_run env BASHOPTS=dotglob bats "$BATS_TEST_TMPDIR"
