@@ -545,7 +545,10 @@ However, bats also can handle directories:
 
     2 tests, 0 failures, 1 skipped
 
-In this mode, bats will pick up all `.bats` files in the directory it was given. There is an additional `-r` switch that will recursively search for more `.bats` files.
+In this mode, bats will pick up all `.bats` files in the directory it was given,
+including hidden files whose names start with `.`. There is an additional `-r`
+switch that will recursively search for more `.bats` files, including those in
+hidden subdirectories.
 However, in our project layout this would pick up the test files of bats itself from `test/bats/test`. We don't have test subfolders anyways, so we can do without `-r`.
 
 

@@ -19,6 +19,75 @@ setup() {
   [ "${lines[1]}" = "ok 1 a passing test" ]
 }
 
+@test "running a suite containing only a hidden test file" {
+  printf '@test "hidden test" { true; }\n' >"$BATS_TEST_TMPDIR/.hidden.bats"
+
+  reentrant_run bats "$BATS_TEST_TMPDIR"
+  [[ "$status" -eq 0 ]]
+  [[ "${lines[0]}" = '1..1' ]]
+  [[ "${lines[1]}" = 'ok 1 hidden test' ]]
+}
+
+@test "directory discovery includes hidden test files without recursing" {
+  local filename
+  for filename in .bats '..hidden.bats' '.hidden with spaces.bats' visible.bats; do
+    printf '@test "%s" { true; }\n' "$filename" >"$BATS_TEST_TMPDIR/$filename"
+  done
+  mkdir "$BATS_TEST_TMPDIR/.hidden-directory"
+  printf '@test "nested" { true; }\n' >"$BATS_TEST_TMPDIR/.hidden-directory/nested.bats"
+  mkdir "$BATS_TEST_TMPDIR/.hidden-directory.bats" "$BATS_TEST_TMPDIR/visible-directory.bats"
+
+  reentrant_run bats "$BATS_TEST_TMPDIR"
+  [[ "$status" -eq 0 ]]
+  [[ "${lines[0]}" = '1..4' ]]
+  [[ "$output" == *' .bats'* ]]
+  [[ "$output" == *' ..hidden.bats'* ]]
+  [[ "$output" == *' .hidden with spaces.bats'* ]]
+  [[ "$output" == *' visible.bats'* ]]
+  [[ "$output" != *nested* ]]
+}
+
+@test "recursive discovery includes hidden test files and directories" {
+  mkdir "$BATS_TEST_TMPDIR/.hidden-directory"
+  printf '@test "hidden root" { true; }\n' >"$BATS_TEST_TMPDIR/.hidden.bats"
+  printf '@test "hidden nested" { true; }\n' >"$BATS_TEST_TMPDIR/.hidden-directory/.nested.bats"
+
+  reentrant_run bats -r "$BATS_TEST_TMPDIR"
+  [[ "$status" -eq 0 ]]
+  [[ "${lines[0]}" = '1..2' ]]
+  [[ "$output" == *' hidden root'* ]]
+  [[ "$output" == *' hidden nested'* ]]
+}
+
+@test "hidden test files honor BATS_FILE_EXTENSION" {
+  printf '@test "hidden custom" { true; }\n' >"$BATS_TEST_TMPDIR/.hidden.test"
+  printf '@test "default extension" { false; }\n' >"$BATS_TEST_TMPDIR/.hidden.bats"
+
+  reentrant_run env BATS_FILE_EXTENSION=test bats "$BATS_TEST_TMPDIR"
+  [[ "$status" -eq 0 ]]
+  [[ "${lines[0]}" = '1..1' ]]
+  [[ "${lines[1]}" = 'ok 1 hidden custom' ]]
+}
+
+@test "directory discovery preserves disabled dotglob for tests" {
+  printf '@test "dotglob stays disabled" { ! shopt -q dotglob; }\n' >"$BATS_TEST_TMPDIR/options.bats"
+
+  reentrant_run env BASHOPTS= bats "$BATS_TEST_TMPDIR"
+  [[ "$status" -eq 0 ]]
+  [[ "${lines[1]}" = 'ok 1 dotglob stays disabled' ]]
+}
+
+@test "directory discovery preserves enabled dotglob for tests" {
+  if ((BASH_VERSINFO[0] < 4 || (BASH_VERSINFO[0] == 4 && BASH_VERSINFO[1] == 0))); then
+    skip "BASHOPTS requires Bash 4.1 or newer"
+  fi
+  printf '@test "dotglob stays enabled" { shopt -q dotglob; }\n' >"$BATS_TEST_TMPDIR/options.bats"
+
+  reentrant_run env BASHOPTS=dotglob bats "$BATS_TEST_TMPDIR"
+  [[ "$status" -eq 0 ]]
+  [[ "${lines[1]}" = 'ok 1 dotglob stays enabled' ]]
+}
+
 @test "counting tests in a suite" {
   reentrant_run bats -c "$FIXTURE_ROOT/single"
   [ $status -eq 0 ]
