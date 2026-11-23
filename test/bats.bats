@@ -623,7 +623,7 @@ END_OF_ERR_MSG
 }
 
 @test "report correct line on unset variables" {
-  LANG=C reentrant_run bats "$FIXTURE_ROOT/unbound_variable.bats"
+  LC_ALL=C reentrant_run bats "$FIXTURE_ROOT/unbound_variable.bats"
   [ "$status" -eq 1 ]
   [ "${#lines[@]}" -eq 9 ]
   [ "${lines[1]}" = 'not ok 1 access unbound variable' ]
@@ -844,7 +844,7 @@ END_OF_ERR_MSG
 
 @test "Parallel mode works on MacOS with over subscription (issue #433)" {
   type -p "${BATS_PARALLEL_BINARY_NAME:-"parallel"}" &>/dev/null || skip "--jobs requires GNU parallel"
-  reentrant_run bats -j 2 "$FIXTURE_ROOT/issue-433"
+  LC_ALL=C reentrant_run bats -j 2 "$FIXTURE_ROOT/issue-433"
 
   [ "$status" -eq 0 ]
   [[ "$output" != *"No such file or directory"* ]] || exit 1 # ensure failures are detected with old bash

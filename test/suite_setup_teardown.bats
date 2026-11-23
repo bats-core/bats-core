@@ -65,22 +65,22 @@ setup() {
 }
 
 @test "syntax errors in setup_suite.bash are reported and lead to non zero exit code" {
-  LANG=C reentrant_run ! bats --setup-suite-file "$FIXTURE_ROOT/syntax_error/setup_suite_no_shellcheck" "$FIXTURE_ROOT/syntax_error/"
+  LC_ALL=C reentrant_run ! bats --setup-suite-file "$FIXTURE_ROOT/syntax_error/setup_suite_no_shellcheck" "$FIXTURE_ROOT/syntax_error/"
   [[ "${lines[1]}" == "$FIXTURE_ROOT/syntax_error/setup_suite_no_shellcheck: line 2: syntax error: unexpected end of file"* ]]
 }
 
 @test "errors in setup_suite.bash's free code reported correctly" {
-  LANG=C reentrant_run ! bats "$FIXTURE_ROOT/error_in_free_code/"
+  LC_ALL=C reentrant_run ! bats "$FIXTURE_ROOT/error_in_free_code/"
   [ "${lines[1]}" == "$FIXTURE_ROOT/error_in_free_code/setup_suite.bash: line 1: call-to-undefined-command: command not found" ]
 }
 
 @test "errors in setup_suite reported correctly" {
-  LANG=C reentrant_run ! bats "$FIXTURE_ROOT/error_in_setup_suite/"
+  LC_ALL=C reentrant_run ! bats "$FIXTURE_ROOT/error_in_setup_suite/"
   [ "${lines[4]}" == "# $FIXTURE_ROOT/error_in_setup_suite/setup_suite.bash: line 2: call-to-undefined-command: command not found" ]
 }
 
 @test "errors in teardown_suite reported correctly" {
-  LANG=C reentrant_run ! bats "$FIXTURE_ROOT/error_in_teardown_suite/"
+  LC_ALL=C reentrant_run ! bats "$FIXTURE_ROOT/error_in_teardown_suite/"
   [ "${lines[5]}" == "# $FIXTURE_ROOT/error_in_teardown_suite/setup_suite.bash: line 6: call-to-undefined-command: command not found" ]
 }
 
