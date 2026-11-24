@@ -45,6 +45,7 @@ The format is based on [Keep a Changelog][kac] and this project adheres to
 
 ### Documentation
 
+* clarify error handling in loaded helpers and show explicit required and optional file reads (#1314)
 * removed the FAQ's outdated claim that suite-wide setup functionality does not exist; it now points to `setup_suite` (#1213)
 
 ## [1.14.0] - 2026-07-21
